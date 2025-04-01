@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Variables</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../styles/variables.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg" style="background-color: #003057;">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html" style="color: aliceblue; margin-left: 5px; font-family: Arial, Helvetica, sans-serif;">Portal de Indicadores Ambientales</a>
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link active" href="programas.html" style="color: aliceblue;">Programas</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="variables.html" style="color: aliceblue;">Variables</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="ods.html" style="color: aliceblue;">ODS</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="indicadores.html" style="color: aliceblue;">Indicadores existentes</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Filtros (Columna izquierda) -->
+            <div class="col-3 mb-5" id="apartadofiltros">
+                <div class="mb-2" style="padding-bottom: 10px;">FILTROS</div>
+                <div class="card">
+                    <div class="card-body">
+                        <!--Buscador de variables -->
+                        <h5>Busqueda por termino</h5>
+                        <form id="searchForm" class="d-flex m-2" role="search">
+                            <input id="searchInput" class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Buscar">
+                            <button class="btn btncustom" type="submit">Buscar</button>
+                        </form>
+                        <hr>
+                        <!-- Filtros de programa de información -->
+                        <h5>Programas de información.</h5>
+                        <div class="form-check">
+                            <input type="checkbox" value="" id="infoDemografica" class="form-check-input">
+                            <label for="infoDemografica" class="form-check-label" style="font-size: small;">Información Demográfica y Social</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" value="" id="infoEconomica" class="form-check-input">
+                            <label for="infoEconomica" class="form-check-label" style="font-size: small;">Información Económica</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" value="" id="infoGeografica" class="form-check-input">
+                            <label for="infoGeografica" class="form-check-label" style="font-size: small;">Información Geográfica, Medio Ambiente, Ordenamiento Territorial y Urbano</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" value="" id="infoGobierno" class="form-check-input">
+                            <label for="infoGobierno" class="form-check-label" style="font-size: small;">Información de Gobierno, Seguridad Pública e Impartición de Justicia</label>
+                        </div>
+                        <hr>
+                        <!-- Filtros de procesos de producción -->
+                        <h5>Procesos de producción.</h5>
+                        <div class="form-check">
+                            <input type="checkbox" value="" id="procDemografica" class="form-check-input">
+                            <label for="procDemografica" class="form-check-label" style="font-size: small;">Información Demográfica y Social</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" value="" id="procEconomica" class="form-check-input">
+                            <label for="procEconomica" class="form-check-label" style="font-size: small;">Información Económica</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" value="" id="procGeografica" class="form-check-input">
+                            <label for="procGeografica" class="form-check-label" style="font-size: small;">Información Geográfica, Medio Ambiente, Ordenamiento Territorial y Urbano</label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" value="" id="procGobierno" class="form-check-input">
+                            <label for="procGobierno" class="form-check-label" style="font-size: small;">Información de Gobierno, Seguridad Pública e Impartición de Justicia</label>
+                        </div>
+
+                        
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Contenido principal (Columna derecha) -->
+            <div class="col-9">
+                <!-- Título -->
+                <h2 class="mb-4 mt-2 text-center">Listado de Variables</h2>
+    
+                <!-- Selector de elementos por página -->
+                <div class="d-flex justify-content-end mb-3">
+                    <label for="itemsPerPage" class="me-2">Mostrar:</label>
+                    <select id="itemsPerPage" class="form-select w-auto">
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30">30</option>
+                    </select>
+                </div>
+    
+                <!-- Contenedor de variables -->
+                <div id="variablesContainer"></div>
+    
+                <!-- Paginador -->
+                <nav>
+                    <ul class="pagination justify-content-center mt-4" id="pagination"></ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+    
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const searchForm = document.getElementById("searchForm");
+    const searchInput = document.getElementById("searchInput");
+    const container = document.getElementById("variablesContainer");
+    const paginationContainer = document.getElementById("pagination");
+
+    let itemsPerPage = 10; // Número de elementos por página
+    let currentPage = 1; // Página actual
+    let allData = []; // Almacena todos los datos cargados inicialmente
+
+    // Función para cargar todos los elementos al entrar a la página
+    async function loadAllVariables() {
+        try {
+            const response = await fetch(`/api/variables`);
+            const data = await response.json();
+            allData = data; // Guardar todos los datos para restaurar el listado inicial
+            renderPage(allData, currentPage);
+            setupPagination(allData);
+        } catch (error) {
+            console.error("Error al cargar los datos:", error);
+            container.innerHTML = "<p class='text-center text-danger'>Ocurrió un error al cargar los datos. Inténtalo nuevamente.</p>";
+        }
+    }
+
+    // Función para realizar la búsqueda
+    function searchVariables(term) {
+        if (!term) {
+            // Si el término está vacío, restaurar el listado inicial
+            renderPage(allData, currentPage);
+            setupPagination(allData);
+            return;
+        }
+
+        const filteredData = allData.filter(variable =>
+            variable.nomVar.toLowerCase().includes(term.toLowerCase()) ||
+            variable.defVar.toLowerCase().includes(term.toLowerCase()) ||
+            variable.varAsig.toLowerCase().includes(term.toLowerCase())
+        );
+
+        if (filteredData.length === 0) {
+            container.innerHTML = "<p class='text-center'>No se encontraron resultados para el término ingresado.</p>";
+            paginationContainer.innerHTML = "";
+            return;
+        }
+
+        renderPage(filteredData, currentPage);
+        setupPagination(filteredData);
+    }
+
+    // Función para renderizar las tarjetas en función de la página actual
+    function renderPage(data, page) {
+        container.innerHTML = ""; // Limpia el contenedor antes de mostrar las nuevas tarjetas
+
+        const startIndex = (page - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedData = data.slice(startIndex, endIndex);
+
+        paginatedData.forEach((variable, index) => {
+            const card = document.createElement("div");
+            card.classList.add("accordion", "mb-3");
+
+            card.innerHTML = `
+                <div class="accordion-item">
+                    <h2 class="accordion-header custom-accordion-header" id="heading${index}">
+                        <button class="accordion-button collapsed" type="button" 
+                            data-bs-toggle="collapse" 
+                            data-bs-target="#collapse${index}" 
+                            aria-expanded="false" 
+                            aria-controls="collapse${index}">
+                            ${variable.nomVar} <span class="badge bg-light text-dark ms-2">${variable.idVar}</span>
+                        </button>
+                    </h2>
+                    <div id="collapse${index}" class="accordion-collapse collapse" aria-labelledby="heading${index}" data-bs-parent="#variablesContainer">
+                        <div class="accordion-body">
+                            <p><strong>Pregunta:</strong> ${variable.pregLit}</p>
+                            <p><strong>Definición:</strong> ${variable.defVar}</p>
+                            <p><strong>Variable Asignada:</strong> ${variable.varAsig}</p>
+                            
+                            <h6 class="mt-3">Clasificación Temática</h6>
+                            <ul>
+                                <li><strong>Tema:</strong> ${variable.tema} / ${variable.subtema}</li>
+                                <li><strong>Tema 2:</strong> ${variable.tema2} / ${variable.subtema2}</li>
+                            </ul>
+
+                            <h6 class="mt-3">Categoría y Relaciones</h6>
+                            <ul>
+                                <li><strong>Categoría:</strong> ${variable.categoria}</li>
+                                <li><strong>Relacionada con Tabulados:</strong> 
+                                    <span class="badge bg-${variable.relTab === 'Sí' ? 'success' : 'danger'}">${variable.relTab}</span>
+                                </li>
+                                <li><strong>Relacionada con Microdatos:</strong> 
+                                    <span class="badge bg-${variable.relMicro === 'Sí' ? 'success' : 'danger'}">${variable.relMicro}</span>
+                                </li>
+                                <li><strong>Alineación con MDEA:</strong> 
+                                    <span class="badge bg-${variable.alinMdea === 'Sí' ? 'success' : 'danger'}">${variable.alinMdea}</span>
+                                </li>
+                                <li><strong>Alineación con ODS:</strong> 
+                                    <span class="badge bg-${variable.alinOds === 'Sí' ? 'success' : 'danger'}">${variable.alinOds}</span>
+                                </li>
+                            </ul>
+
+                            <h6 class="mt-3">Extras</h6>
+                            <ul>
+                                <li><strong>ID del Programa:</strong> ${variable.idPp}</li>
+                                <li><strong>Código de Identificación:</strong> ${variable.codIdenVar}</li>
+                                <li><strong>Comentarios:</strong> ${variable.comentVar ? variable.comentVar : 'N/A'}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // Función para configurar el paginador
+    function setupPagination(data) {
+        paginationContainer.innerHTML = ""; // Limpia el paginador antes de generarlo nuevamente
+        const totalPages = Math.ceil(data.length / itemsPerPage);
+        const maxVisiblePages = 5; // Número máximo de páginas visibles en el paginador
+
+        // Botón "Anterior"
+        if (currentPage > 1) {
+            const prevLi = document.createElement("li");
+            prevLi.classList.add("page-item");
+            const prevA = document.createElement("a");
+            prevA.classList.add("page-link");
+            prevA.href = "#";
+            prevA.textContent = "«";
+            prevA.addEventListener("click", function (e) {
+                e.preventDefault();
+                currentPage--;
+                renderPage(data, currentPage);
+                setupPagination(data);
+            });
+            prevLi.appendChild(prevA);
+            paginationContainer.appendChild(prevLi);
+        }
+
+        // Rango de páginas visibles
+        const startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        // Mostrar "..." al inicio si hay páginas anteriores al rango visible
+        if (startPage > 1) {
+            const dotsLi = document.createElement("li");
+            dotsLi.classList.add("page-item", "disabled");
+            const dotsA = document.createElement("a");
+            dotsA.classList.add("page-link");
+            dotsA.href = "#";
+            dotsA.textContent = "...";
+            dotsLi.appendChild(dotsA);
+            paginationContainer.appendChild(dotsLi);
+        }
+
+        // Números de página visibles
+        for (let i = startPage; i <= endPage; i++) {
+            const li = document.createElement("li");
+            li.classList.add("page-item");
+            if (i === currentPage) li.classList.add("active");
+
+            const a = document.createElement("a");
+            a.classList.add("page-link");
+            a.href = "#";
+            a.textContent = i;
+            a.addEventListener("click", function (e) {
+                e.preventDefault();
+                currentPage = i;
+                renderPage(data, currentPage);
+                setupPagination(data);
+            });
+
+            li.appendChild(a);
+            paginationContainer.appendChild(li);
+        }
+
+        // Mostrar "..." al final si hay páginas posteriores al rango visible
+        if (endPage < totalPages) {
+            const dotsLi = document.createElement("li");
+            dotsLi.classList.add("page-item", "disabled");
+            const dotsA = document.createElement("a");
+            dotsA.classList.add("page-link");
+            dotsA.href = "#";
+            dotsA.textContent = "...";
+            dotsLi.appendChild(dotsA);
+            paginationContainer.appendChild(dotsLi);
+        }
+
+        // Botón "Siguiente"
+        if (currentPage < totalPages) {
+            const nextLi = document.createElement("li");
+            nextLi.classList.add("page-item");
+            const nextA = document.createElement("a");
+            nextA.classList.add("page-link");
+            nextA.href = "#";
+            nextA.textContent = "»";
+            nextA.addEventListener("click", function (e) {
+                e.preventDefault();
+                currentPage++;
+                renderPage(data, currentPage);
+                setupPagination(data);
+            });
+            nextLi.appendChild(nextA);
+            paginationContainer.appendChild(nextLi);
+        }
+    }
+
+    // Manejar el evento de envío del formulario
+    searchForm.addEventListener("submit", function (e) {
+        e.preventDefault(); // Evitar el comportamiento predeterminado del formulario
+        const searchTerm = searchInput.value.trim();
+        currentPage = 1; // Reiniciar a la primera página
+        searchVariables(searchTerm); // Realizar la búsqueda
+    });
+
+    // Cargar todos los elementos al entrar a la página
+    loadAllVariables();
+});
+</script>
+
+ <!--! FOOTER -->
+ <div class="container-fluid" style="background-color: #5d5d5d">
+    <footer class="bd-footer">
+      <div class="pt-4 pb-4">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg">
+  
+              <a style="color: white; font-weight: bold; font-size: 15px; font-family: Helvetica, Sans-Serif; ">Contacto</a>
+              <ul class="nav flex-column">
+                <li><a href="https://www.inegi.org.mx/"><img class="img-fluid d-block m-1" style="height: 2.5rem; width: 12rem;" src="/assets/INEGI_c-modified.png"></a></li>
+                <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text" style="color: white"></a>
+                </li>
+                <li><a class="text-white d-block pt-1" href="https://www.inegi.org.mx/inegi/contacto.html#Directorios" style="font-family: Helvetica, Sans-Serif;">Directorio</a></li>
+                <li><a class="text-white d-block pt-1" href="https://www.inegi.org.mx/inegi/contacto.html" style="font-family: Helvetica, Sans-Serif;">Solicitud de información</a></li>
+                <br>
+                <ul style="list-style: none; padding: 0; display: flex; gap: 10px; margin-bottom: 5px;">
+                <li><a href="http://www.facebook.com/pages/inegi-informa/180299958681029" style="color: white"><i class="bi bi-facebook"></i></a></li>
+                <li><a href="http://twitter.com/inegi_informa" style="color: white"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-twitter-x" viewBox="0 0 16 16">
+                  <path d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z"/>
+                </svg></a></li>
+                <li><a href="https://www.youtube.com/user/INEGIInforma" style="color: white"><i class="bi bi-youtube"></i></a></li>
+                <li><a href="https://www.instagram.com/inegi_informa/" style="color: white;"><i class="bi bi-instagram"></i></a></li>
+                <li><a href="https://www.inegi.org.mx/servicios/rss/" style="color: white"><i class="bi bi-rss-fill"></i></a></li>
+                </ul>
+              </ul>
+            </div>
+            <div class="col-lg">
+              <a style="color: white; font-weight: bold; font-size: 15px">Sitios de interés</a>
+              <ul class="nav flex-column">
+                <li class="nav-item mb-2"><a href="https://www.snieg.mx/cni/" target="_blank" class="nav-link p-0 text"
+                    style="color: white; font-size: 14px; font-family: Helvetica, Sans-Serif;">Catálogo Nacional de Indicadores</a></li>
+                <li class="nav-item mb-2"><a href="https://www.cepal.org/es" target="_blank"
+                    class="nav-link p-0 text" style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">CEPAL</a></li>
+                <li class="nav-item mb-2"><a href="https://www.un.org/sustainabledevelopment/es/objetivos-de-desarrollo-sostenible/" target="_blank" class="nav-link p-0 text"
+                      style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">ODS-ONU</a></li>
+                <li class="nav-item mb-2"><a href="http://agenda2030.mx/" target="_blank" class="nav-link p-0 text"
+                    style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">SIODS</a></li>
+                <li class="nav-item mb-2"><a href="https://www.gob.mx/semarnat/acciones-y-programas/sistema-nacional-de-informacion-ambiental-y-de-recursos-naturales" target="_blank" class="nav-link p-0 text"
+                    style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">SNIARN</a></li>
+                <li class="nav-item mb-2"><a href="#" [routerLink]="['/dg/new']" target="_blank"
+                  class="nav-link p-0 text" style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">Ver más...</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>   
+</body>
+
+</html>

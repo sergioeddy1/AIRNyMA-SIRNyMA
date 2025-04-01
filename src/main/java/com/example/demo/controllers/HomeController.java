@@ -8,7 +8,7 @@ public class HomeController {
 
     @GetMapping("/")
     public String home() {
-        return "redirect:/index.html";
+        return "redirect:SIRNyMA/pages/index.html";
     }
 
    

@@ -1,0 +1,404 @@
+
+
+.imagenCarouselSNIEG {
+    -webkit-filter: drop-shadow(1px 1px 0 #ffffff) drop-shadow(-1px -1px 0 #ffffff); /* Contorno blanco */
+    filter: drop-shadow(.5px .5px 0 #ffffff) drop-shadow(-.5px -.5px 0 #ffffff) contrast(120%);;
+  }
+  
+  .carousel-caption {
+    bottom: 5rem;
+    z-index: 10;
+  }
+  .carousel-item {
+    height: 32rem;
+  }
+  
+  @media only screen and (max-width: 1366px) {
+    .carousel-item {
+      height: 24rem;
+    }
+  }
+  
+  @media only screen and (max-width: 1024px) {
+    .carousel-item {
+      height: 24rem;
+    }
+  }
+  
+  @media only screen and (max-width: 480px) {
+    .carousel-item {
+      height: 22rem;
+    }
+  }
+  
+  .marketing .col-lg-4 {
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  .marketing .col-lg-4 p {
+    margin-right: .75rem;
+    margin-left: .75rem;
+  }
+  
+  /*! botones modificados */
+  .custom-btn-colorWhite {
+    background-color: #ffffffbb;
+    color: #000;
+  }
+  .custom-btn-colorWhite:hover {
+    background-color: #ffffff9c;
+  }
+  .custom-btn-colorGris {
+    background-color: #949494d5;
+    color: #fff;
+  }
+  .custom-btn-colorGris:hover {
+    background-color: #949494a4;
+  }
+  .custom-btn-color {
+    background-color: #007a98b2;
+    color: #fff;
+  }
+  .custom-btn-color:hover {
+    background-color: #0060758f;
+  }
+  .custom-btn-color2 {
+    background-color: #009ddbb7;
+    color: #fff;
+  }
+  .custom-btn-color2:hover {
+    background-color: #007ab2a1;
+  }
+  .custom-btn-color3 {
+    background-color: #5a6889;
+    color: #fff;
+  }
+  .custom-btn-color3:hover {
+    background-color: #4a5d8a;
+  }
+  p{
+   font-family: Arial, Helvetica, sans-serif;
+  }
+  .selected {
+    color: #5f5f5f;
+    background-color: #D8CEFF !important;
+  }
+  .customParrafo{
+    font-size: medium;
+    text-align: justify;
+    font-family: Helvetica, Sans-Serif;
+  }
+  p {
+    font-family: Helvetica, Sans-Serif;
+  }
+  
+  /* APARTADO DE ESTILOS PARA DIFERENTES TIPOS DE RESOLUCIONES. */
+  
+  /* Laptop y proyectores */
+  
+  @media only screen and (max-width: 1366px) {
+    .imagenCarouselINEGI{
+      width: 32%;
+      height: 32px;
+      padding-bottom: 15px;
+    }
+    }
+  
+  @media only screen and (max-width: 1024px) {
+    .imagenCarouselINEGI{
+      width: 30%;
+      height: 30px;
+      padding-bottom: 15px;
+    }
+    }
+  
+    @media only screen and (max-width: 480px) {
+      .imagenCarouselINEGI{
+        margin-right: auto;
+        width: 12rem;
+        height: 50px;
+      }
+    }
+  
+    @media only screen and (min-width: 2560px) and (max-width: 3440px) {
+      .imagenCarouselODS{
+      
+        padding-left: 25rem;
+        width: 75%;
+        height: 100px;
+      }
+    }
+  
+  
+    @media only screen and (max-width: 1366px) {
+      .imagenCarouselODS{
+        padding-right: 180px;
+        width: 90%;
+        height: 75px;
+      }
+      }
+  
+  
+    /* Laptop y proyectores */
+  @media only screen and (max-width: 1024px) {
+    .imagenCarouselODS{
+      padding-right: 200px;
+      width: 95%;
+      height: 80px;
+      padding-bottom: 20px;
+    }
+    }
+  
+    /* Dispositivos moviles */
+    @media only screen and (max-width: 480px) {
+      .imagenCarouselODS{
+        padding-right: 400px;
+        padding-bottom: 35px;
+          width: 40rem;
+          height: 65px;
+      }
+    }
+  
+    /* Laptop y proyectores */
+    @media only screen and (max-width: 1024px) {
+        .imagenCarouselSNIEG{
+        width: 60%;
+        height: 60px;
+        padding-bottom: 15px;
+      }
+      }
+  
+      /* Dispositivos moviles */
+      @media only screen and (max-width: 480px) {
+          .imagenCarouselSNIEG{
+         
+          margin-right: auto;
+          width: 15rem;
+          height: 50px;
+        }
+      }
+  
+      @media only screen and (max-width: 1366px) {
+        .imagenCarouselGeonode{
+        padding-right: auto;
+        padding-top: 50px;
+        width: 8.5rem;
+        height: 40px;
+      }
+     }
+  
+      @media only screen and (max-width: 1024px) {
+        .imagenCarouselGeonode{
+        margin-right: auto;
+        width: 7.5rem;
+        height: 40px;
+      }
+     }
+  
+      @media only screen and (max-width: 480px) {
+        .imagenCarouselGeonode{
+        margin-right: auto;
+        padding-top: 10px;
+        width: 6rem;
+        height: 30px;
+      }
+     }
+  
+  
+     /* Botones para resolución de laptop */
+     @media only screen and (max-width: 1366px)  {
+      .custom-btn-colorWhite {
+        font-size: 1rem;     
+        padding: 6px 12px;    
+      }
+    }
+  
+    @media only screen and (max-width: 1366px)  {
+      .custom-btn-color {
+        font-size: 1rem;    
+        padding: 6px 12px;  
+      }
+    }
+  
+    @media only screen and (max-width: 1366px) {
+      .custom-btn-color2 {
+        font-size: 1rem;     
+        padding: 6px 12px;   
+      }
+    }
+  
+    @media only screen and (max-width: 1366px) {
+      .custom-btn-colorGris {
+        font-size: 1rem;     
+        padding: 6px 12px;   
+      }
+    }
+  
+  
+      /* Botones para resolución de proyector */
+  
+  
+      @media only screen and (max-width: 1024px)  {
+        .custom-btn-colorWhite {
+          font-size: 1rem;
+          padding: 6px 12px;
+        }
+      }
+  
+      @media only screen and (max-width: 1024px)  {
+        .custom-btn-color {
+          font-size: 1rem;
+          padding: 6px 12px;
+        }
+      }
+  
+      @media only screen and (max-width: 1024px) {
+        .custom-btn-color2 {
+          font-size: 1rem;
+          padding: 6px 12px;
+        }
+      }
+  
+      @media only screen and (max-width: 1024px) {
+        .custom-btn-colorGris {
+          font-size: 1rem;
+          padding: 6px 12px;
+        }
+      }
+  
+      /* Botones para dispositivos moviles.  */
+      @media only screen and (max-width: 480px) {
+        .custom-btn-colorWhite {
+          font-size: 1rem;
+          padding: 6px 12px;
+        }
+      }
+  
+      @media only screen and (max-width: 480px) {
+        .custom-btn-color {
+          font-size: 1rem;
+          padding: 6px 12px;
+        }
+      }
+  
+      @media only screen and (max-width: 480px) {
+        .custom-btn-color2 {
+          font-size: 1rem;
+          padding: 6px 12px;
+        }
+      }
+  
+      @media only screen and (max-width: 480px) {
+        .custom-btn-colorGris {
+          font-size: 1rem;
+          padding: 6px 12px;
+        }
+      }
+  
+  
+  .espacio{
+    margin-top: 1rem;
+    margin-left: 2rem;
+    margin-right: 2rem;
+    color: white;
+  }
+  
+  .justificado{
+    text-align: justify;
+    margin-left: 3rem;
+    margin-right: 3rem;
+    margin-bottom: 3rem;
+    font-size: 1rem;
+  }
+  .tMision{
+    margin-left: 5rem;
+  }
+  .space{
+    margin-right: 0.5rem;
+  }
+  
+  
+  @media only screen and (min-width: 2560px) and (max-width: 3440px) {
+    #Mision {
+      text-align: justify;  
+      padding: 1rem;     
+      padding-left: 5rem;
+      font-size: 1rem;   
+    }
+  
+    #Vision {
+      text-align: justify;  
+      padding: 1rem;      
+      padding-right: 5rem;
+      font-size: 1rem;    
+    }
+  }
+  
+  
+  @media only screen and (max-width: 1366px) {
+    .justificado{
+      text-align: justify;
+      margin-top: 10px;
+      margin-left: 3rem;
+      margin-right: 3rem;
+      margin-bottom: 3rem;
+      font-size: 1rem;
+    }
+  }
+  @media only screen and (max-width: 1024px) {
+    .justificado{
+      text-align: justify;
+      margin-top: 10px;
+      margin-left: -1rem;
+      margin-right: -1rem;
+      margin-bottom: 2rem;
+      font-size: 0.9rem;
+    }
+  }
+  
+  @media only screen and (max-width: 480px) {
+    .justificado{
+      text-align: justify;
+      margin-left: -1.5rem;
+      margin-right: -1.5rem;
+      margin-bottom: 2rem;
+      font-size: 0.8rem;
+    }
+  }
+  
+  
+  @media only screen and (max-width: 480px) {
+    .TituloINEGICarousel{
+      font-size: larger;
+      font-weight: 600;
+    }
+  }
+  
+  @media only screen and (max-width: 480px) {
+    .TituloOdsCarousel{
+      font-size: larger;
+      font-weight: 600;
+    }
+  }
+  
+  
+  @media only screen and (max-width: 480px) {
+    .TituloMdeaCarousel{
+      font-size: larger;
+      font-weight: 600;
+    }
+  }
+  
+  @media only screen and (max-width: 480px) {
+    .TituloSniegCarousel{
+      font-size: larger;
+      font-weight: 600;
+    }
+  }
+  
+  @media only screen and (max-width: 480px) {
+    .TituloGeonodeCarousel{
+      font-size: larger;
+      font-weight: 600;
+    }
+  }

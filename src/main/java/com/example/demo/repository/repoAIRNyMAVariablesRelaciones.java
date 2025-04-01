@@ -4,6 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.example.demo.entity.entityAIRNyMAVariableRelaccion;
 
-public interface repoAIRNyMAVariablesRelaciones extends JpaRepository<entityAIRNyMAVariableRelaccion, Long>{
+public interface repoAIRNyMAVariablesRelaciones extends JpaRepository<entityAIRNyMAVariableRelaccion, String>{
     
 }

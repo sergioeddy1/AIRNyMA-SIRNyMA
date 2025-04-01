@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg" style="background-color: #003057;">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="index.html" style="color: aliceblue; margin-left: 5px; font-family: Arial, Helvetica, sans-serif;">Portal de Indicadores Ambientales</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link active" href="programas.html" style="color: aliceblue;">Programas</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="variables.html" style="color: aliceblue;">Variables</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="ods.html" style="color: aliceblue;">ODS</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="indicadores.html" style="color: aliceblue;">Indicadores existentes</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+
+ <!-- Contenedor principal -->
+<div class="container">
+    <!-- Título principal -->
+    <div class="mt-4">
+      <h1 style="color: #113250;">Indicadores en Materia Ambiental.</h1>
+    </div>
+  
+    <!-- Descripción de los indicadores -->
+    <div class="row">
+      <div class="col mt-2">
+        <p class="customPa">
+          Un indicador ambiental es una estadística clave que representa fenómenos ambientales importantes. Su propósito es evaluar tendencias, medir cambios a lo largo del tiempo y ayudar en la toma de decisiones. 
+          INEGI, como entidad estadística del país, contribuye a consolidar un entorno sostenible mediante la recopilación y análisis de estos datos.</p>
+      </div>
+    </div>
+  
+    <!-- Filtros por temática -->
+    <div class="row">
+      <div class="col-12">
+        <h5>Filtros por temática</h5>
+      </div>
+      <div class="col" id="BtnFilter">
+        <button type="button" class="btn btn-light ancho" (click)="filterByTema('')">Todos</button>
+        <button type="button" class="btn btn-agua ancho" (click)="filterByTema('Agua')">Agua</button>
+        <button type="button" class="btn btn-atmosfera ancho" (click)="filterByTema('Atmosfera')">Atmósfera</button>
+        <button type="button" class="btn btn-residuos ancho" (click)="filterByTema('Residuos')">Residuos</button>
+        <button type="button" class="btn btn-suelos ancho" (click)="filterByTema('Suelos')">Suelos</button>
+        <button type="button" class="btn btn-energia ancho" (click)="filterByTema('Energia')">Energía</button>
+        <button type="button" class="btn btn-biodiversidad-marina ancho" (click)="filterByTema('Biodiversidad marina')">Biodiversidad marina</button>
+        <button type="button" class="btn btn-biodiversidad-terrestre ancho" (click)="filterByTema('Biodiversidad terrestre')">Biodiversidad terrestre</button>
+        <button type="button" class="btn btn-forestal ancho" (click)="filterByTema('Forestal')">Forestal</button>
+        <button type="button" class="btn btn-proteccion-ambiental ancho" (click)="filterByTema('Protección Ambiental')">Protección Ambiental</button>
+      </div>
+    </div>
+  
+    <!-- Tabla de Indicadores -->
+    <div class="row mt-5">
+      <div class="col">
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th class="col" scope="col">Nombre</th>
+                <th class="col text-center" scope="col">Fuente</th>
+                <th class="col text-center" scope="col">Temática</th>
+                <th class="col-2 text-center" scope="col">Más información</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Estado de carga: Spinners dentro de la tabla -->
+              <tr *ngIf="isLoading">
+                <td colspan="4" class="text-center">
+                  <div class="d-flex justify-content-center my-3">
+                    <div class="spinner-grow text-secondary me-3" role="status"></div>
+                    <div class="spinner-grow text-secondary me-3" role="status"></div>
+                    <div class="spinner-grow text-secondary" role="status"></div>
+                  </div>
+                </td>
+              </tr>
+  
+              <!-- Fila vacía cuando no hay datos -->
+              <tr *ngIf="!isLoading && paginatedData.length === 0">
+                <td colspan="4" class="text-center">No hay datos disponibles</td>
+              </tr>
+  
+              <!-- Datos de la tabla -->
+              <tr *ngFor="let indicador of paginatedData">
+              </tr>
+            </tbody>
+          </table>
+        </div>
+  
+        <!-- Paginador -->
+        <p-paginator 
+          (onPageChange)="onPageChange($event)" 
+          [first]="first" 
+          [rows]="rows" 
+          [totalRecords]="filteredIndicadores.length" 
+          [rowsPerPageOptions]="[10, 20]"
+          [showFirstLastIcon]="!isFirstPage() && !isLastPage(filteredIndicadores.length)">
+        </p-paginator>
+  
+      </div>
+    </div>
+  </div>
+  
+
+     <!--! FOOTER -->
+     <div class="container-fluid" style="background-color: #5d5d5d">
+        <footer class="bd-footer">
+          <div class="pt-4 pb-4">
+            <div class="container">
+              <div class="row">
+                <div class="col-lg">
+      
+                  <a style="color: white; font-weight: bold; font-size: 15px; font-family: Helvetica, Sans-Serif; ">Contacto</a>
+                  <ul class="nav flex-column">
+                    <li><a href="https://www.inegi.org.mx/"><img class="img-fluid d-block m-1" style="height: 2.5rem; width: 12rem;" src="/assets/INEGI_c-modified.png"></a></li>
+                    <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text" style="color: white"></a>
+                    </li>
+                    <li><a class="text-white d-block pt-1" href="https://www.inegi.org.mx/inegi/contacto.html#Directorios" style="font-family: Helvetica, Sans-Serif;">Directorio</a></li>
+                    <li><a class="text-white d-block pt-1" href="https://www.inegi.org.mx/inegi/contacto.html" style="font-family: Helvetica, Sans-Serif;">Solicitud de información</a></li>
+                    <br>
+                    <ul style="list-style: none; padding: 0; display: flex; gap: 10px; margin-bottom: 5px;">
+                    <li><a href="http://www.facebook.com/pages/inegi-informa/180299958681029" style="color: white"><i class="bi bi-facebook"></i></a></li>
+                    <li><a href="http://twitter.com/inegi_informa" style="color: white"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-twitter-x" viewBox="0 0 16 16">
+                      <path d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z"/>
+                    </svg></a></li>
+                    <li><a href="https://www.youtube.com/user/INEGIInforma" style="color: white"><i class="bi bi-youtube"></i></a></li>
+                    <li><a href="https://www.instagram.com/inegi_informa/" style="color: white;"><i class="bi bi-instagram"></i></a></li>
+                    <li><a href="https://www.inegi.org.mx/servicios/rss/" style="color: white"><i class="bi bi-rss-fill"></i></a></li>
+                    </ul>
+                  </ul>
+                </div>
+                <div class="col-lg">
+                  <a style="color: white; font-weight: bold; font-size: 15px">Sitios de interés</a>
+                  <ul class="nav flex-column">
+                    <li class="nav-item mb-2"><a href="https://www.snieg.mx/cni/" target="_blank" class="nav-link p-0 text"
+                        style="color: white; font-size: 14px; font-family: Helvetica, Sans-Serif;">Catálogo Nacional de Indicadores</a></li>
+                    <li class="nav-item mb-2"><a href="https://www.cepal.org/es" target="_blank"
+                        class="nav-link p-0 text" style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">CEPAL</a></li>
+                    <li class="nav-item mb-2"><a href="https://www.un.org/sustainabledevelopment/es/objetivos-de-desarrollo-sostenible/" target="_blank" class="nav-link p-0 text"
+                          style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">ODS-ONU</a></li>
+                    <li class="nav-item mb-2"><a href="http://agenda2030.mx/" target="_blank" class="nav-link p-0 text"
+                        style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">SIODS</a></li>
+                    <li class="nav-item mb-2"><a href="https://www.gob.mx/semarnat/acciones-y-programas/sistema-nacional-de-informacion-ambiental-y-de-recursos-naturales" target="_blank" class="nav-link p-0 text"
+                        style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">SNIARN</a></li>
+                    <li class="nav-item mb-2"><a href="#" [routerLink]="['/dg/new']" target="_blank"
+                      class="nav-link p-0 text" style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">Ver más...</a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </footer>
+      </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

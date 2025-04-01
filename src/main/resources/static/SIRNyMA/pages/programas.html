@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procesos de Producción</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link href="../styles/programas.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg" style="background-color: #003057;">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html" style="color: aliceblue; margin-left: 5px; font-family: Arial, Helvetica, sans-serif;">Portal de Indicadores Ambientales</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link active" href="programas.html" style="color: aliceblue;">Programas</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="variables.html" style="color: aliceblue;">Variables</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="ods.html" style="color: aliceblue;">ODS</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="indicadores.html" style="color: aliceblue;">Indicadores existentes</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2 class="text-center mb-4">Direcciones Generales</h2>
+
+        <div class="mt-4">
+            <div class="row">
+                <!-- Dirección General de Estadísticas Sociodemográficas -->
+                <div class="col-3 m-1">
+                    <button class="custom-card-btn mostrarGrupoBtn" id="btnDireccionSociodemograficas">
+                        <div class="d-flex justify-content-center align-items-center">
+                            <i class="bi bi-bar-chart display-5 iconcustom"></i>
+                        </div>
+                        <div class="text-center">
+                            <label class="texto-direction nameofDirection">Dirección General de Estadísticas Sociodemográficas</label>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="col-1"></div>
+                <!-- Dirección General de Estadísticas Económicas -->
+                <div class="col-3 m-1">
+                    <button class="custom-card-btn mostrarGrupoBtn" data-grupo="grupo2">
+                        <div class="d-flex justify-content-center align-items-center">
+                            <i class="bi bi-cash-stack display-5 iconcustom"></i>
+                        </div>
+                        <div class="text-center">
+                            <label class="texto-direction nameofDirection">Dirección General de Estadísticas Económicas</label>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="col-1"></div>
+                <!-- Dirección General de Geografía y Medio Ambiente -->
+                <div class="col-3 m-1">
+                    <button class="custom-card-btn mostrarGrupoBtn" data-grupo="grupo3">
+                        <div class="d-flex justify-content-center align-items-center">
+                            <i class="bi bi-globe display-5 iconcustom"></i>
+                        </div>
+                        <div class="text-center">
+                            <label class="texto-direction nameofDirection">Dirección General de Geografía y Medio Ambiente</label>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-2"></div>
+                <!-- Dirección General de Estadísticas de Gobierno, Seguridad Pública y Justicia -->
+                <div class="col-3 m-1">
+                    <button class="custom-card-btn mostrarGrupoBtn" data-grupo="grupo4">
+                        <div class="d-flex justify-content-center align-items-center">
+                            <i class="bi bi-bank display-5 iconcustom"></i>
+                        </div>
+                        <div class="text-center">
+                            <label class="texto-direction nameofDirection">Dirección General de Estadísticas de Gobierno, Seguridad Pública y Justicia</label>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="col-2"></div>
+                <!-- Dirección General de Integración, Análisis e Investigación -->
+                <div class="col-3 m-1">
+                    <button class="custom-card-btn mostrarGrupoBtn" data-grupo="grupo4">
+                        <div class="d-flex justify-content-center align-items-center">
+                            <i class="bi bi-bank display-5 iconcustom"></i>
+                        </div>
+                        <div class="text-center">
+                            <label class="texto-direction nameofDirection">Dirección General de Integración, Análisis e Investigación.</label>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comentado: Programas de información y contenedor dinámico -->
+    <!--
+    <div class="container">
+        <div class="mt-5">
+            <h2>Programas de información</h2>
+            <div class="mt-4 d-none" id="grupo1Container">
+                <div class="row">
+                    <div class="col-3 m-1">
+                        <button class="custom-card-btn mostrarProcesosBtn" data-categoria="InformacionDemografica" id="btnProcesosDemograficos">
+                            <div class="d-flex justify-content-center align-items-center">
+                                <i class="bi bi-person-circle display-5 iconcustom"></i>
+                            </div>
+                            <div class="text-center">
+                                <label class="texto-direction nameofDirection">Programa Información Demográfica y Social</label>
+                                <h5>Total de procesos: <span id="procesosCounter">0</span></h5>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-5 mb-5">
+                <h2>Procesos de Producción</h2>
+            </div>
+            <div class="row mt-4" id="procesosContainer"></div>
+        </div>
+    </div>
+    -->
+
+    <!-- Contenedor donde se mostrarán los procesos -->
+    <div class="container mt-5">
+        <h2>Procesos de Producción</h2>
+        <div class="row mt-4" id="procesosContainer"></div>
+    </div>
+
+    <script>
+        // Asignar funcionalidad al botón de "Dirección General de Estadísticas Sociodemográficas"
+        document.getElementById("btnDireccionSociodemograficas").addEventListener("click", function () {
+            fetch("/api/proceso") // Llamada a la API
+                .then(response => response.json())
+                .then(data => {
+                    let container = document.getElementById("procesosContainer");
+                    container.innerHTML = ""; // Limpiamos el contenedor
+
+                    // Generar tarjetas dinámicamente
+                    data.forEach((proceso, index) => {
+                        let card = `
+                            <div class="col-md-4 mb-4">
+                                <div class="card proceso-card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">ID: ${proceso.idPp}</h5>
+                                        <p class="card-text"><strong>Proceso:</strong> ${proceso.pp || "Desconocido"}</p>
+                                        <p class="card-text">
+                                            <strong>Estatus:</strong> 
+                                            <span class="badge ${getStatusClass(proceso.estatus)}">${proceso.estatus}</span>
+                                        </p>
+                                        <p class="card-text"><strong>Contador:</strong> ${index + 1}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        container.innerHTML += card;
+                    });
+                })
+                .catch(error => {
+                    console.error("Error cargando los procesos:", error);
+                    alert("Ocurrió un error al cargar los procesos");
+                });
+        });
+
+        // Función para determinar la clase CSS según el estatus
+        function getStatusClass(status) {
+            switch (status.toLowerCase()) {
+                case "activo": return "bg-success";
+                case "inactivo": return "bg-danger";
+                case "pendiente": return "bg-warning text-dark";
+                default: return "bg-secondary";
+            }
+        }
+    </script>
+
+    <!--! FOOTER -->
+    <div class="container-fluid" style="background-color: #5d5d5d">
+        <footer class="bd-footer">
+            <div class="pt-4 pb-4">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg">
+                            <a style="color: white; font-weight: bold; font-size: 15px; font-family: Helvetica, Sans-Serif;">Contacto</a>
+                            <ul class="nav flex-column">
+                                <li><a href="https://www.inegi.org.mx/"><img class="img-fluid d-block m-1" style="height: 2.5rem; width: 12rem;" src="/assets/INEGI_c-modified.png"></a></li>
+                                <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text" style="color: white"></a></li>
+                                <li><a class="text-white d-block pt-1" href="https://www.inegi.org.mx/inegi/contacto.html#Directorios" style="font-family: Helvetica, Sans-Serif;">Directorio</a></li>
+                                <li><a class="text-white d-block pt-1" href="https://www.inegi.org.mx/inegi/contacto.html" style="font-family: Helvetica, Sans-Serif;">Solicitud de información</a></li>
+                                <br>
+                                <ul style="list-style: none; padding: 0; display: flex; gap: 10px; margin-bottom: 5px;">
+                                    <li><a href="http://www.facebook.com/pages/inegi-informa/180299958681029" style="color: white"><i class="bi bi-facebook"></i></a></li>
+                                    <li><a href="http://twitter.com/inegi_informa" style="color: white"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-twitter-x" viewBox="0 0 16 16">
+                                        <path d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z"/>
+                                    </svg></a></li>
+                                    <li><a href="https://www.youtube.com/user/INEGIInforma" style="color: white"><i class="bi bi-youtube"></i></a></li>
+                                    <li><a href="https://www.instagram.com/inegi_informa/" style="color: white;"><i class="bi bi-instagram"></i></a></li>
+                                    <li><a href="https://www.inegi.org.mx/servicios/rss/" style="color: white"><i class="bi bi-rss-fill"></i></a></li>
+                                </ul>
+                            </ul>
+                        </div>
+                        <div class="col-lg">
+                            <a style="color: white; font-weight: bold; font-size: 15px">Sitios de interés</a>
+                            <ul class="nav flex-column">
+                                <li class="nav-item mb-2"><a href="https://www.snieg.mx/cni/" target="_blank" class="nav-link p-0 text" style="color: white; font-size: 14px; font-family: Helvetica, Sans-Serif;">Catálogo Nacional de Indicadores</a></li>
+                                <li class="nav-item mb-2"><a href="https://www.cepal.org/es" target="_blank" class="nav-link p-0 text" style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">CEPAL</a></li>
+                                <li class="nav-item mb-2"><a href="https://www.un.org/sustainabledevelopment/es/objetivos-de-desarrollo-sostenible/" target="_blank" class="nav-link p-0 text" style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">ODS-ONU</a></li>
+                                <li class="nav-item mb-2"><a href="http://agenda2030.mx/" target="_blank" class="nav-link p-0 text" style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">SIODS</a></li>
+                                <li class="nav-item mb-2"><a href="https://www.gob.mx/semarnat/acciones-y-programas/sistema-nacional-de-informacion-ambiental-y-de-recursos-naturales" target="_blank" class="nav-link p-0 text" style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">SNIARN</a></li>
+                                <li class="nav-item mb-2"><a href="#" [routerLink]="['/dg/new']" target="_blank" class="nav-link p-0 text" style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">Ver más...</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+.navbar-nav .nav-link.active {
+  color: #FFD700 !important; /* Cambiar el color del enlace activo (dorado en este caso) */
+  font-weight: bold; /* Opcional: resaltar el enlace activo */
+}
+
+
+.customPa{
+    text-align: justify;
+    padding-top: 10px;
+  
+  }
+  
+  .container {
+    min-height: 64vh;
+  }
+
+
+  
+  :host ::ng-deep .custom-tooltip .tooltip-inner {
+    max-width: 800px;
+    /* Ajusta el ancho según tus necesidades */
+    background-color: #000000e5;
+    /* Opcional: Color de fondo personalizado */
+    color: #ffffff;
+    /* Opcional: Color del texto personalizado */
+    border: 1px solid #ccc;
+    /* Color del borde */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    /* Sombra */
+    padding: 10px;
+    /* Relleno */
+    margin: 5px;
+    /* Margen */
+  }
+  ::ng-deep .p-paginator .p-paginator-pages .p-paginator-page.p-highlight,
+  ::ng-deep .p-paginator .p-paginator-pages {
+    background-color: #113250;
+    color: white;
+  }
+  ::ng-deep .p-paginator .p-paginator-next.p-disabled,
+  ::ng-deep .p-paginator .p-paginator-prev.p-disabled {
+    color: #9e9e9e; /* Color para cuando las flechas están deshabilitadas (última página) */
+    pointer-events: none; /* Opcional: evita clics en los íconos deshabilitados */
+    visibility: hidden;
+  }
+  
+  
+  .ancho{
+    margin-right: 0.25rem;
+  }
+  .btn-agua {
+    background-color: #007BFF;
+    /* Azul claro */
+    color: white;
+  }
+  
+  .btn-atmosfera {
+    background-color: #6C757D;
+    /* Gris para el aire */
+    color: white;
+  }
+  
+  .btn-residuos {
+    background-color: #28A745;
+    /* Verde para el reciclaje */
+    color: white;
+  }
+  
+  .btn-suelos {
+    background-color: #DC3545;
+    /* Rojo para la tierra */
+    color: white;
+  }
+  
+  .btn-energia {
+    background-color: #FFC107;
+    /* Amarillo para energía */
+    color: black;
+  }
+  
+  .btn-biodiversidad-marina {
+    background-color: #17A2B8;
+    /* Cyan para el océano */
+    color: white;
+  }
+  
+  .btn-biodiversidad-terrestre {
+    background-color: #28A745;
+    /* Verde para tierra */
+    color: white;
+  }
+  
+  .btn-forestal {
+    background-color: #5A5B3D;
+    /* Verde oscuro para bosques */
+    color: white;
+  }
+  
+  .btn-proteccion-ambiental {
+    background-color: #6F42C1;
+    /* Morado para protección ambiental */
+    color: white;
+  }
+  
+  @media only screen and (max-width: 1366px) {
+    .btn {
+      font-size: .70rem;
+      font-weight: bold;
+      width: 6rem;
+      height: 3.3rem;
+    }
+  }
+  
+  @media only screen and (max-width: 1024px) {
+    .btn {
+      font-size: .70rem;
+      width: 5.6rem;
+      height: 3rem;
+      text-align: left;
+    }
+  }
+  
+  @media only screen and (max-width: 480px) {
+    .btn {
+      font-size: .5rem;
+      width: 4.8rem;
+      height: 5rem;
+    }
+    .table {
+      font-size: 0.85rem; /* Reducir el tamaño de la fuente */
+    }
+    .text-truncate {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    flex: 1;
+}
+
+.bd-footer {
+    background-color: #5d5d5d;
+    color: white;
+    text-align: center;
+    padding: 1rem;
+}

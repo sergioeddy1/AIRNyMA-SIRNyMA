@@ -1,0 +1,61 @@
+/* Cuando el acordeón está cerrado */
+.custom-accordion-header .accordion-button.collapsed {
+    color: #000000;             /* Texto negro */
+    border: 2px solid #08989C;  /* Borde del color personalizado */
+}
+
+/* Cuando el acordeón está abierto */
+.custom-accordion-header .accordion-button:not(.collapsed) {
+    background-color: #077c81;  /* Fondo activo */
+    color: #ffffff;             /* Texto blanco */
+    border: 2px solid #077c81;  /* Borde del mismo color activo */
+    box-shadow: none;           /* Sin sombra al estar expandido */
+}
+
+#pagination .page-item .page-link {
+    background-color: #ffffff !important;
+    color: #A590FF !important;
+    border: 2px solid #A590FF !important;
+    transition: all 0.3s ease;  /* Transición suave */
+}
+
+/* Botones Anterior/Siguiente */
+#pagination .page-item .page-link:hover {
+    background-color: #A590FF;
+    color: #ffffff;
+}
+
+/* Página activa: mejorar visibilidad */
+#pagination .page-item.active .page-link {
+    background-color: #A590FF !important;  /* Fondo color activo */
+    color: #ffffff !important;             /* Texto blanco */
+    border-color: #A590FF !important;      /* Borde activo */
+    font-weight: bold;                     /* Negrita para resaltarlo */
+    transform: scale(1.1);                 /* Aumentar el tamaño para mayor visibilidad */
+}
+
+/* Deshabilitado (para extremos del paginador) */
+#pagination .page-item.disabled .page-link {
+    background-color: #E5E5E5;
+    color: #A590FF;
+    border-color: #A590FF;
+}
+
+.btncustom {
+    background-color: #A590FF !important;
+    color: #ffffff !important;
+    border: 2px solid #A590FF !important;
+    transition: all 0.3s ease;  
+   
+}
+
+#apartadofiltros{
+    padding-top: 50px;
+    padding-bottom: 50px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin: 0 auto;
+    /* Ajusta el ancho máximo según tus necesidades */
+    margin-top: 20px;
+}
