@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procesos de Producción</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link href="../styles/programas.css" rel="stylesheet">
+</head>
+
+<body>
+
+     <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg" style="background-color: #003057;">
+        <div class="container-fluid">
+            <img src="/assets/INEGI_g.png" alt="Logo" class="responsive-image" style="padding-right: 5px; width: 10rem; filter: invert(1) brightness(2) contrast(1.5);" />
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-center" id="navbarNav" style="padding-right: 200px;">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a style="color: aliceblue;" class="nav-link" href="index.html">Inicio</a></li>
+                    <li class="nav-item"><a style="color: aliceblue;" class="nav-link" href="procesos.html">Procesos</a></li>
+                    <li class="nav-item"><a style="color: aliceblue;" class="nav-link" href="variables.html">Variables</a></li>
+                    <li class="nav-item"><a style="color: aliceblue;" class="nav-link" href="ods.html">ODS</a></li>
+                    <li class="nav-item"><a style="color: aliceblue;" class="nav-link" href="indicadores.html">Indicadores existentes</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container mt-4">
+        <h2 class="text-center mb-4" style="padding-right: 60px;">Unidad Administrativa</h2>
+
+        <div class="mt-4">
+            <div class="row">
+                <!-- Dirección General de Estadísticas Sociodemográficas -->
+                <div class="col-3 m-1">
+                    <button class="custom-card-btn mostrarGrupoBtn" id="btnDireccionSociodemograficas">
+                        <div class="d-flex justify-content-center align-items-center">
+                            <i class="bi bi-bar-chart display-5 iconcustom"></i>
+                        </div>
+                        <div class="text-center">
+                            <label class="texto-direction nameofDirection">Dirección General de Estadísticas Sociodemográficas</label>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="col-1"></div>
+                <!-- Dirección General de Estadísticas Económicas -->
+                <div class="col-3 m-1">
+                    <button class="custom-card-btn mostrarGrupoBtn" data-grupo="grupo2">
+                        <div class="d-flex justify-content-center align-items-center">
+                            <i class="bi bi-cash-stack display-5 iconcustom"></i>
+                        </div>
+                        <div class="text-center">
+                            <label class="texto-direction nameofDirection">Dirección General de Estadísticas Económicas</label>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="col-1"></div>
+                <!-- Dirección General de Geografía y Medio Ambiente -->
+                <div class="col-3 m-1">
+                    <button class="custom-card-btn mostrarGrupoBtn" data-grupo="grupo3">
+                        <div class="d-flex justify-content-center align-items-center">
+                            <i class="bi bi-globe display-5 iconcustom"></i>
+                        </div>
+                        <div class="text-center">
+                            <label class="texto-direction nameofDirection">Dirección General de Geografía y Medio Ambiente</label>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-2"></div>
+                <!-- Dirección General de Estadísticas de Gobierno, Seguridad Pública y Justicia -->
+                <div class="col-3 m-1">
+                    <button class="custom-card-btn mostrarGrupoBtn" data-grupo="grupo4">
+                        <div class="d-flex justify-content-center align-items-center">
+                            <i class="bi bi-bank display-5 iconcustom"></i>
+                        </div>
+                        <div class="text-center">
+                            <label class="texto-direction nameofDirection">Dirección General de Estadísticas de Gobierno, Seguridad Pública y Justicia</label>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="col-2"></div>
+                <!-- Dirección General de Integración, Análisis e Investigación -->
+                <div class="col-3 m-1">
+                    <button class="custom-card-btn mostrarGrupoBtn" data-grupo="grupo4">
+                        <div class="d-flex justify-content-center align-items-center">
+                            <i class="bi bi-file-earmark-text display-5 iconcustom"></i>
+                        </div>
+                        <div class="text-center">
+                            <label class="texto-direction nameofDirection">Dirección General de Integración, Análisis e Investigación.</label>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comentado: Programas de información y contenedor dinámico -->
+    <!--
+    <div class="container">
+        <div class="mt-5">
+            <h2>Programas de información</h2>
+            <div class="mt-4 d-none" id="grupo1Container">
+                <div class="row">
+                    <div class="col-3 m-1">
+                        <button class="custom-card-btn mostrarProcesosBtn" data-categoria="InformacionDemografica" id="btnProcesosDemograficos">
+                            <div class="d-flex justify-content-center align-items-center">
+                                <i class="bi bi-person-circle display-5 iconcustom"></i>
+                            </div>
+                            <div class="text-center">
+                                <label class="texto-direction nameofDirection">Programa Información Demográfica y Social</label>
+                                <h5>Total de procesos: <span id="procesosCounter">0</span></h5>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-5 mb-5">
+                <h2>Procesos de Producción</h2>
+            </div>
+            <div class="row mt-4" id="procesosContainer"></div>
+        </div>
+    </div>
+    -->
+
+    <!-- Contenedor donde se mostrarán los procesos -->
+    <div class="container mt-5">
+        <h2>Procesos de Producción</h2>
+        <div class="row mt-4" id="procesosContainer"></div>
+    </div>
+
+    <script>
+        // Asignar funcionalidad al botón de "Dirección General de Estadísticas Sociodemográficas"
+        document.getElementById("btnDireccionSociodemograficas").addEventListener("click", async function () {
+            try {
+                // Llamadas a las APIs
+                const procesos = await fetch("/api/proceso").then(res => res.json());
+                const variables = await fetch("/api/variables").then(res => res.json());
+
+                // Contador de variables por proceso
+                const conteo = {};
+                procesos.forEach(proceso => {
+                    // Filtrar variables que coinciden con el proceso actual
+                    const relacionadas = variables.filter(varObj => varObj.idPp === proceso.idPp);
+                    conteo[proceso.idPp] = relacionadas.length; // Guardar el conteo
+                });
+
+                // Ordenar los procesos alfabéticamente por el campo `pp`
+                procesos.sort((a, b) => a.pp.localeCompare(b.pp));
+
+                // Mostrar los procesos con el contador de variables relacionadas
+                const container = document.getElementById("procesosContainer");
+                container.innerHTML = ""; // Limpiar el contenedor
+
+                procesos.forEach((proceso, index) => {
+                    const card = `
+                        <div class="col-md-4 mb-4">
+                            <div class="card mb-3" style="max-width: 540px;">
+                              <div class="row g-0">
+                               <div class="col-md-4 d-flex justify-content-center align-items-center">
+                                <img src="/assets/iconsociodemografica.png" class="img-fluid rounded-start" style="max-height: 100px;">
+                               </div>
+                              <div class="col-md-8">
+                                <div class="card-body">
+                                    <h5 class="card-title"><strong>${proceso.pp || "Desconocido"}</strong></h5>
+                                    <p class="card-text">${proceso.idPp}</p>
+                                    <p class="card-text">
+                                        <strong>Estatus:</strong> 
+                                        <span class="badge ${getStatusClass(proceso.estatus)}">${proceso.estatus}</span>
+                                    </p>
+                                    <p class="card-text">
+                                        <strong>Total de Variables Relacionadas:</strong> 
+                                        <span style="color: #08739c; 
+                                        text-decoration: underline; 
+                                        cursor: pointer; 
+                                        font-size: 1.2rem; 
+                                        font-family: 'Monaco', monospace; 
+                                        font-weight: bold;" onclick="handleVariableClick('${proceso.idPp}')">
+                                            ${conteo[proceso.idPp] || 0}
+                                        </span>
+                                    </p>
+                                </div>
+                              </div>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += card;
+                });
+            } catch (error) {
+                console.error("Error cargando los procesos o variables:", error);
+                alert("Ocurrió un error al cargar los datos");
+            }
+        });
+
+        // Función para determinar la clase CSS según el estatus
+        function getStatusClass(status) {
+            switch (status.toLowerCase()) {
+                case "activo": return "bg-success";
+                case "inactivo": return "bg-danger";
+                case "pendiente": return "bg-warning text-dark";
+                default: return "bg-secondary";
+            }
+        }
+
+        // Función para manejar el clic en el número del contador
+        function handleVariableClick(idPp) {
+            console.log("Redirigiendo con ID:", idPp);
+            window.location.href = `variables.html?idPp=${encodeURIComponent(idPp)}`;
+            
+    }
+    
+
+        // Asignar funcionalidad a las demás tarjetas
+        document.querySelectorAll(".mostrarGrupoBtn").forEach(button => {
+            if (!button.id) { // Excluir el botón de "Dirección General de Estadísticas Sociodemográficas"
+                button.addEventListener("click", function () {
+                    alert("No se cuenta con la información correspondiente para esta sección.");
+                });
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", async function () {
+            const processSelect = document.getElementById("processSelect"); // Selector de procesos
+            const container = document.getElementById("variablesContainer"); // Contenedor de resultados
+            const paginationContainer = document.getElementById("pagination"); // Contenedor del paginador
+        
+            let itemsPerPage = 10; // Número de elementos por página
+            let currentPage = 1; // Página actual
+            let allData = []; // Almacena todos los datos cargados inicialmente
+        
+            // Función para cargar todos los elementos al entrar a la página
+            async function loadAllVariables() {
+                try {
+                    const response = await fetch(`/api/variables`);
+                    const data = await response.json();
+                    allData = data; // Guardar todos los datos para restaurar el listado inicial
+        
+                    // Capturar el parámetro idPp de la URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const idPp = urlParams.get("idPp");
+        
+                    if (idPp) {
+                        // Seleccionar automáticamente la opción correspondiente en el select
+                        processSelect.value = idPp;
+        
+                        // Verificar si el valor fue correctamente asignado
+                        if (processSelect.value === idPp) {
+                            console.log(`El selector de procesos tomó el valor: ${idPp}`);
+                        } else {
+                            console.error("El valor no fue asignado correctamente al selector de procesos.");
+                        }
+        
+                        // Aplicar el filtro automáticamente
+                        filterByProcess(idPp);
+                    } else {
+                        // Si no hay idPp, mostrar todos los datos
+                        renderPage(allData, currentPage);
+                        setupPagination(allData);
+                    }
+                } catch (error) {
+                    console.error("Error al cargar los datos:", error);
+                    container.innerHTML = "<p class='text-center text-danger'>Ocurrió un error al cargar los datos. Inténtalo nuevamente.</p>";
+                }
+            }
+        
+            // Función para filtrar las variables por idPp
+            function filterByProcess(idPp) {
+                const filteredData = allData.filter(variable => variable.idPp === idPp);
+        
+                if (filteredData.length === 0) {
+                    container.innerHTML = "<p class='text-center'>No se encontraron variables para el proceso seleccionado.</p>";
+                    paginationContainer.innerHTML = "";
+                    return;
+                }
+        
+                renderPage(filteredData, currentPage);
+                setupPagination(filteredData);
+            }
+        
+            // Función para renderizar las tarjetas en función de la página actual
+            function renderPage(data, page) {
+                container.innerHTML = ""; // Limpia el contenedor antes de mostrar las nuevas tarjetas
+        
+                const startIndex = (page - 1) * itemsPerPage;
+                const endIndex = startIndex + itemsPerPage;
+                const paginatedData = data.slice(startIndex, endIndex);
+        
+                paginatedData.forEach(variable => {
+                    const card = `
+                        <div class="accordion mb-3">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading${variable.idVar}">
+                                    <button class="accordion-button collapsed" type="button" 
+                                        data-bs-toggle="collapse" 
+                                        data-bs-target="#collapse${variable.idVar}" 
+                                        aria-expanded="false" 
+                                        aria-controls="collapse${variable.idVar}">
+                                        ${variable.nomVar} <span class="badge bg-light text-dark ms-2">${variable.idVar}</span>
+                                    </button>
+                                </h2>
+                                <div id="collapse${variable.idVar}" class="accordion-collapse collapse" aria-labelledby="heading${variable.idVar}">
+                                    <div class="accordion-body">
+                                        <p><strong>Definición:</strong> ${variable.defVar}</p>
+                                        <p><strong>Variable Asignada:</strong> ${variable.varAsig}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += card;
+                });
+            }
+        
+            // Función para configurar el paginador
+            function setupPagination(data) {
+                paginationContainer.innerHTML = ""; // Limpia el paginador
+                const totalPages = Math.ceil(data.length / itemsPerPage);
+        
+                // Botón "Anterior"
+                if (currentPage > 1) {
+                    const prevLi = document.createElement("li");
+                    prevLi.classList.add("page-item");
+                    const prevA = document.createElement("a");
+                    prevA.classList.add("page-link");
+                    prevA.href = "#";
+                    prevA.textContent = "«";
+                    prevA.addEventListener("click", function (e) {
+                        e.preventDefault();
+                        currentPage--;
+                        renderPage(data, currentPage);
+                        setupPagination(data);
+                    });
+                    prevLi.appendChild(prevA);
+                    paginationContainer.appendChild(prevLi);
+                }
+        
+                // Números de página
+                for (let i = 1; i <= totalPages; i++) {
+                    const li = document.createElement("li");
+                    li.classList.add("page-item");
+                    if (i === currentPage) li.classList.add("active");
+        
+                    const a = document.createElement("a");
+                    a.classList.add("page-link");
+                    a.href = "#";
+                    a.textContent = i;
+                    a.addEventListener("click", function (e) {
+                        e.preventDefault();
+                        currentPage = i;
+                        renderPage(data, currentPage);
+                        setupPagination(data);
+                    });
+        
+                    li.appendChild(a);
+                    paginationContainer.appendChild(li);
+                }
+        
+                // Botón "Siguiente"
+                if (currentPage < totalPages) {
+                    const nextLi = document.createElement("li");
+                    nextLi.classList.add("page-item");
+                    const nextA = document.createElement("a");
+                    nextA.classList.add("page-link");
+                    nextA.href = "#";
+                    nextA.textContent = "»";
+                    nextA.addEventListener("click", function (e) {
+                        e.preventDefault();
+                        currentPage++;
+                        renderPage(data, currentPage);
+                        setupPagination(data);
+                    });
+                    nextLi.appendChild(nextA);
+                    paginationContainer.appendChild(nextLi);
+                }
+            }
+        
+            // Cargar todos los elementos al entrar a la página
+            loadAllVariables();
+        
+            // Agregar evento de cambio al selector de procesos
+            processSelect.addEventListener("change", function () {
+                const selectedProcess = processSelect.value; // Obtener el valor seleccionado
+                currentPage = 1; // Reiniciar a la primera página
+                filterByProcess(selectedProcess); // Filtrar por el proceso seleccionado
+            });
+        });
+    </script>
+
+    <!--! FOOTER -->
+    <div class="container-fluid" style="background-color: #5d5d5d">
+        <footer class="bd-footer">
+            <div class="pt-4 pb-4">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg">
+                            <a style="color: white; font-weight: bold; font-size: 15px; font-family: Helvetica, Sans-Serif;">Contacto</a>
+                            <ul class="nav flex-column">
+                                <li><a href="https://www.inegi.org.mx/"><img class="img-fluid d-block m-1" style="height: 2.5rem; width: 12rem;" src="/assets/INEGI_c-modified.png"></a></li>
+                                <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text" style="color: white"></a></li>
+                                <li><a class="text-white d-block pt-1" href="https://www.inegi.org.mx/inegi/contacto.html#Directorios" style="font-family: Helvetica, Sans-Serif;">Directorio</a></li>
+                                <li><a class="text-white d-block pt-1" href="https://www.inegi.org.mx/inegi/contacto.html" style="font-family: Helvetica, Sans-Serif;">Solicitud de información</a></li>
+                                <br>
+                                <ul style="list-style: none; padding: 0; display: flex; gap: 10px; margin-bottom: 5px;">
+                                    <li><a href="http://www.facebook.com/pages/inegi-informa/180299958681029" style="color: white"><i class="bi bi-facebook"></i></a></li>
+                                    <li><a href="http://twitter.com/inegi_informa" style="color: white"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-twitter-x" viewBox="0 0 16 16">
+                                        <path d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z"/>
+                                    </svg></a></li>
+                                    <li><a href="https://www.youtube.com/user/INEGIInforma" style="color: white"><i class="bi bi-youtube"></i></a></li>
+                                    <li><a href="https://www.instagram.com/inegi_informa/" style="color: white;"><i class="bi bi-instagram"></i></a></li>
+                                    <li><a href="https://www.inegi.org.mx/servicios/rss/" style="color: white"><i class="bi bi-rss-fill"></i></a></li>
+                                </ul>
+                            </ul>
+                        </div>
+                        <div class="col-lg">
+                            <a style="color: white; font-weight: bold; font-size: 15px">Sitios de interés</a>
+                            <ul class="nav flex-column">
+                                <li class="nav-item mb-2"><a href="https://www.snieg.mx/cni/" target="_blank" class="nav-link p-0 text" style="color: white; font-size: 14px; font-family: Helvetica, Sans-Serif;">Catálogo Nacional de Indicadores</a></li>
+                                <li class="nav-item mb-2"><a href="https://www.cepal.org/es" target="_blank" class="nav-link p-0 text" style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">CEPAL</a></li>
+                                <li class="nav-item mb-2"><a href="https://www.un.org/sustainabledevelopment/es/objetivos-de-desarrollo-sostenible/" target="_blank" class="nav-link p-0 text" style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">ODS-ONU</a></li>
+                                <li class="nav-item mb-2"><a href="http://agenda2030.mx/" target="_blank" class="nav-link p-0 text" style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">SIODS</a></li>
+                                <li class="nav-item mb-2"><a href="https://www.gob.mx/semarnat/acciones-y-programas/sistema-nacional-de-informacion-ambiental-y-de-recursos-naturales" target="_blank" class="nav-link p-0 text" style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">SNIARN</a></li>
+                                <li class="nav-item mb-2"><a href="#" [routerLink]="['/dg/new']" target="_blank" class="nav-link p-0 text" style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">Ver más...</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
