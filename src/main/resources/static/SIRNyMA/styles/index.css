@@ -1,9 +1,24 @@
+/*Estilos para el navbar */
+.nav-link {
+  color: aliceblue !important;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  background-color: #005fa3;
+  color: white !important;
+}
+
+.nav-link.active {
+  background-color: #ffffff;
+  color: #003057 !important;
+  font-weight: bold;
+}
 
 
-.imagenCarouselSNIEG {
-    -webkit-filter: drop-shadow(1px 1px 0 #ffffff) drop-shadow(-1px -1px 0 #ffffff); /* Contorno blanco */
-    filter: drop-shadow(.5px .5px 0 #ffffff) drop-shadow(-.5px -.5px 0 #ffffff) contrast(120%);;
-  }
+/* Estilos para el carousel */
   
   .carousel-caption {
     bottom: 5rem;
@@ -31,66 +46,13 @@
     }
   }
   
-  .marketing .col-lg-4 {
-    margin-bottom: 1.5rem;
-    text-align: center;
-  }
-  .marketing .col-lg-4 p {
-    margin-right: .75rem;
-    margin-left: .75rem;
-  }
+ 
   
   /*! botones modificados */
-  .custom-btn-colorWhite {
-    background-color: #ffffffbb;
-    color: #000;
-  }
-  .custom-btn-colorWhite:hover {
-    background-color: #ffffff9c;
-  }
-  .custom-btn-colorGris {
-    background-color: #949494d5;
-    color: #fff;
-  }
-  .custom-btn-colorGris:hover {
-    background-color: #949494a4;
-  }
-  .custom-btn-color {
-    background-color: #007a98b2;
-    color: #fff;
-  }
-  .custom-btn-color:hover {
-    background-color: #0060758f;
-  }
-  .custom-btn-color2 {
-    background-color: #009ddbb7;
-    color: #fff;
-  }
-  .custom-btn-color2:hover {
-    background-color: #007ab2a1;
-  }
-  .custom-btn-color3 {
-    background-color: #5a6889;
-    color: #fff;
-  }
-  .custom-btn-color3:hover {
-    background-color: #4a5d8a;
-  }
   p{
    font-family: Arial, Helvetica, sans-serif;
   }
-  .selected {
-    color: #5f5f5f;
-    background-color: #D8CEFF !important;
-  }
-  .customParrafo{
-    font-size: medium;
-    text-align: justify;
-    font-family: Helvetica, Sans-Serif;
-  }
-  p {
-    font-family: Helvetica, Sans-Serif;
-  }
+
   
   /* APARTADO DE ESTILOS PARA DIFERENTES TIPOS DE RESOLUCIONES. */
   
@@ -402,3 +364,209 @@
       font-weight: 600;
     }
   }
+
+  /*Estilos de la card de mision*/
+
+  .card {
+    width: 24rem;
+    height: 36rem;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    box-shadow: 0 10px 30px 5px rgba(0, 0, 0, 0.2);
+   
+    img {
+      position: absolute;
+      object-fit: cover;
+      width: 100%;
+      height: 150%;
+      top: 0;
+      left: 0;
+      opacity: 0.9;
+      transition: opacity .2s ease-out;
+    }
+
+    .card-content {
+      position: relative;
+      z-index: 2;
+    }
+  
+    h2 {
+      position: absolute;
+      inset: auto auto 30px 30px;
+      margin: 0;
+      transition: inset .3s .3s ease-out;
+      font-family: 'Roboto Condensed', sans-serif;
+      font-weight: normal;
+      text-transform: uppercase;
+    }
+    
+    p, a {
+      position: absolute;
+      opacity: 0;
+      max-width: 80%;
+      transition: opacity .3s ease-out;
+    }
+    
+    p {
+      inset: auto auto 80px 30px;
+    }
+    
+    a {
+      inset: auto auto 40px 30px;
+      color: inherit;
+      text-decoration: none;
+    }
+    
+    &:hover h2 {
+      inset: auto auto 220px 30px;
+      transition: inset .3s ease-out;
+    }
+    
+    &:hover p, &:hover a {
+      opacity: 1;
+      transition: opacity .5s .1s ease-in;
+    }
+    
+    &:hover img {
+      transition: opacity .3s ease-in;
+      opacity: 1;
+    }
+  
+  }
+  
+  .material-symbols-outlined {
+    vertical-align: middle;
+  }
+  
+  /*Estilos de la card de vision*/
+
+
+.card {
+  width: 24rem;
+  height: 36rem;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  box-shadow: 0 10px 30px 5px rgba(0, 0, 0, 0.2);
+
+  img {
+    position: absolute;
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    opacity: 0.9;
+    transition: opacity .2s ease-out;
+  }
+
+  .card-content {
+    position: relative;
+    z-index: 2;
+  }
+
+  h2 {
+    position: absolute;
+    inset: auto auto 30px 30px;
+    margin: 0;
+    transition: inset .3s .3s ease-out;
+    font-family: 'Roboto Condensed', sans-serif;
+    font-weight: normal;
+    text-transform: uppercase;
+  }
+
+  p, a {
+    position: absolute;
+    opacity: 0;
+    max-width: 80%;
+    transition: opacity .3s ease-out;
+  }
+
+  p {
+    inset: auto auto 80px 30px;
+  }
+
+  a {
+    inset: auto auto 40px 30px;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  &:hover h2 {
+    inset: auto auto 220px 30px;
+    transition: inset .3s ease-out;
+  }
+
+  &:hover p, &:hover a {
+    opacity: 1;
+    transition: opacity .5s .1s ease-in;
+  }
+
+  &:hover img {
+    transition: opacity .3s ease-in;
+    opacity: 1;
+  }
+}
+
+/*Estilos para el tema de actualidad*/
+/* CSS */
+.tab-wrapper {
+  display: flex;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.tab-menu {
+  width: 30%;
+  background: #f0f8ff;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+}
+
+.tab-item {
+  padding: 1.2rem;
+  cursor: pointer;
+  font-family: Helvetica, sans-serif;
+  transition: background 0.3s, color 0.3s;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.tab-item:hover {
+  background: #e6f7ff;
+}
+
+.tab-item.active {
+  background-color: #d8ceff;
+  font-weight: bold;
+  border-left: 4px solid #8a7dff;
+}
+
+.tab-content {
+  width: 70%;
+  padding: 2rem;
+  background: #ffffff;
+}
+
+.content-section {
+  display: none;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.content-section.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
+body, html {
+    font-family: Helvetica, Sans-Serif !important;
+}

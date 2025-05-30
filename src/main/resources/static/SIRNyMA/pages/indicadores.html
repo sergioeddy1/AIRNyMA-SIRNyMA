@@ -4,29 +4,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inicio</title>
+    <title>Indicadores Existentes</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link href="../styles/indicadores.css" rel="stylesheet">
+    <style>
+        body,
+        html {
+            font-family: Helvetica, Sans-Serif !important;
+        }
+    </style>
 </head>
 
 <body>
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg" style="background-color: #003057;">
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #003057;">
       <div class="container-fluid">
-          <img src="/assets/INEGI_g.png" alt="Logo" class="responsive-image" style="padding-right: 5px; width: 10rem; filter: invert(1) brightness(2) contrast(1.5);" />
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-              <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse justify-content-center" id="navbarNav" style="padding-right: 200px;">
-              <ul class="navbar-nav">
-                  <li class="nav-item"><a style="color: aliceblue;" class="nav-link" href="index.html">Inicio</a></li>
-                  <li class="nav-item"><a style="color: aliceblue;" class="nav-link" href="procesos.html">Procesos</a></li>
-                  <li class="nav-item"><a style="color: aliceblue;" class="nav-link" href="variables.html">Variables</a></li>
-                  <li class="nav-item"><a style="color: aliceblue;" class="nav-link" href="ods.html">ODS</a></li>
-                  <li class="nav-item"><a style="color: aliceblue;" class="nav-link" href="indicadores.html">Indicadores existentes</a></li>
-              </ul>
-          </div>
+        <a class="navbar-brand" href="index.html">
+          <img src="/assets/INEGI_g.png" alt="Logo INEGI" style="width: 9rem; filter: invert(1) brightness(2) contrast(1.5);">
+        </a>
+    
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+    
+        <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+          <ul class="navbar-nav mx-auto gap-3">
+            <li class="nav-item">
+              <a class="nav-link" href="index.html">Inicio</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="procesos.html">Procesos</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="variables.html">Variables</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="ods.html">ODS</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active fw-bold text-decoration-underline" aria-current="page" href="indicadores.html">Indicadores existentes</a>
+            </li>
+          </ul>
+        </div>
       </div>
     </nav>
     
@@ -35,93 +56,92 @@
 <div class="container">
     <!-- Título principal -->
     <div class="mt-4">
-      <h1 style="color: #113250;">Indicadores en Materia Ambiental.</h1>
+        <h1 style="color: #113250;">Compendio de Indicadores</h1>
     </div>
-  
+
     <!-- Descripción de los indicadores -->
     <div class="row">
-      <div class="col mt-2">
-        <p class="customPa">
-          Un indicador ambiental es una estadística clave que representa fenómenos ambientales importantes. Su propósito es evaluar tendencias, medir cambios a lo largo del tiempo y ayudar en la toma de decisiones. 
-          INEGI, como entidad estadística del país, contribuye a consolidar un entorno sostenible mediante la recopilación y análisis de estos datos.</p>
-      </div>
-    </div>
-  
-    <!-- Filtros por temática -->
-    <div class="row">
-      <div class="col-12">
-        <h5>Filtros por temática</h5>
-      </div>
-      <div class="col" id="BtnFilter">
-        <button type="button" class="btn btn-light ancho" (click)="filterByTema('')">Todos</button>
-        <button type="button" class="btn btn-agua ancho" (click)="filterByTema('Agua')">Agua</button>
-        <button type="button" class="btn btn-atmosfera ancho" (click)="filterByTema('Atmosfera')">Atmósfera</button>
-        <button type="button" class="btn btn-residuos ancho" (click)="filterByTema('Residuos')">Residuos</button>
-        <button type="button" class="btn btn-suelos ancho" (click)="filterByTema('Suelos')">Suelos</button>
-        <button type="button" class="btn btn-energia ancho" (click)="filterByTema('Energia')">Energía</button>
-        <button type="button" class="btn btn-biodiversidad-marina ancho" (click)="filterByTema('Biodiversidad marina')">Biodiversidad marina</button>
-        <button type="button" class="btn btn-biodiversidad-terrestre ancho" (click)="filterByTema('Biodiversidad terrestre')">Biodiversidad terrestre</button>
-        <button type="button" class="btn btn-forestal ancho" (click)="filterByTema('Forestal')">Forestal</button>
-        <button type="button" class="btn btn-proteccion-ambiental ancho" (click)="filterByTema('Protección Ambiental')">Protección Ambiental</button>
-      </div>
-    </div>
-  
-    <!-- Tabla de Indicadores -->
-    <div class="row mt-5">
-      <div class="col">
-        <div class="table-responsive">
-          <table class="table table-bordered">
-            <thead class="table-light">
-              <tr>
-                <th class="col" scope="col">Nombre</th>
-                <th class="col text-center" scope="col">Fuente</th>
-                <th class="col text-center" scope="col">Temática</th>
-                <th class="col-2 text-center" scope="col">Más información</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- Estado de carga: Spinners dentro de la tabla -->
-              <tr *ngIf="isLoading">
-                <td colspan="4" class="text-center">
-                  <div class="d-flex justify-content-center my-3">
-                    <div class="spinner-grow text-secondary me-3" role="status"></div>
-                    <div class="spinner-grow text-secondary me-3" role="status"></div>
-                    <div class="spinner-grow text-secondary" role="status"></div>
-                  </div>
-                </td>
-              </tr>
-  
-              <!-- Fila vacía cuando no hay datos -->
-              <tr *ngIf="!isLoading && paginatedData.length === 0">
-                <td colspan="4" class="text-center">No hay datos disponibles</td>
-              </tr>
-  
-              <!-- Datos de la tabla -->
-              <tr *ngFor="let indicador of paginatedData">
-              </tr>
-            </tbody>
-          </table>
+        <div class="col mt-2">
+            <p class="customPa">
+                Un indicador ambiental es una estadística clave que representa fenómenos ambientales importantes. Su propósito es evaluar tendencias, medir cambios a lo largo del tiempo y ayudar en la toma de decisiones. 
+                INEGI, como entidad estadística del país, contribuye a consolidar un entorno sostenible mediante la recopilación y análisis de estos datos.
+            </p>
         </div>
-  
-        <!-- Paginador -->
-        <p-paginator 
-          (onPageChange)="onPageChange($event)" 
-          [first]="first" 
-          [rows]="rows" 
-          [totalRecords]="filteredIndicadores.length" 
-          [rowsPerPageOptions]="[10, 20]"
-          [showFirstLastIcon]="!isFirstPage() && !isLastPage(filteredIndicadores.length)">
-        </p-paginator>
-  
-      </div>
     </div>
-  </div>
+
+
+    <div class="row mt-4 mb-5">
+        <div class="col">
+    
+            <!-- Tabla de Indicadores -->
+
+            <div class="tabla-indicadores-container">
+              <table class="tabla-indicadores">
+                <thead>
+                  <tr>
+                    <th>Indicador</th>
+                    <th>Año</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="y2022"><td>Proporción de superficie impermeable por asentamientos humanos.</td><td>2022</td></tr>
+                  <tr class="y2022"><td>Cambio en la extensión superficial de agua.</td><td>2022</td></tr>
+                  <tr class="y2022"><td>Tasa de cambio anual en cuerpos de agua.</td><td>2022</td></tr>
+                  <tr class="y2022"><td>Proporción de agua tratada de establecimientos que reportan en la Cédula de Operación Anual (COA).</td><td>2022</td></tr>
+                  <tr class="y2022"><td>Proporción de agua residual descargada por los establecimientos que reportan en la Cédula de Operación Anual (COA).</td><td>2022</td></tr>
+                  <tr class="y2022"><td>Proporción de obras de toma de agua para abastecimiento público con macromedidor funcionando.</td><td>2022</td></tr>
+                  <tr class="y2022"><td>Proporción de tomas domésticas de agua con medidor funcionando.</td><td>2022</td></tr>
+                  <tr class="y2022"><td>Proporción de agua tratada externamente de establecimientos que reportan en la Cédula de Operación Anual (COA).</td><td>2022</td></tr>
+                  <tr class="y2022"><td>Proporción de agua tratada internamente de establecimientos que reportan en la Cédula de Operación Anual (COA).</td><td>2022</td></tr>
+                  <tr class="y2022"><td>Proporción de agua tratada reciclada por los establecimientos que reportan en la Cédula de Operación Anual (COA).</td><td>2022</td></tr>
+                  <tr class="y2022"><td>Proporción de agua tratada reusada por los establecimientos que reportan en la Cédula de Operación Anual (COA).</td><td>2022</td></tr>
+                  <tr class="y2022"><td>Proporción de municipios o demarcaciones que difunden información sobre la gestión del servicio de agua potable y saneamiento.</td><td>2022</td></tr>
+                  <tr class="y2022"><td>Proporción de municipios o demarcaciones que ejecutaron programas orientados a la gestión sustentable de servicios de agua potable y saneamiento.</td><td>2022</td></tr>
+                  
+                  <tr class="y2023"><td>Eficacia de las plantas potabilizadoras de los organismos operadores de agua.</td><td>2023</td></tr>
+                  <tr class="y2023"><td>Proporción de cambio en el número de puntos de descarga de aguas residuales municipales sin tratar</td><td>2023</td></tr>
+                  <tr class="y2023"><td>Proporción de plantas de tratamiento que reutilizan el agua tratada</td><td>2023</td></tr>
+                  <tr class="y2023"><td>Proporción de unidades económicas del sector minería e industrias manufactureras que aplicaron algún tratamiento a sus aguas residuales</td><td>2023</td></tr>
+                  <tr class="y2023"><td>Proporción de viviendas con equipamiento para almacenar agua</td><td>2023</td></tr>
+              
+                  <tr class="y2024"><td>Proporción de mujeres de 12 años y más que acarrean o almacenan agua para consumo exclusivo de su hogar</td><td>2024</td></tr>
+                  <tr class="y2024"><td>Proporción de viviendas con equipamiento para confort térmico de enfriamiento</td><td>2024</td></tr>
+                  <tr class="y2024"><td>Proporción de agua no facturada por los organismos operadores de agua</td><td>2024</td></tr>
+                  <tr class="y2024"><td>Eficiencia física del agua producida por los organismos operadores de agua</td><td>2024</td></tr>
+                  <tr class="y2024"><td>Número de eventos derivados de fenómenos perturbadores hidrometeorológicos reportados por la Unidad Municipal de Protección Civil u homóloga</td><td>2024</td></tr>
+                  <tr class="y2024"><td>Número de puntos de descarga de aguas residuales municipales sin tratamiento</td><td>2024</td></tr>
+                  <tr class="y2024"><td>Proporción de viviendas que cuentan con el equipamiento de calentador solar para la generación de energía alterna</td><td>2024</td></tr>
+                  <tr class="y2024"><td>Proporción de viviendas que cuentan con el equipamiento de calentador y panel solar para la generación de energía alterna</td><td>2024</td></tr>
+                  <tr class="y2024"><td>Proporción de viviendas que cuentan con el equipamiento de panel solar para la generación de energía alterna</td><td>2024</td></tr>
+                  <tr class="y2024"><td>Proporción de viviendas que cuentan con equipamiento para la generación de energía alterna</td><td>2024</td></tr>
+                  <tr class="y2024"><td>Incidencia de los gastos por consumo de energía eléctrica en los organismos operadores de agua</td><td>2024</td></tr>  
+                </tbody>
+              </table>
+            </div>
+        </div>
+    </div>
+</div>
   
+  <script>
+    // Script para el navbar
+    document.addEventListener("DOMContentLoaded", function () {
+                const currentPath = window.location.pathname.split("/").pop();
+                const navLinks = document.querySelectorAll(".navbar-nav .nav-link");
+
+                navLinks.forEach(link => {
+                const href = link.getAttribute("href");
+                if (href === currentPath) {
+                    link.classList.add("active");
+                }
+                });
+            });
+  </script>
 
      <!--! FOOTER -->
-     <div class="container-fluid" style="background-color: #5d5d5d">
-        <footer class="bd-footer">
-          <div class="pt-4 pb-4">
+     <div class="footer-container">
+      <footer class="bd-footer">
+        <div class="pt-4 pb-4">
+          <div class="container">
             <div class="container">
               <div class="row">
                 <div class="col-lg">
@@ -129,8 +149,6 @@
                   <a style="color: white; font-weight: bold; font-size: 15px; font-family: Helvetica, Sans-Serif; ">Contacto</a>
                   <ul class="nav flex-column">
                     <li><a href="https://www.inegi.org.mx/"><img class="img-fluid d-block m-1" style="height: 2.5rem; width: 12rem;" src="/assets/INEGI_c-modified.png"></a></li>
-                    <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text" style="color: white"></a>
-                    </li>
                     <li><a class="text-white d-block pt-1" href="https://www.inegi.org.mx/inegi/contacto.html#Directorios" style="font-family: Helvetica, Sans-Serif;">Directorio</a></li>
                     <li><a class="text-white d-block pt-1" href="https://www.inegi.org.mx/inegi/contacto.html" style="font-family: Helvetica, Sans-Serif;">Solicitud de información</a></li>
                     <br>

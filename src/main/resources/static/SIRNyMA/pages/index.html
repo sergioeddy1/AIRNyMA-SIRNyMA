@@ -4,34 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inicio</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link href="../styles/index.css" rel="stylesheet">
+    <style>
+        body, html {
+            font-family: Helvetica, Sans-Serif !important;
+        }
+    </style>
 </head>
 <body>
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg" style="background-color: #003057;">
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #003057;">
         <div class="container-fluid">
-            <img src="/assets/INEGI_g.png" alt="Logo"  class="responsive-image" style="padding-right: 5px; width: 10rem; filter: invert(1) brightness(2) contrast(1.5);"/>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse justify-content-center" id="navbarNav" style="padding-left: 130px;">
-                <ul class="navbar-nav">
-                    <li class="nav-item"><a style="color: aliceblue;" class="nav-link" href="index.html">Inicio</a></li>
-                    <li class="nav-item"><a style="color: aliceblue;" class="nav-link" href="procesos.html">Procesos</a></li>
-                    <li class="nav-item"><a style="color: aliceblue;" class="nav-link" href="variables.html">Variables</a></li>
-                    <li class="nav-item"><a style="color: aliceblue;" class="nav-link" href="ods.html">ODS</a></li>
-                    <li class="nav-item"><a style="color: aliceblue;" class="nav-link" href="indicadores.html">Indicadores existentes</a></li>
-                </ul>
-            </div>
+          <a class="navbar-brand" href="#">
+            <img src="/assets/INEGI_g.png" alt="Logo INEGI" style="width: 9rem; filter: invert(1) brightness(2) contrast(1.5);">
+          </a>
+      
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+      
+          <div class="collapse navbar-collapse justify-content-between" id="navbarNavDropdown" >
+            <ul class="navbar-nav mx-auto gap-3" style="padding-left: 15rem">
+              <li class="nav-item">
+                <a class="nav-link ctive fw-bold text-decoration-underline" aria-current="page" href="index.html">Inicio</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="procesos.html">Procesos</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="variables.html">Variables</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="ods.html">ODS</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="indicadores.html">Indicadores existentes</a>
+              </li>
+            </ul>
+      
             <form class="d-flex" role="search" action="variables.html" method="GET">
-                <input class="form-control me-2" type="search" name="search" placeholder="Buscar..." aria-label="Buscar">
-                <button class="btn btn-outline-light" type="submit">Buscar</button>
+              <input class="form-control me-2 rounded-pill" type="search" name="search" placeholder="Buscar..." aria-label="Buscar">
+              <button class="btn btn-outline-light rounded-pill" type="submit">Buscar</button>
             </form>
+          </div>
         </div>
-    </nav>
+      </nav>
+      
 
     
 <!-- Carrusel Modificado para Mejor Visualización de Imágenes -->
@@ -106,8 +127,8 @@
             <div>
 
                 <h1 style="text-align: center;">Espacio Digital del Inventario de Variables del SIIERNMA</h1>
-                <hr
-                <h2> Normatividad </h2>
+                <hr>
+                <h3> Normatividad </h3>
                 <p>
                     En cumplimiento con las disposiciones legales y reglamentarias que rigen nuestras actividades, se establece la siguiente normatividad aplicable:
                 </p>
@@ -136,44 +157,61 @@
         <div class="container">
             <div class="row align-items-stretch">
                 <!-- Columna Misión -->
-                <div class="col-6 d-flex flex-column" style="border: 2px solid #5f5f5f; border-style: dotted; background-color: #D8CEFF;">
-                    <div class="espacio h-100" id="Mision">
-                        <h3>
-                            <span class="d-flex align-items-center justify-content-between" style="color: #2b2b2b;">
-                                Misión
-                                <i class="bi bi-bullseye"></i>
-                            </span>
+                        <!-- Tipografías y Material Symbols -->
+                    <link rel="preconnect" href="https://fonts.googleapis.com">
+                    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+                    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&family=Roboto:wght@300&display=swap" rel="stylesheet">
+                    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+
+                    <!-- Card de Misión -->
+                <div class="mision-card col-6 d-flex flex-column" style="font-family: 'Roboto', sans-serif;">
+                  <img src="/assets/CardMisionInegi.png" alt="Misión" style="width:100%; height:200px; object-fit: cover; border-radius: 12px 12px 0 0;">
+                    <div class="card-content" style="padding: 1.5rem; background-color: rgba(216, 206, 255, 0.85); border-radius: 0 0 12px 12px;">
+                        <h3 style="margin-top: 0; color: #2b2b2b; display: flex; justify-content: space-between; align-items: center;">
+                        Misión
+                        <span class="material-symbols-outlined" style="font-size: 28px;">
+                            target
+                        </span>
                         </h3>
-                        <hr style="border: 2px solid">
-                        <label for="" class="justificado" style="color: #5f5f5f;">
-                            Proporcionar un espacio accesible y colaborativo que recabe, analice y difunda información relevante sobre los productos
-                            generados por el Instituto Nacional de Estadística y Geografía (INEGI) en temas relacionados con los recursos naturales
-                            y el medio ambiente, enfocándose en el desarrollo de indicadores en la materia. Nuestro objetivo es contribuir al
-                            cumplimiento de los Objetivos de Desarrollo Sostenible (ODS) de la Organización de las Naciones Unidas (ONU), al Marco
-                            para el Desarrollo de Estadísticas Ambientales (MDEA) de la Comisión Económica para América Latina y el Caribe (CEPAL) y
-                            los indicadores clave del país, promoviendo la toma de decisiones informadas y la sostenibilidad en las políticas
-                            públicas.
-                        </label>
+                        <p style="color: #5f5f5f; text-align: justify;">
+                        Proporcionar un espacio accesible y colaborativo que recabe, analice y difunda información relevante sobre los productos
+                        generados por el Instituto Nacional de Estadística y Geografía (INEGI) en temas relacionados con los recursos naturales
+                        y el medio ambiente, enfocándose en el desarrollo de indicadores en la materia. Nuestro objetivo es contribuir al
+                        cumplimiento de los Objetivos de Desarrollo Sostenible (ODS) de la Organización de las Naciones Unidas (ONU), al Marco
+                        para el Desarrollo de Estadísticas Ambientales (MDEA) de la CEPAL y los indicadores clave del país, promoviendo la toma
+                        de decisiones informadas y la sostenibilidad en las políticas públicas.
+                        </p>
+                        </a>
                     </div>
                 </div>
 
+
                 <!-- Columna Visión -->
-                <div class="col-6 d-flex flex-column" style="border: 2px solid #113250; border-style: dotted; background-color: #BFEFEC;">
-                    <div class="espacio h-100" id="Vision">
+                <link rel="preconnect" href="https://fonts.googleapis.com">
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+                <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&family=Roboto:wght@300&display=swap" rel="stylesheet">
+                <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+                
+               
+                  <div class="card-vision col-6 d-flex flex-column" style="font-family: 'Roboto', sans-serif; ">
+                    <img src="/assets/CardVisionInegi.png" alt="Visión" style="width:100%; height:200px; object-fit: cover; border-radius: 12px 12px 0 0;">
+                    <div class="card-content h-100" style="padding: 1.5rem; background-color: rgba(191, 239, 236, 0.85); border-radius: 0 0 12px 12px;">
                         <h3>
                             <span class="d-flex align-items-center justify-content-between" style="color: #0a1c2c;">
                                 Visión
                                 <i class="bi bi-search"></i>
                             </span>
                         </h3>
-                        <hr style="border: 2px solid;">
-                        <label for="" class="justificado" style="color: #113250;">
-                            Ser el referente institucional en la generación y promoción de indicadores ambientales, impulsando propuestas innovadoras y 
-                            garantizando el acceso a datos precisos, confiables y actualizados. Aspiramos a fomentar una cultura de transparencia y
-                            colaboración entre unidades administrativas, impulsando un desarrollo sostenible integral que beneficie a la sociedad.
-                        </label>
+                      <p style="color: #5f5f5f; text-align: justify;">
+                        Ser el referente institucional en la generación y promoción de indicadores ambientales, impulsando propuestas innovadoras y 
+                        garantizando el acceso a datos precisos, confiables y actualizados. Aspiramos a fomentar una cultura de transparencia y
+                        colaboración entre unidades administrativas, impulsando un desarrollo sostenible integral que beneficie a la sociedad.
+                      </p>
+                      </a>
                     </div>
-                </div>
+                  </div>
+                
+                  
             </div>
         </div>
 
@@ -181,82 +219,73 @@
 
           
 
-          <div class="container marketing mt-5">
-            <div class="row">
-                <div class="col mt-2">
-                    <h1 class="TituloTemas">Temas de interés</h1>
+       <!-- HTML -->
+        <div class="container mt-5 mb-5">
+            <h1 class="mb-4">Temas de interés</h1>
+            <div class="tab-wrapper">
+            <div class="tab-menu">
+                <div class="tab-item active" data-target="inegi">Procesos de Producción</div>
+                <div class="tab-item" data-target="ods">Variables</div>
+                <div class="tab-item" data-target="ind">Objetivos de Desarrollo Sostenible</div>
+                <div class="tab-item" data-target="geonode">Indicadores</div>
+            </div>
+            <div class="tab-content">
+                <div id="inegi" class="content-section active">
+                <h2>Procesos de Producción</h2>
+                <p>El Instituto Nacional de Estadística y Geografía (INEGI) pone a disposición una amplia gama de programas de información, diseñados para generar datos confiables y actualizados sobre diversos temas del país. 
+                  A partir de estos programas se derivan los procesos de producción estadística y geográfica con los que se va a trabajar en esta sección, los cuales siguen metodologías estandarizadas para garantizar la calidad y comparabilidad de la información.</p>
+                </div>
+                <div id="ods" class="content-section">
+                <h2>Variables detectadas en los programas de información</h2>
+                <p>Este apartado presenta el listado de variables identificadas a partir de los programas de información del inventario SIIERNMA. 
+                  Estas variables están directamente relacionadas con los procesos de producción estadística y geográfica, y permiten comprender mejor los elementos clave que se generan, registran y analizan en cada proceso. 
+                  Su organización facilita la consulta y el aprovechamiento de la información disponible.</p>
+                </div>
+                <div id="ind" class="content-section">
+                <h2>Objetivos de Desarrollo Sostenible</h2>
+                <p>Los Objetivos de Desarrollo Sostenible (ODS), adoptados por las Naciones Unidas en 2015, establecen una agenda global para erradicar la pobreza, proteger el planeta y garantizar el bienestar de todas las personas hacia 2030. 
+                  En este apartado se presenta la vinculación de las variables del inventario SIIERNMA con los ODS, identificando cómo los datos generados a través de los procesos de producción contribuyen al seguimiento y cumplimiento de estos objetivos. Esta relación fortalece la utilidad del inventario como herramienta para la toma de decisiones orientadas al desarrollo sostenible.</p>
+                </div>
+                <div id="geonode" class="content-section">
+                <h2>Indicadores generados en INEGI</h2>
+                <p>Los indicadores ambientales generados por el INEGI representan una forma de estadística derivada que permite sintetizar y comunicar información clave sobre el estado y las tendencias del medio ambiente en México. Estos indicadores se construyen a partir de datos confiables provenientes de diversas fuentes, incluidos los procesos de producción del inventario SIIERNMA,
+                   y son fundamentales para evaluar el desempeño ambiental, apoyar la formulación de políticas públicas y dar seguimiento a compromisos nacionales e internacionales en materia ambiental.</p>
                 </div>
             </div>
-        
-            <div class="row" style="margin-bottom: 10rem; background-color: #ecfffd;">
-                <div class="col-4" style="border-right: solid 15px; border-color: #ffffff;">
-                    <div class="row">
-                        <div class="col-12 item selected" data-target="inegi" style="cursor: pointer; border-bottom: solid 3px #ffffff; padding: 1.5rem;">
-                            <h4 class="TituloApartado" style="font-family: Helvetica, Sans-Serif;">Programas de información</h4>
-                        </div>
-                        <div class="col-12 item" data-target="ods" style="cursor: pointer; border-bottom: solid 3px #ffffff; padding: 1.5rem;">
-                            <h4 class="TituloApartado" style="font-family: Helvetica, Sans-Serif;">Variables</h4>
-                        </div>
-                        <div class="col-12 item" data-target="ind" style="cursor: pointer; border-bottom: solid 3px #ffffff; padding: 1.5rem;">
-                            <h4 class="TituloApartado" style="font-family: Helvetica, Sans-Serif;">Objetivos de Desarrollo Sostenible</h4>
-                        </div>
-                        <div class="col-12 item" data-target="geonode" style="cursor: pointer; border-bottom: solid 3px #ffffff; padding: 1.5rem;">
-                            <h4 class="TituloApartado" style="font-family: Helvetica, Sans-Serif;">Indicadores</h4>
-                        </div>
-                    </div>
-                </div>
-        
-                <div class="col-8">
-                    <div id="inegi" class="content-section">
-                        <h2 class="SubtituloParrafo" style="color: #5f5f5f; font-family: Helvetica, Sans-Serif;">Programas de información</h2>
-                        <p class="lead customParrafo">Programas de información que derivan a los procesos de producción.</p>
-                    </div>
-        
-                    <div id="ods" class="content-section d-none">
-                        <h2 class="SubtituloParrafo" style="color: #5f5f5f; font-family: Helvetica, Sans-Serif;">Variables detectadas en los programas de información</h2>
-                        <p class="lead customParrafo">Dentro de este apartado se mantiene el listado de variables que se relacionan con los procesos de producción.</p>
-                    </div>
-        
-                    <div id="ind" class="content-section d-none">
-                        <h2 class="SubtituloParrafo" style="color: #5f5f5f; font-family: Helvetica, Sans-Serif;">Objetivos de Desarrollo Sostenible</h2>
-                        <p class="lead customParrafo">Los Objetivos de Desarrollo Sostenible (ODS), fueron adoptados por las Naciones Unidas en 2015...</p>
-                    </div>
-        
-                    <div id="geonode" class="content-section d-none">
-                        <h2 class="SubtituloParrafo" style="color: #5f5f5f; font-family: Helvetica, Sans-Serif;">Indicadores generados en INEGI</h2>
-                        <p class="lead customParrafo">Los indicadores ambientales son una forma de estadística derivada...</p>
-                    </div>
-                </div>
             </div>
         </div>
+  
         
         <script>
+            // Script para el navbar
             document.addEventListener("DOMContentLoaded", function () {
-                const items = document.querySelectorAll(".item");
-                const sections = document.querySelectorAll(".content-section");
-        
-                // Seleccionar automáticamente la primera opción al cargar la página
-                const defaultItem = document.querySelector(".item[data-target='inegi']");
-                const defaultSection = document.getElementById("inegi");
-        
-                // Marcar la primera opción como seleccionada
-                defaultItem.classList.add("selected");
-                defaultSection.classList.remove("d-none");
-        
-                // Agregar funcionalidad de clic a los elementos
-                items.forEach(item => {
-                    item.addEventListener("click", function () {
-                        // Remover la clase "selected" de todos los elementos
-                        items.forEach(i => i.classList.remove("selected"));
-                        // Agregar la clase "selected" al elemento clickeado
-                        this.classList.add("selected");
-        
-                        // Ocultar todas las secciones
-                        sections.forEach(section => section.classList.add("d-none"));
-                        // Mostrar la sección correspondiente
-                        document.getElementById(this.getAttribute("data-target")).classList.remove("d-none");
-                    });
+                const currentPath = window.location.pathname.split("/").pop();
+                const navLinks = document.querySelectorAll(".navbar-nav .nav-link");
+
+                navLinks.forEach(link => {
+                const href = link.getAttribute("href");
+                if (href === currentPath) {
+                    link.classList.add("active");
+                }
                 });
+            });
+                        
+            // Script para el Contenedor de temas de interes
+            document.querySelectorAll('.tab-item').forEach(item => {
+                item.addEventListener('click', () => {
+                // Activar tab
+                document.querySelectorAll('.tab-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+
+                // Mostrar contenido
+                const target = item.getAttribute('data-target');
+                document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                });
+            });
+
+            document.addEventListener("DOMContentLoaded", function () {
+               
 
                 // Obtener la URL actual
                 const currentPage = window.location.pathname.split("/").pop();

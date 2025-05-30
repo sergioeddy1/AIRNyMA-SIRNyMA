@@ -1,3 +1,119 @@
+/*Estilos para el navbar */
+.nav-link {
+    color: aliceblue !important;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-link:hover {
+    background-color: #005fa3;
+    color: white !important;
+  }
+  
+  .nav-link.active {
+    background-color: #ffffff;
+    color: #003057 !important;
+    font-weight: bold;
+  }
+  
+/* Estilos para el contenedor de las variables */
+/* Estilo de acordeón */
+.accordion-item {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+/* Estilo para el header del acordeón */
+.accordion-header.custom-accordion-header {
+    background-color: #f8f9fa;
+    border-radius: 8px 8px 0 0;
+}
+
+/* Botón del acordeón */
+.accordion-button {
+    background-color: #ffffff;
+    color: #fff;
+    font-weight: 520;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.accordion-button:hover {
+    background-color: #00b395;
+    transform: scale(1.05);
+}
+
+.accordion-button .badge {
+    background-color: #6c757d;
+    font-size: 0.8rem;
+
+}
+
+/* Acordeón abierto */
+.accordion-button:not(.collapsed) {
+    background-color: #ffffff;
+}
+
+.accordion-collapse {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 0 0 8px 8px;
+}
+
+/* Estilo para los badges (etiquetas) */
+.badge {
+    text-align: left;
+    padding: 5px 10px;
+    font-size: 0.9rem;
+    border-radius: 12px;
+    text-wrap: wrap;
+}
+
+/* Estilos para listas dentro del acordeón */
+.accordion-body ul {
+    padding-left: 20px;
+}
+
+.accordion-body li {
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+/* Subtítulos dentro del acordeón */
+.accordion-body h6 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Separadores para secciones */
+.mt-3 {
+    margin-top: 20px;
+}
+
+/* Efecto de sombra en el acordeón */
+.accordion-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos responsivos para pantallas pequeñas */
+@media (max-width: 768px) {
+    .accordion-button {
+        font-size: 14px;
+    }
+    .accordion-body {
+        font-size: 12px;
+    }
+}
 /* Cuando el acordeón está cerrado */
 .custom-accordion-header .accordion-button.collapsed {
     color: #000000;             /* Texto negro */
@@ -12,6 +128,8 @@
     box-shadow: none;           /* Sin sombra al estar expandido */
 }
 
+
+/*Paginación*/
 #pagination .page-item .page-link {
     background-color: #ffffff !important;
     color: #A590FF !important;
@@ -58,4 +176,19 @@
     margin: 0 auto;
     /* Ajusta el ancho máximo según tus necesidades */
     margin-top: 20px;
+}
+
+/*Multiselect*/
+
+    .categoria-badge {
+    max-width: 140px;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+body, html {
+    font-family: Helvetica, Sans-Serif !important;
 }

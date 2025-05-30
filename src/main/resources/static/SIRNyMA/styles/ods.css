@@ -1,3 +1,23 @@
+/*Estilos para el navbar */
+.nav-link {
+  color: aliceblue !important;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  background-color: #005fa3;
+  color: white !important;
+}
+
+.nav-link.active {
+  background-color: #ffffff;
+  color: #003057 !important;
+  font-weight: bold;
+}
+
+
 /* Cuando el acordeón está cerrado */
 .custom-accordion-header .accordion-button.collapsed {
     color: #000000;             /* Texto negro */
@@ -396,3 +416,7 @@
             margin-bottom: 1rem;
           }
   }
+  
+  body, html {
+    font-family: Helvetica, Sans-Serif !important;
+}

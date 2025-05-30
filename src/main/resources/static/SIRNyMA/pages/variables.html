@@ -8,27 +8,48 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link rel="stylesheet" href="../styles/variables.css">
+    <style>
+body, html {
+    font-family: Helvetica, Sans-Serif !important;
+}
+</style>
 </head>
 
 <body>
             <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg" style="background-color: #003057;">
-        <div class="container-fluid">
-            <img src="/assets/INEGI_g.png" alt="Logo" class="responsive-image" style="padding-right: 5px; width: 10rem; filter: invert(1) brightness(2) contrast(1.5);" />
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse justify-content-center" id="navbarNav" style="padding-right: 185px;">
-                <ul class="navbar-nav">
-                    <li class="nav-item"><a style="color: aliceblue;" class="nav-link" href="index.html">Inicio</a></li>
-                    <li class="nav-item"><a style="color: aliceblue;" class="nav-link" href="procesos.html">Procesos</a></li>
-                    <li class="nav-item"><a style="color: aliceblue;" class="nav-link" href="variables.html">Variables</a></li>
-                    <li class="nav-item"><a style="color: aliceblue;" class="nav-link" href="ods.html">ODS</a></li>
-                    <li class="nav-item"><a style="color: aliceblue;" class="nav-link" href="indicadores.html">Indicadores existentes</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+            <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #003057;">
+                <div class="container-fluid">
+                  <a class="navbar-brand" href="index.html">
+                    <img src="/assets/INEGI_g.png" alt="Logo INEGI" style="width: 9rem; filter: invert(1) brightness(2) contrast(1.5);">
+                  </a>
+              
+                  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                  </button>
+              
+                  <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+                    <ul class="navbar-nav mx-auto gap-3">
+                      <li class="nav-item">
+                        <a class="nav-link" href="index.html">Inicio</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="procesos.html">Procesos</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link active fw-bold text-decoration-underline" aria-current="page" href="variables.html">Variables</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="ods.html">ODS</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="indicadores.html">Indicadores existentes</a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </nav>
+              
+
     
 
     <div class="container-fluid">
@@ -48,57 +69,7 @@
                             <button class="btn btncustom" type="submit">Buscar</button>
                         </form>
                         <hr>
-                        <!--Fitrlo de Procesos de producción-->  
-                        <h5>Procesos de Producción</h5>
-                        <select id="processSelect" class="form-select" aria-label="Procesos estadísticos">
-                            <option selected value="">Seleccione un proceso</option>
-                            <option value="procEUL">Características de las localidades y del entorno urbano (EUL)</option>
-                            <option value="procCAAS">Censo de Alojamientos de Asistencia Social (CAAS)</option>
-                            <option value="procCPV">Censo de Población y Vivienda (CPV)</option>
-                            <option value="procCONTEO">Conteo de Población y Vivienda (CONTEO)</option>
-                            <option value="procEFL">Encuesta de Fuerza Laboral (EFL)</option>
-                            <option value="procEDR">Encuesta Demográfica Retrospectiva (EDR)</option>
-                            <option value="procEIC">Encuesta Intercensal (EIC)</option>
-                            <option value="procELCOS">Encuesta Laboral y de Corresponsabilidad Social (ELCOS)</option>
-                            <option value="procENAD">Encuesta Nacional de Adicciones (ENAD)</option>
-                            <option value="procENBIARE">Encuesta Nacional de Bienestar Autorreportado (ENBIARE)</option>
-                            <option value="procENE">Encuesta Nacional de Empleo (ENE)</option>
-                            <option value="procENEU">Encuesta Nacional de Empleo Urbano (ENEU)</option>
-                            <option value="procENGASTO">Encuesta Nacional de Gastos de los Hogares (ENGASTO)</option>
-                            <option value="procENIF">Encuesta Nacional de Inclusión Financiera (ENIF)</option>
-                            <option value="procENIGH">Encuesta Nacional de Ingresos y Gastos de los Hogares (ENIGH)</option>
-                            <option value="procENILEMS">Encuesta Nacional de Inserción Laboral de los Egresados de la Educación Media Superior (ENILEMS)</option>
-                            <option value="procENADID">Encuesta Nacional de la Dinámica Demográfica (ENADID)</option>
-                            <option value="procENH">Encuesta Nacional de los Hogares (ENH)</option>
-                            <option value="procENOE">Encuesta Nacional de Ocupación y Empleo (ENOE)</option>
-                            <option value="procENOE_NE">Encuesta Nacional de Ocupación y Empleo, Nueva Edición (ENOE-NE)</option>
-                            <option value="procENSANUT">Encuesta Nacional de Salud y Nutrición (ENSANUT)</option>
-                            <option value="procENTI">Encuesta Nacional de Trabajo Infantil (ENTI)</option>
-                            <option value="procENVI">Encuesta Nacional de Vivienda (ENVI)</option>
-                            <option value="procENASIC">Encuesta Nacional para el Sistema de Cuidados (ENASIC)</option>
-                            <option value="procENAPE">Encuesta Nacional sobre Acceso y Permanencia en la Educación (ENAPE)</option>
-                            <option value="procENCO">Encuesta Nacional sobre Confianza del Consumidor (ENCO)</option>
-                            <option value="procENUT">Encuesta Nacional sobre Consumo de Energéticos en Viviendas Particulares (ENUT)</option>
-                            <option value="procENDISEG">Encuesta Nacional sobre Diversidad Sexual y de Género (ENDISEG)</option>
-                            <option value="procENFIH">Encuesta Nacional sobre las Finanzas de los Hogares (ENFIH)</option>
-                            <option value="procENASEM">Encuesta Nacional sobre Salud y Envejecimiento en México (ENASEM)</option>
-                            <option value="procENUTTIEMPO">Encuesta Nacional sobre Uso del Tiempo (ENUT)</option>
-                            <option value="procEOD">Encuesta Origen Destino en Hogares de la Zona Metropolitana del Valle de México (EOD)</option>
-                            <option value="procESMNG">Encuesta sobre el Seguro Médico para una Nueva Generación (ESMNG)</option>
-                            <option value="procENPETAH">Encuesta sobre la Penetración de Televisión Abierta en los Hogares (ENPETAH)</option>
-                            <option value="procETOE">Encuesta Telefónica de Ocupación y Empleo (ETOE)</option>
-                            <option value="procMCS">Estadística de Museos (MCS)</option>
-                            <option value="procCULTURA">Estadísticas de Cultura (CULTURA)</option>
-                            <option value="procEDER">Estadísticas de Defunciones Registradas (EDER)</option>
-                            <option value="procINV">Inventario Nacional de Viviendas (INV)</option>
-                            <option value="procMECE">Módulo de Condiciones Socioeconómicas (MECE)</option>
-                            <option value="procMOHOMA">Módulo de Educación, Capacitación y Empleo (MOHOMA)</option>
-                            <option value="procMEDIOAMBIENTE">Módulo de Hogares y Medio Ambiente (MEDIOAMBIENTE)</option>
-                            <option value="procMTI">Módulo de Trabajo Infantil (MTI)</option>
-                            <option value="procMOTRAL">Módulo de Trayectorias Laborales (MOTRAL)</option>
-                        </select>
-                        <hr>                        
-                       <!--Filtros de Tematica--> 
+                        <!--Filtros de Tematica--> 
                         <h5>Temática</h5>
                         <select class="form-select" id="temaSelect" aria-label="Temáticas">
                             <option selected>Seleccione una temática</option>
@@ -168,7 +139,17 @@
                             <option value="Vivienda">Vivienda</option>
                         </select>
                         <hr>
-                         <!-- Filtros de Unidad Administrativa -->
+
+                        <!--Fitro de Procesos de producción-->  
+                        <h5>Procesos de Producción</h5>
+                        <select id="processSelect" class="form-select" multiple size="6" aria-label="Procesos estadísticos">
+                            <!-- Opciones se llenan dinámicamente -->
+                          </select> 
+                        <div id="processSelectContainer" class="d-flex flex-wrap gap-2 mb-2 mt-2"></div>
+                        
+                        <hr>
+
+                        <!--Filtros de Unidad Administrativa -->
                         <div id="unidadAdministrativaSection" style="display: none;">
                          <h5>Unidad Administrativa</h5>
                          <div class="form-check">
@@ -196,26 +177,40 @@
                         <!--Filtros de Relación -->
                         <h5>Relación</h5>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" id="inlineRelacion1" value="option1">
-                            <label class="form-check-label" for="inlineRadio1">Relación con Tabulados</label>
+                            <input class="form-check-input" type="checkbox" id="relTabCheckbox" value="relTab">
+                            <label class="form-check-label" for="relTabCheckbox">Relación con Tabulados</label>
                           </div>
                           <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" id="inlineRelacion2" value="option2">
-                            <label class="form-check-label" for="inlineRadio2">Relación con Microdatos</label>
+                            <input class="form-check-input" type="checkbox" id="relMicroCheckbox" value="relMicro">
+                            <label class="form-check-label" for="relMicroCheckbox">Relación con Microdatos</label>
                           </div>
                           <hr>
                         <!--Filtros de Alineación -->
                         <h5>Alineación</h5>
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="inlineRelacion1" id="inlineRadio1" value="option1">
-                            <label class="form-check-label" for="inlineRadio1">Alineación con MDEA</label>
-                          </div>
-                          <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="inlineRelacion2" id="inlineRadio2" value="option2">
-                            <label class="form-check-label" for="inlineRadio2">Alineación con ODS</label>
-                          </div>
+                        <input class="form-check-input" type="checkbox" id="alinMdeaCheckbox" value="alinMdea">
+                        <label class="form-check-label" for="alinMdeaCheckbox">Alineación con MDEA</label>
                         </div>
+                        <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="alinOdsCheckbox" value="alinOds">
+                        <label class="form-check-label" for="alinOdsCheckbox">Alineación con ODS</label>
+                        </div>
+                        <hr>
+                       <!--Filtros de periodo de tiempo--> 
+                       <div>
+                        <h5 class="mb-2">Periodo de Tiempo</h5>
+                        <div class="d-flex align-items-center gap-2">
+                          <select id="periodInic" class="form-select form-select-sm w-auto" style="min-width: 100px;">
+                            <option>--Vigencia Inicial--</option>
+                          </select>
+                          <span class="mx-1">a</span>
+                          <select id="periodFin" class="form-select form-select-sm w-auto" style="min-width: 100px;">
+                            <option>--Vigencia Final--</option>
+                          </select>
+                        </div>
+                      </div>
                     </div>
+                </div>
              </div>
     
            <!-- Contenido principal (Columna derecha) -->
@@ -281,13 +276,117 @@
     const params = new URLSearchParams(window.location.search); // Obtener los parámetros de la URL
     const idPpParam = params.get("idPp"); // Obtener el valor del parámetro idPp
     const sortSelect = document.getElementById("sortOptions"); // Selector de ordenación
-
+    const alinMdeaCheckbox = document.getElementById("alinMdeaCheckbox");
+    const alinOdsCheckbox = document.getElementById("alinOdsCheckbox");
+    
 
     let itemsPerPage = parseInt(itemsPerPageSelect.value, 10); // Número de elementos por página
     let currentPage = 1; // Página actual
     let allData = []; // Almacena todos los datos cargados inicialmente
     let filteredData = [];    // Resultado de filtros o búsquedas aplicadas
     let currentFilteredData = []; // Siempre contiene el conjunto de datos actualmente filtrado
+
+
+    // Referencias a los checkboxes
+const relTabCheckbox = document.getElementById("relTabCheckbox");
+const relMicroCheckbox = document.getElementById("relMicroCheckbox");
+
+// Script para el navbar
+document.addEventListener("DOMContentLoaded", function () {
+                const currentPath = window.location.pathname.split("/").pop();
+                const navLinks = document.querySelectorAll(".navbar-nav .nav-link");
+
+                navLinks.forEach(link => {
+                const href = link.getAttribute("href");
+                if (href === currentPath) {
+                    link.classList.add("active");
+                }
+                });
+            });
+
+// Función para filtrar por periodo de tiempo 
+function populatePeriodFilters() {
+  const periodInic = document.getElementById("periodInic");
+  const periodFin = document.getElementById("periodFin");
+
+  const yearsSet = new Set();
+
+  allData.forEach(variable => {
+    const startYear = parseInt(variable.vigInicial);
+    const endRaw = variable.vigFinal;
+    const endYear = endRaw.includes("A la fecha") ? new Date().getFullYear() : parseInt(endRaw);
+
+    if (!isNaN(startYear)) yearsSet.add(startYear);
+    if (!isNaN(endYear)) yearsSet.add(endYear);
+  });
+
+  const sortedYears = Array.from(yearsSet).sort((a, b) => a - b);
+
+  // Agregar las opciones
+  sortedYears.forEach(year => {
+    const option1 = new Option(year, year);
+    const option2 = new Option(year, year);
+    periodInic.appendChild(option1);
+    periodFin.appendChild(option2);
+  });
+}
+
+// Función principal de filtrado
+function filterByRelation() {
+    let filtered = allData;
+
+    const selectedStart = parseInt(document.getElementById("periodInic").value);
+    const selectedEnd = parseInt(document.getElementById("periodFin").value);
+
+//Filtro de periodo de tiempo
+    if (!isNaN(selectedStart) && !isNaN(selectedEnd)) {
+    filtered = filtered.filter(variable => {
+        const varStart = parseInt(variable.vigInicial);
+        let varEnd = variable.vigFinal.includes("A la fecha") ? new Date().getFullYear() : parseInt(variable.vigFinal);
+
+        // Validación doble por seguridad
+        if (isNaN(varStart) || isNaN(varEnd)) return false;
+
+        return varStart <= selectedEnd && varEnd >= selectedStart;
+    });
+    }
+
+    // Filtro de relación temática
+    if (relTabCheckbox?.checked || relMicroCheckbox?.checked) {
+        filtered = filtered.filter(variable => {
+            const matchRelTab = relTabCheckbox?.checked ? variable.relTab === "Sí" : true;
+            const matchRelMicro = relMicroCheckbox?.checked ? variable.relMicro === "Sí" : true;
+            return matchRelTab && matchRelMicro;
+        });
+    }
+
+    // Filtro de alineación con MDEA y ODS
+    if (alinMdeaCheckbox?.checked || alinOdsCheckbox?.checked) {
+        filtered = filtered.filter(variable => {
+            const matchMdea = alinMdeaCheckbox?.checked ? variable.alinMdea === "Sí" : true;
+            const matchOds = alinOdsCheckbox?.checked ? variable.alinOds === "Sí" : true;
+            return matchMdea && matchOds;
+        });
+    }
+
+    // Mostrar resultados
+    currentFilteredData = filtered;
+    currentPage = 1;
+    renderPage(currentFilteredData, currentPage);
+    setupPagination(currentFilteredData);
+}
+
+// Escuchar cambios en TODOS los checkboxes
+relTabCheckbox?.addEventListener("change", filterByRelation);
+relMicroCheckbox?.addEventListener("change", filterByRelation);
+alinMdeaCheckbox?.addEventListener("change", filterByRelation);
+alinOdsCheckbox?.addEventListener("change", filterByRelation);
+
+// Si tienes un formulario de búsqueda también, combínalo con este filtrado
+searchForm?.addEventListener("submit", function (e) {
+    e.preventDefault();
+    filterByRelation(); // Aquí podrías combinar también texto de búsqueda
+});
 
 
     //Mostrar y ocultar seccion de filtros Unidad administrativa dependiendo de condicional 
@@ -302,38 +401,124 @@
     }
     }
 
-    // Filtrado por proceso de producción
-    processSelect.addEventListener("change", function () {
-    const selectedValue = this.value;
-    checkMostrarUnidadSection();
-    if (!selectedValue) {
-        // Si no se seleccionó nada, mostrar todo
-        renderPage(allData, 1);
-        setupPagination(allData);
-        updateVariableCounter(allData.length); // Actualizar el contador
-        return;
-    }
 
-    // Extraer el ID real (después de "proc")
-    const selectedIdPp = selectedValue.replace("proc", "");
-
-    // Filtrar por idPp
-    const filteredData = allData.filter(variable => variable.idPp === selectedIdPp);
-
-    if (filteredData.length === 0) {
-        container.innerHTML = "<p class='text-center'>No hay variables para el proceso seleccionado.</p>";
-        paginationContainer.innerHTML = "";
-        updateVariableCounter(0); // Actualizar el contador
-        return;
-    }
-
-    currentPage = 1;
-    currentFilteredData = filteredData;
-    renderPage(currentFilteredData, currentPage);
-    setupPagination(currentFilteredData);
-    updateVariableCounter(filteredData.length); // Actualizar el contador
+// Llenar dinámicamente el select desde /api/proceso
+fetch("/api/proceso")
+  .then(response => response.json())
+  .then(data => {
+    data.forEach(proc => {
+      const option = document.createElement("option");
+      option.value = proc.idPp;
+      option.textContent = proc.pp;
+      processSelect.appendChild(option);
     });
 
+processSelect.addEventListener("mousedown", function (e) {
+  e.preventDefault();
+  const option = e.target;
+  option.selected = !option.selected;
+  processSelect.dispatchEvent(new Event("change"));
+});
+
+    // Aquí ya está listo el select, ahora puedes verificar si hay idPp en la URL
+    aplicarFiltroDesdeURL(); // <== Agrega esta línea aquí
+  })
+  .catch(error => console.error("Error al cargar procesos:", error));
+
+// Cargar todas las variables
+fetch("/api/variables")
+  .then(response => response.json())
+  .then(data => {
+    allData = data;
+    renderPage(allData, 1);
+    setupPagination(allData);
+    updateVariableCounter(allData.length);
+  });
+
+// Función que aplica el filtro si hay idPp en la URL
+function aplicarFiltroDesdeURL() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const selectedIdPp = urlParams.get("idPp");
+
+  if (selectedIdPp) {
+    const interval = setInterval(() => {
+      if (processSelect.options.length > 0 && allData.length > 0) {
+        clearInterval(interval);
+
+        // Seleccionar automáticamente el proceso
+        Array.from(processSelect.options).forEach(option => {
+          option.selected = option.value === selectedIdPp;
+        });
+
+        // Disparar manualmente el evento "change" para aplicar filtro
+        processSelect.dispatchEvent(new Event("change"));
+      }
+    }, 100);
+  }
+}
+
+// Escuchar cambios manuales del usuario en el select
+processSelect.addEventListener("change", function () {
+  const selectedOptions = Array.from(this.selectedOptions);
+  const selectedValues = selectedOptions.map(opt => opt.value);
+
+  // Mostrar tags arriba
+  renderSelectedTags(selectedOptions);
+
+  checkMostrarUnidadSection();
+
+  if (selectedValues.length === 0) {
+    renderPage(allData, 1);
+    setupPagination(allData);
+    updateVariableCounter(allData.length);
+    return;
+  }
+
+  const filteredData = allData.filter(variable => selectedValues.includes(variable.idPp));
+
+  if (filteredData.length === 0) {
+    container.innerHTML = "<p class='text-center'>No hay variables para los procesos seleccionados.</p>";
+    paginationContainer.innerHTML = "";
+    updateVariableCounter(0);
+    return;
+  }
+
+  currentPage = 1;
+  currentFilteredData = filteredData;
+  renderPage(currentFilteredData, currentPage);
+  setupPagination(currentFilteredData);
+  updateVariableCounter(filteredData.length);
+});
+
+ // Renderizar las etiquetas de los procesos seleccionados
+ function renderSelectedTags(selectedOptions) {
+  const container = document.getElementById("processSelectContainer");
+  container.innerHTML = ""; // Limpiar primero
+
+  selectedOptions.forEach(option => {
+    const tag = document.createElement("div");
+    tag.className = "badge bg-primary d-flex align-items-center";
+    tag.style.paddingRight = "0.5rem";
+
+    const text = document.createElement("span");
+    text.textContent = option.textContent;
+    text.style.marginRight = "0.5rem";
+
+    const closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.className = "btn-close btn-close-white btn-sm";
+    closeBtn.setAttribute("aria-label", "Eliminar");
+    closeBtn.onclick = () => {
+      option.selected = false;
+      processSelect.dispatchEvent(new Event("change"));
+    };
+
+    tag.appendChild(text);
+    tag.appendChild(closeBtn);
+    container.appendChild(tag);
+    });
+    }
+    
     // Filtrado por temática
     temaSelect.addEventListener("change", function () {
         const selectedValue = this.value;
@@ -362,147 +547,180 @@
 
     });
     
-    
 
-
-    clearFiltersBtn.addEventListener("click", function () {
-    // Limpiar los campos de los filtros
+  /* Funcionalidad para borrar filtros */
+  clearFiltersBtn.addEventListener("click", function () {
     searchInput.value = "";
-    processSelect.value = "";
     temaSelect.value = "";
+    Array.from(processSelect.options).forEach(option => option.selected = false);
+    updateSelectedProcessesChips();
+    relTabCheckbox.checked = false;
+    relMicroCheckbox.checked = false;
+    alinMdeaCheckbox.checked = false;
+    alinOdsCheckbox.checked = false;
+    document.getElementById("periodInic").selectedIndex = 0;
+    document.getElementById("periodFin").selectedIndex = 0;
+    if (unidadSection) unidadSection.style.display = "none";
+    applyFilters();
+    const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    window.history.replaceState({}, document.title, newUrl);
+});
 
-    // Ocultar y limpiar la sección de unidad administrativa
-    unidadSection.style.display = "none";
-    unidadSection.innerHTML = "";
 
-    // Restaurar el listado completo
-    currentPage = 1;
-    currentFilteredData = [...allData];
-    renderPage(currentFilteredData, currentPage);
-    setupPagination(currentFilteredData);
+    //Fetch para cargar los datos de proceso
+    fetch("/api/proceso")
+    .then(res => res.json())
+    .then(data => {
+        allData = data;
+        populatePeriodFilters(); // llena los selects con los años
+        filterByRelation();      // muestra los datos iniciales si deseas
     });
-
 
     // Función para cargar todos los elementos al entrar a la página
     async function loadAllVariables() {
-        try {
-            const response = await fetch(`/api/variables`);
-            const data = await response.json();
-            allData = data;
-            currentFilteredData = [...allData]; // Copia los datos cargados inicialmente
-            renderPage(currentFilteredData, currentPage);
-            setupPagination(currentFilteredData);
-        if (idPpParam) {
-            processSelect.value = `proc${idPpParam}`;
-            const changeEvent = new Event("change");
-            processSelect.dispatchEvent(changeEvent);
-        }
-        } catch (error) {
-            console.error("Error al cargar los datos:", error);
-            container.innerHTML = "<p class='text-center text-danger'>Ocurrió un error al cargar los datos. Inténtalo nuevamente.</p>";
-        }
-    }
+    try {
+        const response = await fetch('/api/variables');
+        const data = await response.json();
+        allData = data;
+        currentFilteredData = [...allData];
 
-    // Función para realizar la búsqueda
-    function searchVariables(term) {
-        if (!term) {
-            // Si el término está vacío, restaurar el listado inicial
-            renderPage(allData, currentPage);
-            setupPagination(allData);
-            return;
-        }
-
-        const filteredData = allData.filter(variable =>
-            variable.nomVar.toLowerCase().includes(term.toLowerCase()) ||
-            variable.defVar.toLowerCase().includes(term.toLowerCase()) ||
-            variable.varAsig.toLowerCase().includes(term.toLowerCase())
-        );
-
-        if (filteredData.length === 0) {
-            container.innerHTML = "<p class='text-center'>No se encontraron resultados para el término ingresado.</p>";
-            paginationContainer.innerHTML = "";
-            return;
-        }
-
-        currentFilteredData = filteredData;
         renderPage(currentFilteredData, currentPage);
         setupPagination(currentFilteredData);
+        updateVariableCounter(allData.length);
+
+        if (idPpParam) {
+            processSelect.value = `proc${idPpParam}`;
+            applyFilters();
+        }
+    } catch (error) {
+        console.error('Error al cargar los datos:', error);
+        container.innerHTML = "<p class='text-center text-danger'>Ocurrió un error al cargar los datos. Inténtalo nuevamente.</p>";
+    }
+}
+
+// Buscar variables por término ingresado
+function searchVariables(term) {
+    if (!term) {
+        renderPage(allData, currentPage);
+        setupPagination(allData);
+        return;
     }
 
-    // Función para actualizar el contador de variables
-    function updateVariableCounter(count) {
-        const totalVariablesElement = document.getElementById("totalVariables");
-        totalVariablesElement.textContent = count;
+    const termLower = term.toLowerCase();
+    const filteredData = allData.filter(variable =>
+        variable.nomVar.toLowerCase().includes(termLower) ||
+        variable.defVar.toLowerCase().includes(termLower) ||
+        variable.varAsig.toLowerCase().includes(termLower)
+    );
+
+    if (filteredData.length === 0) {
+        container.innerHTML = "<p class='text-center'>No se encontraron resultados para el término ingresado.</p>";
+        paginationContainer.innerHTML = "";
+        return;
     }
 
-    // Función para renderizar las tarjetas en función de la página actual
-    function renderPage(data, page) {
-        container.innerHTML = ""; // Limpia el contenedor antes de mostrar las nuevas tarjetas
+    currentFilteredData = filteredData;
+    renderPage(currentFilteredData, currentPage);
+    setupPagination(currentFilteredData);
+}
 
-        const startIndex = (page - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        const paginatedData = data.slice(startIndex, endIndex);
+// Actualizar el número total de variables mostradas
+function updateVariableCounter(count) {
+    const totalVariablesElement = document.getElementById('totalVariables');
+    totalVariablesElement.textContent = count;
+}
 
-        // Actualizar el contador de variables
-        updateVariableCounter(data.length);
+// Renderizar tarjetas por página with información de variables
+function renderPage(data, page) {
+    container.innerHTML = "";
+    const startIndex = (page - 1) * itemsPerPage;
+    const paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
 
-        paginatedData.forEach((variable, index) => {
-            const card = document.createElement("div");
-            card.classList.add("accordion", "mb-3");
+    updateVariableCounter(data.length);
 
-            card.innerHTML = `
-                <div class="accordion-item">
-                    <h2 class="accordion-header custom-accordion-header" id="heading${index}">
-                        <button class="accordion-button collapsed" type="button" 
-                            data-bs-toggle="collapse" 
-                            data-bs-target="#collapse${index}" 
-                            aria-expanded="false" 
-                            aria-controls="collapse${index}">
-                            ${variable.nomVar} <span class="badge bg-light text-dark ms-2">${variable.idVar}</span>
-                        </button>
-                    </h2>
-                    <div id="collapse${index}" class="accordion-collapse collapse" aria-labelledby="heading${index}" data-bs-parent="#variablesContainer">
-                        <div class="accordion-body">
-                            <p><strong>Pregunta:</strong> ${variable.pregLit}</p>
-                            <p><strong>Definición:</strong> ${variable.defVar}</p>
-                            <p><strong>Variable Asignada:</strong> ${variable.varAsig}</p>
-                            
-                            <h6 class="mt-3">Clasificación Temática</h6>
-                            <ul>
-                                <li><strong>Tema:</strong> ${variable.tema} / ${variable.subtema}</li>
-                                <li><strong>Tema 2:</strong> ${variable.tema2} / ${variable.subtema2}</li>
-                            </ul>
+    paginatedData.forEach((variable, index) => {
+        const card = document.createElement('div');
+        card.classList.add('accordion', 'mb-3');
 
-                            <h6 class="mt-3">Categoría y Relaciones</h6>
-                            <ul>
-                                <li><strong>Categoría:</strong> ${variable.categoria}</li>
-                                <li><strong>Relacionada con Tabulados:</strong> 
-                                    <span class="badge bg-${variable.relTab === 'Sí' ? 'success' : 'danger'}">${variable.relTab}</span>
-                                </li>
-                                <li><strong>Relacionada con Microdatos:</strong> 
-                                    <span class="badge bg-${variable.relMicro === 'Sí' ? 'success' : 'danger'}">${variable.relMicro}</span>
-                                </li>
-                                <li><strong>Alineación con MDEA:</strong> 
-                                    <span class="badge bg-${variable.alinMdea === 'Sí' ? 'success' : 'danger'}">${variable.alinMdea}</span>
-                                </li>
-                                <li><strong>Alineación con ODS:</strong> 
-                                    <span class="badge bg-${variable.alinOds === 'Sí' ? 'success' : 'danger'}">${variable.alinOds}</span>
-                                </li>
-                            </ul>
-
-                            <h6 class="mt-3">Extras</h6>
-                            <ul>
-                                <li><strong>ID del Programa:</strong> ${variable.idPp}</li>
-                                <li><strong>Código de Identificación:</strong> ${variable.codIdenVar}</li>
-                                <li><strong>Comentarios:</strong> ${variable.comentVar ? variable.comentVar : 'N/A'}</li>
-                            </ul>
+        card.innerHTML = `
+    <div class="accordion-item shadow-sm rounded-3 border-0">
+        <h2 class="accordion-header custom-accordion-header" id="heading${index}">
+            <button class="accordion-button collapsed fw-bold" type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapse${index}"
+                aria-expanded="false"
+                aria-controls="collapse${index}">
+                ${variable.varAsig}
+                <span class="badge ms-2 bg-light text-dark border">${variable.idVar}</span>
+            </button>
+        </h2>
+        <div id="collapse${index}" class="accordion-collapse collapse" aria-labelledby="heading${index}" data-bs-parent="#variablesContainer">
+            <div class="accordion-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="mb-2">
+                            <span class="fw-semibold text-secondary"><i class="bi bi-question-circle me-1"></i>Pregunta:</span>
+                            <div class="ps-3">${variable.pregLit}</div>
+                        </div>
+                        <div class="mb-2">
+                            <span class="fw-semibold text-secondary"><i class="bi bi-info-circle me-1"></i>Definición:</span>
+                            <div class="ps-3">${variable.defVar}</div>
+                        </div>
+                        <div class="mb-2">
+                            <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Nombre de la variable seleccionad, tal y como aparece en la fuente del evento en mención">
+                                <i class="bi bi-tag me-1"></i>Variable Fuente:</span>
+                            <span class="badge bg-info-subtle text-dark ms-1">${variable.nomVar}</span>
+                        </div>
+                        <div class="mb-2">
+                            <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Conjunto objeto de cuantificación y caracterización para fines de estudio">
+                               <i class="bi bi-diagram-3 me-1"></i>Categoría:</span>
+                            <span class="badge bg-secondary-subtle text-dark ms-1">${variable.categoria}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-2">
+                            <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Son enunciados genéricos referentes a campos específicos de interés y cuyo estudio constituye la justificación del proyecto estadístico">
+                                <i class="bi bi-layers me-1"></i>Clasificación Temática:</span>
+                            <div class="ps-3">
+                                <span class="badge bg-success-subtle text-dark mb-1">${variable.tema}</span>
+                                <span class="badge bg-success-subtle text-dark mb-1">${variable.subtema}</span><br>
+                                <span class="badge bg-success-subtle text-dark mb-1">${variable.tema2}</span>
+                                <span class="badge bg-success-subtle text-dark mb-1">${variable.subtema2}</span>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <span class="fw-semibold text-secondary"><i class="bi bi-link-45deg me-1"></i>Relación y Alineación:</span>
+                            <div class="ps-3 d-flex flex-wrap gap-2">
+                                <span class="badge bg-${variable.relTab === 'Sí' ? 'success' : 'danger'}">${variable.relTab === 'Sí' ? 'Tabulados' : 'Sin Tabulados'}</span>
+                                <span class="badge bg-${variable.relMicro === 'Sí' ? 'success' : 'danger'}">${variable.relMicro === 'Sí' ? 'Microdatos' : 'Sin Microdatos'}</span>
+                                <span class="badge bg-${variable.alinMdea === 'Sí' ? 'primary' : 'secondary'}">${variable.alinMdea === 'Sí' ? 'MDEA' : 'Sin MDEA'}</span>
+                                <span class="badge bg-${variable.alinOds === 'Sí' ? 'primary' : 'secondary'}">${variable.alinOds === 'Sí' ? 'ODS' : 'Sin ODS'}</span>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <span class="fw-semibold text-secondary"><i class="bi bi-asterisk me-1"></i>Extras:</span>
+                            <div class="ps-3 small">
+                                <div><strong>ID Programa:</strong> ${variable.idPp}</div>
+                                <div><strong>Código Identificación:</strong> ${variable.codIdenVar}</div>
+                                <div><strong>Comentarios:</strong> ${variable.comentVar || 'N/A'}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            `;
-            container.appendChild(card);
-        });
-    }
+            </div>
+        </div>
+    </div>
+`;
+
+
+        container.appendChild(card);
+
+         // Inicializar tooltips dentro de la tarjeta recién agregada
+        const tooltips = card.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltips.forEach(el => new bootstrap.Tooltip(el));
+    });
+  }
+
 
     // Función para configurar el paginador
     function setupPagination(data) {
@@ -612,6 +830,14 @@
         searchVariables(searchTerm); // Realizar la búsqueda
     });
     
+    //Listener para los periodo de tiempo. 
+    document.getElementById("periodInic").addEventListener("change", filterByRelation);
+    document.getElementById("periodFin").addEventListener("change", filterByRelation);
+    
+    window.addEventListener("DOMContentLoaded", () => {
+    populatePeriodFilters(); // Cargar filtros
+    filterByRelation();      // Mostrar todo inicialmente
+    });
 
     // Cargar todos los elementos al entrar a la página
     loadAllVariables();
@@ -629,8 +855,8 @@
         }
 
         const sortedData = [...currentFilteredData].sort((a, b) => {
-            const nameA = a.nomVar.toLowerCase();
-            const nameB = b.nomVar.toLowerCase();
+            const nameA = a.varAsig.toLowerCase();
+            const nameB = b.varAsig.toLowerCase();
 
             if (sortOption === "az") {
                 return nameA.localeCompare(nameB);
@@ -646,6 +872,159 @@
         setupPagination(currentFilteredData);
     });
     
+    // Función para aplicar todos los filtros activos
+    function applyFilters() {
+        let filteredData = [...allData];
+
+        // Filtro por procesos de producción (múltiple)
+        const selectedProcesses = Array.from(processSelect.selectedOptions).map(opt => opt.value);
+        if (selectedProcesses.length > 0) {
+            filteredData = filteredData.filter(variable => selectedProcesses.includes(variable.idPp));
+        }
+
+        // Filtro por temática
+        const selectedTema = temaSelect.value;
+        if (selectedTema && selectedTema !== "Seleccione una temática") {
+            filteredData = filteredData.filter(variable =>
+                variable.tema === selectedTema || variable.tema2 === selectedTema
+            );
+        }
+
+        // Filtro de relación temática
+        if (relTabCheckbox.checked || relMicroCheckbox.checked) {
+            filteredData = filteredData.filter(variable => {
+                const matchRelTab = relTabCheckbox.checked ? variable.relTab === "Sí" : true;
+                const matchRelMicro = relMicroCheckbox.checked ? variable.relMicro === "Sí" : true;
+                return matchRelTab && matchRelMicro;
+            });
+        }
+
+        // Filtro de alineación con MDEA y ODS
+        if (alinMdeaCheckbox.checked || alinOdsCheckbox.checked) {
+            filteredData = filteredData.filter(variable => {
+                const matchMdea = alinMdeaCheckbox.checked ? variable.alinMdea === "Sí" : true;
+                const matchOds = alinOdsCheckbox.checked ? variable.alinOds === "Sí" : true;
+                return matchMdea && matchOds;
+            });
+        }
+
+        // Filtro de periodo de tiempo
+        const selectedStart = parseInt(document.getElementById("periodInic").value);
+        const selectedEnd = parseInt(document.getElementById("periodFin").value);
+        if (!isNaN(selectedStart) && !isNaN(selectedEnd)) {
+            filteredData = filteredData.filter(variable => {
+                const varStart = parseInt(variable.vigInicial);
+                let varEnd = variable.vigFinal.includes("A la fecha") ? new Date().getFullYear() : parseInt(variable.vigFinal);
+                if (isNaN(varStart) || isNaN(varEnd)) return false;
+                return varStart <= selectedEnd && varEnd >= selectedStart;
+            });
+        }
+
+        // Filtro de búsqueda por término
+        const searchTerm = searchInput.value.trim().toLowerCase();
+        if (searchTerm) {
+            filteredData = filteredData.filter(variable =>
+                variable.nomVar.toLowerCase().includes(searchTerm) ||
+                variable.defVar.toLowerCase().includes(searchTerm) ||
+                variable.varAsig.toLowerCase().includes(searchTerm)
+            );
+        }
+
+        // Actualizar los datos filtrados y renderizar
+        currentFilteredData = filteredData;
+        currentPage = 1;
+        renderPage(currentFilteredData, currentPage);
+        setupPagination(currentFilteredData);
+        updateVariableCounter(filteredData.length);
+    }
+
+    const selectedProcessesContainer = document.getElementById("selectedProcessesContainer");
+
+function updateSelectedProcessesChips() {
+    selectedProcessesContainer.innerHTML = "";
+    const selectedOptions = Array.from(processSelect.selectedOptions);
+    selectedOptions.forEach(option => {
+        const chip = document.createElement("span");
+        chip.className = "badge bg-primary text-white me-2 mb-1";
+        chip.textContent = option.text;
+        // Botón para quitar
+        const removeBtn = document.createElement("span");
+        removeBtn.innerHTML = '&times;';
+        removeBtn.style.cursor = "pointer";
+        removeBtn.className = "ms-2";
+        removeBtn.onclick = () => {
+            option.selected = false;
+            updateSelectedProcessesChips();
+            applyFilters();
+        };
+        chip.appendChild(removeBtn);
+        selectedProcessesContainer.appendChild(chip);
+    });
+}
+processSelect.addEventListener("change", function() {
+    updateSelectedProcessesChips();
+    checkMostrarUnidadSection();
+    applyFilters();
+});
+temaSelect.addEventListener("change", function () {
+    checkMostrarUnidadSection();
+    applyFilters();
+});
+relTabCheckbox.addEventListener("change", applyFilters);
+relMicroCheckbox.addEventListener("change", applyFilters);
+alinMdeaCheckbox.addEventListener("change", applyFilters);
+alinOdsCheckbox.addEventListener("change", applyFilters);
+document.getElementById("periodInic").addEventListener("change", applyFilters);
+document.getElementById("periodFin").addEventListener("change", applyFilters);
+searchForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    applyFilters();
+});
+    // Evento para el botón de borrar filtros
+    clearFiltersBtn.addEventListener("click", function () {
+        // Limpiar los campos de los filtros
+        searchInput.value = "";
+        temaSelect.value = "";
+        // Limpiar todas las opciones seleccionadas del select múltiple
+        Array.from(processSelect.options).forEach(option => option.selected = false);
+        updateSelectedProcessesChips(); // <-- Actualiza los chips visuales
+
+        // Ocultar y limpiar la sección de unidad administrativa
+        unidadSection.style.display = "none";
+
+        // Restaurar el listado completo
+        currentPage = 1;
+        currentFilteredData = [...allData];
+        renderPage(currentFilteredData, currentPage);
+        setupPagination(currentFilteredData);
+        updateVariableCounter(allData.length); // Actualizar el contador
+
+        // Eliminar los parámetros de la URL sin recargar
+        const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+    });
+
+    // Función para obtener parámetros de la URL
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+    // Cuando cargue la página, buscar si hay un parámetro "search"
+    document.addEventListener("DOMContentLoaded", () => {
+        const searchTerm = getQueryParam("search");
+        if (searchTerm) {
+            // Asegúrate de que los datos estén cargados antes de buscar
+            const checkDataLoaded = setInterval(() => {
+                if (typeof allData !== 'undefined' && allData.length > 0) {
+                    clearInterval(checkDataLoaded);
+                    searchInput.value = searchTerm; // Mostrar el término en el input
+                    searchVariables(searchTerm);    // Ejecutar la búsqueda
+                }
+            }, 100);
+        }
+    });
+
 });
 </script>
 
@@ -701,5 +1080,4 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>   
 </body>
-
 </html>
