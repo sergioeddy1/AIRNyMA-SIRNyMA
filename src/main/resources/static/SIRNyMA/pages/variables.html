@@ -7,10 +7,12 @@
     <title>Variables</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../styles/variables.css">
     <style>
 body, html {
     font-family: Helvetica, Sans-Serif !important;
+    background-color: #f8f9fa;
 }
 </style>
 </head>
@@ -66,7 +68,6 @@ body, html {
                         <h5>Búsqueda por término</h5>
                         <form id="searchForm" class="d-flex m-2" role="search">
                             <input id="searchInput" class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Buscar">
-                            <button class="btn btncustom" type="submit">Buscar</button>
                         </form>
                         <hr>
                         <!--Filtros de Tematica--> 
@@ -142,11 +143,9 @@ body, html {
 
                         <!--Fitro de Procesos de producción-->  
                         <h5>Procesos de Producción</h5>
-                        <select id="processSelect" class="form-select" multiple size="6" aria-label="Procesos estadísticos">
-                            <!-- Opciones se llenan dinámicamente -->
-                          </select> 
-                        <div id="processSelectContainer" class="d-flex flex-wrap gap-2 mb-2 mt-2"></div>
-                        
+                        <select id="processSelect" class="form-select" multiple size="6" aria-label="Procesos estadísticos"></select>
+                        <div id="processSelectContainer" class="d-flex flex-wrap gap-1 mt-2"></div>
+
                         <hr>
 
                         <!--Filtros de Unidad Administrativa -->
@@ -208,7 +207,7 @@ body, html {
                             <option>--Vigencia Final--</option>
                           </select>
                         </div>
-                      </div>
+                      </div> 
                     </div>
                 </div>
              </div>
@@ -231,12 +230,14 @@ body, html {
                     </div>
 
                     <!-- Contador de variables -->
-                    <div id="variableCounter" class="text-center">
-                        <strong style="padding-top: 5px;">Total de Variables: <span id="totalVariables" style="color: #08739c; 
-                            text-decoration: underline; 
-                            font-size: 1.2rem; 
-                            font-family: 'Monaco', monospace; 
-                            font-weight: bold;">0</span></strong>
+                    <!-- Modern Variable Counter -->
+                    <div id="variableCounter" class="d-flex align-items-center justify-content-center my-2">
+                    <div class="card shadow-sm border-0 bg-light-subtle" style="min-width: 220px; max-width: 260px;">
+                        <div class="card-body d-flex flex-column align-items-center justify-content-center py-2 px-3">
+                        <div class="text-uppercase fw-semibold small text-secondary text-center" style="letter-spacing: 1px;">Total de Variables</div>
+                        <span class="align-items-center justify-content-center d-flex w-100" id="totalVariables" style="color: #08739c; font-size: 2rem; font-family: 'Monaco', monospace; font-weight: bold; text-align: center;">0</span>
+                        </div>
+                    </div>
                     </div>
 
                     <!-- Selector de elementos por página -->
@@ -262,6 +263,8 @@ body, html {
         </div>
     </div>
     
+
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
     const searchForm = document.getElementById("searchForm");
@@ -406,10 +409,11 @@ searchForm?.addEventListener("submit", function (e) {
 fetch("/api/proceso")
   .then(response => response.json())
   .then(data => {
+    procesosGlobal = data;
     data.forEach(proc => {
       const option = document.createElement("option");
       option.value = proc.idPp;
-      option.textContent = proc.pp;
+      option.textContent = `• ${proc.pp} (${proc.idPp})`;
       processSelect.appendChild(option);
     });
 
@@ -430,9 +434,8 @@ fetch("/api/variables")
   .then(response => response.json())
   .then(data => {
     allData = data;
-    renderPage(allData, 1);
-    setupPagination(allData);
-    updateVariableCounter(allData.length);
+    // Solo aplicar filtro desde URL o mostrar todo si no hay filtro
+    aplicarFiltroDesdeURL();
   });
 
 // Función que aplica el filtro si hay idPp en la URL
@@ -453,7 +456,12 @@ function aplicarFiltroDesdeURL() {
         // Disparar manualmente el evento "change" para aplicar filtro
         processSelect.dispatchEvent(new Event("change"));
       }
-    }, 100);
+    },  300); // Reintentar cada 300 ms hasta que los datos estén disponibles
+  } else {
+    // Si no hay filtro en la URL, mostrar todo
+    renderPage(allData, 1);
+    setupPagination(allData);
+    updateVariableCounter(allData.length);
   }
 }
 
@@ -550,18 +558,42 @@ processSelect.addEventListener("change", function () {
 
   /* Funcionalidad para borrar filtros */
   clearFiltersBtn.addEventListener("click", function () {
+    // Limpiar campos de texto y selects
     searchInput.value = "";
-    temaSelect.value = "";
+    temaSelect.selectedIndex = 0;
+    itemsPerPageSelect.selectedIndex = 0;
+    sortSelect.selectedIndex = 0;
+
+    // Limpiar select múltiple de procesos
     Array.from(processSelect.options).forEach(option => option.selected = false);
-    updateSelectedProcessesChips();
+
+    // Limpiar chips visuales de procesos seleccionados
+    const chipsContainer = document.getElementById("processSelectContainer");
+    if (chipsContainer) chipsContainer.innerHTML = "";
+
+    // Limpiar checkboxes
     relTabCheckbox.checked = false;
     relMicroCheckbox.checked = false;
     alinMdeaCheckbox.checked = false;
     alinOdsCheckbox.checked = false;
-    document.getElementById("periodInic").selectedIndex = 0;
-    document.getElementById("periodFin").selectedIndex = 0;
+
+    // Limpiar selects de periodo
+    const periodInic = document.getElementById("periodInic");
+    const periodFin = document.getElementById("periodFin");
+    if (periodInic) periodInic.selectedIndex = 0;
+    if (periodFin) periodFin.selectedIndex = 0;
+
+    // Ocultar sección de unidad administrativa
     if (unidadSection) unidadSection.style.display = "none";
-    applyFilters();
+
+    // Reiniciar datos y paginación
+    currentPage = 1;
+    currentFilteredData = [...allData];
+    renderPage(currentFilteredData, currentPage);
+    setupPagination(currentFilteredData);
+    updateVariableCounter(allData.length);
+
+    // Eliminar parámetros de la URL sin recargar
     const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
     window.history.replaceState({}, document.title, newUrl);
 });
@@ -627,22 +659,87 @@ function searchVariables(term) {
 // Actualizar el número total de variables mostradas
 function updateVariableCounter(count) {
     const totalVariablesElement = document.getElementById('totalVariables');
-    totalVariablesElement.textContent = count;
+    const current = parseInt(totalVariablesElement.textContent.replace(/,/g, '')) || 0;
+    const duration = 1000; // Duración de la animación en ms
+    const frameRate = 100;
+    const totalFrames = Math.round(duration / (2000 / frameRate));
+    let frame = 0;
+
+    if (current === count) return;
+
+    const step = (count - current) / totalFrames;
+
+    function animate() {
+        frame++;
+        const value = Math.round(current + step * frame);
+        totalVariablesElement.textContent = value;
+        if (frame < totalFrames) {
+            requestAnimationFrame(animate);
+        } else {
+            totalVariablesElement.textContent = count;
+        }
+    }
+    animate();
 }
 
-// Renderizar tarjetas por página with información de variables
+// Funcion para la linea de tiempo 
+let eventosGlobal = []; // Aquí almacenamos los eventos una sola vez
+
+// 1. Cargar eventos antes de llamar a renderPage
+fetch('/api/eventos')
+  .then(res => res.json())
+  .then(eventos => {
+    eventosGlobal = eventos; // Guardamos todos los eventos en la variable global
+    fetch('/api/variables')
+      .then(res => res.json())
+      .then(variables => {
+        renderPage(variables, 1); // Llamamos a tu renderPage ya adaptada
+      });
+  });
+
+const construirLineaDeTiempo = (eventos) => {
+  // Ordenar por año de evento (de menor a mayor)
+  eventos.sort((a, b) => parseInt(a.evento) - parseInt(b.evento));
+
+  return `
+  <span class="text-dark">Periodo de Pertinencia del Evento:</span>
+    <ul class="timeline" id="timeline">
+      ${eventos.map(evento => `
+        <li class="li complete d-flex flex-column align-items-center">
+          <div class="timestamp mb-2">
+            <span class="date mb-2"> <a href="${evento.fuenteIden}" target="_blank" class="text-decoration-none">${evento.evento}</a></span>
+          </div>
+          <div class="status text-center">
+          </div>
+        </li>
+      `).join('')}
+    </ul>
+  `;
+};
+
 function renderPage(data, page) {
-    container.innerHTML = "";
-    const startIndex = (page - 1) * itemsPerPage;
-    const paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
+  container.innerHTML = "";
+  const startIndex = (page - 1) * itemsPerPage;
+  const paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
 
-    updateVariableCounter(data.length);
+  updateVariableCounter(data.length);
 
-    paginatedData.forEach((variable, index) => {
-        const card = document.createElement('div');
-        card.classList.add('accordion', 'mb-3');
+  paginatedData.forEach((variable, index) => {
+    // 2. Filtrar los eventos que pertenecen a esta variable
+    const eventosRelacionados = eventosGlobal.filter(ev => ev.idVar === variable.idVar);
+    const timelineHTML = construirLineaDeTiempo(eventosRelacionados);
 
-        card.innerHTML = `
+    // 3. Fuentes dinámicas
+    const fuentesHTML = eventosRelacionados.map(ev => 
+      `<a href="${ev.fuenteIden}" target="_blank" class="d-block text-decoration-underline small text-primary">${ev.evento}</a>`
+    ).join('') || '<span class="text-muted">Sin fuentes disponibles</span>';
+
+    const proceso = procesosGlobal.find(proc => proc.idPp === variable.idPp);
+
+    const card = document.createElement('div');
+    card.classList.add('accordion', 'mb-3');
+
+    card.innerHTML = `
     <div class="accordion-item shadow-sm rounded-3 border-0">
         <h2 class="accordion-header custom-accordion-header" id="heading${index}">
             <button class="accordion-button collapsed fw-bold" type="button"
@@ -652,15 +749,21 @@ function renderPage(data, page) {
                 aria-controls="collapse${index}">
                 ${variable.varAsig}
                 <span class="badge ms-2 bg-light text-dark border">${variable.idVar}</span>
+                ${proceso && proceso.dgaRespPp ? `<span class="badge ms-2 bg-secondary">${proceso.dgaRespPp}</span>` : ''}
             </button>
         </h2>
         <div id="collapse${index}" class="accordion-collapse collapse" aria-labelledby="heading${index}" data-bs-parent="#variablesContainer">
-            <div class="accordion-body">
+          <div class="accordion-body">
+               <div class="d-flex justify-content-center mb-2">
+                    ${timelineHTML}
+                </div>
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="mb-2">
                             <span class="fw-semibold text-secondary"><i class="bi bi-question-circle me-1"></i>Pregunta:</span>
-                            <div class="ps-3">${variable.pregLit}</div>
+                            <div class="ps-3">
+                            <p>${variable.pregLit}</p>
+                            </div>
                         </div>
                         <div class="mb-2">
                             <span class="fw-semibold text-secondary"><i class="bi bi-info-circle me-1"></i>Definición:</span>
@@ -669,12 +772,12 @@ function renderPage(data, page) {
                         <div class="mb-2">
                             <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Nombre de la variable seleccionad, tal y como aparece en la fuente del evento en mención">
                                 <i class="bi bi-tag me-1"></i>Variable Fuente:</span>
-                            <span class="badge bg-info-subtle text-dark ms-1">${variable.nomVar}</span>
+                            <span class="badge bg-info-subtle text-dark ms-1 fw-normal">${variable.nomVar}</span>
                         </div>
                         <div class="mb-2">
                             <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Conjunto objeto de cuantificación y caracterización para fines de estudio">
                                <i class="bi bi-diagram-3 me-1"></i>Categoría:</span>
-                            <span class="badge bg-secondary-subtle text-dark ms-1">${variable.categoria}</span>
+                            <span class="badge bg-secondary-subtle text-dark ms-1 fw-normal">${variable.categoria}</span>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -682,17 +785,30 @@ function renderPage(data, page) {
                             <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Son enunciados genéricos referentes a campos específicos de interés y cuyo estudio constituye la justificación del proyecto estadístico">
                                 <i class="bi bi-layers me-1"></i>Clasificación Temática:</span>
                             <div class="ps-3">
-                                <span class="badge bg-success-subtle text-dark mb-1">${variable.tema}</span>
-                                <span class="badge bg-success-subtle text-dark mb-1">${variable.subtema}</span><br>
-                                <span class="badge bg-success-subtle text-dark mb-1">${variable.tema2}</span>
-                                <span class="badge bg-success-subtle text-dark mb-1">${variable.subtema2}</span>
+                                <span>Tema y Subtema 1:</span>
+                                <span class="badge bg-success-subtle text-dark mb-1 fw-normal">${variable.tema}</span>/
+                                <span class="badge bg-success-subtle text-dark mb-1 fw-normal">${variable.subtema}</span><br>
+                                <span>Tema y Subtema 2:</span>
+                                <span class="badge bg-success-subtle text-dark mb-1 fw-normal">${variable.tema2}</span>/
+                                <span class="badge bg-success-subtle text-dark mb-1 fw-normal">${variable.subtema2}</span>
                             </div>
                         </div>
                         <div class="mb-2">
-                            <span class="fw-semibold text-secondary"><i class="bi bi-link-45deg me-1"></i>Relación y Alineación:</span>
+                            <span class="fw-semibold text-secondary"><i class="bi bi-link-45deg me-1"></i>Relación con Tabulados o Microdatos</span>
                             <div class="ps-3 d-flex flex-wrap gap-2">
-                                <span class="badge bg-${variable.relTab === 'Sí' ? 'success' : 'danger'}">${variable.relTab === 'Sí' ? 'Tabulados' : 'Sin Tabulados'}</span>
-                                <span class="badge bg-${variable.relMicro === 'Sí' ? 'success' : 'danger'}">${variable.relMicro === 'Sí' ? 'Microdatos' : 'Sin Microdatos'}</span>
+                                <span class="badge bg-${variable.relTab === 'Sí' ? 'success badge-tabulado' : 'danger'}"
+                                      style="cursor:pointer"
+                                      data-idvar="${variable.idVar}"
+                                      ${variable.relTab === 'Sí' ? 'data-bs-toggle="modal" data-bs-target="#infoModal" data-type="tabulado"' : ''}
+                                >${variable.relTab === 'Sí' ? 'Tabulados' : 'Sin Tabulados'}</span>
+                                <span class="badge bg-${variable.relMicro === 'Sí' ? 'success badge-microdatos' : 'danger'}"
+                                      style="cursor:pointer"
+                                      data-idvar="${variable.idVar}"
+                                      ${variable.relMicro === 'Sí' ? 'data-bs-toggle="modal" data-bs-target="#infoModal" data-type="microdatos"' : ''}
+                                >${variable.relMicro === 'Sí' ? 'Microdatos' : 'Sin Microdatos'}</span>
+                            </div>
+                        <span class="fw-semibold text-secondary"><i class="bi bi-link-45deg me-1"></i>Alineación con MDEA y ODS</span>
+                            <div class="ps-3 d-flex flex-wrap gap-2">
                                 <span class="badge bg-${variable.alinMdea === 'Sí' ? 'primary' : 'secondary'}">${variable.alinMdea === 'Sí' ? 'MDEA' : 'Sin MDEA'}</span>
                                 <span class="badge bg-${variable.alinOds === 'Sí' ? 'primary' : 'secondary'}">${variable.alinOds === 'Sí' ? 'ODS' : 'Sin ODS'}</span>
                             </div>
@@ -700,26 +816,23 @@ function renderPage(data, page) {
                         <div class="mb-2">
                             <span class="fw-semibold text-secondary"><i class="bi bi-asterisk me-1"></i>Extras:</span>
                             <div class="ps-3 small">
-                                <div><strong>ID Programa:</strong> ${variable.idPp}</div>
-                                <div><strong>Código Identificación:</strong> ${variable.codIdenVar}</div>
-                                <div><strong>Comentarios:</strong> ${variable.comentVar || 'N/A'}</div>
+                                <div><span>Comentarios:</span> ${variable.comentVar || 'N/A'}</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-`;
+    </div>`;
 
+    container.appendChild(card);
 
-        container.appendChild(card);
+    // Inicializar tooltips
+    const tooltips = card.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltips.forEach(el => new bootstrap.Tooltip(el));
+  });
+}
 
-         // Inicializar tooltips dentro de la tarjeta recién agregada
-        const tooltips = card.querySelectorAll('[data-bs-toggle="tooltip"]');
-        tooltips.forEach(el => new bootstrap.Tooltip(el));
-    });
-  }
 
 
     // Función para configurar el paginador
@@ -906,19 +1019,7 @@ function renderPage(data, page) {
                 const matchOds = alinOdsCheckbox.checked ? variable.alinOds === "Sí" : true;
                 return matchMdea && matchOds;
             });
-        }
-
-        // Filtro de periodo de tiempo
-        const selectedStart = parseInt(document.getElementById("periodInic").value);
-        const selectedEnd = parseInt(document.getElementById("periodFin").value);
-        if (!isNaN(selectedStart) && !isNaN(selectedEnd)) {
-            filteredData = filteredData.filter(variable => {
-                const varStart = parseInt(variable.vigInicial);
-                let varEnd = variable.vigFinal.includes("A la fecha") ? new Date().getFullYear() : parseInt(variable.vigFinal);
-                if (isNaN(varStart) || isNaN(varEnd)) return false;
-                return varStart <= selectedEnd && varEnd >= selectedStart;
-            });
-        }
+        }   
 
         // Filtro de búsqueda por término
         const searchTerm = searchInput.value.trim().toLowerCase();
@@ -1025,8 +1126,124 @@ searchForm.addEventListener("submit", function (e) {
         }
     });
 
+    // Evento delegado para mostrar información de tabulados y microdatos en el modal
+    document.addEventListener("click", async function (e) {
+        // Badge de Tabulados
+        if (e.target.classList.contains("badge-tabulado")) {
+            document.getElementById("infoModalLabel").textContent = "Detalle de la Relación con Tabulados"; // <-- Cambia el título
+            const idVar = e.target.getAttribute("data-idvar");
+            const modalBody = document.getElementById("infoModalBody");
+            modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
+
+            try {
+                // 1. Obtener relaciones var-tab
+                const resVarTab = await fetch('/api/var-tab');
+                const dataVarTab = await resVarTab.json();
+
+                // Filtrar todas las coincidencias por idVar
+                const relaciones = dataVarTab.filter(rel => rel.idVar === idVar);
+
+                if (relaciones.length === 0) {
+                    modalBody.innerHTML = "<div class='text-danger'>No hay tabulados relacionados con esta variable.</div>";
+                    return;
+                }
+
+                // 2. Obtener todos los tabulados
+                const resTabulados = await fetch('/api/tabulado');
+                const tabulados = await resTabulados.json();
+
+                // 3. Construir HTML con las ligas y nuevos campos
+                let contenido = "";
+
+                relaciones.forEach(rel => {
+                    const tabulado = tabulados.find(tab => tab.idTab === rel.idTab);
+                    if (tabulado && (tabulado.ligaTab || tabulado.ligaDescTab)) {
+                        contenido += `
+                            <div class="mb-3 border-bottom pb-2">
+                                ${tabulado.tituloTab ? `
+                                <strong>Título del tabulado:</strong><br>
+                                <span>${tabulado.tituloTab}</span><br>` : ''}
+                                <strong>ID Tabulado:</strong> ${rel.idTab}<br>
+                                <div class="row">
+                                    <div class="col-6">
+                                        ${tabulado.ligaTab ? `
+                                        <strong>Liga Tabulado INEGI:</strong><br>
+                                        <a href="${tabulado.ligaTab}" target="_blank" style="word-break: break-all;">Tabulado</a><br>` : ''}
+                                    </div>
+                                    <div class="col-6">
+                                        ${tabulado.ligaDescTab ? `
+                                        <strong>Liga de Descarga:</strong><br>
+                                        <a href="${tabulado.ligaDescTab}" target="_blank" style="word-break: break-all;">Documento Directo</a><br>` : ''}
+                                    </div>
+                                </div>
+                                ${(tabulado.numTab || tabulado.tipoTab) ? `
+                                <strong>Información adicional:</strong><br>
+                                ${tabulado.numTab ? `Número: ${tabulado.numTab}<br>` : ''}
+                                ${tabulado.tipoTab ? `Tipo: ${tabulado.tipoTab}<br>` : ''}` : ''}
+                            </div>
+                        `;
+                    }
+                });
+
+                modalBody.innerHTML = contenido || "<div class='text-danger'>No hay ligas disponibles para los tabulados relacionados.</div>";
+
+            } catch (error) {
+                console.error(error);
+                modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información.</div>";
+            }
+        }
+
+
+        // Badge de Microdatos
+        if (e.target.classList.contains("badge-microdatos")) {
+            document.getElementById("infoModalLabel").textContent = "Detalle de la Relación con Microdatos"; // <-- Cambia el título
+            const idVar = e.target.getAttribute("data-idvar");
+            const modalBody = document.getElementById("infoModalBody");
+            modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
+            try {
+                // Trae todos los microdatos y filtra por idVar
+                const res = await fetch(`/api/microdatos`);
+                const data = await res.json();
+                // Busca el microdato que corresponde a la variable
+                const info = Array.isArray(data)
+                    ? data.find(micro => String(micro.idVar) === String(idVar))
+                    : (data.idVar === idVar ? data : null);
+                if (info && (info.ligaMicro || info.ligaDd)) {
+                    modalBody.innerHTML = `
+                    <div class="mb-2">
+                        <strong class="mb-2">ID Variable:</strong><br> ${info.idVar}<br>
+                        <strong>Liga Microdatos:</strong><br>
+                        <a href="${info.ligaMicro}" target="_blank" style="word-break: break-all;">Página Microdatos INEGI</a>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Liga de Descarga:</strong><br>
+                        <a href="${info.ligaDd}" target="_blank" style="word-break: break-all;">Documento Directo</a>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Tabla donde se encuentra:</strong><br>
+                        ${info.nomTabla || "No disponible"}
+                    </div>
+                    <div class="mb-2">
+                        <strong>Se localiza en el Campo:</strong><br>
+                        ${info.nomCampo || "No disponible"}
+                    </div>
+                    <div class="mb-2">
+                        <strong>Comentario:</strong><br>
+                        ${info.comentMicro || "No disponible"}
+                    </div>
+                `;
+                } else {
+                    modalBody.innerHTML = "<div class='text-danger'>No hay información de microdatos disponible.</div>";
+                }
+            } catch {
+                modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información.</div>";
+            }
+        }
+    });
+
 });
 </script>
+
 
  <!--! FOOTER -->
  <div class="container-fluid" style="background-color: #5d5d5d">
@@ -1060,7 +1277,7 @@ searchForm.addEventListener("submit", function (e) {
               <ul class="nav flex-column">
                 <li class="nav-item mb-2"><a href="https://www.snieg.mx/cni/" target="_blank" class="nav-link p-0 text"
                     style="color: white; font-size: 14px; font-family: Helvetica, Sans-Serif;">Catálogo Nacional de Indicadores</a></li>
-                <li class="nav-item mb-2"><a href="https://www.cepal.org/es" target="_blank"
+                <li class="nav-item mb-2"
                     class="nav-link p-0 text" style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">CEPAL</a></li>
                 <li class="nav-item mb-2"><a href="https://www.un.org/sustainabledevelopment/es/objetivos-de-desarrollo-sostenible/" target="_blank" class="nav-link p-0 text"
                       style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">ODS-ONU</a></li>
@@ -1077,6 +1294,21 @@ searchForm.addEventListener("submit", function (e) {
       </div>
     </footer>
   </div>
+
+<!-- Modal para mostrar ligas -->
+<div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="infoModalLabel">Detalle</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body" id="infoModalBody">
+        
+      </div>
+    </div>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>   
 </body>

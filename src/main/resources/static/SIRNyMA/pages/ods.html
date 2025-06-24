@@ -9,9 +9,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link rel="stylesheet" href="../styles/ods.css">
     <style>
-      body, html {
-          font-family: Helvetica, Sans-Serif !important;
-      }
+       body, html {
+            font-family: Helvetica, Sans-Serif !important;
+            background-color: #f8f9fa;
+        }
     </style>
 </head>
 
@@ -70,8 +71,8 @@
               aria-controls="collapseExample"
               data-group="1_6"
               data-ods="1"
-            >
-            <div class="result-container mt-2" id="result-Objetivo1"></div>
+            >            
+           <div class="result-container mt-2" id="result-Objetivo1"></div>
             <div class="text-center mt-2">
               <strong>Total de Variables ODS 1: 
                 <span id="contador-ods-1" class="text-primary" 
@@ -88,7 +89,7 @@
                       data-bs-toggle="collapse" data-bs-target="#collapseExample2" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="2" data-group="1_6">
                   </div>
-                  <div class="result-container mt-3" id="result-Objetivo2"></div>
+                  <div class="result-container mt-2" id="result-Objetivo2"></div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 2: 
                       <span id="contador-ods-2" class="text-primary" 
@@ -105,6 +106,7 @@
                       data-bs-toggle="collapse" data-bs-target="#collapseExample3" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="3" data-group="1_6">
                   </div>
+                  <div class="result-container mt-2" id="result-Objetivo3"></div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 3: 
                       <span id="contador-ods-3" class="text-primary" 
@@ -121,6 +123,7 @@
                       data-bs-toggle="collapse" data-bs-target="#collapseExample4" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="4" data-group="1_6">
                   </div>
+                  <div class="result-container mt-2" id="result-Objetivo4"></div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 4: 
                       <span id="contador-ods-4" class="text-primary" 
@@ -137,6 +140,7 @@
                       data-bs-toggle="collapse" data-bs-target="#collapseExample5" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="5" data-group="1_6">
                   </div>
+                  <div class="result-container mt-2" id="result-Objetivo5"></div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 5: 
                       <span id="contador-ods-5" class="text-primary" 
@@ -153,6 +157,7 @@
                       data-bs-toggle="collapse" data-bs-target="#collapseExample6" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="6" data-group="1_6">
                   </div>
+                  <div class="result-container mt-2" id="result-Objetivo6"></div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 6: 
                       <span id="contador-ods-6" class="text-primary" 
@@ -178,6 +183,7 @@
                       <option value="20">20</option>
                     </select>
                   </div>
+                  <div id="chartArea1_6" class="d-flex justify-content-center my-4"></div>
                   <div id="OdsContainer1_6"></div>
                   <nav>
                     <ul class="pagination justify-content-center mt-4" id="pagination1_6"></ul>
@@ -195,6 +201,7 @@
                       data-bs-toggle="collapse" data-bs-target="#collapseExample7" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="7" data-group="7_12">
                   </div>
+                  <div class="result-container mt-2" id="result-Objetivo7"></div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 7: 
                       <span id="contador-ods-7" class="text-primary" 
@@ -210,6 +217,7 @@
                     <img class="img-fluid rounded shadow-sm hover-animate" src="/assets/ODS0080_es.jpg" style="max-width: 160px;" type="button"
                       data-bs-toggle="collapse" data-bs-target="#collapseExample8" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="8" data-group="7_12">
+                      <div class="result-container mt-2" id="result-Objetivo8"></div>
                   </div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 8: 
@@ -226,6 +234,7 @@
                     <img class="img-fluid rounded shadow-sm hover-animate" src="/assets/ODS0090_es.jpg" style="max-width: 160px;" type="button"
                       data-bs-toggle="collapse" data-bs-target="#collapseExample9" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="9" data-group="7_12">
+                      <div class="result-container mt-2" id="result-Objetivo9"></div>
                   </div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 9: 
@@ -242,6 +251,7 @@
                     <img class="img-fluid rounded shadow-sm hover-animate" src="/assets/ODS0100_es.jpg" style="max-width: 160px;" type="button"
                       data-bs-toggle="collapse" data-bs-target="#collapseExample10" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="10" data-group="7_12">
+                      <div class="result-container mt-2" id="result-Objetivo10"></div>
                   </div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 10: 
@@ -258,6 +268,7 @@
                     <img class="img-fluid rounded shadow-sm hover-animate" src="/assets/ODS0110_es.jpg" style="max-width: 160px;" type="button"
                       data-bs-toggle="collapse" data-bs-target="#collapseExample11" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="11" data-group="7_12">
+                      <div class="result-container mt-2" id="result-Objetivo11"></div>
                   </div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 11: 
@@ -274,6 +285,7 @@
                     <img class="img-fluid rounded shadow-sm hover-animate" src="/assets/ODS0120_es.jpg" style="max-width: 160px;" type="button"
                       data-bs-toggle="collapse" data-bs-target="#collapseExample12" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="12" data-group="7_12">
+                      <div class="result-container mt-2" id="result-Objetivo12"></div>
                   </div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 12: 
@@ -300,6 +312,7 @@
                       <option value="20">20</option>
                     </select>
                   </div>
+                  <div id="chartArea7_12" class="d-flex justify-content-center my-4"></div>
                   <div id="OdsContainer7_12"></div>
                   <nav>
                     <ul class="pagination justify-content-center mt-4" id="pagination7_12"></ul>
@@ -318,6 +331,7 @@
                     <img class="img-fluid rounded shadow-sm hover-animate" src="/assets/ODS0130_es.jpg" style="max-width: 160px;" type="button"
                       data-bs-toggle="collapse" data-bs-target="#collapseExample13" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="13" data-group="13_17">
+                      <div class="result-container mt-2" id="result-Objetivo13"></div>
                   </div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 13: 
@@ -333,6 +347,7 @@
                     <img class="img-fluid rounded shadow-sm hover-animate" src="/assets/ODS0140_es.jpg" style="max-width: 160px;" type="button"
                       data-bs-toggle="collapse" data-bs-target="#collapseExample14" aria-expanded="false"
                       aria-controls="collapseExample"  data-ods="14" data-group="13_17">
+                      <div class="result-container mt-2" id="result-Objetivo14"></div>
                   </div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 14: 
@@ -348,6 +363,7 @@
                     <img class="img-fluid rounded shadow-sm hover-animate" src="/assets/ODS0150_es.jpg" style="max-width: 160px;" type="button"
                       data-bs-toggle="collapse" data-bs-target="#collapseExample15" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="15" data-group="13_17">
+                      <div class="result-container mt-2" id="result-Objetivo15"></div>
                   </div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 15: 
@@ -363,6 +379,7 @@
                     <img class="img-fluid rounded shadow-sm hover-animate" src="/assets/ODS0160_es.jpg" style="max-width: 160px;" type="button"
                       data-bs-toggle="collapse" data-bs-target="#collapseExample16" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="16" data-group="13_17">
+                      <div class="result-container mt-2" id="result-Objetivo16"></div>
                   </div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 16: 
@@ -378,12 +395,12 @@
                     <img class="img-fluid rounded shadow-sm hover-animate" src="/assets/ODS0170_es.jpg" style="max-width: 160px;" type="button"
                       data-bs-toggle="collapse" data-bs-target="#collapseExample17" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="17" data-group="13_17">
+                      <div class="result-container mt-2" id="result-Objetivo17"></div>
                   </div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 17: 
                       <span id="contador-ods-17" class="text-primary" 
                         style="text-decoration: underline; font-size: 1.1rem; font-family: Monaco, monospace;">
-                        0
                       </span>
                     </strong>
                   </div>
@@ -398,6 +415,7 @@
               </div>
 
                 <!-- Sección de variables relacionadas -->
+                <!-- Contenedor dinámico para ODS 13 al 17 -->
                 <div class="container mt-4 d-none" id="contenedorGrupo13_17">
                   <div class="card shadow-sm border-0">
                     <div class="card-body">
@@ -408,6 +426,7 @@
                           <option value="20">20</option>
                         </select>
                       </div>
+                      <div id="chartArea13_17" class="d-flex justify-content-center my-4"></div>
                       <div id="OdsContainer13_17"></div>
                       <nav>
                         <ul class="pagination justify-content-center mt-4" id="pagination13_17"></ul>
@@ -418,202 +437,350 @@
         </div>
   </div>
 
-    <script>
+<script>
 
-// Script para el navbar
   document.addEventListener("DOMContentLoaded", function () {
-                const currentPath = window.location.pathname.split("/").pop();
-                const navLinks = document.querySelectorAll(".navbar-nav .nav-link");
+      // Activar link activo
+      const currentPath = window.location.pathname.split("/").pop();
+      const navLinks = document.querySelectorAll(".navbar-nav .nav-link");
+      navLinks.forEach(link => {
+        const href = link.getAttribute("href");
+        if (href === currentPath) link.classList.add("active");
+      });
 
-                navLinks.forEach(link => {
-                const href = link.getAttribute("href");
-                if (href === currentPath) {
-                    link.classList.add("active");
-                }
-                });
-            });
+      // Variables globales
+      let data = [];
+      let filteredData = {};
+      let itemsPerPage = 10;
+      let currentPage = 1;
 
-    document.addEventListener("DOMContentLoaded", function () {
-        let data = [];
-        let filteredData = {};
-        let itemsPerPage = 10; // Número de elementos por página por defecto
-        let currentPage = 1; // Página actual
+      // Función para contar metas por ODS
+      function contarMetasEspecificasPorODS(data) {
+      const contador = {};
 
-        // Obtener los datos de la API
-        fetch("/api/ods")
-            .then(response => response.json())
-            .then(responseData => {
-                data = responseData;
+      data.forEach(variable => {
+        const metaCompleta = variable.meta; 
 
-                // Filtrar los datos por "Meta ODS detectada" y agruparlos por número de meta
-                filteredData = data.reduce((acc, item) => {
-                    const metaNumber = item.meta.match(/\d+/)?.[0]; // Extraer el número de la meta
-                    if (metaNumber) {
-                        if (!acc[metaNumber]) acc[metaNumber] = [];
-                        acc[metaNumber].push(item);
-                    }
-                    return acc;
-                }, {});
+        if (metaCompleta && metaCompleta.startsWith("Meta_")) {
+          const meta = metaCompleta.replace("Meta_", ""); 
+          const [ods] = meta.split("."); 
 
-                console.log("Datos agrupados por meta ODS:", filteredData);
-            })
-            .catch(error => console.error("Error al obtener los datos de la API:", error));
+          if (!contador[ods]) contador[ods] = {};
+          if (!contador[ods][meta]) contador[ods][meta] = 0;
 
-        // Agregar eventos a las imágenes con data-ods y data-group
-        document.querySelectorAll("img[data-ods]").forEach(img => {
-          img.addEventListener("click", function () {
-            const ods = this.getAttribute("data-ods");
-            const group = this.getAttribute("data-group");
-            const contenedorId = `contenedorGrupo${group}`;
-            const container = document.getElementById(`OdsContainer${group}`);
-            const paginationContainer = document.getElementById(`pagination${group}`);
+          contador[ods][meta]++;
+        }
+      });
 
-            // Oculta todos los contenedores
-            document.querySelectorAll('[id^="contenedorGrupo"]').forEach(div => {
-              div.classList.add('d-none');
-            });
-
-            // Si ya se mostró ese meta y vuelve a hacer clic, oculta el contenedor
-            if (document.getElementById(contenedorId).dataset.meta === ods) {
-              container.innerHTML = "";
-              paginationContainer.innerHTML = "";
-              document.getElementById(contenedorId).classList.add("d-none");
-              delete document.getElementById(contenedorId).dataset.meta;
-              return;
-            }
-
-            // Mostrar el contenedor deseado
-            const target = document.getElementById(contenedorId);
-            if (target) {
-              target.classList.remove("d-none");
-              target.dataset.meta = ods;
-
-              if (ods && filteredData[ods]) {
-                renderItems(filteredData[ods], container, paginationContainer, ods);
-                target.scrollIntoView({ behavior: "smooth" });
-              } else {
-                container.innerHTML = "<p class='text-center'>No hay datos disponibles para este objetivo.</p>";
-                paginationContainer.innerHTML = "";
-              }
-            }
-          });
-        });
-
-
-        document.getElementById("itemsPerPage").addEventListener("change", function () {
-          itemsPerPage = parseInt(this.value, 10);
-          currentPage = 1;
-
-          const visibleContainer = [...document.querySelectorAll('[id^="contenedorGrupo"]')]
-            .find(div => !div.classList.contains("d-none"));
-
-          if (visibleContainer) {
-            const group = visibleContainer.id.replace("contenedorGrupo", "");
-            const container = document.getElementById(`OdsContainer${group}`);
-            const paginationContainer = document.getElementById(`pagination${group}`);
-            const targetMeta = visibleContainer.dataset.meta;
-
-            if (targetMeta && filteredData[targetMeta]) {
-              renderItems(filteredData[targetMeta], container, paginationContainer, targetMeta);
-            }
-          }
-        });
-
-
-    // Actualizar el número total de variables mostradas
-    function updateVariableCounter(metaNumber, count) {
-      const counterElement = document.getElementById(`contador-ods-${metaNumber}`);
-                  if (counterElement) {
-                    counterElement.textContent = count;
-       }
+      return contador;
     }
 
-        // Renderizar los elementos relacionados en el contenedor correspondiente
-        function renderItems(items, container, paginationContainer, metaNumber) {
-            container.innerHTML = ""; // Limpiar el contenedor
-            paginationContainer.innerHTML = ""; // Limpiar el paginador
 
-            // Paginación
-            const totalPages = Math.ceil(items.length / itemsPerPage);
+      function updateVariableCounter(metaNumber, count) {
+        const counterElement = document.getElementById(`contador-ods-${metaNumber}`);
+        if (counterElement) counterElement.textContent = count;
+      }
 
-            function renderPage(page) {
-                container.innerHTML = ""; // Limpiar el contenedor
-                const start = (page - 1) * itemsPerPage;
-                const end = start + itemsPerPage;
-                const pageItems = items.slice(start, end);
+      function renderItems(items, container, paginationContainer, metaNumber) {
+        container.innerHTML = "";
+        paginationContainer.innerHTML = "";
+        const totalPages = Math.ceil(items.length / itemsPerPage);
 
-                updateVariableCounter(metaNumber, items.length);
+        function renderPage(page) {
+          container.innerHTML = "";
+          const start = (page - 1) * itemsPerPage;
+          const end = start + itemsPerPage;
+          const pageItems = items.slice(start, end);
 
-                pageItems.forEach((item, index) => {
-                    const card = document.createElement("div");
-                    card.classList.add("col-12", "mb-3");
+          updateVariableCounter(metaNumber, items.length);
 
-                    card.innerHTML = `
-                          <div class="card shadow-sm border-0 rounded-4">
-                            <div class="card-body">
-                              <h5 class="card-title fw-bold text-primary mb-3">${item.varAsig}</h5>
-                              
-                              <p class="card-text mb-2">
-                                <span class="fw-semibold text-success">ODS:</span> ${item.ods.replace(/_/g, ' ')}
-                              </p>
-
-                              <p class="card-text mb-3">
-                                <span class="fw-semibold text-secondary">Meta ODS detectada:</span> ${item.meta.replace(/_/g, ' ')}
-                              </p>
-
-                              <h6 class="text-uppercase text-muted small mb-2">Clasificación Temática</h6>
-                              <ul class="list-unstyled ps-3">
-                                <li class="mb-1">
-                                  <i class="bi bi-check-circle text-success me-1"></i>
-                                  <strong>Indicador ODS:</strong> ${item.indicador.replace(/_/g, ' ')}
-                                </li>
-                                <li class="mb-1">
-                                  <i class="bi bi-graph-up-arrow text-warning me-1"></i>
-                                  <strong>Nivel de Contribución:</strong> ${item.nivContOdss}
-                                </li>
-                                <li class="mb-1">
-                                  <i class="bi bi-chat-left-text text-info me-1"></i>
-                                  <strong>Comentario:</strong> ${item.comentOds}
-                                </li>
-                              </ul>
-                            </div>
-                          </div>
-                        `;
-                    container.appendChild(card);
-                });
-            }
-
-            function renderPagination() {
-                paginationContainer.innerHTML = ""; // Limpiar el paginador
-
-                for (let i = 1; i <= totalPages; i++) {
-                    const li = document.createElement("li");
-                    li.classList.add("page-item");
-                    if (i === currentPage) li.classList.add("active");
-
-                    const a = document.createElement("a");
-                    a.classList.add("page-link");
-                    a.href = "#";
-                    a.textContent = i;
-                    a.addEventListener("click", (e) => {
-                        e.preventDefault();
-                        currentPage = i;
-                        renderPage(currentPage);
-                        renderPagination();
-                    });
-
-                    li.appendChild(a);
-                    paginationContainer.appendChild(li);
-                }
-            }
-
-            renderPage(currentPage);
-            if (totalPages > 1) renderPagination(); // Mostrar paginador solo si hay más de una página
+          pageItems.forEach(item => {
+            const card = document.createElement("div");
+            card.classList.add("col-12", "mb-3");
+            card.innerHTML = `
+              <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body">
+                  <h5 class="card-title fw-bold text-primary mb-3">${item.varAsig}</h5>
+                  <p class="card-text mb-2">
+                    <span class="fw-semibold text-success">ODS:</span> ${item.ods.replace(/_/g, ' ')}
+                  </p>
+                  <p class="card-text mb-3">
+                    <span class="fw-semibold text-secondary">Meta ODS detectada:</span> ${item.meta.replace(/_/g, ' ')}
+                  </p>
+                  <h6 class="text-uppercase text-muted small mb-2">Clasificación Temática</h6>
+                  <ul class="list-unstyled ps-3">
+                    <li class="mb-1"><i class="bi bi-check-circle text-success me-1"></i><strong>Indicador ODS:</strong> ${item.indicador.replace(/_/g, ' ')}</li>
+                    <li class="mb-1"><i class="bi bi-graph-up-arrow text-warning me-1"></i><strong>Nivel de Contribución:</strong> ${item.nivContOdss}</li>
+                    <li class="mb-1"><i class="bi bi-chat-left-text text-info me-1"></i><strong>Comentario:</strong> ${item.comentOds}</li>
+                  </ul>
+                </div>
+              </div>`;
+            container.appendChild(card);
+          });
         }
+
+        function renderPagination() {
+          paginationContainer.innerHTML = "";
+          const maxPagesToShow = 10;
+          let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+          let endPage = startPage + maxPagesToShow - 1;
+
+          if (endPage > totalPages) {
+            endPage = totalPages;
+            startPage = Math.max(1, endPage - maxPagesToShow + 1);
+          }
+
+          // Botón de página 1 y puntos suspensivos al inicio
+          if (startPage > 1) {
+            addPageButton(1);
+            if (startPage > 2) addEllipsis();
+          }
+
+          // Botones de páginas visibles
+          for (let i = startPage; i <= endPage; i++) {
+            addPageButton(i);
+          }
+
+          // Puntos suspensivos y botón de última página
+          if (endPage < totalPages) {
+            if (endPage < totalPages - 1) addEllipsis();
+            addPageButton(totalPages);
+          }
+
+          function addPageButton(page) {
+            const li = document.createElement("li");
+            li.classList.add("page-item");
+            if (page === currentPage) li.classList.add("active");
+            const a = document.createElement("a");
+            a.classList.add("page-link");
+            a.href = "#";
+            a.textContent = page;
+            a.addEventListener("click", e => {
+              e.preventDefault();
+              currentPage = page;
+              renderPage(currentPage);
+              renderPagination();
+            });
+            li.appendChild(a);
+            paginationContainer.appendChild(li);
+          }
+
+          function addEllipsis() {
+            const li = document.createElement("li");
+            li.classList.add("page-item", "disabled");
+            const span = document.createElement("span");
+            span.classList.add("page-link");
+            span.textContent = "...";
+            li.appendChild(span);
+            paginationContainer.appendChild(li);
+          }
+        }
+
+        renderPage(currentPage);
+        if (totalPages > 1) renderPagination();
+        }
+      
+
+      // Fetch data y mostrar contadores
+      fetch("/api/ods")
+        .then(response => response.json())
+        .then(responseData => {
+          data = responseData;
+
+          // Agrupar por número de meta
+          filteredData = data.reduce((acc, item) => {
+            const metaNumber = item.meta.match(/\d+/)?.[0];
+            if (metaNumber) {
+              if (!acc[metaNumber]) acc[metaNumber] = [];
+              acc[metaNumber].push(item);
+            }
+            return acc;
+          }, {});
+
+          // Mostrar contador total por meta
+          for (const meta in filteredData) {
+            const count = filteredData[meta].length;
+            const counterElement = document.getElementById(`contador-ods-${meta}`);
+            if (counterElement) counterElement.textContent = count;
+          }
+
+          // Mostrar metas específicas
+          const metasPorODS = contarMetasEspecificasPorODS(data);
+          console.log("Metas por ODS:", metasPorODS);
+          for (const ods in metasPorODS) {
+            const metaObj = metasPorODS[ods];
+            const container = document.getElementById(`result-Objetivo${ods}`);
+            if (container) {
+              container.innerHTML = "<h6 class='fw-bold text-muted mb-2'>Metas ODS detectadas:</h6><ul class='list-unstyled'>";
+              for (const meta in metaObj) {
+                container.innerHTML += `
+                  <li class="mb-1">
+                    <i class="bi bi-check-circle-fill text-success me-1"></i>
+                    <strong>${meta}:</strong> ${metaObj[meta]} variable(s)
+                  </li>`;
+              }
+              container.innerHTML += "</ul>";
+            }
+
+            // Crear nuevo canvas
+            const canvas = document.createElement("canvas");
+            canvas.id = `grafico-ods-${ods}`;
+            canvas.style.maxHeight = "500px";
+            canvas.style.maxWidth = "800px";
+            canvas.style.width = "100%";
+            canvas.style.display = "none"; // Oculto por defecto
+
+            // Determinar el área de gráfico según el grupo
+            let chartAreaId = "";
+            if (ods >= 1 && ods <= 6) chartAreaId = "chartArea1_6";
+            else if (ods >= 7 && ods <= 12) chartAreaId = "chartArea7_12";
+            else if (ods >= 13 && ods <= 17) chartAreaId = "chartArea13_17";
+
+            if (chartAreaId) {
+              const chartArea = document.getElementById(chartAreaId);
+              if (chartArea) {
+                chartArea.appendChild(canvas);
+              }
+            }
+
+            // Definir colores únicos por ODS (puedes ajustar)
+            const colorBase = {
+              "1": "rgba(255, 99, 132, 0.7)",
+              "2": "rgba(255, 159, 64, 0.7)",
+              "3": "rgba(255, 205, 86, 0.7)",
+              "4": "rgba(75, 192, 192, 0.7)",
+              "5": "rgba(54, 162, 235, 0.7)",
+              "6": "rgba(153, 102, 255, 0.7)",
+              "7": "rgba(201, 203, 207, 0.7)",
+              "8": "rgba(100, 181, 246, 0.7)",
+              "9": "rgba(255, 112, 67, 0.7)",
+              "10": "rgba(124, 179, 66, 0.7)",
+              "11": "rgba(0, 172, 193, 0.7)",
+              "12": "rgba(255, 238, 88, 0.7)",
+              "13": "rgba(67, 160, 71, 0.7)",
+              "14": "rgba(41, 182, 246, 0.7)",
+              "15": "rgba(139, 195, 74, 0.7)",
+              "16": "rgba(121, 85, 72, 0.7)",
+              "17": "rgba(156, 39, 176, 0.7)"
+            };
+
+            const color = colorBase[ods] || "rgba(229, 35, 61, 0.7)";
+
+            // Crear gráfico
+            new Chart(canvas, {
+              type: "bar",
+              data: {
+                labels: Object.keys(metaObj).map(meta => `Meta ${meta}`),
+                datasets: [{
+                  label: "Variables por Meta",
+                  data: Object.values(metaObj),
+                  backgroundColor: color,
+                  borderColor: color.replace("0.7", "1"),
+                  borderWidth: 1,
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  x: {
+                    ticks: {
+                      autoSkip: false,
+                      maxRotation: 45,
+                      minRotation: 0
+                    }
+                  },
+                  y: {
+                    beginAtZero: true,
+                    title: {
+                      display: true,
+                      text: "Número de variables"
+                    }
+                  }
+                },
+                plugins: {
+                  legend: {
+                    display: false
+                  },
+                  tooltip: {
+                    callbacks: {
+                      label: context => `${context.parsed.y} variable(s)`
+                    }
+                  }
+                }
+              }
+            });
+
+          }
+        })
         
+        .catch(error => console.error("Error al obtener los datos de la API:", error));
+
+      // Eventos de clic en imágenes
+      document.querySelectorAll("img[data-ods]").forEach(img => {
+        img.addEventListener("click", function () {
+          const ods = this.getAttribute("data-ods");
+          const group = this.getAttribute("data-group");
+          const contenedorId = `contenedorGrupo${group}`;
+          const container = document.getElementById(`OdsContainer${group}`);
+          const paginationContainer = document.getElementById(`pagination${group}`);
+
+          document.querySelectorAll('[id^="contenedorGrupo"]').forEach(div => div.classList.add('d-none'));
+
+          const contenedor = document.getElementById(contenedorId);
+          const grafico = document.getElementById(`grafico-ods-${ods}`);
+
+          if (contenedor.dataset.meta === ods) {
+            container.innerHTML = "";
+            paginationContainer.innerHTML = "";
+            contenedor.classList.add("d-none");
+            delete contenedor.dataset.meta;
+            // Oculta el gráfico también
+            if (grafico) grafico.style.display = "none";
+            return;
+          }
+
+          if (contenedor) {
+            contenedor.classList.remove("d-none");
+            contenedor.dataset.meta = ods;
+            if (filteredData[ods]) {
+              renderItems(filteredData[ods], container, paginationContainer, ods);
+              contenedor.scrollIntoView({ behavior: "smooth" });
+            } else {
+              container.innerHTML = "<p class='text-center'>No hay datos disponibles para este objetivo.</p>";
+              paginationContainer.innerHTML = "";
+            }
+          }
+          // Oculta todos los gráficos
+          document.querySelectorAll("canvas[id^='grafico-ods-']").forEach(c => c.style.display = "none");
+          // Muestra solo el gráfico correspondiente en el área de cards
+          if (grafico) grafico.style.display = "block";
+        });
+      });
+
+      // Cambio de cantidad por página
+      document.getElementById("itemsPerPage").addEventListener("change", function () {
+        itemsPerPage = parseInt(this.value, 10);
+        currentPage = 1;
+        const visibleContainer = [...document.querySelectorAll('[id^="contenedorGrupo"]')]
+          .find(div => !div.classList.contains("d-none"));
+
+        if (visibleContainer) {
+          const group = visibleContainer.id.replace("contenedorGrupo", "");
+          const container = document.getElementById(`OdsContainer${group}`);
+          const paginationContainer = document.getElementById(`pagination${group}`);
+          const targetMeta = visibleContainer.dataset.meta;
+
+          if (targetMeta && filteredData[targetMeta]) {
+            renderItems(filteredData[targetMeta], container, paginationContainer, targetMeta);
+          }
+        }
+      });
+
     });
+
 </script>
-  
+
  <!--! FOOTER -->
     <div class="container-fluid" style="background-color: #5d5d5d">
        <footer class="bd-footer">
@@ -664,7 +831,45 @@
        </footer>
      </div>
      
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.min.js" integrity="sha512-L0Shl7nXXzIlBSUUPpxrokqq4ojqgZFQczTYlGjzONGTDAcLremjwaWv5A+EDLnxhQzY5xUZPWLOLqYRkY0Cbw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>   
-   </body>
+
+
+<!-- Botón flotante de scroll -->
+<button id="scrollBtn" type="button" class="btn btn-primary rounded-circle shadow"
+  style="position: fixed; bottom: 30px; right: 30px; z-index: 9999; width: 56px; height: 56px; display: none;">
+  <i id="scrollBtnIcon" class="bi bi-arrow-down"></i>
+</button>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const scrollBtn = document.getElementById("scrollBtn");
+  const scrollBtnIcon = document.getElementById("scrollBtnIcon");
+
+  // Mostrar/ocultar botón y cambiar icono según posición
+  window.addEventListener("scroll", function () {
+    if (window.scrollY > 100 && (window.innerHeight + window.scrollY) < document.body.offsetHeight - 100) {
+      scrollBtn.style.display = "block";
+      scrollBtnIcon.className = "bi bi-arrow-down";
+      scrollBtn.setAttribute("data-direction", "down");
+    } else if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100) {
+      scrollBtn.style.display = "block";
+      scrollBtnIcon.className = "bi bi-arrow-up";
+      scrollBtn.setAttribute("data-direction", "up");
+    } else {
+      scrollBtn.style.display = "none";
+    }
+  });
+
+  // Acción del botón
+  scrollBtn.addEventListener("click", function () {
+    if (scrollBtn.getAttribute("data-direction") === "down") {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  });
+});
+</script>
+</body>
 </html>
