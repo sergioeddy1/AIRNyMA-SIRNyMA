@@ -49,10 +49,30 @@
           </div>
         </div>
       </nav>
+
+
+<!--Imagen encabezado de Variables-->
+    <div class="container-fluid p-0">
+        <div style="position: relative; width: 100%; height: 300px; overflow: hidden;">
+            <img src="/assets/HeaderOds.png" alt="Encabezado" style="width: 100%; height: 100%; object-fit: cover; filter: blur(4px);">
+            <div style="position: absolute; top: 120px ; left: 550px; text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.514); font-family: 'Montserrat', sans-serif; 
+                font-weight: 700;
+                font-size: 2.8rem;
+                background: linear-gradient(90deg, #ff4c4c, #ffcc00, #33cc66, #33ccff);
+                -webkit-background-clip: text;
+                background-clip: text;
+                -webkit-text-fill-color: transparent;
+                text-align: center;
+                margin-top: 20px;
+                letter-spacing: 1px;">
+                Objetivos del Desarrollo Sostenible (ODS)
+            </div>
+        </div>
+    </div> 
+    
       
       <div class="container mt-5 mb-5">
-        <h2 class="text-center mb-5">Objetivos del Desarrollo Sostenible</h2>
-      
+        
         <!-- Grid de objetivos ODS -->
 
     <!-- Objetivos del 1 al 6 -->
@@ -72,7 +92,8 @@
               data-group="1_6"
               data-ods="1"
             >            
-           <div class="result-container mt-2" id="result-Objetivo1"></div>
+           <div class="result-container mt-2" > 
+           </div>
             <div class="text-center mt-2">
               <strong>Total de Variables ODS 1: 
                 <span id="contador-ods-1" class="text-primary" 
@@ -89,7 +110,7 @@
                       data-bs-toggle="collapse" data-bs-target="#collapseExample2" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="2" data-group="1_6">
                   </div>
-                  <div class="result-container mt-2" id="result-Objetivo2"></div>
+                  <div class="result-container mt-2"></div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 2: 
                       <span id="contador-ods-2" class="text-primary" 
@@ -106,7 +127,7 @@
                       data-bs-toggle="collapse" data-bs-target="#collapseExample3" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="3" data-group="1_6">
                   </div>
-                  <div class="result-container mt-2" id="result-Objetivo3"></div>
+                  <div class="result-container mt-2"></div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 3: 
                       <span id="contador-ods-3" class="text-primary" 
@@ -123,7 +144,7 @@
                       data-bs-toggle="collapse" data-bs-target="#collapseExample4" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="4" data-group="1_6">
                   </div>
-                  <div class="result-container mt-2" id="result-Objetivo4"></div>
+                  <div class="result-container mt-2"></div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 4: 
                       <span id="contador-ods-4" class="text-primary" 
@@ -140,7 +161,7 @@
                       data-bs-toggle="collapse" data-bs-target="#collapseExample5" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="5" data-group="1_6">
                   </div>
-                  <div class="result-container mt-2" id="result-Objetivo5"></div>
+                  <div class="result-container mt-2"></div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 5: 
                       <span id="contador-ods-5" class="text-primary" 
@@ -157,7 +178,7 @@
                       data-bs-toggle="collapse" data-bs-target="#collapseExample6" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="6" data-group="1_6">
                   </div>
-                  <div class="result-container mt-2" id="result-Objetivo6"></div>
+                  <div class="result-container mt-2"></div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 6: 
                       <span id="contador-ods-6" class="text-primary" 
@@ -172,18 +193,28 @@
 
               </div>
 
+              <!-- Contador de Metas Ods Especificas -->
               <!-- Contenedor dinámico para ODS 1 al 6 -->
-            <div class="container mt-4 d-none" id="contenedorGrupo1_6">
+            <div class="container mt-4 mb-3 d-none" id="contenedorGrupo1_6">
               <div class="card shadow-sm border-0">
                 <div class="card-body">
+                  <div>
+                    <!-- Etiqueta para manejar las propiedades del titulo del ODS HTML -->
+                      <h6 id="odsDynamicTitle1_6" class="justificado mb-3" style="background-color: #33ccff; color: white; padding: 10px;"></h6>
+                  </div>
                   <div class="d-flex justify-content-end align-items-center mb-3">
+                    
                     <label for="itemsPerPage1" class="me-2 mb-0">Mostrar:</label>
                     <select id="itemsPerPage1" class="form-select w-auto">
                       <option value="10">10</option>
                       <option value="20">20</option>
                     </select>
                   </div>
-                  <div id="chartArea1_6" class="d-flex justify-content-center my-4"></div>
+                  <!-- Ejemplo para ODS 1 al 6 -->
+                  <div class="d-flex align-items-start my-4">
+                    <div id="metasResumen1_6" style="min-width:220px;max-width:320px;"></div>
+                    <div id="chartArea1_6" class="flex-grow-1 d-flex justify-content-center"></div>
+                  </div>
                   <div id="OdsContainer1_6"></div>
                   <nav>
                     <ul class="pagination justify-content-center mt-4" id="pagination1_6"></ul>
@@ -201,7 +232,7 @@
                       data-bs-toggle="collapse" data-bs-target="#collapseExample7" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="7" data-group="7_12">
                   </div>
-                  <div class="result-container mt-2" id="result-Objetivo7"></div>
+                  <div class="result-container mt-2" ></div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 7: 
                       <span id="contador-ods-7" class="text-primary" 
@@ -217,7 +248,7 @@
                     <img class="img-fluid rounded shadow-sm hover-animate" src="/assets/ODS0080_es.jpg" style="max-width: 160px;" type="button"
                       data-bs-toggle="collapse" data-bs-target="#collapseExample8" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="8" data-group="7_12">
-                      <div class="result-container mt-2" id="result-Objetivo8"></div>
+                      <div class="result-container mt-2" ></div>
                   </div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 8: 
@@ -234,7 +265,7 @@
                     <img class="img-fluid rounded shadow-sm hover-animate" src="/assets/ODS0090_es.jpg" style="max-width: 160px;" type="button"
                       data-bs-toggle="collapse" data-bs-target="#collapseExample9" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="9" data-group="7_12">
-                      <div class="result-container mt-2" id="result-Objetivo9"></div>
+                      <div class="result-container mt-2" ></div>
                   </div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 9: 
@@ -251,7 +282,7 @@
                     <img class="img-fluid rounded shadow-sm hover-animate" src="/assets/ODS0100_es.jpg" style="max-width: 160px;" type="button"
                       data-bs-toggle="collapse" data-bs-target="#collapseExample10" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="10" data-group="7_12">
-                      <div class="result-container mt-2" id="result-Objetivo10"></div>
+                      <div class="result-container mt-2" ></div>
                   </div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 10: 
@@ -268,7 +299,7 @@
                     <img class="img-fluid rounded shadow-sm hover-animate" src="/assets/ODS0110_es.jpg" style="max-width: 160px;" type="button"
                       data-bs-toggle="collapse" data-bs-target="#collapseExample11" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="11" data-group="7_12">
-                      <div class="result-container mt-2" id="result-Objetivo11"></div>
+                      <div class="result-container mt-2"></div>
                   </div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 11: 
@@ -285,7 +316,7 @@
                     <img class="img-fluid rounded shadow-sm hover-animate" src="/assets/ODS0120_es.jpg" style="max-width: 160px;" type="button"
                       data-bs-toggle="collapse" data-bs-target="#collapseExample12" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="12" data-group="7_12">
-                      <div class="result-container mt-2" id="result-Objetivo12"></div>
+                      <div class="result-container mt-2" ></div>
                   </div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 12: 
@@ -305,6 +336,9 @@
             <div class="container mt-4 d-none" id="contenedorGrupo7_12">
               <div class="card shadow-sm border-0">
                 <div class="card-body">
+                  <div>
+                      <h6 id="odsDynamicTitle7_12" class="justificado mb-3"></h6>
+                  </div>
                   <div class="d-flex justify-content-end align-items-center mb-3">
                     <label for="itemsPerPage2" class="me-2 mb-0">Mostrar:</label>
                     <select id="itemsPerPage2" class="form-select w-auto">
@@ -312,7 +346,11 @@
                       <option value="20">20</option>
                     </select>
                   </div>
-                  <div id="chartArea7_12" class="d-flex justify-content-center my-4"></div>
+                  <!-- Ejemplo para ODS 7 al 12 -->
+                  <div class="d-flex align-items-start my-4">
+                    <div id="metasResumen7_12" style="min-width:220px;max-width:320px;"></div>
+                    <div id="chartArea7_12" class="flex-grow-1 d-flex justify-content-center"></div>
+                  </div>
                   <div id="OdsContainer7_12"></div>
                   <nav>
                     <ul class="pagination justify-content-center mt-4" id="pagination7_12"></ul>
@@ -331,7 +369,7 @@
                     <img class="img-fluid rounded shadow-sm hover-animate" src="/assets/ODS0130_es.jpg" style="max-width: 160px;" type="button"
                       data-bs-toggle="collapse" data-bs-target="#collapseExample13" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="13" data-group="13_17">
-                      <div class="result-container mt-2" id="result-Objetivo13"></div>
+                      <div class="result-container mt-2" ></div>
                   </div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 13: 
@@ -347,7 +385,7 @@
                     <img class="img-fluid rounded shadow-sm hover-animate" src="/assets/ODS0140_es.jpg" style="max-width: 160px;" type="button"
                       data-bs-toggle="collapse" data-bs-target="#collapseExample14" aria-expanded="false"
                       aria-controls="collapseExample"  data-ods="14" data-group="13_17">
-                      <div class="result-container mt-2" id="result-Objetivo14"></div>
+                      <div class="result-container mt-2"></div>
                   </div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 14: 
@@ -363,7 +401,7 @@
                     <img class="img-fluid rounded shadow-sm hover-animate" src="/assets/ODS0150_es.jpg" style="max-width: 160px;" type="button"
                       data-bs-toggle="collapse" data-bs-target="#collapseExample15" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="15" data-group="13_17">
-                      <div class="result-container mt-2" id="result-Objetivo15"></div>
+                      <div class="result-container mt-2" ></div>
                   </div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 15: 
@@ -379,7 +417,7 @@
                     <img class="img-fluid rounded shadow-sm hover-animate" src="/assets/ODS0160_es.jpg" style="max-width: 160px;" type="button"
                       data-bs-toggle="collapse" data-bs-target="#collapseExample16" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="16" data-group="13_17">
-                      <div class="result-container mt-2" id="result-Objetivo16"></div>
+                      <div class="result-container mt-2" ></div>
                   </div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 16: 
@@ -395,7 +433,7 @@
                     <img class="img-fluid rounded shadow-sm hover-animate" src="/assets/ODS0170_es.jpg" style="max-width: 160px;" type="button"
                       data-bs-toggle="collapse" data-bs-target="#collapseExample17" aria-expanded="false"
                       aria-controls="collapseExample" data-ods="17" data-group="13_17">
-                      <div class="result-container mt-2" id="result-Objetivo17"></div>
+                      <div class="result-container mt-2" ></div>
                   </div>
                   <div class="text-center mt-2">
                     <strong>Total de Variables ODS 17: 
@@ -419,6 +457,9 @@
                 <div class="container mt-4 d-none" id="contenedorGrupo13_17">
                   <div class="card shadow-sm border-0">
                     <div class="card-body">
+                      <div>
+                      <h6 id="odsDynamicTitle13_17" class="justificado mb-3"></h6>
+                  </div>
                       <div class="d-flex justify-content-end align-items-center mb-3">
                         <label for="itemsPerPage3" class="me-2 mb-0">Mostrar:</label>
                         <select id="itemsPerPage3" class="form-select w-auto">
@@ -438,6 +479,27 @@
   </div>
 
 <script>
+
+/* TItutlos para los contenedores dinamicos de los ODS */
+const odsTitles = {
+  "1": "Objetivo 1: Poner fin a la pobreza en todas sus formas en todo el mundo",
+  "2": "Objetivo 2: Poner fin al hambre, lograr la seguridad alimentaria y la mejora de la nutrición y promover la agricultura sostenible",
+  "3": "Objetivo 3: Garantizar una vida sana y promover el bienestar para todos en todas las edades",
+  "4": "Objetivo 4: Garantizar una educación inclusiva, equitativa y de calidad y promover oportunidades de aprendizaje durante toda la vida para todos",
+  "5": "Objetivo 5: Lograr la igualdad de género y empoderar a todas las mujeres y las niñas",
+  "6": "Objetivo 6: Garantizar la disponibilidad y la gestión sostenible del agua y el saneamiento para todos",
+  "7": "Objetivo 7: Garantizar el acceso a una energía asequible, fiable, sostenible y moderna para todos",
+  "8": "Objetivo 8: Promover el crecimiento económico sostenido, inclusivo y sostenible, el empleo pleno y productivo y el trabajo decente para todos",
+  "9": "Objetivo 9: Construir infraestructuras resilientes, promover la industrialización inclusiva y sostenible y fomentar la innovación",
+  "10": "Objetivo 10: Reducir la desigualdad en y entre los países",
+  "11": "Objetivo 11: Lograr que las ciudades y los asentamientos humanos sean inclusivos, seguros, resilientes y sostenibles",
+  "12": "Objetivo 12: Garantizar modalidades de consumo y producción sostenibles",
+  "13": "Objetivo 13: Adoptar medidas urgentes para combatir el cambio climático y sus efectos",
+  "14": "Objetivo 14: Conservar y utilizar en forma sostenible los océanos, los mares y los recursos marinos para el desarrollo sostenible",
+  "15": "Objetivo 15: Proteger, restablecer y promover el uso sostenible de los ecosistemas terrestres, gestionar sosteniblemente los bosques, luchar contra la desertificación, detener e invertir la degradación de las tierras y detener la pérdida de biodiversidad",
+  "16": "Objetivo 16: Promover sociedades pacíficas e inclusivas para el desarrollo sostenible, proporcionar acceso a la justicia para todos y construir instituciones eficaces, responsables e inclusivas a todos los niveles",
+  "17": "Objetivo 17: Fortalecer los medios de ejecución y revitalizar la Alianza Mundial para el Desarrollo Sostenible"
+};
 
   document.addEventListener("DOMContentLoaded", function () {
       // Activar link activo
@@ -711,6 +773,26 @@
               }
             });
 
+            // Determinar el área de metas según el grupo
+            let metasResumenId = "";
+            if (ods >= 1 && ods <= 6) metasResumenId = "metasResumen1_6";
+            else if (ods >= 7 && ods <= 12) metasResumenId = "metasResumen7_12";
+            else if (ods >= 13 && ods <= 17) metasResumenId = "metasResumen13_17";
+
+            if (metasResumenId) {
+              const metasResumen = document.getElementById(metasResumenId);
+              if (metasResumen) {
+                metasResumen.innerHTML = "<h6 class='fw-bold text-muted mb-2'>Metas ODS detectadas:</h6><ul class='list-unstyled'>";
+                for (const meta in metaObj) {
+                  metasResumen.innerHTML += `
+                    <li class="mb-1">
+                      <i class="bi bi-check-circle-fill text-success me-1"></i>
+                      <strong>${meta}:</strong> ${metaObj[meta]} variable(s)
+                    </li>`;
+                }
+                metasResumen.innerHTML += "</ul>";
+              }
+            }
           }
         })
         
@@ -755,6 +837,41 @@
           document.querySelectorAll("canvas[id^='grafico-ods-']").forEach(c => c.style.display = "none");
           // Muestra solo el gráfico correspondiente en el área de cards
           if (grafico) grafico.style.display = "block";
+
+          // Determina el id del título según el grupo
+          let titleId = "";
+          if (group === "1_6") titleId = "odsDynamicTitle1_6";
+          else if (group === "7_12") titleId = "odsDynamicTitle7_12";
+          else if (group === "13_17") titleId = "odsDynamicTitle13_17";
+
+          const titleElement = document.getElementById(titleId);
+          if (titleElement) {
+            titleElement.textContent = odsTitles[ods] || "";
+          }
+
+          // Actualiza el resumen de metas SOLO para el ODS seleccionado
+          let metasResumenId = "";
+          if (group === "1_6") metasResumenId = "metasResumen1_6";
+          else if (group === "7_12") metasResumenId = "metasResumen7_12";
+          else if (group === "13_17") metasResumenId = "metasResumen13_17";
+
+          const metasPorODS = contarMetasEspecificasPorODS(data);
+          const metaObj = metasPorODS[ods] || {};
+
+          if (metasResumenId) {
+            const metasResumen = document.getElementById(metasResumenId);
+            if (metasResumen) {
+              metasResumen.innerHTML = "<h6 class='fw-bold text-muted mb-2'>Metas ODS detectadas:</h6><ul class='list-unstyled'>";
+              for (const meta in metaObj) {
+                metasResumen.innerHTML += `
+                  <li class="mb-1">
+                    <i class="bi bi-check-circle-fill text-success me-1"></i>
+                    <strong>${meta}:</strong> ${metaObj[meta]} variable(s)
+                  </li>`;
+              }
+              metasResumen.innerHTML += "</ul>";
+            }
+          }
         });
       });
 
@@ -871,5 +988,6 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 </script>
+
 </body>
 </html>

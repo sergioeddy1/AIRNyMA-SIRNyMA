@@ -9,9 +9,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link href="../styles/procesos.css" rel="stylesheet">
     <style>
-         body, html {
+        body,
+        html {
             font-family: Helvetica, Sans-Serif !important;
-            background-color: #f8f9fa;
         }
     </style>
 </head>
@@ -68,7 +68,7 @@
             <div class="col-md-12">
                 <h2 class="mb-4">Información en contexto</h2>
                 <p class="lead">La información en contexto es un conjunto de datos que permite entender y analizar un fenómeno o situación específica. En el caso de los procesos de producción, esta información es crucial para la toma de decisiones y la planificación estratégica.</p>
-                <p>En esta sección, podrás explorar los diferentes procesos de producción y las variables asociadas a cada uno de ellos. Utiliza el menú desplegable para seleccionar un proceso específico y ver sus detalles.</p>
+                <p>En esta sección, podrás explorar los diferentes procesos de producción y las variables ambientles asociadas a cada uno de ellos. Utiliza el menú desplegable para seleccionar un proceso específico y ver sus detalles.</p>
             </div>
         </div>
         <p>Procesos de Producción de Información del INEGI
@@ -81,7 +81,7 @@
     </div>
 
     <div class="container mt-4 mb-3">
-        <h2 class="mb-2">Unidad Administrativa</h2>
+        <h2 class="mb-2">Unidades Administrativa</h2>
         <hr>
 
         <div class="row row-cols-1 row-cols-md-3 g-4">
@@ -92,7 +92,7 @@
                         <i class="bi bi-bar-chart display-4 mb-3 iconcustom"></i>
                     </div>
                     <h5 class="card-title texto-direction nameofDirection">
-                        Unidad Administrativa de Estadísticas Sociodemográficas
+                       Unidad de Estadísticas Sociodemográficas
                     </h5>
                 </div>
             </div>
@@ -102,7 +102,7 @@
                     <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-cash-stack display-4 mb-3 iconcustom"></i>
                         <h5 class="card-title texto-direction nameofDirection">
-                            Unidad Administrativa de Estadísticas Económicas
+                            Unidad de Estadísticas Económicas
                         </h5>
                     </div>
                 </div>
@@ -113,7 +113,7 @@
                     <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-globe display-4 mb-3 iconcustom"></i>
                         <h5 class="card-title texto-direction nameofDirection">
-                            Unidad Administrativa de Geografía y Medio Ambiente
+                           Unidad de Geografía y Medio Ambiente
                         </h5>
                     </div>
                 </div>
@@ -124,7 +124,7 @@
                     <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-bank display-4 mb-3 iconcustom"></i>
                         <h5 class="card-title texto-direction nameofDirection">
-                            Unidad Administrativa de Estadísticas de Gobierno, Seguridad Pública y Justicia
+                            Unidad de Estadísticas de Gobierno, Seguridad Pública y Justicia
                         </h5>
                     </div>
                 </div>
@@ -135,7 +135,7 @@
                     <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-file-earmark-text display-4 mb-3 iconcustom"></i>
                         <h5 class="card-title texto-direction nameofDirection">
-                            Unidad Administrativa de Integración, Análisis e Investigación
+                            Dirección General de Integración, Análisis e Investigación
                         </h5>
                     </div>
                 </div>
@@ -176,7 +176,13 @@
     <div class="container mt-5" id="procesosSection" hidden>
         <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
             <h2 class="mb-2 mb-lg-0">Procesos de Producción</h2>
+        </div>
 
+        <hr>
+        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap">
+            <div>
+                <strong>Total de procesos: <span id="procesosCounter">0</span></strong>
+            </div>
             <div class="d-flex align-items-center flex-wrap gap-2">
                 <select id="ordenarProcesos" class="form-select w-auto flex-shrink-0">
                     <option value="">Ordenar por...</option>
@@ -194,26 +200,16 @@
                     <option value="iin">Información de Interés Nacional</option>
                 </select>
 
-                <select id="fechaInicio" class="form-select w-auto flex-shrink-0">
-                    <option value="">Año inicial...</option>
-                </select>
-                <select id="fechaFin" class="form-select w-auto flex-shrink-0">
-                    <option value="">Año final...</option>
+                <select id="filtrarPeriodicidad" class="form-select w-auto flex-shrink-0">
+                    <option value="">Filtrar por periodicidad...</option>
                 </select>
 
-                <!-- Botón de limpiar filtros -->
                 <button id="resetFiltrosBtn" class="btn btn-outline-danger flex-shrink-0" title="Restablecer filtros">
                     <i class="bi bi-trash"></i>
                 </button>
             </div>
         </div>
-        <hr>
-        <div class="d-flex justify-content-end align-items-center mb-2">
-          <span class="fw-semibold" style="font-size: 1.1rem;">
-            Total de procesos: <span id="totalProcesosCounter" style="color: #08739c; font-weight: bold;">0</span>
-          </span>
-        </div>
-
+        <!-- Contenedor dinamico que muestra los procesos.  -->
         <div class="row mt-4" id="procesosContainer"></div>
     </div>
 
@@ -240,7 +236,7 @@
             const container = document.getElementById("procesosContainer");
 
             let procesosGlobal = [];
-            let conteoGlobal = {};
+            let conteoGlobal = [];
 
             if (btnMostrar && seccionProcesos) {
                 btnMostrar.addEventListener("click", async function () {
@@ -254,16 +250,13 @@
                         procesosGlobal = procesos;
                         conteoGlobal = {};
 
-                        // Actualiza el contador aquí
-                        document.getElementById("totalProcesosCounter").textContent = procesosGlobal.length;
-
                         procesos.forEach(proceso => {
                             const relacionadas = variables.filter(v => v.idPp === proceso.idPp);
                             conteoGlobal[proceso.idPp] = relacionadas.length;
                         });
 
+                        // Siempre muestra todos los procesos al inicio
                         renderProcesos(procesosGlobal, conteoGlobal);
-                        poblarSelectsDeFechas(procesosGlobal);
 
                     } catch (err) {
                         console.error("Error cargando datos", err);
@@ -273,15 +266,15 @@
             }
 
             function renderProcesos(procesos, conteo) {
-                container.innerHTML = "";
-                // Actualiza el contador dinámicamente según los procesos que se muestran
-                document.getElementById("totalProcesosCounter").textContent = procesos.length;
+                // Actualiza el contador dinámicamente
+                const counter = document.getElementById("procesosCounter");
+                if (counter) counter.textContent = procesos.length;
 
+                container.innerHTML = "";
                 procesos.forEach(proceso => {
                     const card = `
                         <div class="col-md-4 mb-4">
                             <div class="card h-100 shadow-sm rounded-3 p-2 position-relative">
-                                <!-- Badge IIN en la esquina superior izquierda -->
                                 ${proceso.gradoMadur === "Información de Interés Nacional" ? `
                                     <span class="badge bg-secondary position-absolute top-0 start-0 m-2 "
                                           style="z-index:2; cursor: help;"
@@ -308,10 +301,9 @@
                                                 ${proceso.perioProd || "No disponible"}
                                             </p>
                                             <p class="card-text mb-1" style="font-size: 0.85rem">
-                                                <strong style="font-size: 0.85rem">Vig. Inicial/Final:</strong>
+                                                <strong style="font-size: 0.85rem">Vigencia:</strong>
                                                 ${mostrarVigencia(proceso.vigInicial, proceso.vigFinal)}
                                             </p>
-                                            <!-- Ya NO se muestra el campo Grado de Maduración aquí -->
                                             <p class="card-text mb-0">  
                                                 <strong>Total Variables:</strong>
                                                 <span style="color: #08739c; text-decoration: underline; cursor: pointer; font-weight: bold;"
@@ -337,65 +329,7 @@
                 }
             }
 
-            // Funciones para poblar y filtrar por fechas
-            const fechaInicioSelect = document.getElementById("fechaInicio");
-            const fechaFinSelect = document.getElementById("fechaFin");
-
-            function poblarSelectsDeFechas(procesos) {
-                let minYear = Number.POSITIVE_INFINITY;
-                let maxYear = Number.NEGATIVE_INFINITY;
-                const currentYear = new Date().getFullYear();
-
-                procesos.forEach(proc => {
-                    let ini = parseInt(proc.vigInicial);
-                    let fin = proc.vigFinal === "A la fecha" ? currentYear : parseInt(proc.vigFinal);
-                    if (!isNaN(ini) && ini < minYear) minYear = ini;
-                    if (!isNaN(fin) && fin > maxYear) maxYear = fin;
-                });
-
-                // Limpiar selects
-                fechaInicioSelect.innerHTML = '<option value="">Año inicial...</option>';
-                fechaFinSelect.innerHTML = '<option value="">Año final...</option>';
-
-                // Llenar selects
-                for (let y = minYear; y <= maxYear; y++) {
-                    fechaInicioSelect.innerHTML += `<option value="${y}">${y}</option>`;
-                    fechaFinSelect.innerHTML += `<option value="${y}">${y}</option>`;
-                }
-            }
-
-            // Llama a esta función después de cargar procesosGlobal:
-            poblarSelectsDeFechas(procesosGlobal);
-
-            // Evento para filtrar por rango de fechas
-            function filtrarPorFechas() {
-                const ini = parseInt(fechaInicioSelect.value);
-                const fin = parseInt(fechaFinSelect.value);
-                const currentYear = new Date().getFullYear();
-
-                let filtrados = procesosGlobal;
-
-                if (!isNaN(ini) || !isNaN(fin)) {
-                    filtrados = procesosGlobal.filter(proc => {
-                        let procIni = parseInt(proc.vigInicial);
-                        let procFin = proc.vigFinal === "A la fecha" ? currentYear : parseInt(proc.vigFinal);
-
-                        // Si no hay fechas válidas, lo excluimos
-                        if (isNaN(procIni) || isNaN(procFin)) return false;
-
-                       
-                        return (isNaN(ini) || procFin >= ini) && (isNaN(fin) || procIni <= fin);
-                    });
-                }
-
-                renderProcesos(filtrados, conteoGlobal);
-            }
-
-            // Listeners para los selects de fechas
-            fechaInicioSelect.addEventListener("change", filtrarPorFechas);
-            fechaFinSelect.addEventListener("change", filtrarPorFechas);
-
-            // Eventos de ordenamiento y filtrado
+            // Filtro de orden
             document.getElementById("ordenarProcesos").addEventListener("change", function () {
                 const orden = this.value;
                 if (!orden || procesosGlobal.length === 0) {
@@ -424,6 +358,7 @@
                 renderProcesos(sorted, conteoGlobal);
             });
 
+            // Filtro de estatus
             document.getElementById("filtrarEstatus").addEventListener("change", function () {
                 const estatusSeleccionado = this.value;
 
@@ -453,49 +388,23 @@
                 new bootstrap.Tooltip(tooltipTriggerEl);
             });
 
-            // Evento para el botón de restablecer filtros
+            // Botón de limpiar filtros
             document.getElementById("resetFiltrosBtn").addEventListener("click", function () {
-                // Restablecer selects
                 document.getElementById("ordenarProcesos").selectedIndex = 0;
                 document.getElementById("filtrarEstatus").selectedIndex = 0;
-                document.getElementById("fechaInicio").selectedIndex = 0;
-                document.getElementById("fechaFin").selectedIndex = 0;
-
-                // Mostrar todos los procesos
                 renderProcesos(procesosGlobal, conteoGlobal);
             });
 
             // Cards de unidad administrativa
             const cards = document.querySelectorAll('.mostrarGrupoBtn');
-
             cards.forEach(card => {
                 card.addEventListener('click', function () {
-                    // Si la card NO es la que sí tiene datos
                     if (this.id !== "btnDireccionSociodemograficas") {
                         alert("Información no disponible");
                     }
-                    // Si es la card con datos, tu lógica normal (ya la tienes implementada)
                 });
             });
         });
-
-        const construirLineaDeTiempo = (eventos) => {
-          return `
-            <ul class="timeline" id="timeline">
-              ${eventos.map(evento => `
-                <li class="li complete d-flex flex-column align-items-center">
-                  <div class="timeline-node"></div>
-                  <div class="timestamp">
-                    <span class="date">
-                      <a href="${evento.fuenteIden}" target="_blank" class="text-decoration-none">${evento.evento}</a>
-                    </span>
-                  </div>
-                  <div class="status text-center"></div>
-                </li>
-              `).join('')}
-            </ul>
-          `;
-        };
 
         function mostrarVigencia(vigInicial, vigFinal) {
             if (!vigInicial && !vigFinal) return "No disponible";
@@ -503,8 +412,6 @@
             return `${vigInicial || "No disponible"} - ${vigFinal || "No disponible"}`;
         }
 
-        // Supón que procesosGlobal contiene los procesos de la unidad administrativa seleccionada
-        document.getElementById("totalProcesosCounter").textContent = procesosGlobal.length;
     </script>
 
 
@@ -551,7 +458,7 @@
         </footer>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 
-
-
-</body>    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script></html>
+</html>

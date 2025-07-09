@@ -46,81 +46,95 @@
               </li>
             </ul>
       
-           <!-- <form class="d-flex" role="search" action="variables.html" method="GET">
+          <form id="navbarSearchForm" class="d-flex" role="search">
               <input id="searchInput" class="form-control me-2 rounded-pill" type="search" name="search" placeholder="Buscar..." aria-label="Buscar">
               <button class="btn btn-outline-light rounded-pill" type="submit">Buscar</button>
-            </form> -->
+            </form> 
           </div>
         </div>
       </nav>
       
 
     
-<!-- Carrusel Modificado para Mejor Visualización de Imágenes -->
-<div id="myCarousel" class="carousel carousel-dark slide mb-5" data-bs-ride="carousel">
+    
+<!-- Carrusel con texto a la izquierda e imagen a la derecha -->
+<div id="myCarousel" class="carousel slide carousel-dark mb-5" data-bs-ride="carousel">
+  <!-- Indicadores -->
   <div class="carousel-indicators">
-      <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="0" class="active" aria-label="Slide 1"></button>
-      <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
-      <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
-      <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="3" aria-label="Slide 4"></button>
+    <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="0" class="active" aria-label="Slide 1"></button>
+    <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+    <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+    <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="3" aria-label="Slide 4"></button>
   </div>
 
   <div class="carousel-inner">
 
-    <!--Primer Slider Programas de información-->
-      <div class="carousel-item active">
-        <div class="container" style="position: relative; padding-top: 0;">
-          <div class="carousel-caption text-center" style="position: absolute; top: 10%; left: 50%; transform: translateX(-50%); width: 100%; padding: 10px 0;">
-            <h2 class="TituloINEGICarousel" style="color: black; font-family: Helvetica, Sans-Serif;">Procesos de Producción</h2>
-          </div>
-          <img src="/assets/inegislider.png" class="d-block mx-auto" alt="Programas de información"
-               style="width: 100%; height: 500px; object-fit: contain;">
+    <!-- Slide 1 -->
+    <div class="carousel-item active" style="background-color: white;">
+      <div class="d-flex align-items-center" style="height: 500px;">
+        <!-- Texto -->
+        <div class="col-md-6 ps-5 pe-3" style="margin-left: 25px; margin-bottom: 120px;">
+          <h2 class="fw-bold" style="font-family: Helvetica, Sans-Serif; color: #003057;">Procesos de Producción</h2>
+          <p>Explora los programas estadísticos y registros administrativos relacionados con el medio ambiente.</p>
+        </div>
+        <!-- Imagen -->
+        <div class="col-md-6 h-100 mb-5">
+          <img src="/assets/inegislider.png" class="img-fluid h-100 w-100" style="object-fit: contain;" alt="Procesos de Producción">
         </div>
       </div>
-      
+    </div>
 
-      <!-- Segundo slider Variables-->
-      <div class="carousel-item" style="background-color: transparent">
-        <div class="container" style="position: relative;">
-          <div class="carousel-caption text-center" style="position: absolute; top: 4%; left: 50%; transform: translateX(-50%); width: 100%; padding: 5px;">
-            <h2 class="TituloMdeaCarousel" style="color: black; font-family: Helvetica, Sans-Serif;">Variables</h2>
-          </div>
-          <img src="/assets/variablesslider.png" class="d-block mx-auto" alt="Variables"
-            style="width: 75%; height: 75%; object-fit: contain;">
+    <!-- Slide 2 -->
+    <div class="carousel-item" style="background-color: white;">
+      <div class="d-flex align-items-center" style="height: 500px;">
+        <div class="col-md-6 ps-5 pe-3" style="margin-left: 25px; margin-bottom: 120px;">
+          <h2 class="fw-bold" style="font-family: Helvetica, Sans-Serif; color: #003057;">Variables</h2>
+          <p>Consulta las variables ambientales agrupadas por procesos, temas y fuentes de información.</p>
         </div>
-      </div>      
-
-      <!-- Tercer slider ODS-->
-      <div class="carousel-item" style="background-color: white; border-bottom: 1px solid #009edb;">
-          <img src="/assets/SLIDERODS.png" class="d-block mx-auto" alt="ODS"
-               style="width: 100%; height: 500px; object-fit: contain;">
-          <div class="carousel-caption text-end">
-          </div>
+        <div class="col-md-6 h-100 mb-5">
+          <img src="/assets/variablesslider.png" class="img-fluid h-100 w-100" style="object-fit: contain;" alt="Variables">
+        </div>
       </div>
+    </div>
 
-      <!-- Cuarto slider Indicadores Existentes-->
-      <div class="carousel-item" style="background-color: transparent;">
-        <div class="container" style="position: relative; padding-top: 0;">
-          <img src="/assets/indicadoresslide.png" class="d-block mx-auto" alt="Indicadores Ambientales"
-               style="width: 60%; height: 500px; object-fit: cover;">
-               <div class="carousel-caption text-start" 
-               style="position: absolute; bottom: 8px; left: 10px; z-index: 10; width: auto; padding: 5px;">          
-          </div>
+    <!-- Slide 3 -->
+    <div class="carousel-item" style="background-color: white;">
+      <div class="d-flex align-items-center" style="height: 500px;">
+        <div class="col-md-6 ps-5 pe-3" style="margin-left: 25px; margin-bottom: 120px;">
+          <h2 class="fw-bold" style="font-family: Helvetica, Sans-Serif; color: #003057;">ODS</h2>
+          <p>Visualiza las variables alineadas con los Objetivos de Desarrollo Sostenible y su relación con los indicadores existentes.</p>
         </div>
-      </div>      
+        <div class="col-md-6 h-100 mb-3">
+          <img src="/assets/SLIDERODS.png" class="img-fluid h-100 w-100" style="object-fit: contain;" alt="ODS">
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 4 -->
+    <div class="carousel-item" style="background-color: white;">
+      <div class="d-flex align-items-center" style="height: 500px;">
+        <div class="col-md-6 ps-5 pe-3" style="margin-left: 20px; margin-bottom: 120px;">
+          <h2 class="fw-bold" style="font-family: Helvetica, Sans-Serif; color: #003057;">Indicadores Existentes</h2>
+          <p>Consulta el compendio de indicadores ambientales existentes que permiten medir y monitorear los cambios en el entorno.</p>
+        </div>
+        <div class="col-md-6 h-100 mb-2">
+          <img src="/assets/indicadoresslide.png" class="img-fluid h-100 w-100" style="object-fit: contain; filter: brightness(1.1);" alt="Indicadores">
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- Botones de navegación -->
+  <!-- Controles -->
   <button class="carousel-control-prev" type="button" data-bs-target="#myCarousel" data-bs-slide="prev">
-      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Anterior</span>
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Anterior</span>
   </button>
   <button class="carousel-control-next" type="button" data-bs-target="#myCarousel" data-bs-slide="next">
-      <span class="carousel-control-next-icon" aria-hidden="true"></span>
-      <span class="visually-hidden">Siguiente</span>
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Siguiente</span>
   </button>
 </div>
-
 
 
 <!-- Normatividad-->
@@ -129,6 +143,18 @@
 
                 <h1 style="text-align: center;">Espacio Digital del Inventario de Variables del SIIERNMA</h1>
                 <hr>
+                   <div class="shadow-sm" style="
+                    font-size: 1.1rem;
+                    background: linear-gradient(90deg, rgba(191,239,236,0.85) 0%, rgba(216,206,255,0.85) 100%);
+                    border-left: 6px solid #33ccff;
+                    border-radius: 8px;
+                    padding: 1.2rem 1.5rem;
+                    margin-bottom: 2rem;
+                    color: #2b2b2b;
+                ">
+                  <strong style="color: #009edb;">Objetivo del portal:</strong>
+                  Este portal integra y facilita el acceso a información clave sobre procesos, variables, Objetivos de Desarrollo Sostenible (ODS) e indicadores ambientales generados por el INEGI. Su propósito es ofrecer una herramienta centralizada y transparente para la consulta, análisis y aprovechamiento de datos ambientales, apoyando la toma de decisiones informadas y el cumplimiento de compromisos nacionales e internacionales en materia de desarrollo sostenible.
+                </div>
                 <h3> Normatividad </h3>
                 <p>
                     En cumplimiento con las disposiciones legales y reglamentarias que rigen nuestras actividades, se establece la siguiente normatividad aplicable:
@@ -380,7 +406,18 @@
                 loadAllVariables();
             });
 
-        </script>
+       </script>
+
+<script>
+    document.getElementById("navbarSearchForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const searchTerm = document.getElementById("searchInput").value.trim();
+      if (searchTerm) {
+        localStorage.setItem("variableSearchTerm", searchTerm);
+        window.location.href = "variables.html";
+      }
+    });
+</script>
 
         <!--! FOOTER -->
 <div class="container-fluid" style="background-color: #5d5d5d">

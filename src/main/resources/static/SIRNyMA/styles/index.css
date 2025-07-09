@@ -23,9 +23,15 @@
   .carousel-caption {
     bottom: 5rem;
     z-index: 10;
+    
   }
   .carousel-item {
-    height: 32rem;
+    height: 30rem;
+    
+  }
+
+  #myCarousel{
+    background-color: #f8f9fa;
   }
   
   @media only screen and (max-width: 1366px) {

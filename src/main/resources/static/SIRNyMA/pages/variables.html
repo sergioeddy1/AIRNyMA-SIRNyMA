@@ -52,6 +52,15 @@ body, html {
               </nav>
               
 
+<!--Imagen encabezado de Variables-->
+    <div class="container-fluid p-0">
+        <div style="position: relative; width: 100%; height: 300px; overflow: hidden;">
+            <img src="/assets/HeaderVariables2.png" alt="Encabezado" style="width: 100%; height: 100%; object-fit: cover;">
+            <div style="position: absolute; top: 20px; left: 40px; color: white; font-size: 2.5rem; font-weight: bold; text-shadow: 2px 2px 5px rgba(0,0,0,0.7);">
+                Listado de Variables
+            </div>
+        </div>
+    </div> 
     
 
     <div class="container-fluid">
@@ -214,8 +223,6 @@ body, html {
     
            <!-- Contenido principal (Columna derecha) -->
             <div class="col-9">
-                <!-- Título -->
-                <h2 class="mb-2 mt-3 text-left">Listado de Variables</h2>
 
                 <!-- Filtros y selector de elementos por página -->
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -1242,6 +1249,23 @@ searchForm.addEventListener("submit", function (e) {
     });
 
 });
+
+// Almacenar y recuperar término de búsqueda en localStorage
+document.addEventListener("DOMContentLoaded", function () {
+  const searchInput = document.getElementById("searchInput");
+  const storedTerm = localStorage.getItem("variableSearchTerm");
+  if (storedTerm && searchInput) {
+    searchInput.value = storedTerm;
+    localStorage.removeItem("variableSearchTerm");
+    // Simula Enter para disparar la búsqueda automáticamente
+    const event = new Event('input', { bubbles: true });
+    searchInput.dispatchEvent(event);
+    if (typeof searchInput.form !== "undefined" && searchInput.form) {
+      searchInput.form.dispatchEvent(new Event('submit', { bubbles: true }));
+    }
+  }
+});
+
 </script>
 
 
