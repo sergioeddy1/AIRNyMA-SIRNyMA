@@ -1,0 +1,419 @@
+/*Estilos para el navbar */
+.nav-link {
+  color: aliceblue !important;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  background-color: #005fa3;
+  color: white !important;
+}
+
+.nav-link.active {
+  background-color: #ffffff;
+  color: #003057 !important;
+  font-weight: bold;
+}
+
+
+/* Cuando el acordeón está cerrado */
+.custom-accordion-header .accordion-button.collapsed {
+    color: #000000;             /* Texto negro */
+    border: 2px solid #08989C;  /* Borde del color personalizado */
+}
+
+/* Cuando el acordeón está abierto */
+.custom-accordion-header .accordion-button:not(.collapsed) {
+    background-color: #077c81;  /* Fondo activo */
+    color: #ffffff;             /* Texto blanco */
+    border: 2px solid #077c81;  /* Borde del mismo color activo */
+    box-shadow: none;           /* Sin sombra al estar expandido */
+}
+
+#pagination .page-item .page-link {
+    background-color: #ffffff !important;
+    color: #A590FF !important;
+    border: 2px solid #A590FF !important;
+    transition: all 0.3s ease;  /* Transición suave */
+}
+
+/* Botones Anterior/Siguiente */
+#pagination .page-item .page-link:hover {
+    background-color: #A590FF;
+    color: #ffffff;
+}
+
+/* Página activa: mejorar visibilidad */
+#pagination .page-item.active .page-link {
+    background-color: #A590FF !important;  /* Fondo color activo */
+    color: #ffffff !important;             /* Texto blanco */
+    border-color: #A590FF !important;      /* Borde activo */
+    font-weight: bold;                     /* Negrita para resaltarlo */
+    transform: scale(1.1);                 /* Aumentar el tamaño para mayor visibilidad */
+}
+
+/* Deshabilitado (para extremos del paginador) */
+#pagination .page-item.disabled .page-link {
+    background-color: #E5E5E5;
+    color: #A590FF;
+    border-color: #A590FF;
+}
+
+.custom-btn {
+    background-color: #e5233d !important;
+    color: white !important;
+    border: none !important;
+  }
+  .custom-badge {
+    background-color: #ff6f61 !important;
+    color: white !important;
+  }
+  /*! objetivo 2 */
+  .custom-btn2 {
+    background-color: #dda73a !important;
+    color: white !important;
+    border: none !important;
+  }
+  .custom-badge2 {
+    background-color: #ddb76b !important;
+    color: white !important;
+  }
+  /*! objetivo 3 */
+  .custom-btn3 {
+    background-color: #4ca146 !important;
+    color: white !important;
+    border: none !important;
+  }
+  
+  .custom-badge3 {
+    background-color: #6fa76b !important;
+    color: white !important;
+  }
+  /*! objetivo 4 */
+  .custom-btn4 {
+    background-color: #c7212f !important;
+    color: white !important;
+    border: none !important;
+  }
+  
+  .custom-badge4 {
+    background-color: #cc555f !important;
+    color: white !important;
+  }
+  /*! objetivo 5 */
+  .custom-btn5 {
+    background-color: #ef402d !important;
+    color: white !important;
+    border: none !important;
+  }
+  
+  .custom-badge5 {
+    background-color: #f07b6e !important;
+    color: white !important;
+  }
+  /*! objetivo 6 */
+  .custom-btn6 {
+    background-color: #27bfe6 !important;
+    color: white !important;
+    border: none !important;
+  }
+  
+  .custom-badge6 {
+    background-color: #69cde6 !important;
+    color: white !important;
+  }
+  /*! objetivo 7 */
+  .custom-btn7 {
+    background-color: #fbc412 !important;
+    color: white !important;
+    border: none !important;
+  }
+  
+  .custom-badge7 {
+    background-color: #fad661 !important;
+    color: white !important;
+  }
+  /*! objetivo 8 */
+  .custom-btn8 {
+    background-color: #a31c44 !important;
+    color: white !important;
+    border: none !important;
+  }
+  
+  .custom-badge8 {
+    background-color: #a04e67 !important;
+    color: white !important;
+  }
+  /*! objetivo 9 */
+  .custom-btn9 {
+    background-color: #f26a2e !important;
+    color: white !important;
+    border: none !important;
+  }
+  
+  .custom-badge9 {
+    background-color: #f1956d !important;
+    color: white !important;
+  }
+  /*! objetivo 10 */
+  .custom-btn10 {
+    background-color: #e01483 !important;
+    color: white !important;
+    border: none !important;
+  }
+  
+  .custom-badge10 {
+    background-color: #dd4b9b !important;
+    color: white !important;
+  }
+  /*! objetivo 11 */
+  .custom-btn11 {
+    background-color: #f89d2a !important;
+    color: white !important;
+    border: none !important;
+  }
+  
+  .custom-badge11 {
+    background-color: #faaf54 !important;
+    color: white !important;
+  }
+  /*! objetivo 12 */
+  .custom-btn12 {
+    background-color: #bf8d2c !important;
+    color: white !important;
+    border: none !important;
+  }
+  
+  .custom-badge12 {
+    background-color: #be984c !important;
+    color: white !important;
+  }
+  /*! objetivo 13 */
+  .custom-btn13 {
+    background-color: #407f46 !important;
+    color: white !important;
+    border: none !important;
+  }
+  
+  .custom-badge13 {
+    background-color: #517c55 !important;
+    color: white !important;
+  }
+  /*! objetivo 14 */
+  .custom-btn14 {
+    background-color: #1f97d4 !important;
+    color: white !important;
+    border: none !important;
+  }
+  
+  .custom-badge14 {
+    background-color: #3ba0d3 !important;
+    color: white !important;
+  }
+  /*! objetivo 15 */
+  .custom-btn15 {
+    background-color: #59ba47 !important;
+    color: white !important;
+    border: none !important;
+  }
+  
+  .custom-badge15 {
+    background-color: #60b351 !important;
+    color: white !important;
+  }
+  /*! objetivo 16 */
+  .custom-btn16 {
+    background-color: #136a9f !important;
+    color: white !important;
+    border: none !important;
+  }
+  
+  .custom-badge16 {
+    background-color: #2270a1 !important;
+    color: white !important;
+  }
+  /*! objetivo 17 */
+  .custom-btn17 {
+    background-color: #14496b !important;
+    color: white !important;
+    border: none !important;
+  }
+  
+  .custom-badge17 {
+    background-color: #21516e !important;
+    color: white !important;
+  }
+  
+  
+  
+  
+  /*! more badge */
+  .custom-btnIndicator {
+    background-color: #cce8c6 !important;
+    color: black !important;
+    border: none !important;
+  }
+  .custom-btnIndicator2 {
+    background-color: #eed5a6 !important;
+    color: black !important;
+    border: none !important;
+  }
+  
+  
+  
+  .symbol-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .symbol-item .badge {
+    flex-shrink: 0;
+    width: 2rem;
+    /* Ajusta este valor según sea necesario */
+    display: inline-flex;
+    justify-content: center;
+  }
+  
+  .symbol-item label {
+    margin-left: 0.5rem;
+  }
+  
+  
+  
+  :host ::ng-deep .custom-tooltip .tooltip-inner {
+    max-width: 400px;
+    /* Ajusta el ancho según tus necesidades */
+    background-color: #000000e5;
+    /* Opcional: Color de fondo personalizado */
+    color: #ffffff;
+    /* Opcional: Color del texto personalizado */
+    border: 1px solid #ccc;
+      /* Color del borde */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      /* Sombra */
+    padding: 10px;
+      /* Relleno */
+    margin: 5px;
+      /* Margen */
+  
+  }
+  
+  /* Define a specific width and height for all buttons */
+  button {
+   width: 5rem;
+  }
+  
+  /* Make the text look like a link when hovered */
+  .clickable-text {
+    cursor: pointer;
+    color: black;
+    text-align: justify;
+  
+  
+  }
+  
+  /* Optional: Change color on hover */
+  .clickable-text:hover {
+    color: darkblue;
+    text-decoration: underline;
+  
+  }
+  
+  /* CSS para personalizar el ancho del modal */
+  .custom-modal-width .modal-dialog {
+    max-width: 80% !important;
+    /* Cambia el valor según el ancho deseado */
+  }
+  
+  .hover-animate {
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .hover-animate:hover {
+    transform: scale(1.1) translateZ(-5px);
+  }
+  
+  
+  .hover-pointer {
+    cursor: pointer;
+  }
+  
+  .resolImg{
+      max-height: 100px;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+  }
+  
+  @media (min-width: 1500px) and (max-width: 2000px) {
+  
+  }
+  
+  @media (min-width: 1366px) and (max-width: 1366px) and (min-height: 768px) and (max-height: 768px) {
+  .col-lados-custom {
+      width: 66px;
+    }
+  
+    .col-entre-custom {
+      width: 164px;
+      padding-left: 2px !important;
+      padding-right: 2px !important;
+  
+    }
+  
+  
+  }
+  
+  @media (min-width: 1024px) and (max-width: 1024px) and (min-height: 768px) and (max-height: 768px) {
+  .col-lados-custom {
+      width: 33px;
+    }
+    .col-entre-custom {
+        width: 144px;
+        padding-left: 2px !important;
+        padding-right: 2px !important;
+  
+      }
+      .Rproyector{
+        max-width: 140px !important;
+      }
+  
+          .resolImg {
+            max-width: 45rem;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+          }
+  }
+  
+  @media (min-width: 390px) and (max-width: 430px) and (min-height: 600px) and (max-height: 930px) {
+  .col-lados-custom {
+      width: 33px;
+    }
+      .col-entre-custom {
+        width: 100%;
+        padding-left: 2px !important;
+        padding-right: 2px !important;
+  
+      }
+  
+      .Rproyector {
+        max-width: 140px !important;
+      }
+          .resolImg {
+            max-width: 25rem;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+          }
+  }
+  
