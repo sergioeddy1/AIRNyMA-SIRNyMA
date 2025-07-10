@@ -278,7 +278,6 @@ body, html {
     const searchInput = document.getElementById("searchInput");
     const container = document.getElementById("variablesContainer");
     const paginationContainer = document.getElementById("pagination");
-    const processSelect = document.getElementById("processSelect");
     const temaSelect = document.getElementById("temaSelect"); // AÑADE ESTA LÍNEA SI NO LA TIENES
     const clearFiltersBtn = document.getElementById("clearFiltersBtn");
     const itemsPerPageSelect = document.getElementById("itemsPerPage"); // Selector de elementos por página
@@ -959,8 +958,39 @@ function renderPage(data, page) {
     filterByRelation();      // Mostrar todo inicialmente
     });
 
-    // Cargar todos los elementos al entrar a la página
-    loadAllVariables();
+    // Función para cargar todos los elementos al entrar a la página
+    async function cargarDatos() {
+      allData = await fetch('https://upcoming-accent-msgid-rendering.trycloudflare.com/api/variables').then(r => r.json());
+      // Llenar el select
+      llenarSelectProcesos();
+      // Llamar al filtro desde URL aquí, cuando todo está listo
+      aplicarFiltroDesdeURL();
+    }
+
+    function llenarSelectProcesos() {
+      // ...llena el select...
+    }
+
+    function aplicarFiltroDesdeURL() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const selectedIdPp = urlParams.get("idPp");
+
+      if (selectedIdPp) {
+        // Selecciona el proceso en el select
+        Array.from(processSelect.options).forEach(option => {
+          option.selected = option.value === selectedIdPp;
+        });
+        // Dispara el evento change para filtrar
+        processSelect.dispatchEvent(new Event("change"));
+      } else {
+        renderPage(allData, 1);
+        setupPagination(allData);
+        updateVariableCounter(allData.length);
+      }
+    }
+
+    // Llama cargarDatos cuando el DOM esté listo
+    document.addEventListener("DOMContentLoaded", cargarDatos);
 
     //Filtrado de ordemaniento de la A-Z 
         // Función para ordenar variables alfabéticamente
