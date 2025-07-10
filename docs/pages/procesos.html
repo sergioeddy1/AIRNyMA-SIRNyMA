@@ -244,8 +244,8 @@
                     seccionProcesos.scrollIntoView({ behavior: 'smooth' });
 
                     try {
-                        const procesos = await fetch("/api/proceso").then(res => res.json());
-                        const variables = await fetch("/api/variables").then(res => res.json());
+                        const procesos = await fetch("http://10.109.1.13:8090/api/proceso").then(res => res.json());
+                        const variables = await fetch('http://10.109.1.13:8090/api/variables').then(res => res.json());
 
                         procesosGlobal = procesos;
                         conteoGlobal = {};

@@ -644,7 +644,7 @@ const odsTitles = {
       
 
       // Fetch data y mostrar contadores
-      fetch("/api/ods")
+      fetch("http://10.109.1.13:8090/api/ods")
         .then(response => response.json())
         .then(responseData => {
           data = responseData;

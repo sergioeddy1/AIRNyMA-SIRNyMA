@@ -413,7 +413,7 @@ searchForm?.addEventListener("submit", function (e) {
 
 
 // Llenar dinámicamente el select desde /api/proceso
-fetch("/api/proceso")
+fetch("http://10.109.1.13:8090/api/proceso")
   .then(response => response.json())
   .then(data => {
     procesosGlobal = data;
@@ -437,7 +437,7 @@ processSelect.addEventListener("mousedown", function (e) {
   .catch(error => console.error("Error al cargar procesos:", error));
 
 // Cargar todas las variables
-fetch("/api/variables")
+fetch("http://10.109.1.13:8090/api/variables")
   .then(response => response.json())
   .then(data => {
     allData = data;
@@ -607,7 +607,7 @@ processSelect.addEventListener("change", function () {
 
 
     //Fetch para cargar los datos de proceso
-    fetch("/api/proceso")
+    fetch("http://10.109.1.13:8090/api/proceso")
     .then(res => res.json())
     .then(data => {
         allData = data;
@@ -618,7 +618,7 @@ processSelect.addEventListener("change", function () {
     // Función para cargar todos los elementos al entrar a la página
     async function loadAllVariables() {
     try {
-        const response = await fetch('/api/variables');
+        const response = await fetch('http://10.109.1.13:8090/api/variables');
         const data = await response.json();
         allData = data;
         currentFilteredData = [...allData];
@@ -693,11 +693,11 @@ function updateVariableCounter(count) {
 let eventosGlobal = []; // Aquí almacenamos los eventos una sola vez
 
 // 1. Cargar eventos antes de llamar a renderPage
-fetch('/api/eventos')
+fetch('http://10.109.1.13:8090/api/eventos')
   .then(res => res.json())
   .then(eventos => {
     eventosGlobal = eventos; // Guardamos todos los eventos en la variable global
-    fetch('/api/variables')
+    fetch('http://10.109.1.13:8090/api/variables')
       .then(res => res.json())
       .then(variables => {
         renderPage(variables, 1); // Llamamos a tu renderPage ya adaptada
@@ -1144,7 +1144,7 @@ searchForm.addEventListener("submit", function (e) {
 
             try {
                 // 1. Obtener relaciones var-tab
-                const resVarTab = await fetch('/api/var-tab');
+                const resVarTab = await fetch('http://10.109.1.13:8090/api/var-tab');
                 const dataVarTab = await resVarTab.json();
 
                 // Filtrar todas las coincidencias por idVar
@@ -1156,7 +1156,7 @@ searchForm.addEventListener("submit", function (e) {
                 }
 
                 // 2. Obtener todos los tabulados
-                const resTabulados = await fetch('/api/tabulado');
+                const resTabulados = await fetch('http://10.109.1.13:8090/api/tabulado');
                 const tabulados = await resTabulados.json();
 
                 // 3. Construir HTML con las ligas y nuevos campos
@@ -1209,7 +1209,7 @@ searchForm.addEventListener("submit", function (e) {
             modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
             try {
                 // Trae todos los microdatos y filtra por idVar
-                const res = await fetch(`/api/microdatos`);
+                const res = await fetch('http://10.109.1.13:8090/api/microdatos');
                 const data = await res.json();
                 // Busca el microdato que corresponde a la variable
                 const info = Array.isArray(data)
