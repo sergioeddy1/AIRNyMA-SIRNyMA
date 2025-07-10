@@ -1,0 +1,315 @@
+/*Estilos para el navbar */
+.nav-link {
+    color: aliceblue !important;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-link:hover {
+    background-color: #005fa3;
+    color: white !important;
+  }
+  
+  .nav-link.active {
+    background-color: #ffffff;
+    color: #003057 !important;
+    font-weight: bold;
+  }
+  
+/* Estilos para el contenedor de las variables */
+/* Estilo de acordeón */
+.accordion-item {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.accordion-body {
+        font-size: 12px;
+        background-color: #ffffff;
+  }
+
+/* Estilo para el header del acordeón */
+.accordion-header.custom-accordion-header {
+    background-color: #f8f9fa;
+    border-radius: 8px 8px 0 0;
+}
+
+/* Botón del acordeón */
+.accordion-button {
+    background-color: #ffffff;
+    color: #fff;
+    font-weight: 520;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.accordion-button:hover {
+    background-color: #00b395;
+    transform: scale(1.05);
+}
+
+.accordion-button .badge {
+    background-color: #6c757d;
+    font-size: 0.8rem;
+
+}
+
+/* Acordeón abierto */
+.accordion-button:not(.collapsed) {
+    background-color: #ffffff;
+}
+
+.accordion-collapse {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 0 0 8px 8px;
+}
+
+/* Estilo para los badges (etiquetas) */
+.badge {
+    text-align: left;
+    padding: 5px 10px;
+    font-size: 0.9rem;
+    border-radius: 12px;
+    text-wrap: wrap;
+}
+
+/* Estilos responsivos para pantallas pequeñas */
+@media (max-width: 768px) {
+    .accordion-button {
+        font-size: 14px;
+    }
+    .accordion-body {
+        font-size: 12px;
+        background-color: #ffffff;
+    }
+}
+/* Cuando el acordeón está cerrado */
+.custom-accordion-header .accordion-button.collapsed {
+    color: #000000;             /* Texto negro */
+    border: 2px solid #08989C;  /* Borde del color personalizado */
+}
+
+/* Cuando el acordeón está abierto */
+.custom-accordion-header .accordion-button:not(.collapsed) {
+    background-color: #077c81;  /* Fondo activo */
+    color: #ffffff;             /* Texto blanco */
+    border: 2px solid #077c81;  /* Borde del mismo color activo */
+    box-shadow: none;           /* Sin sombra al estar expandido */
+}
+
+
+/*Paginación*/
+#pagination .page-item .page-link {
+    background-color: #ffffff !important;
+    color: #A590FF !important;
+    border: 2px solid #A590FF !important;
+    transition: all 0.3s ease;  /* Transición suave */
+}
+
+/* Botones Anterior/Siguiente */
+#pagination .page-item .page-link:hover {
+    background-color: #A590FF;
+    color: #ffffff;
+}
+
+/* Página activa: mejorar visibilidad */
+#pagination .page-item.active .page-link {
+    background-color: #A590FF !important;  /* Fondo color activo */
+    color: #ffffff !important;             /* Texto blanco */
+    border-color: #A590FF !important;      /* Borde activo */
+    font-weight: bold;                     /* Negrita para resaltarlo */
+    transform: scale(1.1);                 /* Aumentar el tamaño para mayor visibilidad */
+}
+
+/* Deshabilitado (para extremos del paginador) */
+#pagination .page-item.disabled .page-link {
+    background-color: #E5E5E5;
+    color: #A590FF;
+    border-color: #A590FF;
+}
+
+.btncustom {
+    background-color: #A590FF !important;
+    color: #ffffff !important;
+    border: 2px solid #A590FF !important;
+    transition: all 0.3s ease;  
+   
+}
+
+#apartadofiltros{
+    padding-top: 50px;
+    padding-bottom: 50px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin: 0 auto;
+    /* Ajusta el ancho máximo según tus necesidades */
+    margin-top: 20px;
+}
+
+/*Multiselect*/
+
+#processSelect option {
+overflow: hidden;
+text-overflow: clip;
+white-space: normal;
+font-size: 0.85rem; 
+line-break: normal;        
+line-height: 2.2;         
+padding-top: 6px;        
+padding-bottom: 6px;    
+}
+
+#processSelectContainer .badge {
+  margin-top: 2px;;
+  font-size: .8rem;     /* Tamaño más pequeño */
+}
+    .categoria-badge {
+    max-width: 140px;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.bg-light-subtle {
+    background-color: #f8fafc !important;
+}
+#variableCounter .card {
+    border-radius: 1.2rem;
+    transition: box-shadow 0.2s;
+}
+#variableCounter .card:hover {
+    box-shadow: 0 0.5rem 1.5rem rgba(8, 115, 156, 0.10);
+}
+
+/* Linea del tiempo */
+.timeline {
+  list-style-type: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  gap: 0; /* <-- nodos pegados */
+  padding: 0 10px;
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: #e0e0e0 #f8f9fa;
+  margin-bottom: 10px;
+  min-height: 60px;
+  background: transparent;
+  max-width: 100%;
+}
+
+.timeline::-webkit-scrollbar {
+  height: 1px;
+  margin-top: 3px;
+
+}
+.timeline::-webkit-scrollbar-thumb {
+  background: #e0e0e0;
+  border-radius: 3px;
+}
+
+.li {
+  min-width: 40px;
+  flex: 0 0 auto;
+  transition: all 200ms ease-in;
+  text-align: center;
+}
+
+.timestamp {
+  margin-bottom: 5px;
+  padding: 0 2px;
+  font-size: 0.75rem;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.date {
+  display: inline-block;
+  white-space: nowrap;
+  font-size: 0.90em;
+  padding-right: 5px;
+  margin-bottom: 15px;
+}
+
+.status {
+  padding: 0px 80px;
+  display: flex;
+  justify-content: center;
+  border-top: 2px solid #D6DCE0;
+  position: relative;
+  transition: all 200ms ease-in;
+}
+
+.status h4 {
+  font-weight: 600;
+  margin-top: 10px;
+  font-size: 0.85rem; 
+}
+
+.status::before {
+  content: '';
+  width: 25px;
+  height: 25px;
+  background-color: white;
+  border-radius: 25px;
+  border: 1px solid #ddd;
+  position: absolute;
+  top: -15px;
+  left: 42%;
+  transition: all 200ms ease-in;
+}
+
+.li.complete .status {
+  border-top: 2px solid #43a047;
+}
+
+.li.complete .status::before {
+  background-color: #43a047;
+  border: none;
+}
+
+.li.complete .status h4 {
+  color: #43a047;
+}
+
+.badge.fw-normal {
+  font-weight: 400 !important;
+}
+
+@media (min-device-width: 320px) and (max-device-width: 700px) {
+  .timeline {
+    display: block;
+  }
+
+  .li {
+    display: flex;
+    width: inherit;
+  }
+
+  .timestamp {
+    width: 100px;
+  }
+
+  .status::before {
+    left: -8%;
+    top: 30%;
+  }
+}
+
+
