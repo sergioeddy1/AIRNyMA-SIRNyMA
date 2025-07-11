@@ -292,10 +292,73 @@ body, html {
 
     let itemsPerPage = parseInt(itemsPerPageSelect.value, 10); // Número de elementos por página
     let currentPage = 1; // Página actual
-    let allData = []; // Almacena todos los datos cargados inicialmente
-    let filteredData = [];    // Resultado de filtros o búsquedas aplicadas
-    let currentFilteredData = []; // Siempre contiene el conjunto de datos actualmente filtrado
+    let procesosGlobal = [];
+let allData = [];
+let currentFilteredData = [];
 
+
+// Llenar el select de procesos y aplicar filtro inicial si hay idPp en la URL
+fetch("/api/proceso")
+  .then(response => response.json())
+  .then(data => {
+    procesosGlobal = data;
+    data.forEach(proc => {
+      const option = document.createElement("option");
+      option.value = proc.idPp;
+      option.textContent = `• ${proc.pp} (${proc.idPp})`;
+      processSelect.appendChild(option);
+    });
+
+    // Ahora carga las variables
+    fetch("/api/variables")
+      .then(response => response.json())
+      .then(variables => {
+        allData = variables;
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedIdPp = urlParams.get("idPp");
+
+        if (selectedIdPp) {
+          // Selecciona el proceso en el select
+          Array.from(processSelect.options).forEach(option => {
+            option.selected = option.value === selectedIdPp;
+          });
+          // Filtra y muestra solo las variables de ese proceso
+          const filteredData = allData.filter(variable => variable.idPp === selectedIdPp);
+          currentFilteredData = filteredData;
+          renderPage(currentFilteredData, 1);
+          setupPagination(currentFilteredData);
+          updateVariableCounter(filteredData.length);
+        } else {
+          // Si no hay filtro, muestra todo
+          currentFilteredData = allData;
+          renderPage(allData, 1);
+          setupPagination(allData);
+          updateVariableCounter(allData.length);
+        }
+      });
+  });
+
+// Listener para cambios manuales en el select
+processSelect.addEventListener("change", function () {
+  const selectedOptions = Array.from(this.selectedOptions);
+  const selectedValues = selectedOptions.map(opt => opt.value);
+
+  checkMostrarUnidadSection();
+
+  if (selectedValues.length === 0) {
+    currentFilteredData = allData;
+    renderPage(allData, 1);
+    setupPagination(allData);
+    updateVariableCounter(allData.length);
+    return;
+  }
+
+  const filteredData = allData.filter(variable => selectedValues.includes(variable.idPp));
+  currentFilteredData = filteredData;
+  renderPage(currentFilteredData, 1);
+  setupPagination(currentFilteredData);
+  updateVariableCounter(filteredData.length);
+});
 
     // Referencias a los checkboxes
 const relTabCheckbox = document.getElementById("relTabCheckbox");
@@ -455,17 +518,17 @@ function aplicarFiltroDesdeURL() {
       if (processSelect.options.length > 0 && allData.length > 0) {
         clearInterval(interval);
 
-        // Seleccionar automáticamente el proceso
+        // Solo selecciona si no está ya seleccionado
         Array.from(processSelect.options).forEach(option => {
-          option.selected = option.value === selectedIdPp;
+          if (option.value === selectedIdPp && !option.selected) {
+            option.selected = true;
+          }
         });
 
-        // Disparar manualmente el evento "change" para aplicar filtro
         processSelect.dispatchEvent(new Event("change"));
       }
-    },  300); // Reintentar cada 300 ms hasta que los datos estén disponibles
+    }, 300);
   } else {
-    // Si no hay filtro en la URL, mostrar todo
     renderPage(allData, 1);
     setupPagination(allData);
     updateVariableCounter(allData.length);
@@ -510,7 +573,13 @@ processSelect.addEventListener("change", function () {
   const container = document.getElementById("processSelectContainer");
   container.innerHTML = ""; // Limpiar primero
 
+  // Usar un Set para evitar duplicados
+  const seen = new Set();
+
   selectedOptions.forEach(option => {
+    if (seen.has(option.value)) return; // Si ya existe, no lo agregues
+    seen.add(option.value);
+
     const tag = document.createElement("div");
     tag.className = "badge bg-primary d-flex align-items-center";
     tag.style.paddingRight = "0.5rem";
@@ -531,8 +600,8 @@ processSelect.addEventListener("change", function () {
     tag.appendChild(text);
     tag.appendChild(closeBtn);
     container.appendChild(tag);
-    });
-    }
+  });
+}
     
     // Filtrado por temática
     temaSelect.addEventListener("change", function () {
@@ -1049,12 +1118,13 @@ function renderPage(data, page) {
     const selectedProcessesContainer = document.getElementById("selectedProcessesContainer");
 
 function updateSelectedProcessesChips() {
+    const selectedProcessesContainer = document.getElementById("selectedProcessesContainer");
     selectedProcessesContainer.innerHTML = "";
     const selectedOptions = Array.from(processSelect.selectedOptions);
     selectedOptions.forEach(option => {
         const chip = document.createElement("span");
         chip.className = "badge bg-primary text-white me-2 mb-1";
-        chip.textContent = option.text;
+        chip.textContent = option.textContent;
         // Botón para quitar
         const removeBtn = document.createElement("span");
         removeBtn.innerHTML = '&times;';
@@ -1069,11 +1139,7 @@ function updateSelectedProcessesChips() {
         selectedProcessesContainer.appendChild(chip);
     });
 }
-processSelect.addEventListener("change", function() {
-    updateSelectedProcessesChips();
-    checkMostrarUnidadSection();
-    applyFilters();
-});
+
 temaSelect.addEventListener("change", function () {
     checkMostrarUnidadSection();
     applyFilters();

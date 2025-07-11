@@ -455,17 +455,17 @@ function aplicarFiltroDesdeURL() {
       if (processSelect.options.length > 0 && allData.length > 0) {
         clearInterval(interval);
 
-        // Seleccionar automáticamente el proceso
+        // Solo selecciona si no está ya seleccionado
         Array.from(processSelect.options).forEach(option => {
-          option.selected = option.value === selectedIdPp;
+          if (option.value === selectedIdPp && !option.selected) {
+            option.selected = true;
+          }
         });
 
-        // Disparar manualmente el evento "change" para aplicar filtro
         processSelect.dispatchEvent(new Event("change"));
       }
-    },  300); // Reintentar cada 300 ms hasta que los datos estén disponibles
+    }, 300);
   } else {
-    // Si no hay filtro en la URL, mostrar todo
     renderPage(allData, 1);
     setupPagination(allData);
     updateVariableCounter(allData.length);
@@ -510,7 +510,13 @@ processSelect.addEventListener("change", function () {
   const container = document.getElementById("processSelectContainer");
   container.innerHTML = ""; // Limpiar primero
 
+  // Usar un Set para evitar duplicados
+  const seen = new Set();
+
   selectedOptions.forEach(option => {
+    if (seen.has(option.value)) return; // Si ya existe, no lo agregues
+    seen.add(option.value);
+
     const tag = document.createElement("div");
     tag.className = "badge bg-primary d-flex align-items-center";
     tag.style.paddingRight = "0.5rem";
@@ -531,8 +537,8 @@ processSelect.addEventListener("change", function () {
     tag.appendChild(text);
     tag.appendChild(closeBtn);
     container.appendChild(tag);
-    });
-    }
+  });
+}
     
     // Filtrado por temática
     temaSelect.addEventListener("change", function () {
