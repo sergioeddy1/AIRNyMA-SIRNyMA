@@ -10,7 +10,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**") // aplica a todas las rutas bajo /api/
-                .allowedOrigins("https://sergioeddy1.github.io/") // tu sitio en GitHub Pages
+                .allowedOrigins("https://sergioeddy1.github.io/AIRNyMA-SIRNyMA") // tu sitio en GitHub Pages
                 .allowedMethods("GET", "POST", "PUT", "DELETE") // métodos permitidos
                 .allowedHeaders("*"); // permite todos los headers
     }
