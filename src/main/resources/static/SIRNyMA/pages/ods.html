@@ -644,7 +644,7 @@ const odsTitles = {
       
 
       // Fetch data y mostrar contadores
-      fetch("/api/ods")
+      fetch(`https://jones-investors-participant-behaviour.trycloudflare.com/api/ods`)
         .then(response => response.json())
         .then(responseData => {
           data = responseData;
