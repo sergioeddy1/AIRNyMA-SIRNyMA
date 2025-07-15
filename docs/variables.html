@@ -413,7 +413,7 @@ searchForm?.addEventListener("submit", function (e) {
 
 
 // Llenar dinámicamente el select desde /api/proceso
-fetch("https://upcoming-accent-msgid-rendering.trycloudflare.com/api/proceso")
+fetch('https://jones-investors-participant-behaviour.trycloudflare.com/api/proceso')
   .then(response => response.json())
   .then(data => {
     procesosGlobal = data;
@@ -437,7 +437,7 @@ processSelect.addEventListener("mousedown", function (e) {
   .catch(error => console.error("Error al cargar procesos:", error));
 
 // Cargar todas las variables
-fetch("https://upcoming-accent-msgid-rendering.trycloudflare.com/api/variables")
+fetch('https://jones-investors-participant-behaviour.trycloudflare.com/api/variables')
   .then(response => response.json())
   .then(data => {
     allData = data;
@@ -464,7 +464,7 @@ function aplicarFiltroDesdeURL() {
 
         processSelect.dispatchEvent(new Event("change"));
       }
-    }, 300);
+    }, 100);
   } else {
     renderPage(allData, 1);
     setupPagination(allData);
@@ -613,7 +613,7 @@ processSelect.addEventListener("change", function () {
 
 
     //Fetch para cargar los datos de proceso
-    fetch("https://upcoming-accent-msgid-rendering.trycloudflare.com/api/proceso")
+    fetch("https://jones-investors-participant-behaviour.trycloudflare.com/api/proceso")
     .then(res => res.json())
     .then(data => {
         allData = data;
@@ -624,7 +624,7 @@ processSelect.addEventListener("change", function () {
     // Función para cargar todos los elementos al entrar a la página
     async function loadAllVariables() {
     try {
-        const response = await fetch('https://upcoming-accent-msgid-rendering.trycloudflare.com/api/variables');
+        const response = await fetch('https://jones-investors-participant-behaviour.trycloudflare.com/api/variables');
         const data = await response.json();
         allData = data;
         currentFilteredData = [...allData];
@@ -699,11 +699,11 @@ function updateVariableCounter(count) {
 let eventosGlobal = []; // Aquí almacenamos los eventos una sola vez
 
 // 1. Cargar eventos antes de llamar a renderPage
-fetch('https://upcoming-accent-msgid-rendering.trycloudflare.com/api/eventos')
+fetch('https://jones-investors-participant-behaviour.trycloudflare.com/api/eventos')
   .then(res => res.json())
   .then(eventos => {
     eventosGlobal = eventos; // Guardamos todos los eventos en la variable global
-    fetch('https://upcoming-accent-msgid-rendering.trycloudflare.com/api/variables')
+    fetch('https://jones-investors-participant-behaviour.trycloudflare.com/api/variables')
       .then(res => res.json())
       .then(variables => {
         renderPage(variables, 1); // Llamamos a tu renderPage ya adaptada
@@ -1150,7 +1150,7 @@ searchForm.addEventListener("submit", function (e) {
 
             try {
                 // 1. Obtener relaciones var-tab
-                const resVarTab = await fetch('https://upcoming-accent-msgid-rendering.trycloudflare.com/api/var-tab');
+                const resVarTab = await fetch('https://jones-investors-participant-behaviour.trycloudflare.com/api/var-tab');
                 const dataVarTab = await resVarTab.json();
 
                 // Filtrar todas las coincidencias por idVar
@@ -1162,7 +1162,7 @@ searchForm.addEventListener("submit", function (e) {
                 }
 
                 // 2. Obtener todos los tabulados
-                const resTabulados = await fetch('https://upcoming-accent-msgid-rendering.trycloudflare.com/api/tabulado');
+                const resTabulados = await fetch('https://jones-investors-participant-behaviour.trycloudflare.com/api/tabulado');
                 const tabulados = await resTabulados.json();
 
                 // 3. Construir HTML con las ligas y nuevos campos
@@ -1215,7 +1215,7 @@ searchForm.addEventListener("submit", function (e) {
             modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
             try {
                 // Trae todos los microdatos y filtra por idVar
-                const res = await fetch('https://upcoming-accent-msgid-rendering.trycloudflare.com/api/microdatos');
+                const res = await fetch('https://jones-investors-participant-behaviour.trycloudflare.com/api/microdatos');
                 const data = await res.json();
                 // Busca el microdato que corresponde a la variable
                 const info = Array.isArray(data)
