@@ -85,9 +85,9 @@
         <hr>
 
         <div class="row row-cols-1 row-cols-md-3 g-4">
-            <!-- Dirección General de Estadísticas Sociodemográficas -->
+            <!-- Dirección General de Estadísticas Sociodemográficas (única habilitada) -->
             <div class="col">
-                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn" id="btnDireccionSociodemograficas">
+                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn" id="btnDireccionSociodemograficas" style="cursor:pointer;">
                     <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-bar-chart display-4 mb-3 iconcustom"></i>
                     </div>
@@ -96,9 +96,9 @@
                     </h5>
                 </div>
             </div>
-            <!--  Dirección General de Estadísticas Económicas-->
+            <!-- OTRAS CARDS DESHABILITADAS -->
             <div class="col">
-                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn" data-grupo="grupo2">
+                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn disabled" data-grupo="grupo2" style="background-color: #e9ecef; opacity: 0.6; cursor:not-allowed; pointer-events: none;">
                     <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-cash-stack display-4 mb-3 iconcustom"></i>
                         <h5 class="card-title texto-direction nameofDirection">
@@ -107,9 +107,8 @@
                     </div>
                 </div>
             </div>
-            <!-- Dirección General de Geografía y Medio Ambiente -->
             <div class="col">
-                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn" data-grupo="grupo3">
+                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn disabled" data-grupo="grupo3" style="background-color: #e9ecef; opacity: 0.6; cursor:not-allowed; pointer-events: none;">
                     <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-globe display-4 mb-3 iconcustom"></i>
                         <h5 class="card-title texto-direction nameofDirection">
@@ -118,9 +117,8 @@
                     </div>
                 </div>
             </div>
-            <!-- Dirección General de Estadísticas de Gobierno, Seguridad Pública y Justicia -->
             <div class="col">
-                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn" data-grupo="grupo4">
+                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn disabled" data-grupo="grupo4" style="background-color: #e9ecef; opacity: 0.6; cursor:not-allowed; pointer-events: none;">
                     <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-bank display-4 mb-3 iconcustom"></i>
                         <h5 class="card-title texto-direction nameofDirection">
@@ -129,9 +127,8 @@
                     </div>
                 </div>
             </div>
-            <!-- Dirección General de Integración, Análisis e Investigación -->
             <div class="col">
-                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn" data-grupo="grupo5">
+                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn disabled" data-grupo="grupo5" style="background-color: #e9ecef; opacity: 0.6; cursor:not-allowed; pointer-events: none;">
                     <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-file-earmark-text display-4 mb-3 iconcustom"></i>
                         <h5 class="card-title texto-direction nameofDirection">
@@ -173,246 +170,60 @@
     -->
 
     <!-- Contenedor donde se mostrarán los procesos -->
-    <div class="container mt-5" id="procesosSection" hidden>
-        <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
-            <h2 class="mb-2 mb-lg-0">Procesos de Producción</h2>
-        </div>
+<div class="container mt-5" id="procesosSection" hidden>
+  <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+    <h2 class="mb-2 mb-lg-0">Procesos de Producción</h2>
+  </div>
 
-        <hr>
-        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap">
-            <div>
-                <strong>Total de procesos: <span id="procesosCounter">0</span></strong>
-            </div>
-            <div class="d-flex align-items-center flex-wrap gap-2">
-                <select id="ordenarProcesos" class="form-select w-auto flex-shrink-0">
-                    <option value="">Ordenar por...</option>
-                    <option value="az">Nombre (A - Z)</option>
-                    <option value="za">Nombre (Z - A)</option>
-                    <option value="menor-mayor">Cantidad de variables (Menor a mayor)</option>
-                    <option value="mayor-menor">Cantidad de variables (Mayor a menor)</option>
-                </select>
-
-                <select id="filtrarEstatus" class="form-select w-auto flex-shrink-0">
-                    <option value="">Filtrar por estatus...</option>
-                    <option value="Activo">Activo</option>
-                    <option value="Inactivo">Inactivo</option>
-                    <option value="Histórico">Histórico</option>
-                    <option value="iin">Información de Interés Nacional</option>
-                </select>
-
-                <select id="filtrarPeriodicidad" class="form-select w-auto flex-shrink-0">
-                    <option value="">Filtrar por periodicidad...</option>
-                </select>
-
-                <button id="resetFiltrosBtn" class="btn btn-outline-danger flex-shrink-0" title="Restablecer filtros">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </div>
-        </div>
-        <!-- Contenedor dinamico que muestra los procesos.  -->
-        <div class="row mt-4" id="procesosContainer"></div>
+  <hr>
+  <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-3">
+    <div>
+      <strong>Total de procesos: <span id="procesosCounter">0</span></strong>
     </div>
 
-    <script>
-        // Esta función debe estar FUERA del DOMContentLoaded para que sea accesible desde el HTML generado
-        function handleVariableClick(idPp) {
-            window.open(`variables.html?idPp=${idPp}`, '_blank');
-        }
+    <div class="d-flex flex-wrap align-items-center gap-2">
+      <!-- Select de ordenamiento -->
+      <select id="ordenarProcesos" class="form-select w-auto">
+        <option value="">Ordenar por...</option>
+        <option value="az">Nombre (A - Z)</option>
+        <option value="za">Nombre (Z - A)</option>
+        <option value="menor-mayor">Cantidad de variables (Menor a mayor)</option>
+        <option value="mayor-menor">Cantidad de variables (Mayor a menor)</option>
+      </select>
 
+      <!-- Select de estatus -->
+      <select id="filtrarEstatus" class="form-select w-auto">
+        <option value="">Filtrar por estatus...</option>
+        <option value="Activo">Activo</option>
+        <option value="Inactivo">Inactivo</option>
+        <option value="Histórico">Histórico</option>
+      </select>
 
-        document.addEventListener("DOMContentLoaded", async function () {
-            const currentPath = window.location.pathname.split("/").pop();
-            const navLinks = document.querySelectorAll(".navbar-nav .nav-link");
+      <!-- Select de periodicidad dinámico -->
+      <select id="filtrarPeriodicidad" class="form-select w-auto">
+        <option value="">Filtrar por periodicidad...</option>
+        <!-- Opciones se llenan vía JS -->
+      </select>
 
-            navLinks.forEach(link => {
-                const href = link.getAttribute("href");
-                if (href === currentPath) {
-                    link.classList.add("active");
-                }
-            });
+      <!-- Checkbox IIN -->
+      <div class="form-check ms-2">
+        <input class="form-check-input" type="checkbox" id="iinCheck">
+        <label class="form-check-label fw-bold" for="iinCheck">Sólo IIN</label>
+      </div>
 
-            const btnMostrar = document.getElementById("btnDireccionSociodemograficas");
-            const seccionProcesos = document.getElementById("procesosSection");
-            const container = document.getElementById("procesosContainer");
+      <!-- Botón reset -->
+      <button id="resetFiltrosBtn" class="btn btn-outline-danger" title="Restablecer filtros">
+        <i class="bi bi-trash"></i>
+      </button>
+    </div>
+  </div>
 
-            let procesosGlobal = [];
-            let conteoGlobal = [];
+  <!-- Contenedor dinámico de tarjetas -->
+  <div class="row mt-4" id="procesosContainer"></div>
+</div>
 
-            if (btnMostrar && seccionProcesos) {
-                btnMostrar.addEventListener("click", async function () {
-                    seccionProcesos.hidden = false;
-                    seccionProcesos.scrollIntoView({ behavior: 'smooth' });
-
-                    try {
-                        const procesos = await fetch(`https://jones-investors-participant-behaviour.trycloudflare.com/api/proceso`).then(res => res.json());
-                        const variables = await fetch(`https://jones-investors-participant-behaviour.trycloudflare.com/api/variables`).then(res => res.json());
-
-                        procesosGlobal = procesos;
-                        conteoGlobal = {};
-
-                        procesos.forEach(proceso => {
-                            const relacionadas = variables.filter(v => v.idPp === proceso.idPp);
-                            conteoGlobal[proceso.idPp] = relacionadas.length;
-                        });
-
-                        // Siempre muestra todos los procesos al inicio
-                        renderProcesos(procesosGlobal, conteoGlobal);
-
-                    } catch (err) {
-                        console.error("Error cargando datos", err);
-                        container.innerHTML = "<p class='text-danger'>Error al cargar los procesos.</p>";
-                    }
-                });
-            }
-
-            function renderProcesos(procesos, conteo) {
-                // Actualiza el contador dinámicamente
-                const counter = document.getElementById("procesosCounter");
-                if (counter) counter.textContent = procesos.length;
-
-                container.innerHTML = "";
-                procesos.forEach(proceso => {
-                    const card = `
-                        <div class="col-md-4 mb-4">
-                            <div class="card h-100 shadow-sm rounded-3 p-2 position-relative">
-                                ${proceso.gradoMadur === "Información de Interés Nacional" ? `
-                                    <span class="badge bg-secondary position-absolute top-0 start-0 m-2 "
-                                          style="z-index:2; cursor: help;"
-                                          data-bs-toggle="tooltip"
-                                          data-bs-placement="right"
-                                          title="Información de Interés Nacional">
-                                        IIN
-                                    </span>
-                                ` : ""}
-                                <div class="row g-0 d-flex align-items-center">
-                                    <div class="col-4 d-flex justify-content-center">
-                                        <img src="/assets/iconsociodemografica.png" class="img-fluid proceso-icon rounded-start" alt="Icono" style="max-height: 80px;">
-                                    </div>
-                                    <div class="col-8">
-                                        <div class="card-body p-2">
-                                            <h5 class="card-title fw-bold mb-1">${proceso.pp || "Desconocido"}</h5>
-                                            <p class="card-text text-muted mb-1">${proceso.idPp}</p>
-                                            <p class="card-text mb-1">
-                                                <strong style="font-size: 0.85rem">Estatus:</strong>
-                                                <span class="badge ${getStatusClass(proceso.estatus)}">${proceso.estatus}</span>
-                                            </p>
-                                            <p class="card-text mb-1" style="font-size: 0.85rem">
-                                                <strong style="font-size: 0.85rem">Periodicidad:</strong>
-                                                ${proceso.perioProd || "No disponible"}
-                                            </p>
-                                            <p class="card-text mb-1" style="font-size: 0.85rem">
-                                                <strong style="font-size: 0.85rem">Vigencia:</strong>
-                                                ${mostrarVigencia(proceso.vigInicial, proceso.vigFinal)}
-                                            </p>
-                                            <p class="card-text mb-0">  
-                                                <strong>Total Variables:</strong>
-                                                <span style="color: #08739c; text-decoration: underline; cursor: pointer; font-weight: bold;"
-                                                    onclick="handleVariableClick('${proceso.idPp}')">
-                                                    ${conteo[proceso.idPp] || 0}
-                                                </span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>`;
-                    container.innerHTML += card;
-                });
-            }
-
-            function getStatusClass(status) {
-                switch ((status || "").toLowerCase()) {
-                    case "activo": return "bg-success";
-                    case "inactivo": return "bg-danger";
-                    case "pendiente": return "bg-warning text-dark";
-                    default: return "bg-secondary";
-                }
-            }
-
-            // Filtro de orden
-            document.getElementById("ordenarProcesos").addEventListener("change", function () {
-                const orden = this.value;
-                if (!orden || procesosGlobal.length === 0) {
-                    renderProcesos(procesosGlobal, conteoGlobal);
-                    return;
-                }
-
-                let sorted = [];
-
-                if (orden === "az" || orden === "za") {
-                    sorted = [...procesosGlobal].sort((a, b) => {
-                        const nombreA = (a.pp || "").toLowerCase();
-                        const nombreB = (b.pp || "").toLowerCase();
-                        return orden === "az"
-                            ? nombreA.localeCompare(nombreB)
-                            : nombreB.localeCompare(nombreA);
-                    });
-                } else if (orden === "mayor-menor" || orden === "menor-mayor") {
-                    sorted = [...procesosGlobal].sort((a, b) => {
-                        const countA = conteoGlobal[a.idPp] || 0;
-                        const countB = conteoGlobal[b.idPp] || 0;
-                        return orden === "mayor-menor" ? countB - countA : countA - countB;
-                    });
-                }
-
-                renderProcesos(sorted, conteoGlobal);
-            });
-
-            // Filtro de estatus
-            document.getElementById("filtrarEstatus").addEventListener("change", function () {
-                const estatusSeleccionado = this.value;
-
-                if (!estatusSeleccionado) {
-                    renderProcesos(procesosGlobal, conteoGlobal);
-                    return;
-                }
-
-                let filtrados = [];
-
-                if (estatusSeleccionado === "iin") {
-                    filtrados = procesosGlobal.filter(proceso =>
-                        (proceso.gradoMadur || "").toLowerCase() === "información de interés nacional"
-                    );
-                } else {
-                    filtrados = procesosGlobal.filter(proceso =>
-                        (proceso.estatus || "").toLowerCase() === estatusSeleccionado.toLowerCase()
-                    );
-                }
-
-                renderProcesos(filtrados, conteoGlobal);
-            });
-
-            // Inicializar tooltips de Bootstrap
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.forEach(function (tooltipTriggerEl) {
-                new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-
-            // Botón de limpiar filtros
-            document.getElementById("resetFiltrosBtn").addEventListener("click", function () {
-                document.getElementById("ordenarProcesos").selectedIndex = 0;
-                document.getElementById("filtrarEstatus").selectedIndex = 0;
-                renderProcesos(procesosGlobal, conteoGlobal);
-            });
-
-            // Cards de unidad administrativa
-            const cards = document.querySelectorAll('.mostrarGrupoBtn');
-            cards.forEach(card => {
-                card.addEventListener('click', function () {
-                    if (this.id !== "btnDireccionSociodemograficas") {
-                        alert("Información no disponible");
-                    }
-                });
-            });
-        });
-
-        function mostrarVigencia(vigInicial, vigFinal) {
-            if (!vigInicial && !vigFinal) return "No disponible";
-            if (vigInicial === vigFinal) return vigInicial || "No disponible";
-            return `${vigInicial || "No disponible"} - ${vigFinal || "No disponible"}`;
-        }
-
-    </script>
+    <!-- Script para manejar la lógica de los procesos -->
+    <script src="../js/procesos.js"></script>
 
 
 
