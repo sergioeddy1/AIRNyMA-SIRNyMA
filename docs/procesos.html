@@ -85,9 +85,9 @@
         <hr>
 
         <div class="row row-cols-1 row-cols-md-3 g-4">
-            <!-- Dirección General de Estadísticas Sociodemográficas -->
+            <!-- Dirección General de Estadísticas Sociodemográficas (única habilitada) -->
             <div class="col">
-                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn" id="btnDireccionSociodemograficas">
+                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn" id="btnDireccionSociodemograficas" style="cursor:pointer;">
                     <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-bar-chart display-4 mb-3 iconcustom"></i>
                     </div>
@@ -96,9 +96,9 @@
                     </h5>
                 </div>
             </div>
-            <!--  Dirección General de Estadísticas Económicas-->
+            <!-- OTRAS CARDS DESHABILITADAS -->
             <div class="col">
-                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn" data-grupo="grupo2">
+                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn disabled" data-grupo="grupo2" style="background-color: #e9ecef; opacity: 0.6; cursor:not-allowed; pointer-events: none;">
                     <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-cash-stack display-4 mb-3 iconcustom"></i>
                         <h5 class="card-title texto-direction nameofDirection">
@@ -107,9 +107,8 @@
                     </div>
                 </div>
             </div>
-            <!-- Dirección General de Geografía y Medio Ambiente -->
             <div class="col">
-                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn" data-grupo="grupo3">
+                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn disabled" data-grupo="grupo3" style="background-color: #e9ecef; opacity: 0.6; cursor:not-allowed; pointer-events: none;">
                     <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-globe display-4 mb-3 iconcustom"></i>
                         <h5 class="card-title texto-direction nameofDirection">
@@ -118,9 +117,8 @@
                     </div>
                 </div>
             </div>
-            <!-- Dirección General de Estadísticas de Gobierno, Seguridad Pública y Justicia -->
             <div class="col">
-                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn" data-grupo="grupo4">
+                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn disabled" data-grupo="grupo4" style="background-color: #e9ecef; opacity: 0.6; cursor:not-allowed; pointer-events: none;">
                     <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-bank display-4 mb-3 iconcustom"></i>
                         <h5 class="card-title texto-direction nameofDirection">
@@ -129,9 +127,8 @@
                     </div>
                 </div>
             </div>
-            <!-- Dirección General de Integración, Análisis e Investigación -->
             <div class="col">
-                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn" data-grupo="grupo5">
+                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn disabled" data-grupo="grupo5" style="background-color: #e9ecef; opacity: 0.6; cursor:not-allowed; pointer-events: none;">
                     <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-file-earmark-text display-4 mb-3 iconcustom"></i>
                         <h5 class="card-title texto-direction nameofDirection">
@@ -173,48 +170,62 @@
     -->
 
     <!-- Contenedor donde se mostrarán los procesos -->
-    <div class="container mt-5" id="procesosSection" hidden>
-        <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
-            <h2 class="mb-2 mb-lg-0">Procesos de Producción</h2>
-        </div>
+<div class="container mt-5" id="procesosSection" hidden>
+  <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+    <h2 class="mb-2 mb-lg-0">Procesos de Producción</h2>
+  </div>
 
-        <hr>
-        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap">
-            <div>
-                <strong>Total de procesos: <span id="procesosCounter">0</span></strong>
-            </div>
-            <div class="d-flex align-items-center flex-wrap gap-2">
-                <select id="ordenarProcesos" class="form-select w-auto flex-shrink-0">
-                    <option value="">Ordenar por...</option>
-                    <option value="az">Nombre (A - Z)</option>
-                    <option value="za">Nombre (Z - A)</option>
-                    <option value="menor-mayor">Cantidad de variables (Menor a mayor)</option>
-                    <option value="mayor-menor">Cantidad de variables (Mayor a menor)</option>
-                </select>
-
-                <select id="filtrarEstatus" class="form-select w-auto flex-shrink-0">
-                    <option value="">Filtrar por estatus...</option>
-                    <option value="Activo">Activo</option>
-                    <option value="Inactivo">Inactivo</option>
-                    <option value="Histórico">Histórico</option>
-                    <option value="iin">Información de Interés Nacional</option>
-                </select>
-
-                <select id="filtrarPeriodicidad" class="form-select w-auto flex-shrink-0">
-                    <option value="">Filtrar por periodicidad...</option>
-                </select>
-
-                <button id="resetFiltrosBtn" class="btn btn-outline-danger flex-shrink-0" title="Restablecer filtros">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </div>
-        </div>
-        <!-- Contenedor dinamico que muestra los procesos.  -->
-        <div class="row mt-4" id="procesosContainer"></div>
+  <hr>
+  <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-3">
+    <div>
+      <strong>Total de procesos: <span id="procesosCounter">0</span></strong>
     </div>
 
+    <div class="d-flex flex-wrap align-items-center gap-2">
+      <!-- Select de ordenamiento -->
+      <select id="ordenarProcesos" class="form-select w-auto">
+        <option value="">Ordenar por...</option>
+        <option value="az">Nombre (A - Z)</option>
+        <option value="za">Nombre (Z - A)</option>
+        <option value="menor-mayor">Cantidad de variables (Menor a mayor)</option>
+        <option value="mayor-menor">Cantidad de variables (Mayor a menor)</option>
+      </select>
 
-<script src="js/procesos.js"></script>
+      <!-- Select de estatus -->
+      <select id="filtrarEstatus" class="form-select w-auto">
+        <option value="">Filtrar por estatus...</option>
+        <option value="Activo">Activo</option>
+        <option value="Inactivo">Inactivo</option>
+        <option value="Histórico">Histórico</option>
+      </select>
+
+      <!-- Select de periodicidad dinámico -->
+      <select id="filtrarPeriodicidad" class="form-select w-auto">
+        <option value="">Filtrar por periodicidad...</option>
+        <!-- Opciones se llenan vía JS -->
+      </select>
+
+      <!-- Checkbox IIN -->
+      <div class="form-check ms-2">
+        <input class="form-check-input" type="checkbox" id="iinCheck">
+        <label class="form-check-label fw-bold" for="iinCheck">Sólo IIN</label>
+      </div>
+
+      <!-- Botón reset -->
+      <button id="resetFiltrosBtn" class="btn btn-outline-danger" title="Restablecer filtros">
+        <i class="bi bi-trash"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Contenedor dinámico de tarjetas -->
+  <div class="row mt-4" id="procesosContainer"></div>
+</div>
+
+    <!-- Script para manejar la lógica de los procesos -->
+    <script src="js/procesos.js"></script>
+
+
 
     <!--! FOOTER -->
     <div class="container-fluid" style="background-color: #5d5d5d">
@@ -225,7 +236,7 @@
                         <div class="col-lg">
                             <a style="color: white; font-weight: bold; font-size: 15px; font-family: Helvetica, Sans-Serif;">Contacto</a>
                             <ul class="nav flex-column">
-                                <li><a href="https://www.inegi.org.mx/"><img class="img-fluid d-block m-1" style="height: 2.5rem; width: 12rem;" src="img/INEGI_c-modified.png"></a></li>
+                                <li><a href="https://www.inegi.org.mx/"><img class="img-fluid d-block m-1" style="height: 2.5rem; width: 12rem;" src="/assets/INEGI_c-modified.png"></a></li>
                                 <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text" style="color: white"></a></li>
                                 <li><a class="text-white d-block pt-1" href="https://www.inegi.org.mx/inegi/contacto.html#Directorios" style="font-family: Helvetica, Sans-Serif;">Directorio</a></li>
                                 <li><a class="text-white d-block pt-1" href="https://www.inegi.org.mx/inegi/contacto.html" style="font-family: Helvetica, Sans-Serif;">Solicitud de información</a></li>
