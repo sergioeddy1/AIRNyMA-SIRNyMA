@@ -19,6 +19,27 @@ const odsTitles = {
   "17": "Objetivo 17: Fortalecer los medios de ejecución y revitalizar la Alianza Mundial para el Desarrollo Sostenible"
 };
 
+ const odsColors = {
+                  "1": "#e5233d",
+                  "2": "#dda73a",
+                  "3": "#4ca146",
+                  "4": "#c7212f",
+                  "5": "#ef402d",
+                  "6": "#27bfe6",
+                  "7": "#fbc412",
+                  "8": "#a31c44",
+                  "9": "#f26a2e",
+                  "10": "#e01483",
+                  "11": "#f89d2a",
+                  "12": "#bf8d2c",
+                  "13": "#407f46",
+                  "14": "#1f97d4",
+                  "15": "#59ba47",
+                  "16": "#136a9f",
+                  "17": "#14496b"
+                };
+
+
   document.addEventListener("DOMContentLoaded", function () {
       // Activar link activo
       const currentPath = window.location.pathname.split("/").pop();
@@ -74,6 +95,7 @@ const odsTitles = {
 
           updateVariableCounter(metaNumber, items.length);
 
+          
           pageItems.forEach(item => {
             const card = document.createElement("div");
             card.classList.add("col-12", "mb-3");
@@ -90,8 +112,8 @@ const odsTitles = {
                   <h6 class="text-uppercase text-muted small mb-2">Clasificación Temática</h6>
                   <ul class="list-unstyled ps-3">
                     <li class="mb-1"><i class="bi bi-check-circle text-success me-1"></i><strong>Indicador ODS:</strong> ${item.indicador.replace(/_/g, ' ')}</li>
-                    <li class="mb-1"><i class="bi bi-graph-up-arrow text-warning me-1"></i><strong>Nivel de Contribución:</strong> ${item.nivContOdss}</li>
-                    <li class="mb-1"><i class="bi bi-chat-left-text text-info me-1"></i><strong>Comentario:</strong> ${item.comentOds}</li>
+                    <li class="mb-1"><i class="bi bi-graph-up-arrow text-warning me-1"></i><strong>Nivel de Contribución:</strong> ${item.nivContOds}</li>
+                    ${renderComentarios(item.comentOds)}
                   </ul>
                 </div>
               </div>`;
@@ -177,12 +199,44 @@ const odsTitles = {
             return acc;
           }, {});
 
-          // Mostrar contador total por meta
-          for (const meta in filteredData) {
-            const count = filteredData[meta].length;
-            const counterElement = document.getElementById(`contador-ods-${meta}`);
-            if (counterElement) counterElement.textContent = count;
+          const totalPorODS = {};
+
+        // Recorremos todos los datos y sumamos por número de ODS
+        data.forEach(item => {
+          const metaCompleta = item.meta;
+          if (metaCompleta && metaCompleta.startsWith("Meta_")) {
+            const meta = metaCompleta.replace("Meta_", "");
+            const [ods] = meta.split(".");
+            if (!totalPorODS[ods]) totalPorODS[ods] = 0;
+            totalPorODS[ods]++;
           }
+        });
+
+        // Pintar contador externo (debajo de la imagen)
+        for (const ods in totalPorODS) {
+          const count = totalPorODS[ods];
+          const counterElement = document.getElementById(`contador-ods-${ods}`);
+          if (counterElement) counterElement.textContent = count;
+        }
+
+        // Pintar contador interno dentro de cada tarjeta dinámica
+        for (const ods in totalPorODS) {
+          const grupo = ods >= 1 && ods <= 6 ? "1_6" :
+                        ods >= 7 && ods <= 12 ? "7_12" :
+                        ods >= 13 && ods <= 17 ? "13_17" : "";
+
+          const internoId = `contadorInterno${grupo}`;
+          const internoElement = document.getElementById(internoId);
+
+          // Solo insertar si el contador interno existe y no se ha insertado aún (para evitar sobrescribir)
+          if (internoElement && !internoElement.dataset.odsSet) {
+            internoElement.innerHTML = `
+              <strong>Total de relaciones ODS ${ods}:</strong>
+              <a class="text-primary text-decoration-underline" style="font-family: Monaco;">${totalPorODS[ods]}</a>
+            `;
+            internoElement.dataset.odsSet = "true"; // Flag para no sobreescribir si hay varios ODS en el grupo
+          }
+        }
 
           // Mostrar metas específicas
           const metasPorODS = contarMetasEspecificasPorODS(data);
@@ -324,6 +378,9 @@ const odsTitles = {
           const contenedorId = `contenedorGrupo${group}`;
           const container = document.getElementById(`OdsContainer${group}`);
           const paginationContainer = document.getElementById(`pagination${group}`);
+          actualizarContadorInterno(ods, "1_6");
+          actualizarContadorInterno(ods, "7_12");
+          actualizarContadorInterno(ods, "13_17");
 
           document.querySelectorAll('[id^="contenedorGrupo"]').forEach(div => div.classList.add('d-none'));
 
@@ -365,6 +422,18 @@ const odsTitles = {
           const titleElement = document.getElementById(titleId);
           if (titleElement) {
             titleElement.textContent = odsTitles[ods] || "";
+            if (titleElement) {
+            titleElement.textContent = odsTitles[ods] || "";
+            
+            // Aplicar color dinámico de fondo según ODS
+            const bgColor = odsColors[ods] || "#333";
+            titleElement.style.backgroundColor = bgColor;
+            titleElement.style.color = "#fff";
+            titleElement.style.padding = "12px";
+            titleElement.style.borderRadius = "8px";
+            titleElement.style.fontWeight = "bold";
+            titleElement.style.boxShadow = `0 0 10px ${bgColor}55`;
+          }
           }
 
           // Actualiza el resumen de metas SOLO para el ODS seleccionado
@@ -381,14 +450,66 @@ const odsTitles = {
             if (metasResumen) {
               metasResumen.innerHTML = "<h6 class='fw-bold text-muted mb-2'>Metas ODS detectadas:</h6><ul class='list-unstyled'>";
               for (const meta in metaObj) {
-                metasResumen.innerHTML += `
-                  <li class="mb-1">
-                    <i class="bi bi-check-circle-fill text-success me-1"></i>
-                    <strong>${meta}:</strong> ${metaObj[meta]} variable(s)
-                  </li>`;
-              }
-              metasResumen.innerHTML += "</ul>";
+              const color = odsColors[ods] || "#0d6efd"; // Fallback al azul Bootstrap
+            metasResumen.innerHTML += `
+              <li class="mb-1 meta-item btn badge text-white" 
+                  data-meta="${meta}" data-ods="${ods}"
+                  style="background-color: ${color}; font-size: 0.95rem; margin: 3px; padding: 8px 12px; border-radius: 20px;">
+                <i class="bi bi-check-circle-fill text-white me-1"></i>
+                <strong>${meta}:</strong> <span class="hover-effect" style="color: black;">${metaObj[meta]} Relaciones</span>
+              </li>`;
             }
+               metasResumen.innerHTML += "</ul>";
+            }
+            document.addEventListener("click", function (e) {
+              const metaItem = e.target.closest(".meta-item");
+              if (metaItem) {
+                const meta = metaItem.getAttribute("data-meta");
+                const ods = metaItem.getAttribute("data-ods");
+                const group = ods >= 1 && ods <= 6 ? "1_6" :
+                              ods >= 7 && ods <= 12 ? "7_12" : 
+                              ods >= 13 && ods <= 17 ? "13_17" : "";
+
+                const contenedor = document.getElementById(`contenedorGrupo${group}`);
+                const container = document.getElementById(`OdsContainer${group}`);
+                const paginationContainer = document.getElementById(`pagination${group}`);
+
+                // Mostrar contenedor
+                document.querySelectorAll('[id^="contenedorGrupo"]').forEach(div => div.classList.add('d-none'));
+                contenedor.classList.remove('d-none');
+
+                // Filtrar por meta exacta
+                const metaFiltrada = data.filter(item => item.meta === `Meta_${meta}`);
+
+                // Renderizar solo las variables de esa meta
+                renderItems(metaFiltrada, container, paginationContainer, meta);
+                contenedor.scrollIntoView({ behavior: "smooth" });
+     
+
+                // Opcional: actualizar el título también
+                const titleId = group === "1_6" ? "odsDynamicTitle1_6" :
+                                group === "7_12" ? "odsDynamicTitle7_12" :
+                                "odsDynamicTitle13_17";
+
+                const titleElement = document.getElementById(titleId);
+                if (titleElement) titleElement.textContent = `Meta ${meta} - ${odsTitles[ods]}`;
+
+                  // Actualizar contador interno también
+                  const internoId = group === "1_6" ? "contadorInterno1_6" :
+                                    group === "7_12" ? "contadorInterno7_12" :
+                                    "contadorInterno13_17";
+
+                  const internoElement = document.getElementById(internoId);
+                  if (internoElement) {
+                    internoElement.innerHTML = `
+                      <strong>Total de relaciones ODS ${ods}:</strong>
+                      <a class="text-primary text-decoration-underline" style="font-family: Monaco;">${totalPorODS[ods] || 0}</a>
+                    `;
+                  }
+
+              }
+            });
+
           }
         });
       });
@@ -412,4 +533,43 @@ const odsTitles = {
         }
       });
 
+    function actualizarContadorInterno(odsSeleccionado, group) {
+      const internoId = `contadorInterno${group}`;
+      const contadorElemento = document.getElementById(internoId);
+
+      // Obtener valor actual del contador ya cargado
+      const contadorSpan = document.getElementById(`contador-ods-${odsSeleccionado}`);
+      const totalRelaciones = contadorSpan ? contadorSpan.textContent.trim() : "0";
+
+      if (contadorElemento) {
+        contadorElemento.innerHTML = `
+          <strong>Total de relaciones ODS ${odsSeleccionado}:
+            <span class="text-primary" style="text-decoration: underline; font-size: 1.1rem; font-family: Monaco, monospace;">
+              ${totalRelaciones}
+            </span>
+          </strong>
+        `;
+      }
+    }
+
     });
+
+// Nueva función para renderizar comentarios
+function renderComentarios(comentario) {
+  if (
+    !comentario ||
+    comentario.trim() === '' ||
+    comentario.trim() === '-' ||
+    comentario.trim().toLowerCase() === 'nula' ||
+    comentario.trim().toLowerCase() === 'null' ||
+    comentario.trim().toLowerCase() === 'n/a'
+  ) {
+    return ''; // No mostrar nada
+  }
+  return `
+    <li class="mb-1"><i class="bi bi-chat-left-text text-info me-1"></i><strong>Comentario:</strong> ${comentario} </li>
+  `;
+}
+
+
+

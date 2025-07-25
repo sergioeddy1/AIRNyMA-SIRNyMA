@@ -416,4 +416,9 @@
             margin-bottom: 1rem;
           }
   }
+
+.hover-effect:hover {
+  color: #ffffff !important;
+  text-decoration: underline;
+}
   
