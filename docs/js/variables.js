@@ -948,7 +948,7 @@ searchForm.addEventListener("submit", function (e) {
                 }
 
                 // 2. Obtener todos los tabulados
-                const resTabulados = await fetch('https://jones-investors-participant-behaviour.trycloudflare.com/api/tabulados');
+                const resTabulados = await fetch('https://jones-investors-participant-behaviour.trycloudflare.com/api/tabulado');
                 const tabulados = await resTabulados.json();
 
                 // 3. Construir HTML con las ligas y nuevos campos
