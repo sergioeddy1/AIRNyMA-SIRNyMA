@@ -200,7 +200,7 @@ searchForm?.addEventListener("submit", function (e) {
     }
 
 
-// Llenar dinámicamente el select desde https://jones-investors-participant-behaviour.trycloudflare.com/api/proceso
+// Llenar dinámicamente el select desde /api/proceso
 fetch("https://jones-investors-participant-behaviour.trycloudflare.com/api/proceso")
   .then(response => response.json())
   .then(data => {
@@ -561,23 +561,24 @@ function renderPage(data, page) {
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="mb-2">
-                            <span class="fw-semibold text-secondary"><i class="bi bi-question-circle me-1"></i>Pregunta:</span>
+                            <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Pregunta elaborada cuyo objetivo es obtener una respuesta directa y explícita basada en información específica y detallada proporcionada por un informante"><i class="bi bi-question-circle me-1"></i>Pregunta:</span>
                             <div class="ps-3">
                             <p>${variable.pregLit}</p>
                             </div>
-                             <span class="fw-semibold text-secondary"><i class="bi bi-question-circle me-1"></i>Clasificación de la pregunta:</span>
+                             <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Ordenamiento de todas y cada una de las modalidades cualitativas o intervalos numéricos admitidos por una variable"><i class="bi bi-question-circle me-1"></i>Clasificación de la variable correspondiente a la pregunta:</span>
                              <div class="ps-3">
                                 ${getClasificacionesPorVariable(variable.idVar)}
                               </div>
                         </div>
                         <div class="mb-2">
-                            <span class="fw-semibold text-secondary"><i class="bi bi-info-circle me-1"></i>Definición:</span>
+                            <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Concepto o termino que incluya sus aspectos principales brindando un contexto de la variable">
+                                <i class="bi bi-info-circle me-1"></i>Definición:</span>
                             <div class="ps-3">${variable.defVar}</div>
                         </div>
                         <div class="mb-2">
                             <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Nombre de la variable seleccionad, tal y como aparece en la fuente del evento en mención">
                                 <i class="bi bi-tag me-1"></i>Variable Fuente:</span>
-                            <span class="badge bg-info-subtle text-dark ms-1 fw-normal">${variable.nomVar}</span>
+                            <span class="text-dark ms-1 fw-normal">${variable.nomVar}</span>
                         </div>
                     </div>
                
@@ -585,18 +586,18 @@ function renderPage(data, page) {
                         <div class="mb-2">
                             <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Conjunto objeto de cuantificación y caracterización para fines de estudio">
                                <i class="bi bi-diagram-3 me-1"></i>Categoría:</span>
-                            <span class="badge bg-secondary-subtle text-dark ms-1 fw-normal">${variable.categoria}</span>
+                            <span class="text-dark ms-1 fw-normal">${variable.categoria}</span>
                         </div>
                         <div class="mb-2">
                             <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Son enunciados genéricos referentes a campos específicos de interés y cuyo estudio constituye la justificación del proyecto estadístico">
                                 <i class="bi bi-layers me-1"></i>Clasificación Temática:</span>
                             <div class="ps-3">
                                 <span>Tema y Subtema 1:</span>
-                                <span class="badge bg-success-subtle text-dark mb-1 fw-normal">${variable.tema}</span>/
-                                <span class="badge bg-success-subtle text-dark mb-1 fw-normal">${variable.subtema}</span><br>
+                                <span class="text-dark mb-1 fw-normal">${variable.tema}</span>/
+                                <span class="text-dark mb-1 fw-normal">${variable.subtema}</span><br>
                                 <span>Tema y Subtema 2:</span>
-                                <span class="badge bg-success-subtle text-dark mb-1 fw-normal">${variable.tema2}</span>/
-                                <span class="badge bg-success-subtle text-dark mb-1 fw-normal">${variable.subtema2}</span>
+                                <span class="text-dark mb-1 fw-normal">${variable.tema2}</span>/
+                                <span class="text-dark mb-1 fw-normal">${variable.subtema2}</span>
                             </div>
                         </div>
                         <div class="mb-2">
@@ -947,7 +948,7 @@ searchForm.addEventListener("submit", function (e) {
                 }
 
                 // 2. Obtener todos los tabulados
-                const resTabulados = await fetch('https://jones-investors-participant-behaviour.trycloudflare.com/api/tabulado');
+                const resTabulados = await fetch('https://jones-investors-participant-behaviour.trycloudflare.com/api/tabulados');
                 const tabulados = await resTabulados.json();
 
                 // 3. Construir HTML con las ligas y nuevos campos
@@ -1026,8 +1027,7 @@ searchForm.addEventListener("submit", function (e) {
                         ${info.nomCampo || "No disponible"}
                     </div>
                     <div class="mb-2">
-                        <strong>Comentario:</strong><br>
-                        ${info.comentMicro || "No disponible"}
+                        ${renderComentarios(info.comentMicro)}
                     </div>
                 `;
                 } else {
@@ -1105,11 +1105,9 @@ function renderComentarios(comentario) {
     return ''; // No mostrar nada
   }
   return `
-    <div class="mb-2">
-      <span class="fw-semibold text-secondary"><i class="bi bi-asterisk me-1"></i>Extras:</span>
-      <div class="ps-3 small">
-        <div><span>Comentarios:</span> ${comentario}</div>
-      </div>
+    <div class="mb-2 ms-1">
+      <span class="fw-semibold">Comentario:</span>
+      <div>${comentario}</div>
     </div>
   `;
 }
