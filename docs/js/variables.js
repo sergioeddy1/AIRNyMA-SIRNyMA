@@ -97,6 +97,7 @@ function handleProcessSelectChange() {
 // ✅ Asignar el listener desde el inicio
 processSelect.addEventListener("change", handleProcessSelectChange);
 
+
     // Referencias a los checkboxes
 const relTabCheckbox = document.getElementById("relTabCheckbox");
 const relMicroCheckbox = document.getElementById("relMicroCheckbox");
