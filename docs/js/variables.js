@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 // Llenar el select de procesos y aplicar filtro inicial si hay idPp en la URL
-fetch("/api/proceso")
+fetch("https://jones-investors-participant-behaviour.trycloudflare.com/api/proceso")
   .then(response => response.json())
   .then(data => {
     procesosGlobal = data;
@@ -35,7 +35,7 @@ fetch("/api/proceso")
     });
 
     // Cargar variables luego de llenar el select
-    return fetch("/api/variables");
+    return fetch("https://jones-investors-participant-behaviour.trycloudflare.com/api/variables");
   })
   .then(response => response.json())
   .then(variables => {
