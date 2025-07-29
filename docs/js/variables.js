@@ -22,7 +22,6 @@ let allData = [];
 let currentFilteredData = [];
 
 
-// Llenar el select de procesos y aplicar filtro inicial si hay idPp en la URL
 fetch("https://jones-investors-participant-behaviour.trycloudflare.com/api/proceso")
   .then(response => response.json())
   .then(data => {
@@ -34,37 +33,46 @@ fetch("https://jones-investors-participant-behaviour.trycloudflare.com/api/proce
       processSelect.appendChild(option);
     });
 
-    // Ahora carga las variables
-    fetch("https://jones-investors-participant-behaviour.trycloudflare.com/api/variables")
-      .then(response => response.json())
-      .then(variables => {
-        allData = variables;
-        const urlParams = new URLSearchParams(window.location.search);
-        const selectedIdPp = urlParams.get("idPp");
+    // Cargar variables luego de llenar el select
+    return fetch("https://jones-investors-participant-behaviour.trycloudflare.com/api/variables");
+  })
+  .then(response => response.json())
+  .then(variables => {
+    allData = variables;
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectedIdPp = urlParams.get("idPp");
 
-        if (selectedIdPp) {
-          // Selecciona el proceso en el select
-          Array.from(processSelect.options).forEach(option => {
-            option.selected = option.value === selectedIdPp;
-          });
-          // Filtra y muestra solo las variables de ese proceso
-          const filteredData = allData.filter(variable => variable.idPp === selectedIdPp);
-          currentFilteredData = filteredData;
-          renderPage(currentFilteredData, 1);
-          setupPagination(currentFilteredData);
-          updateVariableCounter(filteredData.length);
-        } else {
-          // Si no hay filtro, muestra todo
-          currentFilteredData = allData;
-          renderPage(allData, 1);
-          setupPagination(allData);
-          updateVariableCounter(allData.length);
-        }
+    if (selectedIdPp) {
+      // Desactivar temporalmente el listener para evitar doble render
+      processSelect.removeEventListener("change", handleProcessSelectChange);
+
+      // Seleccionar la opción
+      Array.from(processSelect.options).forEach(option => {
+        option.selected = option.value === selectedIdPp;
       });
+
+      // Aplicar filtro
+      const filteredData = allData.filter(variable => variable.idPp === selectedIdPp);
+      currentFilteredData = filteredData;
+      renderPage(currentFilteredData, 1);
+      setupPagination(currentFilteredData);
+      updateVariableCounter(filteredData.length);
+
+      // Reactivar el listener después del render inicial
+      setTimeout(() => {
+        processSelect.addEventListener("change", handleProcessSelectChange);
+      }, 0);
+    } else {
+      // No hay filtro en la URL, mostrar todo
+      currentFilteredData = allData;
+      renderPage(allData, 1);
+      setupPagination(allData);
+      updateVariableCounter(allData.length);
+    }
   });
 
-// Listener para cambios manuales en el select
-processSelect.addEventListener("change", function () {
+// ✅ Listener en función aparte (para poder quitarlo si hace falta)
+function handleProcessSelectChange() {
   const selectedOptions = Array.from(this.selectedOptions);
   const selectedValues = selectedOptions.map(opt => opt.value);
 
@@ -83,7 +91,10 @@ processSelect.addEventListener("change", function () {
   renderPage(currentFilteredData, 1);
   setupPagination(currentFilteredData);
   updateVariableCounter(filteredData.length);
-});
+}
+
+// ✅ Asignar el listener desde el inicio
+processSelect.addEventListener("change", handleProcessSelectChange);
 
     // Referencias a los checkboxes
 const relTabCheckbox = document.getElementById("relTabCheckbox");
