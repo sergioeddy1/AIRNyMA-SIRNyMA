@@ -18,11 +18,12 @@ document.addEventListener("DOMContentLoaded", function () {
     let itemsPerPage = parseInt(itemsPerPageSelect.value, 10); // Número de elementos por página
     let currentPage = 1; // Página actual
     let procesosGlobal = [];
-let allData = [];
-let currentFilteredData = [];
+    let allData = [];
+    let currentFilteredData = [];
 
 
-fetch("https://jones-investors-participant-behaviour.trycloudflare.com/api/proceso")
+// Llenar el select de procesos y aplicar filtro inicial si hay idPp en la URL
+fetch("/api/proceso")
   .then(response => response.json())
   .then(data => {
     procesosGlobal = data;
@@ -34,7 +35,7 @@ fetch("https://jones-investors-participant-behaviour.trycloudflare.com/api/proce
     });
 
     // Cargar variables luego de llenar el select
-    return fetch("https://jones-investors-participant-behaviour.trycloudflare.com/api/variables");
+    return fetch("/api/variables");
   })
   .then(response => response.json())
   .then(variables => {

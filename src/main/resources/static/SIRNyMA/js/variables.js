@@ -22,6 +22,8 @@ let allData = [];
 let currentFilteredData = [];
 
 
+let initializing = true; // <-- bandera de inicialización
+
 // Llenar el select de procesos y aplicar filtro inicial si hay idPp en la URL
 fetch("/api/proceso")
   .then(response => response.json())
@@ -34,37 +36,40 @@ fetch("/api/proceso")
       processSelect.appendChild(option);
     });
 
-    // Ahora carga las variables
-    fetch("/api/variables")
-      .then(response => response.json())
-      .then(variables => {
-        allData = variables;
-        const urlParams = new URLSearchParams(window.location.search);
-        const selectedIdPp = urlParams.get("idPp");
+    return fetch("/api/variables");
+  })
+  .then(response => response.json())
+  .then(variables => {
+    allData = variables;
 
-        if (selectedIdPp) {
-          // Selecciona el proceso en el select
-          Array.from(processSelect.options).forEach(option => {
-            option.selected = option.value === selectedIdPp;
-          });
-          // Filtra y muestra solo las variables de ese proceso
-          const filteredData = allData.filter(variable => variable.idPp === selectedIdPp);
-          currentFilteredData = filteredData;
-          renderPage(currentFilteredData, 1);
-          setupPagination(currentFilteredData);
-          updateVariableCounter(filteredData.length);
-        } else {
-          // Si no hay filtro, muestra todo
-          currentFilteredData = allData;
-          renderPage(allData, 1);
-          setupPagination(allData);
-          updateVariableCounter(allData.length);
-        }
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectedIdPp = urlParams.get("idPp");
+
+    if (selectedIdPp) {
+      Array.from(processSelect.options).forEach(option => {
+        option.selected = option.value === selectedIdPp;
       });
+
+      const filteredData = allData.filter(variable => variable.idPp === selectedIdPp);
+      currentFilteredData = filteredData;
+      renderPage(currentFilteredData, 1);
+      setupPagination(currentFilteredData);
+      updateVariableCounter(filteredData.length);
+    } else {
+      currentFilteredData = allData;
+      renderPage(allData, 1);
+      setupPagination(allData);
+      updateVariableCounter(allData.length);
+    }
+
+    // Finaliza fase de inicialización
+    initializing = false;
   });
 
-// Listener para cambios manuales en el select
+// Listener global del select
 processSelect.addEventListener("change", function () {
+  if (initializing) return; // Ignora si aún se está inicializando
+
   const selectedOptions = Array.from(this.selectedOptions);
   const selectedValues = selectedOptions.map(opt => opt.value);
 
@@ -84,6 +89,7 @@ processSelect.addEventListener("change", function () {
   setupPagination(currentFilteredData);
   updateVariableCounter(filteredData.length);
 });
+
 
     // Referencias a los checkboxes
 const relTabCheckbox = document.getElementById("relTabCheckbox");
