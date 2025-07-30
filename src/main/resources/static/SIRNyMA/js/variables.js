@@ -23,28 +23,7 @@ let currentFilteredData = [];
 
 
 // Llenar el select de procesos y aplicar filtro inicial si hay idPp en la URL
-document.addEventListener("DOMContentLoaded", function () {
-    const searchForm = document.getElementById("searchForm");
-    const searchInput = document.getElementById("searchInput");
-    const container = document.getElementById("variablesContainer");
-    const paginationContainer = document.getElementById("pagination");
-    const processSelect = document.getElementById("processSelect");
-    const temaSelect = document.getElementById("temaSelect"); // AÑADE ESTA LÍNEA SI NO LA TIENES
-    const clearFiltersBtn = document.getElementById("clearFiltersBtn");
-    const itemsPerPageSelect = document.getElementById("itemsPerPage"); // Selector de elementos por página
-    const unidadSection = document.getElementById("unidadAdministrativaSection");
-    const params = new URLSearchParams(window.location.search); // Obtener los parámetros de la URL
-    const idPpParam = params.get("idPp"); // Obtener el valor del parámetro idPp
-    const sortSelect = document.getElementById("sortOptions"); // Selector de ordenación
-    const alinMdeaCheckbox = document.getElementById("alinMdeaCheckbox");
-    const alinOdsCheckbox = document.getElementById("alinOdsCheckbox");
-    
 
-    let itemsPerPage = parseInt(itemsPerPageSelect.value, 10); // Número de elementos por página
-    let currentPage = 1; // Página actual
-    let procesosGlobal = [];
-let allData = [];
-let currentFilteredData = [];
 
 
 // Llenar el select de procesos y aplicar filtro inicial si hay idPp en la URL
@@ -2103,8 +2082,6 @@ searchForm.addEventListener("submit", function (e) {
             }
         }
     });
-
-});
 
 // Almacenar y recuperar término de búsqueda en localStorage
 document.addEventListener("DOMContentLoaded", function () {
