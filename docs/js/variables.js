@@ -1,102 +1,26 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const searchForm = document.getElementById("searchForm");
-    const searchInput = document.getElementById("searchInput");
-    const container = document.getElementById("variablesContainer");
-    const paginationContainer = document.getElementById("pagination");
-    const processSelect = document.getElementById("processSelect");
-    const temaSelect = document.getElementById("temaSelect"); // AÑADE ESTA LÍNEA SI NO LA TIENES
-    const clearFiltersBtn = document.getElementById("clearFiltersBtn");
-    const itemsPerPageSelect = document.getElementById("itemsPerPage"); // Selector de elementos por página
-    const unidadSection = document.getElementById("unidadAdministrativaSection");
-    const params = new URLSearchParams(window.location.search); // Obtener los parámetros de la URL
-    const idPpParam = params.get("idPp"); // Obtener el valor del parámetro idPp
-    const sortSelect = document.getElementById("sortOptions"); // Selector de ordenación
-    const alinMdeaCheckbox = document.getElementById("alinMdeaCheckbox");
-    const alinOdsCheckbox = document.getElementById("alinOdsCheckbox");
-    
+  // Elementos del DOM
+  const searchForm = document.getElementById("searchForm");
+  const searchInput = document.getElementById("searchInput");
+  const container = document.getElementById("variablesContainer");
+  const paginationContainer = document.getElementById("pagination");
+  const processSelect = document.getElementById("processSelect");
+  const temaSelect = document.getElementById("temaSelect");
+  const clearFiltersBtn = document.getElementById("clearFiltersBtn");
+  const itemsPerPageSelect = document.getElementById("itemsPerPage");
+  const unidadSection = document.getElementById("unidadAdministrativaSection");
+  const sortSelect = document.getElementById("sortOptions");
+  const alinMdeaCheckbox = document.getElementById("alinMdeaCheckbox");
+  const alinOdsCheckbox = document.getElementById("alinOdsCheckbox");
 
-    let itemsPerPage = parseInt(itemsPerPageSelect.value, 10); // Número de elementos por página
-    let currentPage = 1; // Página actual
-    let procesosGlobal = [];
-    let allData = [];
-    let currentFilteredData = [];
-
-
-// Llenar el select de procesos y aplicar filtro inicial si hay idPp en la URL
-fetch("https://jones-investors-participant-behaviour.trycloudflare.com/api/proceso")
-  .then(response => response.json())
-  .then(data => {
-    procesosGlobal = data;
-    data.forEach(proc => {
-      const option = document.createElement("option");
-      option.value = proc.idPp;
-      option.textContent = `• ${proc.pp} (${proc.idPp})`;
-      processSelect.appendChild(option);
-    });
-
-    // Cargar variables luego de llenar el select
-    return fetch("https://jones-investors-participant-behaviour.trycloudflare.com/api/variables");
-  })
-  .then(response => response.json())
-  .then(variables => {
-    allData = variables;
-    const urlParams = new URLSearchParams(window.location.search);
-    const selectedIdPp = urlParams.get("idPp");
-
-    if (selectedIdPp) {
-      // Desactivar temporalmente el listener para evitar doble render
-      processSelect.removeEventListener("change", handleProcessSelectChange);
-
-      // Seleccionar la opción
-      Array.from(processSelect.options).forEach(option => {
-        option.selected = option.value === selectedIdPp;
-      });
-
-      // Aplicar filtro
-      const filteredData = allData.filter(variable => variable.idPp === selectedIdPp);
-      currentFilteredData = filteredData;
-      renderPage(currentFilteredData, 1);
-      setupPagination(currentFilteredData);
-      updateVariableCounter(filteredData.length);
-
-      // Reactivar el listener después del render inicial
-      setTimeout(() => {
-        processSelect.addEventListener("change", handleProcessSelectChange);
-      }, 0);
-    } else {
-      // No hay filtro en la URL, mostrar todo
-      currentFilteredData = allData;
-      renderPage(allData, 1);
-      setupPagination(allData);
-      updateVariableCounter(allData.length);
-    }
-  });
-
-// ✅ Listener en función aparte (para poder quitarlo si hace falta)
-function handleProcessSelectChange() {
-  const selectedOptions = Array.from(this.selectedOptions);
-  const selectedValues = selectedOptions.map(opt => opt.value);
-
-  checkMostrarUnidadSection();
-
-  if (selectedValues.length === 0) {
-    currentFilteredData = allData;
-    renderPage(allData, 1);
-    setupPagination(allData);
-    updateVariableCounter(allData.length);
-    return;
-  }
-
-  const filteredData = allData.filter(variable => selectedValues.includes(variable.idPp));
-  currentFilteredData = filteredData;
-  renderPage(currentFilteredData, 1);
-  setupPagination(currentFilteredData);
-  updateVariableCounter(filteredData.length);
-}
-
-// ✅ Asignar el listener desde el inicio
-processSelect.addEventListener("change", handleProcessSelectChange);
-
+  // Variables globales
+  const params = new URLSearchParams(window.location.search);
+  const idPpParam = params.get("idPp");
+  let itemsPerPage = parseInt(itemsPerPageSelect.value, 10);
+  let currentPage = 1;
+  let procesosGlobal = [];
+  let allData = [];
+  let currentFilteredData = [];
 
     // Referencias a los checkboxes
 const relTabCheckbox = document.getElementById("relTabCheckbox");
@@ -213,77 +137,81 @@ searchForm?.addEventListener("submit", function (e) {
     }
 
 
-// Llenar dinámicamente el select desde /api/proceso
-fetch("https://jones-investors-participant-behaviour.trycloudflare.com/api/proceso")
-  .then(response => response.json())
-  .then(data => {
-    procesosGlobal = data;
-    data.forEach(proc => {
+
+
+// 🔁 Cargar procesos y variables en paralelo
+Promise.all([
+  fetch("https://jones-investors-participant-behaviour.trycloudflare.com/api/proceso").then(res => res.json()),
+  fetch("https://jones-investors-participant-behaviour.trycloudflare.com/api/variables").then(res => res.json())
+])
+  .then(([procesos, variables]) => {
+    procesosGlobal = procesos;
+    allData = variables;
+
+    // Llenar el select de procesos
+    procesos.forEach(proc => {
       const option = document.createElement("option");
       option.value = proc.idPp;
       option.textContent = `• ${proc.pp} (${proc.idPp})`;
       processSelect.appendChild(option);
     });
 
-processSelect.addEventListener("mousedown", function (e) {
-  e.preventDefault();
-  const option = e.target;
-  option.selected = !option.selected;
-  processSelect.dispatchEvent(new Event("change"));
-});
+    // Manejo de clic para selección múltiple estilo checkbox
+    processSelect.addEventListener("mousedown", function (e) {
+      e.preventDefault();
+      const option = e.target;
+      option.selected = !option.selected;
+      processSelect.dispatchEvent(new Event("change"));
+    });
 
-    // Aquí ya está listo el select, ahora puedes verificar si hay idPp en la URL
-    aplicarFiltroDesdeURL(); // <== Agrega esta línea aquí
+    aplicarFiltroDesdeURL(); // ✅ Aplicar filtro inicial si viene desde otra página
   })
-  .catch(error => console.error("Error al cargar procesos:", error));
+  .catch(error => console.error("Error al cargar procesos o variables:", error));
 
-// Cargar todas las variables
-fetch("https://jones-investors-participant-behaviour.trycloudflare.com/api/variables")
-  .then(response => response.json())
-  .then(data => {
-    allData = data;
-    // Solo aplicar filtro desde URL o mostrar todo si no hay filtro
-    aplicarFiltroDesdeURL();
-  });
 
-// Función que aplica el filtro si hay idPp en la URL
+// ✅ Listener de cambio del select de procesos
+processSelect.addEventListener("change", handleProcessSelectChange);
+
+// 🔍 Aplicar filtro desde la URL si hay `idPp`
 function aplicarFiltroDesdeURL() {
   const urlParams = new URLSearchParams(window.location.search);
   const selectedIdPp = urlParams.get("idPp");
 
-  if (selectedIdPp) {
-    const interval = setInterval(() => {
-      if (processSelect.options.length > 0 && allData.length > 0) {
-        clearInterval(interval);
-
-        // Solo selecciona si no está ya seleccionado
-        Array.from(processSelect.options).forEach(option => {
-          if (option.value === selectedIdPp && !option.selected) {
-            option.selected = true;
-          }
-        });
-
-        processSelect.dispatchEvent(new Event("change"));
-      }
-    }, 100);
-  } else {
+  if (!selectedIdPp) {
     renderPage(allData, 1);
     setupPagination(allData);
     updateVariableCounter(allData.length);
+    return;
   }
+
+  const interval = setInterval(() => {
+    const selectReady = processSelect.options.length > 0;
+    const dataReady = allData.length > 0;
+
+    if (selectReady && dataReady) {
+      clearInterval(interval);
+
+      // Seleccionar desde la URL
+      Array.from(processSelect.options).forEach(option => {
+        if (option.value === selectedIdPp) option.selected = true;
+      });
+
+      processSelect.dispatchEvent(new Event("change"));
+    }
+  }, 100);
 }
 
-// Escuchar cambios manuales del usuario en el select
-processSelect.addEventListener("change", function () {
-  const selectedOptions = Array.from(this.selectedOptions);
+
+// ✅ Función central de cambio del select
+function handleProcessSelectChange() {
+  const selectedOptions = Array.from(processSelect.selectedOptions);
   const selectedValues = selectedOptions.map(opt => opt.value);
 
-  // Mostrar tags arriba
   renderSelectedTags(selectedOptions);
-
   checkMostrarUnidadSection();
 
   if (selectedValues.length === 0) {
+    currentFilteredData = allData;
     renderPage(allData, 1);
     setupPagination(allData);
     updateVariableCounter(allData.length);
@@ -291,6 +219,7 @@ processSelect.addEventListener("change", function () {
   }
 
   const filteredData = allData.filter(variable => selectedValues.includes(variable.idPp));
+  currentFilteredData = filteredData;
 
   if (filteredData.length === 0) {
     container.innerHTML = "<p class='text-center'>No hay variables para los procesos seleccionados.</p>";
@@ -300,26 +229,25 @@ processSelect.addEventListener("change", function () {
   }
 
   currentPage = 1;
-  currentFilteredData = filteredData;
   renderPage(currentFilteredData, currentPage);
   setupPagination(currentFilteredData);
   updateVariableCounter(filteredData.length);
-});
+}
 
- // Renderizar las etiquetas de los procesos seleccionados
- function renderSelectedTags(selectedOptions) {
+
+// ✅ Renderizado de tags (chips) de procesos seleccionados
+function renderSelectedTags(selectedOptions) {
   const container = document.getElementById("processSelectContainer");
-  container.innerHTML = ""; // Limpiar primero
+  container.innerHTML = "";
 
-  // Usar un Set para evitar duplicados
   const seen = new Set();
 
   selectedOptions.forEach(option => {
-    if (seen.has(option.value)) return; // Si ya existe, no lo agregues
+    if (seen.has(option.value)) return;
     seen.add(option.value);
 
     const tag = document.createElement("div");
-    tag.className = "badge bg-primary d-flex align-items-center";
+    tag.className = "badge bg-primary d-flex align-items-center me-2 mb-1";
     tag.style.paddingRight = "0.5rem";
 
     const text = document.createElement("span");
@@ -340,6 +268,7 @@ processSelect.addEventListener("change", function () {
     container.appendChild(tag);
   });
 }
+
     
     // Filtrado por temática
     temaSelect.addEventListener("change", function () {
@@ -854,7 +783,6 @@ function renderPage(data, page) {
         updateVariableCounter(filteredData.length);
     }
 
-    const selectedProcessesContainer = document.getElementById("selectedProcessesContainer");
 
 function updateSelectedProcessesChips() {
     const selectedProcessesContainer = document.getElementById("selectedProcessesContainer");
@@ -1124,3 +1052,5 @@ function renderComentarios(comentario) {
     </div>
   `;
 }
+
+  
