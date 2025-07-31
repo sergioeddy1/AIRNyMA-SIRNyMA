@@ -136,9 +136,6 @@ searchForm?.addEventListener("submit", function (e) {
     }
     }
 
-
-
-
 // 🔁 Cargar procesos y variables en paralelo
 Promise.all([
   fetch("https://jones-investors-participant-behaviour.trycloudflare.com/api/proceso").then(res => res.json()),
@@ -198,7 +195,7 @@ function aplicarFiltroDesdeURL() {
 
       processSelect.dispatchEvent(new Event("change"));
     }
-  }, 100);
+  }, 1000);
 }
 
 
