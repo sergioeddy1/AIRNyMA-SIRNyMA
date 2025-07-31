@@ -150,7 +150,7 @@
                                                 ${mostrarVigencia(proceso.vigInicial, proceso.vigFinal)}
                                             </p>
                                             <p class="card-text mb-0">  
-                                                <strong>Total Variables:</strong>
+                                                <strong>Total Variables Ambientales:</strong>
                                                  <span style="color: #08739c; text-decoration: underline; cursor: pointer; font-weight: bold;"
                                                     onclick="handleVariableClick('${proceso.idPp}')">
                                                     ${conteo[proceso.idPp] || 0}
