@@ -101,4 +101,21 @@ td:nth-child(2) {
   padding-left: 3px;
 }
 
+/* Hace que el cuerpo del modal sea desplazable si el contenido es grande */
+.modal-xl .modal-body {
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+  .table-modal thead th {
+    white-space: normal;               /* permite saltos de línea */
+    overflow-wrap: anywhere;           /* parte palabras muy largas si hace falta */
+    line-height: 1.2;
+    vertical-align: bottom;
+  }
+  /* Alinea números a la derecha */
+  .table-modal td.num { text-align: right; }
+  /* Año sin wrap (si prefieres fijo) */
+  .table-modal td.year { white-space: nowrap; }
+
 

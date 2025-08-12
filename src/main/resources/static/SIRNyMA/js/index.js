@@ -121,11 +121,10 @@
             });
 
        
-    document.getElementById("navbarSearchForm").addEventListener("submit", function(e) {
-      e.preventDefault();
-      const searchTerm = document.getElementById("searchInput").value.trim();
-      if (searchTerm) {
-        localStorage.setItem("variableSearchTerm", searchTerm);
-        window.location.href = "variables.html";
-      }
-    });
+ document.getElementById("navbarSearchForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  const searchTerm = document.getElementById("searchInput").value.trim();
+  if (searchTerm) {
+    window.location.href = `variables.html?search=${encodeURIComponent(searchTerm)}`;
+  }
+});

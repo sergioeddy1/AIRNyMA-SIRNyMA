@@ -176,29 +176,55 @@ processSelect.addEventListener("change", handleProcessSelectChange);
 function aplicarFiltroDesdeURL() {
   const urlParams = new URLSearchParams(window.location.search);
   const selectedIdPp = urlParams.get("idPp");
-
-  if (!selectedIdPp) {
-    renderPage(allData, 1);
-    setupPagination(allData);
-    updateVariableCounter(allData.length);
-    return;
-  }
+  const searchTerm = urlParams.get("search");
 
   const interval = setInterval(() => {
     const selectReady = processSelect.options.length > 0;
     const dataReady = allData.length > 0;
 
-    if (selectReady && dataReady) {
-      clearInterval(interval);
+    if (!selectReady || !dataReady) return;
 
-      // Seleccionar desde la URL
+    clearInterval(interval);
+
+    // Filtro por Proceso (idPp)
+    if (selectedIdPp) {
       Array.from(processSelect.options).forEach(option => {
         if (option.value === selectedIdPp) option.selected = true;
       });
-
       processSelect.dispatchEvent(new Event("change"));
+      return;
     }
-  }, 100);
+
+    // Filtro por término de búsqueda
+    if (searchTerm) {
+      searchInput.value = searchTerm;
+
+      const filteredData = allData.filter(variable =>
+        variable.nomVar.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        variable.defVar.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        variable.varAsig.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+
+      currentFilteredData = filteredData;
+      currentPage = 1;
+
+      if (filteredData.length === 0) {
+        container.innerHTML = "<p class='text-center'>No se encontraron resultados para el término ingresado.</p>";
+        paginationContainer.innerHTML = "";
+        updateVariableCounter(0);
+      } else {
+        renderPage(currentFilteredData, currentPage);
+        setupPagination(currentFilteredData);
+        updateVariableCounter(filteredData.length);
+      }
+      return;
+    }
+
+    // Si no hay filtros, mostrar todo
+    renderPage(allData, 1);
+    setupPagination(allData);
+    updateVariableCounter(allData.length);
+  }, 1000);
 }
 
 
@@ -375,28 +401,25 @@ function renderSelectedTags(selectedOptions) {
 
 // Buscar variables por término ingresado
 function searchVariables(term) {
-    if (!term) {
-        renderPage(allData, currentPage);
-        setupPagination(allData);
-        return;
-    }
+  if (!term) {
+    renderPage(allData, 1);
+    setupPagination(allData);
+    return;
+  }
 
-    const termLower = term.toLowerCase();
-    const filteredData = allData.filter(variable =>
-        variable.nomVar.toLowerCase().includes(termLower) ||
-        variable.defVar.toLowerCase().includes(termLower) ||
-        variable.varAsig.toLowerCase().includes(termLower)
-    );
+  const filteredData = allData.filter(variable =>
+    variable.nomVar.toLowerCase().includes(term.toLowerCase()) ||
+    variable.defVar.toLowerCase().includes(term.toLowerCase()) ||
+    variable.varAsig.toLowerCase().includes(term.toLowerCase())
+  );
 
-    if (filteredData.length === 0) {
-        container.innerHTML = "<p class='text-center'>No se encontraron resultados para el término ingresado.</p>";
-        paginationContainer.innerHTML = "";
-        return;
-    }
-
-    currentFilteredData = filteredData;
-    renderPage(currentFilteredData, currentPage);
-    setupPagination(currentFilteredData);
+  if (filteredData.length === 0) {
+    container.innerHTML = "<p class='text-center'>No se encontraron resultados.</p>";
+    paginationContainer.innerHTML = "";
+  } else {
+    renderPage(filteredData, 1);
+    setupPagination(filteredData);
+  }
 }
 
 // Actualizar el número total de variables mostradas
@@ -846,24 +869,25 @@ searchForm.addEventListener("submit", function (e) {
     });
 
     // Función para obtener parámetros de la URL
-    function getQueryParam(param) {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get(param);
+   function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
     }
 
     // Cuando cargue la página, buscar si hay un parámetro "search"
-    document.addEventListener("DOMContentLoaded", () => {
-        const searchTerm = getQueryParam("search");
-        if (searchTerm) {
-            // Asegúrate de que los datos estén cargados antes de buscar
-            const checkDataLoaded = setInterval(() => {
-                if (typeof allData !== 'undefined' && allData.length > 0) {
-                    clearInterval(checkDataLoaded);
-                    searchInput.value = searchTerm; // Mostrar el término en el input
-                    searchVariables(searchTerm);    // Ejecutar la búsqueda
-                }
-            }, 100);
+   document.addEventListener("DOMContentLoaded", () => {
+    const searchTerm = getQueryParam("search");
+
+    if (searchTerm) {
+        const checkDataLoaded = setInterval(() => {
+        if (typeof allData !== 'undefined' && allData.length > 0) {
+            clearInterval(checkDataLoaded);
+            searchInput.value = searchTerm;
+            currentPage = 1;
+            searchVariables(searchTerm);
         }
+        }, 100);
+    }
     });
 
     // Evento delegado para mostrar información de tabulados y microdatos en el modal
