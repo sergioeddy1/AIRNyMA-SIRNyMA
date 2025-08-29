@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Variables globales
   const params = new URLSearchParams(window.location.search);
   const idPpParam = params.get("idPp");
-  let itemsPerPage = parseInt(itemsPerPageSelect.value, 10);
+  let itemsPerPage = parseInt(itemsPerPageSelect.value, 15);
   let currentPage = 1;
   let procesosGlobal = [];
   let allData = [];
@@ -40,30 +40,66 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
 // Función para filtrar por periodo de tiempo 
-function populatePeriodFilters() {
+function populatePeriodFilters(selectedProcessIds = []) {
   const periodInic = document.getElementById("periodInic");
-  const periodFin = document.getElementById("periodFin");
+  const periodFin  = document.getElementById("periodFin");
+  if (!periodInic || !periodFin) return;
 
+  // 1) Obtener series por proceso
   const yearsSet = new Set();
 
-  allData.forEach(variable => {
-    const startYear = parseInt(variable.vigInicial);
-    const endRaw = variable.vigFinal;
-    const endYear = endRaw.includes("A la fecha") ? new Date().getFullYear() : parseInt(endRaw);
+  // Si no se seleccionó nada, usar todos los procesos (union)
+  const procesosFuente = (selectedProcessIds.length
+    ? procesosGlobal.filter(p => selectedProcessIds.includes(p.idPp))
+    : procesosGlobal
+  );
 
-    if (!isNaN(startYear)) yearsSet.add(startYear);
-    if (!isNaN(endYear)) yearsSet.add(endYear);
+  procesosFuente.forEach(proc => {
+    const serie = getProcessYearSeries(proc); // respeta overrides/caps/periodicidad
+    serie.forEach(y => yearsSet.add(y));
   });
 
-  const sortedYears = Array.from(yearsSet).sort((a, b) => a - b);
+  // Si no hay nada que mostrar, sal
+  if (yearsSet.size === 0) {
+    periodInic.innerHTML = '<option value="">Inicio</option>';
+    periodFin.innerHTML  = '<option value="">Fin</option>';
+    return;
+  }
 
-  // Agregar las opciones
-  sortedYears.forEach(year => {
-    const option1 = new Option(year, year);
-    const option2 = new Option(year, year);
-    periodInic.appendChild(option1);
-    periodFin.appendChild(option2);
+  // 2) Ordenar y limpiar selects
+  const sortedYears = Array.from(yearsSet).sort((a,b)=>a-b);
+  periodInic.innerHTML = '<option value="">Inicio</option>';
+  periodFin.innerHTML  = '<option value="">Fin</option>';
+
+  // 3) Rellenar opciones con los años calculados
+  sortedYears.forEach(y => {
+    periodInic.appendChild(new Option(y, y));
+    periodFin.appendChild(new Option(y, y));
   });
+
+  // 4) Selecciones por defecto (min y max)
+  const minY = sortedYears[0];
+  const maxY = sortedYears[sortedYears.length - 1];
+  periodInic.value = String(minY);
+  periodFin.value  = String(maxY);
+
+  // 5) Asegurar rango válido si el usuario cambia
+  periodInic.onchange = () => {
+    const start = parseInt(periodInic.value, 10);
+    const end   = parseInt(periodFin.value, 10);
+    if (Number.isFinite(start) && Number.isFinite(end) && start > end) {
+      // mover fin hacia el mismo inicio
+      periodFin.value = String(start);
+    }
+  };
+  periodFin.onchange = () => {
+    const start = parseInt(periodInic.value, 10);
+    const end   = parseInt(periodFin.value, 10);
+    if (Number.isFinite(start) && Number.isFinite(end) && end < start) {
+      // mover inicio hacia el mismo fin
+      periodInic.value = String(end);
+    }
+  };
 }
 
 // Función principal de filtrado
@@ -170,7 +206,14 @@ Promise.all([
 
 
 // ✅ Listener de cambio del select de procesos
-processSelect.addEventListener("change", handleProcessSelectChange);
+processSelect.addEventListener("change", () => {
+  const selected = Array.from(processSelect.selectedOptions).map(o => o.value);
+  populatePeriodFilters(selected);   // <- repoblar años según procesos elegidos
+  handleProcessSelectChange();       // <- tu lógica existente de filtrado por proceso
+});
+
+// Tras cargar procesos/variables:
+populatePeriodFilters([]); // sin selección inicial -> usa unión de todos
 
 // 🔍 Aplicar filtro desde la URL si hay `idPp`
 function aplicarFiltroDesdeURL() {
@@ -450,35 +493,215 @@ function updateVariableCounter(count) {
 }
 
 // Funcion para la linea de tiempo 
-let eventosGlobal = []; // Aquí almacenamos los eventos una sola vez
+let variablesGlobal = [];
+let microdatosGlobal = [];
+let fuentesGlobal = [];
+
+Promise.all([
+  fetch('/api/proceso').then(r => r.json()),
+  fetch('/api/variables').then(r => r.json()),
+  fetch('/api/microdatos').then(r => r.json()),
+  fetch('/api/fuentes').then(r => r.json()) // tabla "fuente" con anioEvento, idPp, ligaFuente/ligas
+]).then(([procesos, variables, microdatos, fuentes]) => {
+  procesosGlobal = procesos;
+  variablesGlobal = variables;
+  microdatosGlobal = microdatos;
+  fuentesGlobal = fuentes;
+
+  // Preprocesos: mapas para resoluciones rápidas
+  window._periodicidadPorPp = buildPeriodicidadPorPp(procesosGlobal); // idPp -> step años
+  window._rangoPorPp       = buildRangoPorPp(procesosGlobal);         // idPp -> {startYear, endYear}
+  window._ultimoAnioPorPp  = buildUltimoAnioPorPp(fuentesGlobal);      // idPp -> max(anioEvento)
+  window._ligaMicroPorVar  = buildLigaMicroPorVar(microdatosGlobal);   // idVar -> ligaMicro
+
+  // Llama a tu renderPage(variables, 1) como ya lo haces
+  renderPage(variablesGlobal, 1);
+});
 
 // 1. Cargar eventos antes de llamar a renderPage
-fetch('/api/eventos')
-  .then(res => res.json())
-  .then(eventos => {
-    eventosGlobal = eventos; // Guardamos todos los eventos en la variable global
-    fetch('/api/variables')
-      .then(res => res.json())
-      .then(variables => {
-        renderPage(variables, 1); // Llamamos a tu renderPage ya adaptada
-      });
-  });
+// --- Helpers: leer periodicidad, rango y último año por proceso ---
+// Deshabilitar anchors en el nodo destacado (amarillo) a nivel global:
+const DISABLE_LINKS_ON_HIT = true;
 
-const construirLineaDeTiempo = (eventos) => {
-  eventos.sort((a, b) => parseInt(a.evento) - parseInt(b.evento));
-  return `
-    <ul class="timeline" id="timeline">
-      ${eventos.map(evento => `
-        <li class="li complete d-flex flex-column align-items-center">
-          <div class="timestamp mb-2">
-            <span class="date mb-2"> <a href="${evento.fuenteIden}" target="_blank" class="text-decoration-none">${evento.evento}</a></span>
-          </div>
-          <div class="status text-center"></div>
-        </li>
-      `).join('')}
-    </ul>
-  `;
+// Tope general si vigFinal == "A la fecha" (cuando no haya override específico)
+const DEFAULT_END_YEAR_CAP = 2025;
+
+// Reglas por proceso (idPp)
+const SPECIAL_RULES = {
+  CPV: {
+    seriesOverride: [1895,1900,1910,1921,1930,1940,1950,1960,1970,1980,1990,1995,2000,2005,2010,2020],
+    capYear: 2020,
+    greenFromYear: 1950,
+    noLinks: true, // además de DISABLE_LINKS_ON_HIT global, forzamos en CPV
+  },
+  EIC:   { periodicityOverride: 5, capYear: 2020 },
+  ENIGH: { capYear: 2024, greenFromYear: 2016 },
+  ENADID: {
+  seriesOverride: [1992, 1997, 2006, 2009, 2014, 2018],
+  capYear: 2023,
+  lastYearOverride: 2018
+  },
+  ENBIARE: { seriesOverride: [2021], capYear: 2021 },
+  EM: { capYear: 2024 },
+  ENUT: { seriesOverride: [2002, 2009, 2014, 2019], capYear: 2019 },
+  ENILEMS: {
+    seriesOverride: [2012, 2016, 2019],
+    capYear: 2019,
+    lastYearOverride: 2019   // ⬅️ Fuerza el nodo amarillo en 2019 para todas las variables
+  },
+  ENIF: { periodicityOverride: 3, capYear: 2024 },
+  EFL: { capYear: 2019 },
+  ENTI: { periodicityOverride: 3, capYear: 2022 },
+  ENASIC: { seriesOverride: [2022], capYear: 2022 },
+  ENCO: { lastYearOverride: 2021 }, // resaltar 2021 en amarillo
 };
+
+
+
+function normIdPp(id) {
+  return String(id || '').trim().toUpperCase();
+}
+// Helpers existentes (usa los que ya tienes)
+function parseYearSafe(v) {
+  const n = parseInt(String(v).trim(), 10);
+  return Number.isFinite(n) ? n : null;
+}
+
+function parsePeriodicidadAnios(s) {
+  if (!s) return 1;
+  const txt = String(s).toLowerCase();
+  if (txt.includes('anual')) return 1;
+  if (txt.includes('bienal')) return 2;
+  if (txt.includes('trienal')) return 3;
+  if (txt.includes('quinquenal')) return 5;
+  const m = txt.match(/cada\s+(\d+)\s*años?/);
+  if (m) return Math.max(1, parseInt(m[1], 10));
+  return 1;
+}
+
+function buildYearSeries(startYear, endYear, step) {
+  const years = [];
+  for (let y = startYear; y <= endYear; y += step) years.push(y);
+  if (years.length && years[years.length - 1] !== endYear) years.push(endYear);
+  return years;
+}
+
+// Resolver fin de vigencia con reglas
+function resolveEndYear(proc) {
+  const rule = SPECIAL_RULES[normIdPp(proc.idPp)];
+  if (rule?.capYear) return rule.capYear;
+
+  const v = String(proc.vigFinal || '').toLowerCase();
+  if (v.includes('fecha')) return DEFAULT_END_YEAR_CAP; // 2020 por defecto
+  return parseYearSafe(proc.vigFinal);
+}
+
+// Serie por proceso (override > periodicidad)
+function getProcessYearSeries(proc) {
+  const rule = SPECIAL_RULES[normIdPp(proc.idPp)];
+
+  if (Array.isArray(rule?.seriesOverride)) {
+    let years = rule.seriesOverride
+      .map(y => parseInt(y, 10))
+      .filter(Number.isFinite);
+
+    // Si capYear es mayor que el último año de la serie, agrégalo
+    if (rule.capYear && !years.includes(rule.capYear)) {
+      years.push(rule.capYear);
+    }
+
+    years = years.filter(y => y <= rule.capYear); // sigue filtrando por capYear
+    return years.sort((a,b)=>a-b);
+  }
+
+  const startYear = parseYearSafe(proc.vigInicial);
+  const endYear = resolveEndYear(proc);
+  if (!startYear || !endYear || endYear < startYear) return [];
+
+  const step = rule?.periodicityOverride ?? parsePeriodicidadAnios(proc.perPubResul || proc.perioProd || 'Anual');
+  let years = buildYearSeries(startYear, endYear, step);
+  if (years.length && years[years.length - 1] !== endYear) years.push(endYear);
+  return years.sort((a,b)=>a-b);
+}
+
+function getEventYearsForVar(idVar, eventosRelacionados) {
+  const fuente = (eventosRelacionados && eventosRelacionados.length)
+    ? eventosRelacionados
+    : (Array.isArray(eventosGlobal) ? eventosGlobal.filter(e => e.idVar === idVar) : []);
+
+  const años = new Set();
+  for (const ev of fuente) {
+    const y = parseInt(String(ev.anioEvento ?? ev.evento ?? '').trim(), 10);
+    if (Number.isFinite(y)) años.add(y);
+  }
+  return Array.from(años).sort((a,b)=>a-b); // orden asc
+}
+
+// ⚠️ Reemplaza sólo esta función
+function construirLineaDeTiempoVariable(variable, eventosRelacionados) {
+  try {
+    const proc = procesosGlobal?.find(p => p.idPp === variable.idPp);
+    if (!proc) return construirLineaDeTiempo(eventosRelacionados);
+
+    // Serie base de años del proceso (usa tus helpers/reglas ya existentes)
+    let years = getProcessYearSeries(proc);
+    if (!years.length) return construirLineaDeTiempo(eventosRelacionados);
+
+    // Años con evento para ESTA variable (verde)
+    const eventYears = getEventYearsForVar(variable.idVar, eventosRelacionados);
+    const greenYearsSet = new Set(eventYears);
+
+    // Determinar el año amarillo (hitYear) según reglas especiales
+    const rule = SPECIAL_RULES[normIdPp(proc.idPp)];
+    let hitYear = null;
+    if (rule && rule.lastYearOverride) {
+      hitYear = rule.lastYearOverride;
+    } else if (eventYears.length) {
+      hitYear = eventYears[eventYears.length - 1];
+    }
+
+    // Si el hitYear no está en la serie de years, lo insertamos para que se dibuje
+    if (hitYear && !years.includes(hitYear)) {
+      years.push(hitYear);
+      years.sort((a,b)=>a-b);
+    }
+
+    // Construcción de nodos (mismo HTML que usas)
+   const items = years.map(y => {
+    const isHit   = (hitYear === y);                  // amarillo
+    const isGreen = !isHit && greenYearsSet.has(y);   // verde si tiene evento y no es hit
+    const liClass = isHit
+      ? 'complete-hit'
+      : (isGreen ? 'complete-green' : 'complete-neutral');
+
+    // Tooltips por estado
+    const tooltipAttr = isHit
+      ? `data-bs-toggle="tooltip" data-bs-placement="top" title="Año en el que se referencia la relación de esta variable mostrada ${hitYear}"`
+      : (isGreen
+          ? `data-bs-toggle="tooltip" data-bs-placement="top" title="Año en el que aparece la variable"`
+          : '');
+
+    // Sin enlaces (según tu requerimiento actual)
+    const inner = `<span class="tl-year" ${tooltipAttr}>${y}</span>`;
+
+    return `
+      <li class="li ${liClass} d-flex flex-column align-items-center">
+        <div class="timestamp mb-2">
+          <span class="date mb-2">${inner}</span>
+        </div>
+        <div class="status text-center"></div>
+      </li>
+    `;
+  }).join('');
+
+
+    return `<ul class="timeline" id="timeline">${items}</ul>`;
+  } catch (err) {
+    console.error('Error en construirLineaDeTiempoVariable:', err);
+    return construirLineaDeTiempo(eventosRelacionados);
+  }
+}
+
 
 function renderPage(data, page) {
   container.innerHTML = "";
@@ -490,7 +713,7 @@ function renderPage(data, page) {
   paginatedData.forEach((variable, index) => {
     // 2. Filtrar los eventos que pertenecen a esta variable
     const eventosRelacionados = eventosGlobal.filter(ev => ev.idVar === variable.idVar);
-    const timelineHTML = construirLineaDeTiempo(eventosRelacionados);
+    const timelineHTML = construirLineaDeTiempoVariable(variable, eventosRelacionados);
 
     // 3. Fuentes dinámicas
     const fuentesHTML = eventosRelacionados.map(ev => 
@@ -526,11 +749,13 @@ function renderPage(data, page) {
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="mb-2">
-                            <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Pregunta elaborada cuyo objetivo es obtener una respuesta directa y explícita basada en información específica y detallada proporcionada por un informante"><i class="bi bi-question-circle me-1"></i>Pregunta:</span>
+                            <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Pregunta elaborada cuyo objetivo es obtener una respuesta directa y explícita basada en información específica y detallada proporcionada por un informante">
+                            <i class="bi bi-question-circle me-1"></i>Pregunta:</span>
                             <div class="ps-3">
                             <p>${variable.pregLit}</p>
                             </div>
-                             <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Ordenamiento de todas y cada una de las modalidades cualitativas o intervalos numéricos admitidos por una variable"><i class="bi bi-question-circle me-1"></i>Clasificación de la variable correspondiente a la pregunta:</span>
+                             <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Ordenamiento de todas y cada una de las modalidades cualitativas o intervalos numéricos admitidos por una variable">
+                             <i class="bi bi-question-circle me-1"></i>Clasificación de la variable correspondiente a la pregunta:</span>
                              <div class="ps-3">
                                 ${getClasificacionesPorVariable(variable.idVar)}
                               </div>
@@ -541,7 +766,7 @@ function renderPage(data, page) {
                             <div class="ps-3">${variable.defVar}</div>
                         </div>
                         <div class="mb-2">
-                            <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Nombre de la variable seleccionad, tal y como aparece en la fuente del evento en mención">
+                            <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Nombre de la variable seleccionada, tal y como aparece en la fuente del evento en mención">
                                 <i class="bi bi-tag me-1"></i>Variable Fuente:</span>
                             <span class="text-dark ms-1 fw-normal">${variable.nomVar}</span>
                         </div>
@@ -566,7 +791,8 @@ function renderPage(data, page) {
                             </div>
                         </div>
                         <div class="mb-2">
-                            <span class="fw-semibold text-secondary"><i class="bi bi-link-45deg me-1"></i>Relación con Tabulados o Microdatos</span>
+                            <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Verifica si la variable seleccionada cuenta con información disponible en relación a tabulados publicados o en microdatos">
+                            <i class="bi bi-link-45deg me-1"></i>Relación con Tabulados o Microdatos</span>
                             <div class="ps-3 d-flex flex-wrap gap-2">
                                 <span class="badge bg-${variable.relTab === 'Sí' ? 'success badge-tabulado' : 'danger'}"
                                       style="cursor:pointer"
@@ -579,7 +805,8 @@ function renderPage(data, page) {
                                       ${variable.relMicro === 'Sí' ? 'data-bs-toggle="modal" data-bs-target="#infoModal" data-type="microdatos"' : ''}
                                 >${variable.relMicro === 'Sí' ? 'Microdatos' : 'Sin Microdatos'}</span>
                             </div>
-                        <span class="fw-semibold text-secondary"><i class="bi bi-link-45deg me-1"></i>Alineación con MDEA y ODS</span>
+                        <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Verifica si la variable seleccionada está alineada con la estructura del MDEA o con los ODS.">
+                        <i class="bi bi-link-45deg me-1"></i>Alineación con MDEA y ODS</span>
                             <div class="ps-3 d-flex flex-wrap gap-2">
                                 <span class="badge bg-${variable.alinMdea === 'Sí' ? 'primary' : 'secondary'}">${variable.alinMdea === 'Sí' ? 'MDEA' : 'Sin MDEA'}</span>
                                 <span class="badge bg-${variable.alinOds === 'Sí' ? 'primary' : 'secondary'}">${variable.alinOds === 'Sí' ? 'ODS' : 'Sin ODS'}</span>
@@ -696,7 +923,7 @@ function renderPage(data, page) {
 
     // Manejar el evento de cambio en el selector de elementos por página
     itemsPerPageSelect.addEventListener("change", function () {
-        itemsPerPage = parseInt(this.value, 10); // Actualizar el número de elementos por página
+        itemsPerPage = parseInt(this.value, 15); // Actualizar el número de elementos por página
         currentPage = 1; // Reiniciar a la primera página
         renderPage(allData, currentPage); // Renderizar la nueva página
         setupPagination(allData); // Actualizar el paginador
@@ -808,7 +1035,8 @@ function renderPage(data, page) {
 
 
 function updateSelectedProcessesChips() {
-    const selectedProcessesContainer = document.getElementById("selectedProcessesContainer");
+    const selectedProcessesContainer = document.getElementById("processSelectContainer");
+    if (!selectedProcessesContainer) return;
     selectedProcessesContainer.innerHTML = "";
     const selectedOptions = Array.from(processSelect.selectedOptions);
     selectedOptions.forEach(option => {
@@ -927,7 +1155,6 @@ searchForm.addEventListener("submit", function (e) {
                                 ${tabulado.tituloTab ? `
                                 <strong>Título del tabulado:</strong><br>
                                 <span>${tabulado.tituloTab}</span><br>` : ''}
-                                <strong>ID Tabulado:</strong> ${rel.idTab}<br>
                                 <div class="row">
                                     <div class="col-6">
                                         ${tabulado.ligaTab ? `
@@ -975,7 +1202,6 @@ searchForm.addEventListener("submit", function (e) {
                 if (info && (info.ligaMicro || info.ligaDd)) {
                     modalBody.innerHTML = `
                     <div class="mb-2">
-                        <strong class="mb-2">ID Variable:</strong><br> ${info.idVar}<br>
                         <strong>Liga Microdatos:</strong><br>
                         <a href="${info.ligaMicro}" target="_blank" style="word-break: break-all;">Página Microdatos INEGI</a>
                     </div>
@@ -1034,7 +1260,7 @@ fetch('/api/clasificaciones')
         fetch('/api/variables')
           .then(res => res.json())
           .then(variables => {
-            renderPage(variables, 1);
+            (variables, 1);
           });
       });
   });
@@ -1077,4 +1303,13 @@ function renderComentarios(comentario) {
   `;
 }
 
-  
+// Espera al menos 1000ms antes de mostrar el contenido principal
+window.addEventListener("DOMContentLoaded", function() {
+  setTimeout(function() {
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("mainContent").style.display = "";
+  }, 1000);
+});
+
+
+

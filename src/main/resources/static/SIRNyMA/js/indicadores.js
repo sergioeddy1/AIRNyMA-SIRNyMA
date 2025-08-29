@@ -153,7 +153,7 @@ document.addEventListener("DOMContentLoaded", function () {
      
   `;
     const onShown = () => {
-        renderIndicadorChart('indicadorChart', indicador.tablaDatos);
+        renderIndicadorChart('indicadorChart', indicador.tablaDatos || indicador.tablaGraficos);
         modalEl.removeEventListener('shown.bs.modal', onShown);
       };
       modalEl.addEventListener('shown.bs.modal', onShown);

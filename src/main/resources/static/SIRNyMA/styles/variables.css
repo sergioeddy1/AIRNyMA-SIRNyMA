@@ -54,7 +54,7 @@
 
 .accordion-button:hover {
     background-color: #00b395;
-    transform: scale(1.05);
+    transform: scale(1.01);
 }
 
 .accordion-button .badge {
@@ -195,119 +195,150 @@ padding-bottom: 6px;
 }
 
 /* Línea del tiempo */
+/* --- Layout horizontal del timeline --- */
 .timeline {
-  list-style-type: none;
+  /* NUEVO: fila horizontal con scroll */
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  overflow-x: auto;
+  flex-direction: row;
   flex-wrap: nowrap;
-  gap: 0px;
-  box-sizing: border-box;
-  scrollbar-width: thin;
-  scrollbar-color: #e0e0e0 #f8f9fa;
-  margin-bottom: 20px;
-  min-height: 65px; /* antes 59.5px */
-  background: transparent;
-  max-width: 100%;
+  align-items: flex-start;
+  overflow-x: auto;
+  padding: 8px 8px;
+  margin: 0;
+  list-style: none;
+
+  /* Scroll más agradable */
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
 }
 
-.timeline::-webkit-scrollbar {
-  height: 1px;
-  margin-top: 3px;
+/* Cada punto del timeline */
+.li {
+  /* NUEVO: columna centrada para fecha y línea */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 0 0 auto;         /* No se estira; respeta su ancho */
+  min-width: 56px;        /* ancho mínimo para que no se aplaste */
+  text-align: center;
+  scroll-snap-align: center;
+  transition: transform 200ms ease-in;
+}
 
+/* Fecha (pastilla) - ya tienes estilos de color; sólo centramos spacing */
+.timestamp {
+  margin-bottom: 6px;
+  padding: 0 2px;
+  font-size: 0.85rem;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.date {
+  display: inline-block;
+  white-space: nowrap;
+  font-size: 0.95em;
+  margin-bottom: 10px;
+}
+
+/* Segmento de línea entre nodos */
+.status {
+  /* EN VEZ DE usar padding para forzar ancho, define un ancho fijo */
+  width: 100px;                 /* longitud del segmento horizontal */
+  height: 1px;
+  border-top: 1.5px solid #D6DCE0;
+  position: relative;
+  display: block;               /* línea simple, no flex */
+}
+
+/* El círculo del nodo (centrado sobre la línea) */
+.status::before {
+  content: '';
+  width: 14px;
+  height: 14px;
+  background-color: #fff;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  position: absolute;
+  top: 0;                       /* encima de la línea */
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: background-color 200ms ease-in;
+}
+
+/* Estados “complete” si los usas en alguna lógica propia */
+.li.complete .status {
+  border-top-color: #43a047;
+}
+.li.complete .status::before {
+  background-color: #43a047;
+  border-color: #43a047;
+}
+
+/* --- Tus colores de nodos (se mantienen) --- */
+.timeline .li.complete-neutral .date {
+  background: #f4f7fb;
+  color: #374151;
+  border-radius: 999px;
+  padding: 4px 10px;
+  border: 1px solid #d9e2ec;
+}
+
+.timeline .li:last-child .status { 
+  border-top-color:  #D6DCE0 !important;
+}
+
+.timeline .li.complete-hit .date {
+  background: #ffe680;
+  color: #2c2c2c;
+  border-radius: 999px;
+  padding: 4px 10px;
+  border: 1px solid #ffd24d;
+  font-weight: 600;
+}
+
+/* Scrollbar horizontal sutil */
+.timeline::-webkit-scrollbar {
+  height: 6px;              /* un poco más alto para ser usable */
 }
 .timeline::-webkit-scrollbar-thumb {
   background: #e0e0e0;
   border-radius: 3px;
 }
 
-.li {
-  min-width: 30px; /* antes 39.5px */
-  flex: 0 0 auto;
-  transition: all 200ms ease-in;
-  text-align: center;
+.timeline .li.complete-neutral .date {
+  background: #f4f7fb;
+  color: #374151;
+  border-radius: 999px;
+  padding: 4px 10px;
+  border: 1px solid #d9e2ec;
 }
 
-.timestamp {
-  margin-bottom: 5px;
-  padding: 0 2px;
-  font-size: 0.75rem;
-  min-width: 0;
-  word-break: break-word;
-}
-
-.date {
-  display: inline-block;
-  white-space: nowrap;
-  font-size: 0.90em;
-  padding-right: 5px;
-  margin-bottom: 15px;
-}
-
-.status {
-  padding: 0px 70px; /* antes 79.5px */
-  display: flex;
-  justify-content: center;
-  border-top: 1.5px solid #D6DCE0; /* antes 1.5px */
-  position: relative;
-  transition: all 200ms ease-in;
-}
-
-.status h4 {
+/* Amarillo = último año con datos */
+.timeline .li.complete-hit .date {
+  background: #ffe680;
+  color: #2c2c2c;
+  border-radius: 999px;
+  padding: 4px 10px;
+  border: 1px solid #ffd24d;
   font-weight: 600;
-  margin-top: 10px;
-  font-size: 0.85rem; 
 }
 
-.status::before {
-  content: '';
-  width: 24px;   /* antes 24.5px */
-  height: 24px;  /* antes 24.5px */
-  background-color: white;
-  border-radius: 24px;
-  border: 1px solid #ddd;
-  position: absolute;
-  top: -15px;
-  left: 42%;
-  transition: all 200ms ease-in;
+/* Verde = CPV desde 1950 */
+.timeline .li.complete-green .date {
+  background: #c9f7d8;
+  color: #1b5e20;
+  border-radius: 999px;
+  padding: 4px 10px;
+  border: 1px solid #81c784;
+  font-weight: 600;
 }
 
-.li.complete .status {
-  border-top: 1px solid #43a047; /* antes 1.5px */
+.timeline .li.complete-hit .tl-year {
+  cursor: default; /* o pointer si quieres */
 }
 
-.li.complete .status::before {
-  background-color: #43a047;
-  border: none;
+/* Responsivo: acorta el segmento en pantallas chicas */
+@media (max-width: 768px) {
+  .status { width: 80px; }
 }
-
-.li.complete .status h4 {
-  color: #43a047;
-}
-
-.badge.fw-normal {
-  font-weight: 400 !important;
-}
-
-@media (min-device-width: 320px) and (max-device-width: 700px) {
-  .timeline {
-    display: block;
-  }
-
-  .li {
-    display: flex;
-    width: inherit;
-  }
-
-  .timestamp {
-    width: 100px;
-  }
-
-  .status::before {
-    left: -8%;
-    top: 30%;
-  }
-}
-
-
