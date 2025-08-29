@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link rel="stylesheet" href="../styles/ods.css">
+     <link rel="icon" type="image/png" href="/assets/favicon_espaciodigital.png">
     <style>
        body, html {
             font-family: Helvetica, Sans-Serif !important;
@@ -95,12 +96,9 @@
            <div class="result-container mt-2" > 
            </div>
             <div class="text-center mt-2">
-              <strong>Total de Variables ODS 1: 
-                <span id="contador-ods-1" class="text-primary" 
-                  style="text-decoration: underline; font-size: 1.1rem; font-family: Monaco, monospace;">
-                  0
-                </span>
-              </strong>
+                <div class="d-none">
+                <span id="contador-ods-1">0</span>
+              </div>
             </div>
           </div>
 
@@ -112,12 +110,11 @@
                   </div>
                   <div class="result-container mt-2"></div>
                   <div class="text-center mt-2">
-                    <strong>Total de Variables ODS 2: 
-                      <span id="contador-ods-2" class="text-primary" 
-                        style="text-decoration: underline; font-size: 1.1rem; font-family: Monaco, monospace;">
-                        0
-                      </span>
-                    </strong>
+
+                    <div class="d-none">
+                      <span id="contador-ods-2">0</span>
+                    </div>
+
                   </div>
                 </div>
           
@@ -129,12 +126,11 @@
                   </div>
                   <div class="result-container mt-2"></div>
                   <div class="text-center mt-2">
-                    <strong>Total de Variables ODS 3: 
-                      <span id="contador-ods-3" class="text-primary" 
-                        style="text-decoration: underline; font-size: 1.1rem; font-family: Monaco, monospace;">
-                        0
-                      </span>
-                    </strong>
+                   
+                     <div class="d-none">
+                        <span id="contador-ods-3">0</span>
+                      </div>
+                   
                   </div>
                 </div>
           
@@ -146,12 +142,11 @@
                   </div>
                   <div class="result-container mt-2"></div>
                   <div class="text-center mt-2">
-                    <strong>Total de Variables ODS 4: 
-                      <span id="contador-ods-4" class="text-primary" 
-                        style="text-decoration: underline; font-size: 1.1rem; font-family: Monaco, monospace;">
-                        0
-                      </span>
-                    </strong>
+                    
+                     <div class="d-none">
+                      <span id="contador-ods-4">0</span>
+                    </div>
+                                      
                   </div>
                 </div>
           
@@ -163,12 +158,9 @@
                   </div>
                   <div class="result-container mt-2"></div>
                   <div class="text-center mt-2">
-                    <strong>Total de Variables ODS 5: 
-                      <span id="contador-ods-5" class="text-primary" 
-                        style="text-decoration: underline; font-size: 1.1rem; font-family: Monaco, monospace;">
-                        0
-                      </span>
-                    </strong>
+                   <div class="d-none">
+                      <span id="contador-ods-5">0</span>
+                    </div>
                   </div>
                 </div>
           
@@ -180,12 +172,11 @@
                   </div>
                   <div class="result-container mt-2"></div>
                   <div class="text-center mt-2">
-                    <strong>Total de Variables ODS 6: 
-                      <span id="contador-ods-6" class="text-primary" 
-                        style="text-decoration: underline; font-size: 1.1rem; font-family: Monaco, monospace;">
-                        0
-                      </span>
-                    </strong>
+                 
+                      <div class="d-none">
+                        <span id="contador-ods-6">0</span>
+                      </div>
+                                        
                   </div>
                 </div>
           
@@ -201,6 +192,8 @@
                   <div>
                     <!-- Etiqueta para manejar las propiedades del titulo del ODS HTML -->
                       <h6 id="odsDynamicTitle1_6" class="justificado mb-3" style="background-color: #33ccff; color: white; padding: 10px;"></h6>
+                      <div class="text-center my-3" id="contadorInterno1_6"></div>
+                      <div id="descripcionODS1_6" class="mb-3"></div><div id="descripcionODS1_6" class="mb-3"></div>
                   </div>
                   <div class="d-flex justify-content-end align-items-center mb-3">
                     
@@ -211,8 +204,11 @@
                     </select>
                   </div>
                   <!-- Ejemplo para ODS 1 al 6 -->
+                   <div class="flex-grow-1 d-flex flex-column align-items-start">
+                      <h6 class="fw-bold text-muted mb-2 text-center w-100">Metas ODS Detectadas</h6>
+                      <div id="metasResumen1_6" style="min-width:220px;max-width:320px; align-items: center; display: inline-flex;"></div>
+                   </div>
                   <div class="d-flex align-items-start my-4">
-                    <div id="metasResumen1_6" style="min-width:220px;max-width:320px;"></div>
                     <div id="chartArea1_6" class="flex-grow-1 d-flex justify-content-center"></div>
                   </div>
                   <div id="OdsContainer1_6"></div>
@@ -234,12 +230,11 @@
                   </div>
                   <div class="result-container mt-2" ></div>
                   <div class="text-center mt-2">
-                    <strong>Total de Variables ODS 7: 
-                      <span id="contador-ods-7" class="text-primary" 
-                        style="text-decoration: underline; font-size: 1.1rem; font-family: Monaco, monospace;">
-                        0
-                      </span>
-                    </strong>
+
+                      <div class="d-none">
+                        <span id="contador-ods-7">0</span>
+                      </div>
+
                   </div>
                 </div>
           
@@ -251,12 +246,11 @@
                       <div class="result-container mt-2" ></div>
                   </div>
                   <div class="text-center mt-2">
-                    <strong>Total de Variables ODS 8: 
-                      <span id="contador-ods-8" class="text-primary" 
-                        style="text-decoration: underline; font-size: 1.1rem; font-family: Monaco, monospace;">
-                        0
-                      </span>
-                    </strong>
+
+                      <div class="d-none">
+                        <span id="contador-ods-8">0</span>
+                      </div>
+
                   </div>
                 </div>
           
@@ -268,12 +262,9 @@
                       <div class="result-container mt-2" ></div>
                   </div>
                   <div class="text-center mt-2">
-                    <strong>Total de Variables ODS 9: 
-                      <span id="contador-ods-9" class="text-primary" 
-                        style="text-decoration: underline; font-size: 1.1rem; font-family: Monaco, monospace;">
-                        0
-                      </span>
-                    </strong>
+                    <div class="d-none">
+                      <span id="contador-ods-9">0</span>
+                    </div>
                   </div>
                 </div>
           
@@ -285,12 +276,11 @@
                       <div class="result-container mt-2" ></div>
                   </div>
                   <div class="text-center mt-2">
-                    <strong>Total de Variables ODS 10: 
-                      <span id="contador-ods-10" class="text-primary" 
-                        style="text-decoration: underline; font-size: 1.1rem; font-family: Monaco, monospace;">
-                        0
-                      </span>
-                    </strong>
+                    
+                      <div class="d-none">
+                        <span id="contador-ods-10">0</span>
+                      </div>
+                    
                   </div>
                 </div>
           
@@ -302,12 +292,11 @@
                       <div class="result-container mt-2"></div>
                   </div>
                   <div class="text-center mt-2">
-                    <strong>Total de Variables ODS 11: 
-                      <span id="contador-ods-11" class="text-primary" 
-                        style="text-decoration: underline; font-size: 1.1rem; font-family: Monaco, monospace;">
-                        0
-                      </span>
-                    </strong>
+                  
+                      <div class="d-none">
+                        <span id="contador-ods-11">0</span>
+                      </div>
+                  
                   </div>
                 </div>
           
@@ -319,12 +308,11 @@
                       <div class="result-container mt-2" ></div>
                   </div>
                   <div class="text-center mt-2">
-                    <strong>Total de Variables ODS 12: 
-                      <span id="contador-ods-12" class="text-primary" 
-                        style="text-decoration: underline; font-size: 1.1rem; font-family: Monaco, monospace;">
-                        0
-                      </span>
-                    </strong>
+              
+                      <div class="d-none">
+                        <span id="contador-ods-12">0</span>
+                      </div>
+
                   </div>
                 </div>
                 <div class="col-lados-custom"></div>
@@ -338,6 +326,8 @@
                 <div class="card-body">
                   <div>
                       <h6 id="odsDynamicTitle7_12" class="justificado mb-3"></h6>
+                      <div class="text-center my-3" id="contadorInterno7_12"></div>
+                      <div id="descripcionODS7_12" class="mb-3"></div><div id="descripcionODS7_12" class="mb-3"></div>
                   </div>
                   <div class="d-flex justify-content-end align-items-center mb-3">
                     <label for="itemsPerPage2" class="me-2 mb-0">Mostrar:</label>
@@ -347,8 +337,11 @@
                     </select>
                   </div>
                   <!-- Ejemplo para ODS 7 al 12 -->
+                   <div class="flex-grow-1 d-flex flex-column align-items-start">
+                      <h6 class="fw-bold text-muted mb-2 text-center w-100">Metas ODS Detectadas</h6>
+                      <div id="metasResumen7_12" style="min-width:220px;max-width:320px; align-items: center; display: inline-flex;"></div>
+                   </div>
                   <div class="d-flex align-items-start my-4">
-                    <div id="metasResumen7_12" style="min-width:220px;max-width:320px;"></div>
                     <div id="chartArea7_12" class="flex-grow-1 d-flex justify-content-center"></div>
                   </div>
                   <div id="OdsContainer7_12"></div>
@@ -372,12 +365,11 @@
                       <div class="result-container mt-2" ></div>
                   </div>
                   <div class="text-center mt-2">
-                    <strong>Total de Variables ODS 13: 
-                      <span id="contador-ods-13" class="text-primary" 
-                        style="text-decoration: underline; font-size: 1.1rem; font-family: Monaco, monospace;">
-                        0
-                      </span>
-                    </strong>
+                   
+                      <div class="d-none">
+                        <span id="contador-ods-13">0</span>
+                      </div>
+                  
                   </div>
                 </div>
                 <div class="col-2" id="Objetivo14">
@@ -388,12 +380,11 @@
                       <div class="result-container mt-2"></div>
                   </div>
                   <div class="text-center mt-2">
-                    <strong>Total de Variables ODS 14: 
-                      <span id="contador-ods-14" class="text-primary" 
-                        style="text-decoration: underline; font-size: 1.1rem; font-family: Monaco, monospace;">
-                        0
-                      </span>
-                    </strong>
+                   
+                      <div class="d-none">
+                        <span id="contador-ods-14">0</span>
+                      </div>
+                  
                   </div>
                 </div>
                 <div class="col-2" id="Objetivo15">
@@ -404,12 +395,11 @@
                       <div class="result-container mt-2" ></div>
                   </div>
                   <div class="text-center mt-2">
-                    <strong>Total de Variables ODS 15: 
-                      <span id="contador-ods-15" class="text-primary" 
-                        style="text-decoration: underline; font-size: 1.1rem; font-family: Monaco, monospace;">
-                        0
-                      </span>
-                    </strong>
+                    
+                      <div class="d-none">
+                        <span id="contador-ods-15">0</span>
+                      </div>
+                    
                   </div>
                 </div>
                 <div class="col-2" id="Objetivo16">
@@ -420,12 +410,11 @@
                       <div class="result-container mt-2" ></div>
                   </div>
                   <div class="text-center mt-2">
-                    <strong>Total de Variables ODS 16: 
-                      <span id="contador-ods-16" class="text-primary" 
-                        style="text-decoration: underline; font-size: 1.1rem; font-family: Monaco, monospace;">
-                        0
-                      </span>
-                    </strong>
+                   
+                      <div class="d-none">
+                        <span id="contador-ods-16">0</span>
+                      </div>
+                   
                   </div>
                 </div>
                 <div class="col-2" id="Objetivo17">
@@ -436,11 +425,11 @@
                       <div class="result-container mt-2" ></div>
                   </div>
                   <div class="text-center mt-2">
-                    <strong>Total de Variables ODS 17: 
-                      <span id="contador-ods-17" class="text-primary" 
-                        style="text-decoration: underline; font-size: 1.1rem; font-family: Monaco, monospace;">
-                      </span>
-                    </strong>
+                    
+                      <div class="d-none">
+                        <span id="contador-ods-17">0</span>
+                      </div>
+
                   </div>
                 </div>
                 <div class="col-2">
@@ -459,6 +448,8 @@
                     <div class="card-body">
                       <div>
                       <h6 id="odsDynamicTitle13_17" class="justificado mb-3"></h6>
+                      <div class="text-center my-3" id="contadorInterno13_17"></div>
+                      <div id="descripcionODS13_17" class="mb-3"></div><div id="descripcionODS13_17" class="mb-3"></div>
                   </div>
                       <div class="d-flex justify-content-end align-items-center mb-3">
                         <label for="itemsPerPage3" class="me-2 mb-0">Mostrar:</label>
@@ -467,10 +458,16 @@
                           <option value="20">20</option>
                         </select>
                       </div>
-                      <div id="chartArea13_17" class="d-flex justify-content-center my-4"></div>
-                      <div id="OdsContainer13_17"></div>
-                      <nav>
-                        <ul class="pagination justify-content-center mt-4" id="pagination13_17"></ul>
+                      <!-- Ejemplo para ODS 13 al 17 -->
+                       <div class="flex-grow-1 d-flex flex-column align-items-start">
+                          <h6 class="fw-bold text-muted mb-2 text-center w-100">Metas ODS Detectadas</h6>
+                          <div id="metasResumen13_17" style="min-width:220px;max-width:320px; align-items: center; display: inline-flex;"></div>
+                       </div>
+                  <div class="d-flex align-items-start my-4">
+                    <div id="chartArea13_17" class="flex-grow-1 d-flex justify-content-center"></div>
+                  </div>
+                  <div id="OdsContainer13_17"></div>
+                    <ul class="pagination justify-content-center mt-4" id="pagination13_17"></ul>
                       </nav>
                     </div>
                   </div>
@@ -479,7 +476,7 @@
   </div>
  
    <!-- Scripts para la clase ods -->
-    <script src="../js/ods.js"></script>
+    
 
  <!--! FOOTER -->
     <div class="container-fluid" style="background-color: #5d5d5d">
@@ -571,6 +568,8 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 </script>
+
+<script src="../js/ods.js"></script>
 
 </body>
 </html>

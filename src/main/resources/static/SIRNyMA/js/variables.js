@@ -22,8 +22,6 @@ let allData = [];
 let currentFilteredData = [];
 
 
-let initializing = true; // <-- bandera de inicialización
-
 // Llenar el select de procesos y aplicar filtro inicial si hay idPp en la URL
 fetch("/api/proceso")
   .then(response => response.json())
@@ -36,40 +34,37 @@ fetch("/api/proceso")
       processSelect.appendChild(option);
     });
 
-    return fetch("/api/variables");
-  })
-  .then(response => response.json())
-  .then(variables => {
-    allData = variables;
+    // Ahora carga las variables
+    fetch("/api/variables")
+      .then(response => response.json())
+      .then(variables => {
+        allData = variables;
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedIdPp = urlParams.get("idPp");
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const selectedIdPp = urlParams.get("idPp");
-
-    if (selectedIdPp) {
-      Array.from(processSelect.options).forEach(option => {
-        option.selected = option.value === selectedIdPp;
+        if (selectedIdPp) {
+          // Selecciona el proceso en el select
+          Array.from(processSelect.options).forEach(option => {
+            option.selected = option.value === selectedIdPp;
+          });
+          // Filtra y muestra solo las variables de ese proceso
+          const filteredData = allData.filter(variable => variable.idPp === selectedIdPp);
+          currentFilteredData = filteredData;
+          renderPage(currentFilteredData, 1);
+          setupPagination(currentFilteredData);
+          updateVariableCounter(filteredData.length);
+        } else {
+          // Si no hay filtro, muestra todo
+          currentFilteredData = allData;
+          renderPage(allData, 1);
+          setupPagination(allData);
+          updateVariableCounter(allData.length);
+        }
       });
-
-      const filteredData = allData.filter(variable => variable.idPp === selectedIdPp);
-      currentFilteredData = filteredData;
-      renderPage(currentFilteredData, 1);
-      setupPagination(currentFilteredData);
-      updateVariableCounter(filteredData.length);
-    } else {
-      currentFilteredData = allData;
-      renderPage(allData, 1);
-      setupPagination(allData);
-      updateVariableCounter(allData.length);
-    }
-
-    // Finaliza fase de inicialización
-    initializing = false;
   });
 
-// Listener global del select
+// Listener para cambios manuales en el select
 processSelect.addEventListener("change", function () {
-  if (initializing) return; // Ignora si aún se está inicializando
-
   const selectedOptions = Array.from(this.selectedOptions);
   const selectedValues = selectedOptions.map(opt => opt.value);
 
@@ -90,7 +85,6 @@ processSelect.addEventListener("change", function () {
   updateVariableCounter(filteredData.length);
 });
 
-
     // Referencias a los checkboxes
 const relTabCheckbox = document.getElementById("relTabCheckbox");
 const relMicroCheckbox = document.getElementById("relMicroCheckbox");
@@ -109,30 +103,66 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
 // Función para filtrar por periodo de tiempo 
-function populatePeriodFilters() {
+function populatePeriodFilters(selectedProcessIds = []) {
   const periodInic = document.getElementById("periodInic");
-  const periodFin = document.getElementById("periodFin");
+  const periodFin  = document.getElementById("periodFin");
+  if (!periodInic || !periodFin) return;
 
+  // 1) Obtener series por proceso
   const yearsSet = new Set();
 
-  allData.forEach(variable => {
-    const startYear = parseInt(variable.vigInicial);
-    const endRaw = variable.vigFinal;
-    const endYear = endRaw.includes("A la fecha") ? new Date().getFullYear() : parseInt(endRaw);
+  // Si no se seleccionó nada, usar todos los procesos (union)
+  const procesosFuente = (selectedProcessIds.length
+    ? procesosGlobal.filter(p => selectedProcessIds.includes(p.idPp))
+    : procesosGlobal
+  );
 
-    if (!isNaN(startYear)) yearsSet.add(startYear);
-    if (!isNaN(endYear)) yearsSet.add(endYear);
+  procesosFuente.forEach(proc => {
+    const serie = getProcessYearSeries(proc); // respeta overrides/caps/periodicidad
+    serie.forEach(y => yearsSet.add(y));
   });
 
-  const sortedYears = Array.from(yearsSet).sort((a, b) => a - b);
+  // Si no hay nada que mostrar, sal
+  if (yearsSet.size === 0) {
+    periodInic.innerHTML = '<option value="">Inicio</option>';
+    periodFin.innerHTML  = '<option value="">Fin</option>';
+    return;
+  }
 
-  // Agregar las opciones
-  sortedYears.forEach(year => {
-    const option1 = new Option(year, year);
-    const option2 = new Option(year, year);
-    periodInic.appendChild(option1);
-    periodFin.appendChild(option2);
+  // 2) Ordenar y limpiar selects
+  const sortedYears = Array.from(yearsSet).sort((a,b)=>a-b);
+  periodInic.innerHTML = '<option value="">Inicio</option>';
+  periodFin.innerHTML  = '<option value="">Fin</option>';
+
+  // 3) Rellenar opciones con los años calculados
+  sortedYears.forEach(y => {
+    periodInic.appendChild(new Option(y, y));
+    periodFin.appendChild(new Option(y, y));
   });
+
+  // 4) Selecciones por defecto (min y max)
+  const minY = sortedYears[0];
+  const maxY = sortedYears[sortedYears.length - 1];
+  periodInic.value = String(minY);
+  periodFin.value  = String(maxY);
+
+  // 5) Asegurar rango válido si el usuario cambia
+  periodInic.onchange = () => {
+    const start = parseInt(periodInic.value, 10);
+    const end   = parseInt(periodFin.value, 10);
+    if (Number.isFinite(start) && Number.isFinite(end) && start > end) {
+      // mover fin hacia el mismo inicio
+      periodFin.value = String(start);
+    }
+  };
+  periodFin.onchange = () => {
+    const start = parseInt(periodInic.value, 10);
+    const end   = parseInt(periodFin.value, 10);
+    if (Number.isFinite(start) && Number.isFinite(end) && end < start) {
+      // mover inicio hacia el mismo fin
+      periodInic.value = String(end);
+    }
+  };
 }
 
 // Función principal de filtrado
@@ -206,77 +236,114 @@ searchForm?.addEventListener("submit", function (e) {
     }
 
 
-// Llenar dinámicamente el select desde /api/proceso
-fetch("/api/proceso")
-  .then(response => response.json())
-  .then(data => {
-    procesosGlobal = data;
-    data.forEach(proc => {
+
+
+// 🔁 Cargar procesos y variables en paralelo
+Promise.all([
+  fetch("/api/proceso").then(res => res.json()),
+  fetch("/api/variables").then(res => res.json())
+])
+  .then(([procesos, variables]) => {
+    procesosGlobal = procesos;
+    allData = variables;
+
+    // Llenar el select de procesos
+    procesos.forEach(proc => {
       const option = document.createElement("option");
       option.value = proc.idPp;
       option.textContent = `• ${proc.pp} (${proc.idPp})`;
       processSelect.appendChild(option);
     });
 
-processSelect.addEventListener("mousedown", function (e) {
-  e.preventDefault();
-  const option = e.target;
-  option.selected = !option.selected;
-  processSelect.dispatchEvent(new Event("change"));
+    // Manejo de clic para selección múltiple estilo checkbox
+    processSelect.addEventListener("mousedown", function (e) {
+      e.preventDefault();
+      const option = e.target;
+      option.selected = !option.selected;
+      processSelect.dispatchEvent(new Event("change"));
+    });
+
+    aplicarFiltroDesdeURL(); // ✅ Aplicar filtro inicial si viene desde otra página
+  })
+  .catch(error => console.error("Error al cargar procesos o variables:", error));
+
+
+// ✅ Listener de cambio del select de procesos
+processSelect.addEventListener("change", () => {
+  const selected = Array.from(processSelect.selectedOptions).map(o => o.value);
+  populatePeriodFilters(selected);   // <- repoblar años según procesos elegidos
+  handleProcessSelectChange();       // <- tu lógica existente de filtrado por proceso
 });
 
-    // Aquí ya está listo el select, ahora puedes verificar si hay idPp en la URL
-    aplicarFiltroDesdeURL(); // <== Agrega esta línea aquí
-  })
-  .catch(error => console.error("Error al cargar procesos:", error));
+// Tras cargar procesos/variables:
+populatePeriodFilters([]); // sin selección inicial -> usa unión de todos
 
-// Cargar todas las variables
-fetch("/api/variables")
-  .then(response => response.json())
-  .then(data => {
-    allData = data;
-    // Solo aplicar filtro desde URL o mostrar todo si no hay filtro
-    aplicarFiltroDesdeURL();
-  });
-
-// Función que aplica el filtro si hay idPp en la URL
+// 🔍 Aplicar filtro desde la URL si hay `idPp`
 function aplicarFiltroDesdeURL() {
   const urlParams = new URLSearchParams(window.location.search);
   const selectedIdPp = urlParams.get("idPp");
+  const searchTerm = urlParams.get("search");
 
-  if (selectedIdPp) {
-    const interval = setInterval(() => {
-      if (processSelect.options.length > 0 && allData.length > 0) {
-        clearInterval(interval);
+  const interval = setInterval(() => {
+    const selectReady = processSelect.options.length > 0;
+    const dataReady = allData.length > 0;
 
-        // Solo selecciona si no está ya seleccionado
-        Array.from(processSelect.options).forEach(option => {
-          if (option.value === selectedIdPp && !option.selected) {
-            option.selected = true;
-          }
-        });
+    if (!selectReady || !dataReady) return;
 
-        processSelect.dispatchEvent(new Event("change"));
+    clearInterval(interval);
+
+    // Filtro por Proceso (idPp)
+    if (selectedIdPp) {
+      Array.from(processSelect.options).forEach(option => {
+        if (option.value === selectedIdPp) option.selected = true;
+      });
+      processSelect.dispatchEvent(new Event("change"));
+      return;
+    }
+
+    // Filtro por término de búsqueda
+    if (searchTerm) {
+      searchInput.value = searchTerm;
+
+      const filteredData = allData.filter(variable =>
+        variable.nomVar.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        variable.defVar.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        variable.varAsig.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+
+      currentFilteredData = filteredData;
+      currentPage = 1;
+
+      if (filteredData.length === 0) {
+        container.innerHTML = "<p class='text-center'>No se encontraron resultados para el término ingresado.</p>";
+        paginationContainer.innerHTML = "";
+        updateVariableCounter(0);
+      } else {
+        renderPage(currentFilteredData, currentPage);
+        setupPagination(currentFilteredData);
+        updateVariableCounter(filteredData.length);
       }
-    }, 100);
-  } else {
+      return;
+    }
+
+    // Si no hay filtros, mostrar todo
     renderPage(allData, 1);
     setupPagination(allData);
     updateVariableCounter(allData.length);
-  }
+  }, 1000);
 }
 
-// Escuchar cambios manuales del usuario en el select
-processSelect.addEventListener("change", function () {
-  const selectedOptions = Array.from(this.selectedOptions);
+
+// ✅ Función central de cambio del select
+function handleProcessSelectChange() {
+  const selectedOptions = Array.from(processSelect.selectedOptions);
   const selectedValues = selectedOptions.map(opt => opt.value);
 
-  // Mostrar tags arriba
   renderSelectedTags(selectedOptions);
-
   checkMostrarUnidadSection();
 
   if (selectedValues.length === 0) {
+    currentFilteredData = allData;
     renderPage(allData, 1);
     setupPagination(allData);
     updateVariableCounter(allData.length);
@@ -284,6 +351,7 @@ processSelect.addEventListener("change", function () {
   }
 
   const filteredData = allData.filter(variable => selectedValues.includes(variable.idPp));
+  currentFilteredData = filteredData;
 
   if (filteredData.length === 0) {
     container.innerHTML = "<p class='text-center'>No hay variables para los procesos seleccionados.</p>";
@@ -293,26 +361,25 @@ processSelect.addEventListener("change", function () {
   }
 
   currentPage = 1;
-  currentFilteredData = filteredData;
   renderPage(currentFilteredData, currentPage);
   setupPagination(currentFilteredData);
   updateVariableCounter(filteredData.length);
-});
+}
 
- // Renderizar las etiquetas de los procesos seleccionados
- function renderSelectedTags(selectedOptions) {
+
+// ✅ Renderizado de tags (chips) de procesos seleccionados
+function renderSelectedTags(selectedOptions) {
   const container = document.getElementById("processSelectContainer");
-  container.innerHTML = ""; // Limpiar primero
+  container.innerHTML = "";
 
-  // Usar un Set para evitar duplicados
   const seen = new Set();
 
   selectedOptions.forEach(option => {
-    if (seen.has(option.value)) return; // Si ya existe, no lo agregues
+    if (seen.has(option.value)) return;
     seen.add(option.value);
 
     const tag = document.createElement("div");
-    tag.className = "badge bg-primary d-flex align-items-center";
+    tag.className = "badge bg-primary d-flex align-items-center me-2 mb-1";
     tag.style.paddingRight = "0.5rem";
 
     const text = document.createElement("span");
@@ -333,6 +400,7 @@ processSelect.addEventListener("change", function () {
     container.appendChild(tag);
   });
 }
+
     
     // Filtrado por temática
     temaSelect.addEventListener("change", function () {
@@ -439,28 +507,25 @@ processSelect.addEventListener("change", function () {
 
 // Buscar variables por término ingresado
 function searchVariables(term) {
-    if (!term) {
-        renderPage(allData, currentPage);
-        setupPagination(allData);
-        return;
-    }
+  if (!term) {
+    renderPage(allData, 1);
+    setupPagination(allData);
+    return;
+  }
 
-    const termLower = term.toLowerCase();
-    const filteredData = allData.filter(variable =>
-        variable.nomVar.toLowerCase().includes(termLower) ||
-        variable.defVar.toLowerCase().includes(termLower) ||
-        variable.varAsig.toLowerCase().includes(termLower)
-    );
+  const filteredData = allData.filter(variable =>
+    variable.nomVar.toLowerCase().includes(term.toLowerCase()) ||
+    variable.defVar.toLowerCase().includes(term.toLowerCase()) ||
+    variable.varAsig.toLowerCase().includes(term.toLowerCase())
+  );
 
-    if (filteredData.length === 0) {
-        container.innerHTML = "<p class='text-center'>No se encontraron resultados para el término ingresado.</p>";
-        paginationContainer.innerHTML = "";
-        return;
-    }
-
-    currentFilteredData = filteredData;
-    renderPage(currentFilteredData, currentPage);
-    setupPagination(currentFilteredData);
+  if (filteredData.length === 0) {
+    container.innerHTML = "<p class='text-center'>No se encontraron resultados.</p>";
+    paginationContainer.innerHTML = "";
+  } else {
+    renderPage(filteredData, 1);
+    setupPagination(filteredData);
+  }
 }
 
 // Actualizar el número total de variables mostradas
@@ -491,35 +556,215 @@ function updateVariableCounter(count) {
 }
 
 // Funcion para la linea de tiempo 
-let eventosGlobal = []; // Aquí almacenamos los eventos una sola vez
+let variablesGlobal = [];
+let microdatosGlobal = [];
+let fuentesGlobal = [];
+
+Promise.all([
+  fetch('/api/proceso').then(r => r.json()),
+  fetch('/api/variables').then(r => r.json()),
+  fetch('/api/microdatos').then(r => r.json()),
+  fetch('/api/fuentes').then(r => r.json()) // tabla "fuente" con anioEvento, idPp, ligaFuente/ligas
+]).then(([procesos, variables, microdatos, fuentes]) => {
+  procesosGlobal = procesos;
+  variablesGlobal = variables;
+  microdatosGlobal = microdatos;
+  fuentesGlobal = fuentes;
+
+  // Preprocesos: mapas para resoluciones rápidas
+  window._periodicidadPorPp = buildPeriodicidadPorPp(procesosGlobal); // idPp -> step años
+  window._rangoPorPp       = buildRangoPorPp(procesosGlobal);         // idPp -> {startYear, endYear}
+  window._ultimoAnioPorPp  = buildUltimoAnioPorPp(fuentesGlobal);      // idPp -> max(anioEvento)
+  window._ligaMicroPorVar  = buildLigaMicroPorVar(microdatosGlobal);   // idVar -> ligaMicro
+
+  // Llama a tu renderPage(variables, 1) como ya lo haces
+  renderPage(variablesGlobal, 1);
+});
 
 // 1. Cargar eventos antes de llamar a renderPage
-fetch('/api/eventos')
-  .then(res => res.json())
-  .then(eventos => {
-    eventosGlobal = eventos; // Guardamos todos los eventos en la variable global
-    fetch('/api/variables')
-      .then(res => res.json())
-      .then(variables => {
-        renderPage(variables, 1); // Llamamos a tu renderPage ya adaptada
-      });
-  });
+// --- Helpers: leer periodicidad, rango y último año por proceso ---
+// Deshabilitar anchors en el nodo destacado (amarillo) a nivel global:
+const DISABLE_LINKS_ON_HIT = true;
 
-const construirLineaDeTiempo = (eventos) => {
-  eventos.sort((a, b) => parseInt(a.evento) - parseInt(b.evento));
-  return `
-    <ul class="timeline" id="timeline">
-      ${eventos.map(evento => `
-        <li class="li complete d-flex flex-column align-items-center">
-          <div class="timestamp mb-2">
-            <span class="date mb-2"> <a href="${evento.fuenteIden}" target="_blank" class="text-decoration-none">${evento.evento}</a></span>
-          </div>
-          <div class="status text-center"></div>
-        </li>
-      `).join('')}
-    </ul>
-  `;
+// Tope general si vigFinal == "A la fecha" (cuando no haya override específico)
+const DEFAULT_END_YEAR_CAP = 2025;
+
+// Reglas por proceso (idPp)
+const SPECIAL_RULES = {
+  CPV: {
+    seriesOverride: [1895,1900,1910,1921,1930,1940,1950,1960,1970,1980,1990,1995,2000,2005,2010,2020],
+    capYear: 2020,
+    greenFromYear: 1950,
+    noLinks: true, // además de DISABLE_LINKS_ON_HIT global, forzamos en CPV
+  },
+  EIC:   { periodicityOverride: 5, capYear: 2020 },
+  ENIGH: { capYear: 2024, greenFromYear: 2016 },
+  ENADID: {
+  seriesOverride: [1992, 1997, 2006, 2009, 2014, 2018],
+  capYear: 2023,
+  lastYearOverride: 2018
+  },
+  ENBIARE: { seriesOverride: [2021], capYear: 2021 },
+  EM: { capYear: 2024 },
+  ENUT: { seriesOverride: [2002, 2009, 2014, 2019], capYear: 2019 },
+  ENILEMS: {
+    seriesOverride: [2012, 2016, 2019],
+    capYear: 2019,
+    lastYearOverride: 2019   // ⬅️ Fuerza el nodo amarillo en 2019 para todas las variables
+  },
+  ENIF: { periodicityOverride: 3, capYear: 2024 },
+  EFL: { capYear: 2019 },
+  ENTI: { periodicityOverride: 3, capYear: 2022 },
+  ENASIC: { seriesOverride: [2022], capYear: 2022 },
+  ENCO: { lastYearOverride: 2021 }, // resaltar 2021 en amarillo
 };
+
+
+
+function normIdPp(id) {
+  return String(id || '').trim().toUpperCase();
+}
+// Helpers existentes (usa los que ya tienes)
+function parseYearSafe(v) {
+  const n = parseInt(String(v).trim(), 10);
+  return Number.isFinite(n) ? n : null;
+}
+
+function parsePeriodicidadAnios(s) {
+  if (!s) return 1;
+  const txt = String(s).toLowerCase();
+  if (txt.includes('anual')) return 1;
+  if (txt.includes('bienal')) return 2;
+  if (txt.includes('trienal')) return 3;
+  if (txt.includes('quinquenal')) return 5;
+  const m = txt.match(/cada\s+(\d+)\s*años?/);
+  if (m) return Math.max(1, parseInt(m[1], 10));
+  return 1;
+}
+
+function buildYearSeries(startYear, endYear, step) {
+  const years = [];
+  for (let y = startYear; y <= endYear; y += step) years.push(y);
+  if (years.length && years[years.length - 1] !== endYear) years.push(endYear);
+  return years;
+}
+
+// Resolver fin de vigencia con reglas
+function resolveEndYear(proc) {
+  const rule = SPECIAL_RULES[normIdPp(proc.idPp)];
+  if (rule?.capYear) return rule.capYear;
+
+  const v = String(proc.vigFinal || '').toLowerCase();
+  if (v.includes('fecha')) return DEFAULT_END_YEAR_CAP; // 2020 por defecto
+  return parseYearSafe(proc.vigFinal);
+}
+
+// Serie por proceso (override > periodicidad)
+function getProcessYearSeries(proc) {
+  const rule = SPECIAL_RULES[normIdPp(proc.idPp)];
+
+  if (Array.isArray(rule?.seriesOverride)) {
+    let years = rule.seriesOverride
+      .map(y => parseInt(y, 10))
+      .filter(Number.isFinite);
+
+    // Si capYear es mayor que el último año de la serie, agrégalo
+    if (rule.capYear && !years.includes(rule.capYear)) {
+      years.push(rule.capYear);
+    }
+
+    years = years.filter(y => y <= rule.capYear); // sigue filtrando por capYear
+    return years.sort((a,b)=>a-b);
+  }
+
+  const startYear = parseYearSafe(proc.vigInicial);
+  const endYear = resolveEndYear(proc);
+  if (!startYear || !endYear || endYear < startYear) return [];
+
+  const step = rule?.periodicityOverride ?? parsePeriodicidadAnios(proc.perPubResul || proc.perioProd || 'Anual');
+  let years = buildYearSeries(startYear, endYear, step);
+  if (years.length && years[years.length - 1] !== endYear) years.push(endYear);
+  return years.sort((a,b)=>a-b);
+}
+
+function getEventYearsForVar(idVar, eventosRelacionados) {
+  const fuente = (eventosRelacionados && eventosRelacionados.length)
+    ? eventosRelacionados
+    : (Array.isArray(eventosGlobal) ? eventosGlobal.filter(e => e.idVar === idVar) : []);
+
+  const años = new Set();
+  for (const ev of fuente) {
+    const y = parseInt(String(ev.anioEvento ?? ev.evento ?? '').trim(), 10);
+    if (Number.isFinite(y)) años.add(y);
+  }
+  return Array.from(años).sort((a,b)=>a-b); // orden asc
+}
+
+// ⚠️ Reemplaza sólo esta función
+function construirLineaDeTiempoVariable(variable, eventosRelacionados) {
+  try {
+    const proc = procesosGlobal?.find(p => p.idPp === variable.idPp);
+    if (!proc) return construirLineaDeTiempo(eventosRelacionados);
+
+    // Serie base de años del proceso (usa tus helpers/reglas ya existentes)
+    let years = getProcessYearSeries(proc);
+    if (!years.length) return construirLineaDeTiempo(eventosRelacionados);
+
+    // Años con evento para ESTA variable (verde)
+    const eventYears = getEventYearsForVar(variable.idVar, eventosRelacionados);
+    const greenYearsSet = new Set(eventYears);
+
+    // Determinar el año amarillo (hitYear) según reglas especiales
+    const rule = SPECIAL_RULES[normIdPp(proc.idPp)];
+    let hitYear = null;
+    if (rule && rule.lastYearOverride) {
+      hitYear = rule.lastYearOverride;
+    } else if (eventYears.length) {
+      hitYear = eventYears[eventYears.length - 1];
+    }
+
+    // Si el hitYear no está en la serie de years, lo insertamos para que se dibuje
+    if (hitYear && !years.includes(hitYear)) {
+      years.push(hitYear);
+      years.sort((a,b)=>a-b);
+    }
+
+    // Construcción de nodos (mismo HTML que usas)
+   const items = years.map(y => {
+    const isHit   = (hitYear === y);                  // amarillo
+    const isGreen = !isHit && greenYearsSet.has(y);   // verde si tiene evento y no es hit
+    const liClass = isHit
+      ? 'complete-hit'
+      : (isGreen ? 'complete-green' : 'complete-neutral');
+
+    // Tooltips por estado
+    const tooltipAttr = isHit
+      ? `data-bs-toggle="tooltip" data-bs-placement="top" title="Año en el que se referencia la relación de esta variable mostrada ${hitYear}"`
+      : (isGreen
+          ? `data-bs-toggle="tooltip" data-bs-placement="top" title="Año en el que aparece la variable"`
+          : '');
+
+    // Sin enlaces (según tu requerimiento actual)
+    const inner = `<span class="tl-year" ${tooltipAttr}>${y}</span>`;
+
+    return `
+      <li class="li ${liClass} d-flex flex-column align-items-center">
+        <div class="timestamp mb-2">
+          <span class="date mb-2">${inner}</span>
+        </div>
+        <div class="status text-center"></div>
+      </li>
+    `;
+  }).join('');
+
+
+    return `<ul class="timeline" id="timeline">${items}</ul>`;
+  } catch (err) {
+    console.error('Error en construirLineaDeTiempoVariable:', err);
+    return construirLineaDeTiempo(eventosRelacionados);
+  }
+}
+
 
 function renderPage(data, page) {
   container.innerHTML = "";
@@ -531,7 +776,7 @@ function renderPage(data, page) {
   paginatedData.forEach((variable, index) => {
     // 2. Filtrar los eventos que pertenecen a esta variable
     const eventosRelacionados = eventosGlobal.filter(ev => ev.idVar === variable.idVar);
-    const timelineHTML = construirLineaDeTiempo(eventosRelacionados);
+    const timelineHTML = construirLineaDeTiempoVariable(variable, eventosRelacionados);
 
     // 3. Fuentes dinámicas
     const fuentesHTML = eventosRelacionados.map(ev => 
@@ -567,23 +812,26 @@ function renderPage(data, page) {
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="mb-2">
-                            <span class="fw-semibold text-secondary"><i class="bi bi-question-circle me-1"></i>Pregunta:</span>
+                            <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Pregunta elaborada cuyo objetivo es obtener una respuesta directa y explícita basada en información específica y detallada proporcionada por un informante">
+                            <i class="bi bi-question-circle me-1"></i>Pregunta:</span>
                             <div class="ps-3">
                             <p>${variable.pregLit}</p>
                             </div>
-                             <span class="fw-semibold text-secondary"><i class="bi bi-question-circle me-1"></i>Clasificación de la pregunta:</span>
+                             <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Ordenamiento de todas y cada una de las modalidades cualitativas o intervalos numéricos admitidos por una variable">
+                             <i class="bi bi-question-circle me-1"></i>Clasificación de la variable correspondiente a la pregunta:</span>
                              <div class="ps-3">
                                 ${getClasificacionesPorVariable(variable.idVar)}
                               </div>
                         </div>
                         <div class="mb-2">
-                            <span class="fw-semibold text-secondary"><i class="bi bi-info-circle me-1"></i>Definición:</span>
+                            <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Concepto o termino que incluya sus aspectos principales brindando un contexto de la variable">
+                                <i class="bi bi-info-circle me-1"></i>Definición:</span>
                             <div class="ps-3">${variable.defVar}</div>
                         </div>
                         <div class="mb-2">
-                            <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Nombre de la variable seleccionad, tal y como aparece en la fuente del evento en mención">
+                            <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Nombre de la variable seleccionada, tal y como aparece en la fuente del evento en mención">
                                 <i class="bi bi-tag me-1"></i>Variable Fuente:</span>
-                            <span class="badge bg-info-subtle text-dark ms-1 fw-normal">${variable.nomVar}</span>
+                            <span class="text-dark ms-1 fw-normal">${variable.nomVar}</span>
                         </div>
                     </div>
                
@@ -591,22 +839,23 @@ function renderPage(data, page) {
                         <div class="mb-2">
                             <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Conjunto objeto de cuantificación y caracterización para fines de estudio">
                                <i class="bi bi-diagram-3 me-1"></i>Categoría:</span>
-                            <span class="badge bg-secondary-subtle text-dark ms-1 fw-normal">${variable.categoria}</span>
+                            <span class="text-dark ms-1 fw-normal">${variable.categoria}</span>
                         </div>
                         <div class="mb-2">
                             <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Son enunciados genéricos referentes a campos específicos de interés y cuyo estudio constituye la justificación del proyecto estadístico">
                                 <i class="bi bi-layers me-1"></i>Clasificación Temática:</span>
                             <div class="ps-3">
                                 <span>Tema y Subtema 1:</span>
-                                <span class="badge bg-success-subtle text-dark mb-1 fw-normal">${variable.tema}</span>/
-                                <span class="badge bg-success-subtle text-dark mb-1 fw-normal">${variable.subtema}</span><br>
+                                <span class="text-dark mb-1 fw-normal">${variable.tema}</span>/
+                                <span class="text-dark mb-1 fw-normal">${variable.subtema}</span><br>
                                 <span>Tema y Subtema 2:</span>
-                                <span class="badge bg-success-subtle text-dark mb-1 fw-normal">${variable.tema2}</span>/
-                                <span class="badge bg-success-subtle text-dark mb-1 fw-normal">${variable.subtema2}</span>
+                                <span class="text-dark mb-1 fw-normal">${variable.tema2}</span>/
+                                <span class="text-dark mb-1 fw-normal">${variable.subtema2}</span>
                             </div>
                         </div>
                         <div class="mb-2">
-                            <span class="fw-semibold text-secondary"><i class="bi bi-link-45deg me-1"></i>Relación con Tabulados o Microdatos</span>
+                            <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Verifica si la variable seleccionada cuenta con información disponible en relación a tabulados publicados o en microdatos">
+                            <i class="bi bi-link-45deg me-1"></i>Relación con Tabulados o Microdatos</span>
                             <div class="ps-3 d-flex flex-wrap gap-2">
                                 <span class="badge bg-${variable.relTab === 'Sí' ? 'success badge-tabulado' : 'danger'}"
                                       style="cursor:pointer"
@@ -619,7 +868,8 @@ function renderPage(data, page) {
                                       ${variable.relMicro === 'Sí' ? 'data-bs-toggle="modal" data-bs-target="#infoModal" data-type="microdatos"' : ''}
                                 >${variable.relMicro === 'Sí' ? 'Microdatos' : 'Sin Microdatos'}</span>
                             </div>
-                        <span class="fw-semibold text-secondary"><i class="bi bi-link-45deg me-1"></i>Alineación con MDEA y ODS</span>
+                        <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Verifica si la variable seleccionada está alineada con la estructura del MDEA o con los ODS.">
+                        <i class="bi bi-link-45deg me-1"></i>Alineación con MDEA y ODS</span>
                             <div class="ps-3 d-flex flex-wrap gap-2">
                                 <span class="badge bg-${variable.alinMdea === 'Sí' ? 'primary' : 'secondary'}">${variable.alinMdea === 'Sí' ? 'MDEA' : 'Sin MDEA'}</span>
                                 <span class="badge bg-${variable.alinOds === 'Sí' ? 'primary' : 'secondary'}">${variable.alinOds === 'Sí' ? 'ODS' : 'Sin ODS'}</span>
@@ -736,7 +986,7 @@ function renderPage(data, page) {
 
     // Manejar el evento de cambio en el selector de elementos por página
     itemsPerPageSelect.addEventListener("change", function () {
-        itemsPerPage = parseInt(this.value, 10); // Actualizar el número de elementos por página
+        itemsPerPage = parseInt(this.value, 15); // Actualizar el número de elementos por página
         currentPage = 1; // Reiniciar a la primera página
         renderPage(allData, currentPage); // Renderizar la nueva página
         setupPagination(allData); // Actualizar el paginador
@@ -846,10 +1096,10 @@ function renderPage(data, page) {
         updateVariableCounter(filteredData.length);
     }
 
-    const selectedProcessesContainer = document.getElementById("selectedProcessesContainer");
 
 function updateSelectedProcessesChips() {
-    const selectedProcessesContainer = document.getElementById("selectedProcessesContainer");
+    const selectedProcessesContainer = document.getElementById("processSelectContainer");
+    if (!selectedProcessesContainer) return;
     selectedProcessesContainer.innerHTML = "";
     const selectedOptions = Array.from(processSelect.selectedOptions);
     selectedOptions.forEach(option => {
@@ -910,24 +1160,25 @@ searchForm.addEventListener("submit", function (e) {
     });
 
     // Función para obtener parámetros de la URL
-    function getQueryParam(param) {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get(param);
+   function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
     }
 
     // Cuando cargue la página, buscar si hay un parámetro "search"
-    document.addEventListener("DOMContentLoaded", () => {
-        const searchTerm = getQueryParam("search");
-        if (searchTerm) {
-            // Asegúrate de que los datos estén cargados antes de buscar
-            const checkDataLoaded = setInterval(() => {
-                if (typeof allData !== 'undefined' && allData.length > 0) {
-                    clearInterval(checkDataLoaded);
-                    searchInput.value = searchTerm; // Mostrar el término en el input
-                    searchVariables(searchTerm);    // Ejecutar la búsqueda
-                }
-            }, 100);
+   document.addEventListener("DOMContentLoaded", () => {
+    const searchTerm = getQueryParam("search");
+
+    if (searchTerm) {
+        const checkDataLoaded = setInterval(() => {
+        if (typeof allData !== 'undefined' && allData.length > 0) {
+            clearInterval(checkDataLoaded);
+            searchInput.value = searchTerm;
+            currentPage = 1;
+            searchVariables(searchTerm);
         }
+        }, 100);
+    }
     });
 
     // Evento delegado para mostrar información de tabulados y microdatos en el modal
@@ -967,7 +1218,6 @@ searchForm.addEventListener("submit", function (e) {
                                 ${tabulado.tituloTab ? `
                                 <strong>Título del tabulado:</strong><br>
                                 <span>${tabulado.tituloTab}</span><br>` : ''}
-                                <strong>ID Tabulado:</strong> ${rel.idTab}<br>
                                 <div class="row">
                                     <div class="col-6">
                                         ${tabulado.ligaTab ? `
@@ -1015,7 +1265,6 @@ searchForm.addEventListener("submit", function (e) {
                 if (info && (info.ligaMicro || info.ligaDd)) {
                     modalBody.innerHTML = `
                     <div class="mb-2">
-                        <strong class="mb-2">ID Variable:</strong><br> ${info.idVar}<br>
                         <strong>Liga Microdatos:</strong><br>
                         <a href="${info.ligaMicro}" target="_blank" style="word-break: break-all;">Página Microdatos INEGI</a>
                     </div>
@@ -1032,8 +1281,7 @@ searchForm.addEventListener("submit", function (e) {
                         ${info.nomCampo || "No disponible"}
                     </div>
                     <div class="mb-2">
-                        <strong>Comentario:</strong><br>
-                        ${info.comentMicro || "No disponible"}
+                        ${renderComentarios(info.comentMicro)}
                     </div>
                 `;
                 } else {
@@ -1075,7 +1323,7 @@ fetch('/api/clasificaciones')
         fetch('/api/variables')
           .then(res => res.json())
           .then(variables => {
-            renderPage(variables, 1);
+            (variables, 1);
           });
       });
   });
@@ -1111,11 +1359,20 @@ function renderComentarios(comentario) {
     return ''; // No mostrar nada
   }
   return `
-    <div class="mb-2">
-      <span class="fw-semibold text-secondary"><i class="bi bi-asterisk me-1"></i>Extras:</span>
-      <div class="ps-3 small">
-        <div><span>Comentarios:</span> ${comentario}</div>
-      </div>
+    <div class="mb-2 ms-1">
+      <span class="fw-semibold">Comentario:</span>
+      <div>${comentario}</div>
     </div>
   `;
 }
+
+// Espera al menos 1000ms antes de mostrar el contenido principal
+window.addEventListener("DOMContentLoaded", function() {
+  setTimeout(function() {
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("mainContent").style.display = "";
+  }, 1000);
+});
+
+
+

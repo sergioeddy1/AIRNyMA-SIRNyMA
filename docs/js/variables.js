@@ -136,17 +136,13 @@ searchForm?.addEventListener("submit", function (e) {
     }
     }
 
-// 🔁 Cargar procesos y variables en paralelo
-Promise.all([
-  fetch("https://jones-investors-participant-behaviour.trycloudflare.com/api/proceso").then(res => res.json()),
-  fetch("https://jones-investors-participant-behaviour.trycloudflare.com/api/variables").then(res => res.json())
-])
-  .then(([procesos, variables]) => {
-    procesosGlobal = procesos;
-    allData = variables;
 
-    // Llenar el select de procesos
-    procesos.forEach(proc => {
+// Llenar dinámicamente el select desde https://jones-investors-participant-behaviour.trycloudflare.com/api/proceso
+fetch("https://jones-investors-participant-behaviour.trycloudflare.com/api/proceso")
+  .then(response => response.json())
+  .then(data => {
+    procesosGlobal = data;
+    data.forEach(proc => {
       const option = document.createElement("option");
       option.value = proc.idPp;
       option.textContent = `• ${proc.pp} (${proc.idPp})`;
