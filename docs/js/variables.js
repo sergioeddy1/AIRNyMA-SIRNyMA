@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const alinOdsCheckbox = document.getElementById("alinOdsCheckbox");
     
 
-    let itemsPerPage = parseInt(itemsPerPageSelect.value, 10); // Número de elementos por página
+    let itemsPerPage = parseInt(itemsPerPageSelect.value, 15); // Número de elementos por página
     let currentPage = 1; // Página actual
     let procesosGlobal = [];
 let allData = [];

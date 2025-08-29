@@ -125,7 +125,7 @@
                                             ` : ""}
                                             <div class="row g-0 d-flex align-items-center">
                                                 <div class="col-4 d-flex justify-content-center">
-                                                    <img src="/assets/iconsociodemografica.png" class="img-fluid proceso-icon rounded-start" alt="Icono" style="max-height: 80px;">
+                                                    <img src="img/iconsociodemografica.png" class="img-fluid proceso-icon rounded-start" alt="Icono" style="max-height: 80px;">
                                                 </div>
                                                 <div class="col-8">
                                                     <div class="card-body p-2">
