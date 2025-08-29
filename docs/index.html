@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link href="css/index.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="img/favicon_espaciodigital.png">
     <style>
        body, html {
             font-family: Helvetica, Sans-Serif !important;
@@ -28,7 +29,7 @@
           </button>
       
           <div class="collapse navbar-collapse justify-content-between" id="navbarNavDropdown" >
-            <ul class="navbar-nav mx-auto gap-3" style="padding-left: 15rem">
+            <ul class="navbar-nav mx-auto gap-3">
               <li class="nav-item">
                 <a class="nav-link ctive fw-bold text-decoration-underline" aria-current="page" href="index.html">Inicio</a>
               </li>
@@ -46,10 +47,10 @@
               </li>
             </ul>
       
-          <form id="navbarSearchForm" class="d-flex" role="search">
+          <!-- <form id="navbarSearchForm" class="d-flex" role="search">
               <input id="searchInput" class="form-control me-2 rounded-pill" type="search" name="search" placeholder="Buscar..." aria-label="Buscar">
               <button class="btn btn-outline-light rounded-pill" type="submit">Buscar</button>
-            </form> 
+            </form>  -->
           </div>
         </div>
       </nav>
@@ -59,7 +60,8 @@
     
 <!-- Carrusel con texto a la izquierda e imagen a la derecha -->
 <div id="myCarousel" class="carousel slide carousel-dark mb-5" data-bs-ride="carousel">
-  <!-- Indicadores -->
+
+  <!-- Posicionamiento de los botones en la parte interna del carousel de navegación -->
   <div class="carousel-indicators">
     <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="0" class="active" aria-label="Slide 1"></button>
     <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
@@ -68,7 +70,6 @@
   </div>
 
   <div class="carousel-inner">
-
     <!-- Slide 1 -->
     <div class="carousel-item active" style="background-color: white;">
       <div class="d-flex align-items-center" style="height: 500px;">
@@ -79,7 +80,7 @@
         </div>
         <!-- Imagen -->
         <div class="col-md-6 h-100 mb-5">
-          <img src="img/inegislider.png" class="img-fluid h-100 w-100" style="object-fit: contain;" alt="Procesos de Producción">
+          <img id="imgProcesosInegi" src="img/inegislider.png" class="img-fluid h-100 w-100 carousel-img" style="object-fit: contain;" alt="Procesos de Producción">
         </div>
       </div>
     </div>
@@ -87,12 +88,14 @@
     <!-- Slide 2 -->
     <div class="carousel-item" style="background-color: white;">
       <div class="d-flex align-items-center" style="height: 500px;">
+          <!-- Texto -->
         <div class="col-md-6 ps-5 pe-3" style="margin-left: 25px; margin-bottom: 120px;">
           <h2 class="fw-bold" style="font-family: Helvetica, Sans-Serif; color: #003057;">Variables</h2>
           <p>Consulta las variables ambientales agrupadas por procesos, temas y fuentes de información.</p>
         </div>
+         <!-- Imagen -->
         <div class="col-md-6 h-100 mb-5">
-          <img src="img/variablesslider.png" class="img-fluid h-100 w-100" style="object-fit: contain;" alt="Variables">
+          <img id="imgVariables" src="img/variablesslider.png" class="img-fluid h-100 w-100 carousel-img" style="object-fit: contain;" alt="Variables">
         </div>
       </div>
     </div>
@@ -100,12 +103,14 @@
     <!-- Slide 3 -->
     <div class="carousel-item" style="background-color: white;">
       <div class="d-flex align-items-center" style="height: 500px;">
+        <!-- Texto -->
         <div class="col-md-6 ps-5 pe-3" style="margin-left: 25px; margin-bottom: 120px;">
           <h2 class="fw-bold" style="font-family: Helvetica, Sans-Serif; color: #003057;">ODS</h2>
           <p>Visualiza las variables alineadas con los Objetivos de Desarrollo Sostenible y su relación con los indicadores existentes.</p>
         </div>
+        <!-- Imagen -->
         <div class="col-md-6 h-100 mb-3">
-          <img src="img/SLIDERODS.png" class="img-fluid h-100 w-100" style="object-fit: contain;" alt="ODS">
+          <img id="imgODS" src="img/SLIDERODS.png" class="img-fluid h-100 w-100 carousel-img" style="object-fit: contain;" alt="ODS">
         </div>
       </div>
     </div>
@@ -113,19 +118,21 @@
     <!-- Slide 4 -->
     <div class="carousel-item" style="background-color: white;">
       <div class="d-flex align-items-center" style="height: 500px;">
+        <!-- Texto -->
         <div class="col-md-6 ps-5 pe-3" style="margin-left: 20px; margin-bottom: 120px;">
           <h2 class="fw-bold" style="font-family: Helvetica, Sans-Serif; color: #003057;">Indicadores Existentes</h2>
           <p>Consulta el compendio de indicadores ambientales existentes que permiten medir y monitorear los cambios en el entorno.</p>
         </div>
+        <!-- Imagen -->
         <div class="col-md-6 h-100 mb-2">
-          <img src="img/indicadoresslide.png" class="img-fluid h-100 w-100" style="object-fit: contain; filter: brightness(1.1);" alt="Indicadores">
+          <img  src="img/indicadoresslide.png" class="img-fluid h-100 w-100 carousel-img" style="object-fit: contain; filter: brightness(1.1);" alt="Indicadores">
         </div>
       </div>
     </div>
 
   </div>
 
-  <!-- Controles -->
+  <!-- Controles laterales del carousel -->
   <button class="carousel-control-prev" type="button" data-bs-target="#myCarousel" data-bs-slide="prev">
     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
     <span class="visually-hidden">Anterior</span>
@@ -137,13 +144,14 @@
 </div>
 
 
-<!-- Normatividad-->
+<!-- Introduccion al portal en concepto textualizado -->
         <div class="container">
             <div>
-
+              <!-- Titulo encabezado del portal -->
                 <h1 style="text-align: center;">Espacio Digital del Inventario de Variables del SIIERNMA</h1>
                 <hr>
-                   <div class="shadow-sm" style="
+                <!-- Objetivo del portal -->
+                <div class="shadow-sm" style="
                     font-size: 1.1rem;
                     background: linear-gradient(90deg, rgba(191,239,236,0.85) 0%, rgba(216,206,255,0.85) 100%);
                     border-left: 6px solid #33ccff;
@@ -151,10 +159,11 @@
                     padding: 1.2rem 1.5rem;
                     margin-bottom: 2rem;
                     color: #2b2b2b;
-                ">
+                    ">
                   <strong style="color: #009edb;">Objetivo del portal:</strong>
                   Este portal integra y facilita el acceso a información clave sobre procesos, variables, Objetivos de Desarrollo Sostenible (ODS) e indicadores ambientales generados por el INEGI. Su propósito es ofrecer una herramienta centralizada y transparente para la consulta, análisis y aprovechamiento de datos ambientales, apoyando la toma de decisiones informadas y el cumplimiento de compromisos nacionales e internacionales en materia de desarrollo sostenible.
                 </div>
+                <!-- Normatividad -->
                 <h3> Normatividad </h3>
                 <p>
                     En cumplimiento con las disposiciones legales y reglamentarias que rigen nuestras actividades, se establece la siguiente normatividad aplicable:
@@ -179,18 +188,17 @@
             </div>
         </div>
 
-        <!-- Mision y Vision -->
-
+      <!-- Mision y Vision -->
         <div class="container">
+           <!-- Columna Misión -->
             <div class="row align-items-stretch">
-                <!-- Columna Misión -->
-                        <!-- Tipografías y Material Symbols -->
-                    <link rel="preconnect" href="https://fonts.googleapis.com">
-                    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-                    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&family=Roboto:wght@300&display=swap" rel="stylesheet">
-                    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+              <!-- Tipografías y Material Symbols de Misión-->
+                  <link rel="preconnect" href="https://fonts.googleapis.com">
+                  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+                  <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&family=Roboto:wght@300&display=swap" rel="stylesheet">
+                  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
 
-                    <!-- Card de Misión -->
+              <!-- Card de Misión -->
                 <div class="mision-card col-6 d-flex flex-column" style="font-family: 'Roboto', sans-serif;">
                   <img src="img/CardMisionInegi.png" alt="Misión" style="width:100%; height:200px; object-fit: cover; border-radius: 12px 12px 0 0;">
                     <div class="card-content" style="padding: 1.5rem; background-color: rgba(216, 206, 255, 0.85); border-radius: 0 0 12px 12px;">
@@ -208,81 +216,87 @@
                         para el Desarrollo de Estadísticas Ambientales (MDEA) de la CEPAL y los indicadores clave del país, promoviendo la toma
                         de decisiones informadas y la sostenibilidad en las políticas públicas.
                         </p>
-                        </a>
                     </div>
                 </div>
 
 
-                <!-- Columna Visión -->
-                <link rel="preconnect" href="https://fonts.googleapis.com">
-                <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-                <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&family=Roboto:wght@300&display=swap" rel="stylesheet">
-                <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+                <!-- Tipografías y Material Symbols de Visión -->
+                  <link rel="preconnect" href="https://fonts.googleapis.com">
+                  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+                  <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&family=Roboto:wght@300&display=swap" rel="stylesheet">
+                  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
                 
-               
-                  <div class="card-vision col-6 d-flex flex-column" style="font-family: 'Roboto', sans-serif; ">
-                    <img src="img/CardVisionInegi.png" alt="Visión" style="width:100%; height:200px; object-fit: cover; border-radius: 12px 12px 0 0;">
-                    <div class="card-content h-100" style="padding: 1.5rem; background-color: rgba(191, 239, 236, 0.85); border-radius: 0 0 12px 12px;">
-                        <h3>
-                            <span class="d-flex align-items-center justify-content-between" style="color: #0a1c2c;">
-                                Visión
-                                <i class="bi bi-search"></i>
-                            </span>
-                        </h3>
-                      <p style="color: #5f5f5f; text-align: justify;">
-                        Ser el referente institucional en la generación y promoción de indicadores ambientales, impulsando propuestas innovadoras y 
-                        garantizando el acceso a datos precisos, confiables y actualizados. Aspiramos a fomentar una cultura de transparencia y
-                        colaboración entre unidades administrativas, impulsando un desarrollo sostenible integral que beneficie a la sociedad.
-                      </p>
-                      </a>
-                    </div>
+               <!-- Card de Misión -->
+                <div class="card-vision col-6 d-flex flex-column" style="font-family: 'Roboto', sans-serif; ">
+                  <img src="img/CardVisionInegi.png" alt="Visión" style="width:100%; height:200px; object-fit: cover; border-radius: 12px 12px 0 0;">
+                  <div class="card-content h-100" style="padding: 1.5rem; background-color: rgba(191, 239, 236, 0.85); border-radius: 0 0 12px 12px;">
+                      <h3>
+                         <span class="d-flex align-items-center justify-content-between" style="color: #0a1c2c;">
+                             Visión
+                             <i class="bi bi-search"></i>
+                         </span>
+                      </h3>
+                    <p style="color: #5f5f5f; text-align: justify;">
+                      Ser el referente institucional en la generación y promoción de indicadores ambientales, impulsando propuestas innovadoras y 
+                      garantizando el acceso a datos precisos, confiables y actualizados. Aspiramos a fomentar una cultura de transparencia y
+                      colaboración entre unidades administrativas, impulsando un desarrollo sostenible integral que beneficie a la sociedad.
+                    </p>
                   </div>
-                
-                  
+                </div>
             </div>
         </div>
 
-          <!-- Temas de actualidad -->
+         
 
           
-
-       <!-- HTML -->
+ <!-- Apartado Menu de Temas de Interes -->
         <div class="container mt-5 mb-5">
-            <h1 class="mb-4">Temas de interés</h1>
-            <div class="tab-wrapper">
+          <h1 class="mb-4">Temas de interés</h1>
+          <div class="tab-wrapper">
             <div class="tab-menu">
-                <div class="tab-item active" data-target="inegi">Procesos de Producción</div>
-                <div class="tab-item" data-target="ods">Variables</div>
-                <div class="tab-item" data-target="ind">Objetivos de Desarrollo Sostenible</div>
-                <div class="tab-item" data-target="geonode">Indicadores</div>
+              <div class="tab-item active" data-target="inegi">Procesos de Producción</div>
+              <div class="tab-item" data-target="ods">Variables</div>
+              <div class="tab-item" data-target="ind">Objetivos de Desarrollo Sostenible</div>
+              <div class="tab-item" data-target="geonode">Indicadores</div>
             </div>
             <div class="tab-content">
-                <div id="inegi" class="content-section active">
+              <div id="inegi" class="content-section active">
                 <h2>Procesos de Producción</h2>
-                <p>El Instituto Nacional de Estadística y Geografía (INEGI) pone a disposición una amplia gama de programas de información, diseñados para generar datos confiables y actualizados sobre diversos temas del país. 
-                  A partir de estos programas se derivan los procesos de producción estadística y geográfica con los que se va a trabajar en esta sección, los cuales siguen metodologías estandarizadas para garantizar la calidad y comparabilidad de la información.</p>
-                </div>
-                <div id="ods" class="content-section">
+                <p>
+                  El Instituto Nacional de Estadística y Geografía (INEGI) pone a disposición una amplia gama de programas de información, diseñados para generar datos confiables y actualizados sobre diversos temas del país.
+                  A partir de estos programas se derivan los procesos de producción estadística y geográfica con los que se va a trabajar en esta sección, los cuales siguen metodologías estandarizadas para garantizar la calidad y comparabilidad de la información.
+                </p>
+              </div>
+              <div id="ods" class="content-section">
                 <h2>Variables detectadas en los programas de información</h2>
-                <p>Este apartado presenta el listado de variables identificadas a partir de los programas de información del inventario SIIERNMA. 
-                  Estas variables están directamente relacionadas con los procesos de producción estadística y geográfica, y permiten comprender mejor los elementos clave que se generan, registran y analizan en cada proceso. 
-                  Su organización facilita la consulta y el aprovechamiento de la información disponible.</p>
-                </div>
-                <div id="ind" class="content-section">
+                <p>
+                  Este apartado presenta el listado de variables identificadas a partir de los programas de información del inventario SIIERNMA.
+                  Estas variables están directamente relacionadas con los procesos de producción estadística y geográfica, y permiten comprender mejor los elementos clave que se generan, registran y analizan en cada proceso.
+                  Su organización facilita la consulta y el aprovechamiento de la información disponible.
+                </p>
+              </div>
+              <div id="ind" class="content-section">
                 <h2>Objetivos de Desarrollo Sostenible</h2>
-                <p>Los Objetivos de Desarrollo Sostenible (ODS), adoptados por las Naciones Unidas en 2015, establecen una agenda global para erradicar la pobreza, proteger el planeta y garantizar el bienestar de todas las personas hacia 2030. 
-                  En este apartado se presenta la vinculación de las variables del inventario SIIERNMA con los ODS, identificando cómo los datos generados a través de los procesos de producción contribuyen al seguimiento y cumplimiento de estos objetivos. Esta relación fortalece la utilidad del inventario como herramienta para la toma de decisiones orientadas al desarrollo sostenible.</p>
-                </div>
-                <div id="geonode" class="content-section">
+                <p>
+                  Los Objetivos de Desarrollo Sostenible (ODS), adoptados por las Naciones Unidas en 2015, establecen una agenda global para erradicar la pobreza, proteger el planeta y garantizar el bienestar de todas las personas hacia 2030.
+                  En este apartado se presenta la vinculación de las variables del inventario SIIERNMA con los ODS, identificando cómo los datos generados a través de los procesos de producción contribuyen al seguimiento y cumplimiento de estos objetivos.
+                  Esta relación fortalece la utilidad del inventario como herramienta para la toma de decisiones orientadas al desarrollo sostenible.
+                </p>
+              </div>
+              <div id="geonode" class="content-section">
                 <h2>Indicadores generados en INEGI</h2>
-                <p>Los indicadores ambientales generados por el INEGI representan una forma de estadística derivada que permite sintetizar y comunicar información clave sobre el estado y las tendencias del medio ambiente en México. Estos indicadores se construyen a partir de datos confiables provenientes de diversas fuentes, incluidos los procesos de producción del inventario SIIERNMA,
-                   y son fundamentales para evaluar el desempeño ambiental, apoyar la formulación de políticas públicas y dar seguimiento a compromisos nacionales e internacionales en materia ambiental.</p>
-                </div>
+                <p>
+                  Los indicadores ambientales generados por el INEGI representan una forma de estadística derivada que permite sintetizar y comunicar información clave sobre el estado y las tendencias del medio ambiente en México.
+                  Estos indicadores se construyen a partir de datos confiables provenientes de diversas fuentes, incluidos los procesos de producción del inventario SIIERNMA,
+                  y son fundamentales para evaluar el desempeño ambiental, apoyar la formulación de políticas públicas y dar seguimiento a compromisos nacionales e internacionales en materia ambiental.
+                </p>
+              </div>
             </div>
-            </div>
+          </div>
         </div>
-
-        <script src="js/index.js"></script>
+  
+        
+<script src="js/index.js"></script>
 
         <!--! FOOTER -->
 <div class="container-fluid" style="background-color: #5d5d5d">
@@ -291,7 +305,6 @@
         <div class="container">
           <div class="row">
             <div class="col-lg">
-  
               <a style="color: white; font-weight: bold; font-size: 15px; font-family: Helvetica, Sans-Serif; ">Contacto</a>
               <ul class="nav flex-column">
                 <li><a href="https://www.inegi.org.mx/"><img class="img-fluid d-block m-1" style="height: 2.5rem; width: 12rem;" src="img/INEGI_c-modified.png"></a></li>
@@ -332,8 +345,8 @@
         </div>
       </div>
     </footer>
-  </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

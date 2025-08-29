@@ -51,9 +51,108 @@
       height: 22rem;
     }
   }
+
+  /*Estilos para la imagen del carousel adapatadas a diferentes resoluciones*/
+
+  @media screen and (max-width: 1366px) {
+    #imgProcesosInegi {
+      width: 100%;
+      height: 100%;
+     
+    }
+    
+  }
+  @media screen and (max-width: 1024px) {
+    #imgProcesosInegi {
+      width: 100%;
+      height: 100%;
+     
+    }
+  } 
+  @media screen and (max-width: 480px) {
+    #imgProcesosInegi {               
+      width: 100%;
+      height: 100%;
+    
+    }
+  }
+
+  @media screen and (max-width: 1366px) {
+  #imgVariables {
+    width: 100%;
+    height: 100%;
   
- 
+  }
+    }
+
+  @media screen and (max-width: 1024px) {
+    #imgVariables {
+      width: 100%;
+      height: 100%;
+    
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    #imgVariables {
+      width: 100%;
+      height: 100%;
+     
+    }
+  }
+
+  @media screen and (max-width: 1366px) {
+    #imgODS {
+      width: 50%;
+      height: 50%;
+      
+    }
+  }
+  @media screen and (max-width: 1024px) {
+    #imgODS {
+       width: 50%;
+      height: 50%;
+      
+    }
+  }
+  @media screen and (max-width: 480px) {
+    #imgODS {
+      width: 100%;
+      height: 100%;
+      
+    }
+  }
+
+  @media screen and (max-width: 1366px) {
+    #imgIndicadores {
+      width: 100%;
+      height: 100%;
+     
+    }
+  }
+
+  @media screen and (max-width: 1280px) {
+    #imgIndicadores {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  @media screen and (max-width: 1024px) {
+    #imgIndicadores {
+      width: 100%;
+      height: 100%;
+    }
+  }
+  @media screen and (max-width: 480px) {
+    #imgIndicadores {
+      width: 100%;
+      height: 100%;
+    }
+  }
   
+
+
   /*! botones modificados */
   p{
    font-family: Arial, Helvetica, sans-serif;
