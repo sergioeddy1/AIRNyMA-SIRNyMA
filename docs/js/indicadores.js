@@ -90,7 +90,7 @@ function buildTableHTML(rows) {
 
 document.addEventListener("DOMContentLoaded", function () {
   // Cargar datos de la API
-  fetch('/api/indicadores_ambientales')
+  fetch('https://sale-regulatory-usc-collectables.trycloudflare.com/api/indicadores_ambientales')
     .then(res => res.json())
     .then(data => {
       indicadoresData = data;

@@ -28,8 +28,8 @@
                     seccionProcesos.scrollIntoView({ behavior: 'smooth' });
 
                     try {
-                        const procesos = await fetch("/api/proceso").then(res => res.json());
-                        const variables = await fetch("/api/variables").then(res => res.json());
+                        const procesos = await fetch("https://sale-regulatory-usc-collectables.trycloudflare.com/api/proceso").then(res => res.json());
+                        const variables = await fetch("https://sale-regulatory-usc-collectables.trycloudflare.com/api/variables").then(res => res.json());
 
                         procesosGlobal = procesos;
                         conteoGlobal = {};

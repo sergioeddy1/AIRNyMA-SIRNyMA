@@ -23,7 +23,7 @@ let currentFilteredData = [];
 
 
 // Llenar el select de procesos y aplicar filtro inicial si hay idPp en la URL
-fetch("/api/proceso")
+fetch("https://sale-regulatory-usc-collectables.trycloudflare.com/api/proceso")
   .then(response => response.json())
   .then(data => {
     procesosGlobal = data;
@@ -35,7 +35,7 @@ fetch("/api/proceso")
     });
 
     // Ahora carga las variables
-    fetch("/api/variables")
+    fetch("https://sale-regulatory-usc-collectables.trycloudflare.com/api/variables")
       .then(response => response.json())
       .then(variables => {
         allData = variables;
@@ -240,8 +240,8 @@ searchForm?.addEventListener("submit", function (e) {
 
 // 🔁 Cargar procesos y variables en paralelo
 Promise.all([
-  fetch("/api/proceso").then(res => res.json()),
-  fetch("/api/variables").then(res => res.json())
+  fetch("https://sale-regulatory-usc-collectables.trycloudflare.com/api/proceso").then(res => res.json()),
+  fetch("https://sale-regulatory-usc-collectables.trycloudflare.com/api/variables").then(res => res.json())
 ])
   .then(([procesos, variables]) => {
     procesosGlobal = procesos;
@@ -475,7 +475,7 @@ function renderSelectedTags(selectedOptions) {
 
 
     //Fetch para cargar los datos de proceso
-    fetch("/api/proceso")
+    fetch("https://sale-regulatory-usc-collectables.trycloudflare.com/api/proceso")
     .then(res => res.json())
     .then(data => {
         allData = data;
@@ -486,7 +486,7 @@ function renderSelectedTags(selectedOptions) {
     // Función para cargar todos los elementos al entrar a la página
     async function loadAllVariables() {
     try {
-        const response = await fetch('/api/variables');
+        const response = await fetch('https://sale-regulatory-usc-collectables.trycloudflare.com/api/variables');
         const data = await response.json();
         allData = data;
         currentFilteredData = [...allData];
@@ -561,10 +561,10 @@ let microdatosGlobal = [];
 let fuentesGlobal = [];
 
 Promise.all([
-  fetch('/api/proceso').then(r => r.json()),
-  fetch('/api/variables').then(r => r.json()),
-  fetch('/api/microdatos').then(r => r.json()),
-  fetch('/api/fuentes').then(r => r.json()) // tabla "fuente" con anioEvento, idPp, ligaFuente/ligas
+  fetch('https://sale-regulatory-usc-collectables.trycloudflare.com/api/proceso').then(r => r.json()),
+  fetch('https://sale-regulatory-usc-collectables.trycloudflare.com/api/variables').then(r => r.json()),
+  fetch('https://sale-regulatory-usc-collectables.trycloudflare.com/api/microdatos').then(r => r.json()),
+  fetch('https://sale-regulatory-usc-collectables.trycloudflare.com/api/fuentes').then(r => r.json()) // tabla "fuente" con anioEvento, idPp, ligaFuente/ligas
 ]).then(([procesos, variables, microdatos, fuentes]) => {
   procesosGlobal = procesos;
   variablesGlobal = variables;
@@ -1192,7 +1192,7 @@ searchForm.addEventListener("submit", function (e) {
 
             try {
                 // 1. Obtener relaciones var-tab
-                const resVarTab = await fetch('/api/var-tab');
+                const resVarTab = await fetch('https://sale-regulatory-usc-collectables.trycloudflare.com/api/var-tab');
                 const dataVarTab = await resVarTab.json();
 
                 // Filtrar todas las coincidencias por idVar
@@ -1204,7 +1204,7 @@ searchForm.addEventListener("submit", function (e) {
                 }
 
                 // 2. Obtener todos los tabulados
-                const resTabulados = await fetch('/api/tabulado');
+                const resTabulados = await fetch('https://sale-regulatory-usc-collectables.trycloudflare.com/api/tabulado');
                 const tabulados = await resTabulados.json();
 
                 // 3. Construir HTML con las ligas y nuevos campos
@@ -1256,7 +1256,7 @@ searchForm.addEventListener("submit", function (e) {
             modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
             try {
                 // Trae todos los microdatos y filtra por idVar
-                const res = await fetch(`/api/microdatos`);
+                const res = await fetch(`https://sale-regulatory-usc-collectables.trycloudflare.com/api/microdatos`);
                 const data = await res.json();
                 // Busca el microdato que corresponde a la variable
                 const info = Array.isArray(data)
@@ -1311,16 +1311,16 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 // Cargar clasificaciones antes de renderizar variables
-fetch('/api/clasificaciones')
+fetch('https://sale-regulatory-usc-collectables.trycloudflare.com/api/clasificaciones')
   .then(res => res.json())
   .then(clasificaciones => {
     clasificacionesGlobal = clasificaciones;
     // Ahora carga las variables y eventos como ya lo haces
-    fetch('/api/eventos')
+    fetch('https://sale-regulatory-usc-collectables.trycloudflare.com/api/eventos')
       .then(res => res.json())
       .then(eventos => {
         eventosGlobal = eventos;
-        fetch('/api/variables')
+        fetch('https://sale-regulatory-usc-collectables.trycloudflare.com/api/variables')
           .then(res => res.json())
           .then(variables => {
             (variables, 1);

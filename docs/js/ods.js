@@ -204,7 +204,7 @@ const descripcionesODS = {
       
 
       // Fetch data y mostrar contadores
-      fetch("/api/ods")
+      fetch("https://sale-regulatory-usc-collectables.trycloudflare.com/api/ods")
         .then(response => response.json())
         .then(responseData => {
           data = responseData;
