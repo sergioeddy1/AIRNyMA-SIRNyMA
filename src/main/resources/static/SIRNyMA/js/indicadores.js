@@ -124,32 +124,145 @@ document.addEventListener("DOMContentLoaded", function () {
       const tablaHTML = buildTableHTML(filasTabla);
 
   document.getElementById('indicadorModalBody').innerHTML = `
-    <div class="container">
-      <div class="row"><div class="col"><strong>Tipo de Indicador:</strong> ${indicador.tipoIndicador || ''}</div></div>
-      <div class="row"><div class="col"><strong>Descripción corta:</strong> ${indicador.descripcionCorta || ''}</div></div>
-      <div class="row"><div class="col"><strong>Descripción del valor:</strong> ${indicador.descripcionValor || ''}</div></div>
-      <div class="row"><div class="col"><strong>Definición de variables:</strong> ${indicador.definicionVariables || ''}</div></div>
-      <div class="row"><div class="col"><strong>Unidad de medida:</strong> ${indicador.unidadMedida || ''}</div></div>
-      <div class="row"><div class="col"><strong>Fórmula de cálculo:</strong> ${indicador.formulaCalculo || ''}</div></div>
-      <div class="row"><div class="col"><strong>Alcance:</strong> ${indicador.alcance || ''}</div></div>
-      <div class="row"><div class="col"><strong>Limitaciones:</strong> ${indicador.limitaciones || ''}</div></div>
-      <div class="row"><div class="col"><strong>Relevancia:</strong> ${indicador.relevancia || ''}</div></div>
-      <div class="row mt-3"><div class="col"><strong>Gráfico:</strong><div class="ratio ratio-16x9"><canvas id="indicadorChart"></canvas></div></div></div>
-      <div class="row"><div class="col"><strong>Frase de tendencia:</strong> ${indicador.fraseTendencia || ''}</div></div>
-      <div class="row"><div class="col"><strong>Notas de la serie:</strong> ${indicador.notasSerie || ''}</div></div>
-      <div class="row"><div class="col"><strong>Cobertura:</strong> ${indicador.cobertura || ''}</div></div>
-      <div class="row"><div class="col"><strong>Desagregación:</strong> ${indicador.desagregacion || ''}</div></div>
-      <div class="row"><div class="col"><strong>Método de captura:</strong> ${indicador.metodoCaptura || ''}</div></div>
-      <div class="row"><div class="col"><strong>Disponibilidad de datos:</strong> ${indicador.disponibilidadDatos || ''}</div></div>
-      <div class="row"><div class="col"><strong>Periodicidad de los datos:</strong> ${indicador.periodicidadDatos || ''}</div></div>
-      <div class="row"><div class="col"><strong>Periodo disponible:</strong> ${indicador.periodoDisponible || ''}</div></div>
-      <div class="row"><div class="col"><strong>Periodicidad de actualización:</strong> ${indicador.periodicidadActualizacion || ''}</div></div>
-      <div class="row"><div class="col"><strong>Relación con políticas ambientales:</strong> ${indicador.relacionPoliticasAmbientales || ''}</div></div>
-      <div class="row"><div class="col"><strong>Tabla de datos:</strong><div id="tablaDatosContainer">${tablaHTML}</div></div></div>
-      <div class="row"><div class="col"><strong>Fuente de datos:</strong> ${indicador.fuenteDatos || ''}</div></div>
-      <div class="row"><div class="col"><strong>Requisitos de coordinación:</strong> ${indicador.requisitosCoordinacion || ''}</div></div>
-      </div>
+  <div class="container">
+  <!-- Título interno -->
+  <div class="mb-2">
+    <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Nombre del Indicador</div>
+    <div class="bg-light border rounded p-2">${indicador.nombreIndicador || ''}</div>
+  </div>
 
+  <!-- Tipo y Unidad -->
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Tipo de indicador</div>
+      <div class="bg-light border rounded p-2">${indicador.tipoIndicador || ''}</div>
+    </div>
+    <div class="col-md-6">
+      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Unidad de medida</div>
+      <div class="bg-light border rounded p-2">${indicador.unidadMedida || ''}</div>
+    </div>
+  </div>
+
+  <!-- Descripciones -->
+  <div class="mt-3">
+    <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Descripción corta del indicador</div>
+    <div class="bg-light border rounded p-2">${indicador.descripcionCorta || ''}</div>
+  </div>
+
+  <div class="mt-3">
+    <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Descripción del valor en el espacio/tiempo</div>
+    <div class="bg-light border rounded p-2">${indicador.descripcionValor || ''}</div>
+  </div>
+
+  <!-- Definición y Fórmula / Alcance -->
+  <div class="mt-3">
+    <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Definición de variables</div>
+    <div class="bg-light border rounded p-2 text-muted">${indicador.definicionVariables || ''}</div>
+  </div>
+
+  <div class="row g-3 mt-1">
+    <div class="col-md-6">
+      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Fórmula de cálculo</div>
+      <div class="bg-light border rounded p-2 text-muted">${indicador.formulaCalculo || ''}</div>
+    </div>
+    <div class="col-md-6">
+      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Alcance (qué mide)</div>
+      <div class="bg-light border rounded p-2">${indicador.alcance || ''}</div>
+    </div>
+  </div>
+
+  <!-- Limitaciones / Relevancia -->
+  <div class="row g-3 mt-1">
+    <div class="col-md-6">
+      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Limitaciones (qué no mide)</div>
+      <div class="bg-light border rounded p-2">${indicador.limitaciones || ''}</div>
+    </div>
+    <div class="col-md-6">
+      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Relevancia</div>
+      <div class="bg-light border rounded p-2">${indicador.relevancia || ''}</div>
+    </div>
+  </div>
+
+  <!-- Gráfico -->
+  <div class="mt-3">
+    <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Gráfico / tendencia</div>
+    <div class="bg-light border rounded p-2">
+      <div class="ratio ratio-16x9">
+        <canvas id="indicadorChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Frase / Notas -->
+  <div class="row g-3 mt-1">
+    <div class="col-md-6">
+      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Frase de tendencia</div>
+      <div class="bg-light border rounded p-2">${indicador.fraseTendencia || ''}</div>
+    </div>
+    <div class="col-md-6">
+      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Notas sobre la serie</div>
+      <div class="bg-light border rounded p-2">${indicador.notasSerie || 'No aplica'}</div>
+    </div>
+  </div>
+
+  <!-- Cobertura / Desagregación / Periodo -->
+  <div class="row g-3 mt-1">
+    <div class="col-md-4">
+      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Cobertura</div>
+      <div class="bg-light border rounded p-2">${indicador.cobertura || ''}</div>
+    </div>
+    <div class="col-md-4">
+      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Desagregación</div>
+      <div class="bg-light border rounded p-2">${indicador.desagregacion || ''}</div>
+    </div>
+    <div class="col-md-4">
+      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Periodo disponible</div>
+      <div class="bg-light border rounded p-2">${indicador.periodoDisponible || ''}</div>
+    </div>
+  </div>
+
+  <!-- Método / Disponibilidad / Periodicidad -->
+  <div class="row g-3 mt-1">
+    <div class="col-md-6">
+      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Método de captura</div>
+      <div class="bg-light border rounded p-2 text-muted">${indicador.metodoCaptura || ''}</div>
+    </div>
+    <div class="col-md-6">
+      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Disponibilidad y periodicidad</div>
+      <div class="bg-light border rounded p-2 text-muted">
+        <div><strong>Disponibilidad:</strong> ${indicador.disponibilidadDatos || ''}</div>
+        <div><strong>Periodicidad de datos:</strong> ${indicador.periodicidadDatos || ''}</div>
+        <div><strong>Actualización:</strong> ${indicador.periodicidadActualizacion || ''}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Políticas -->
+  <div class="mt-3">
+    <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Relación con políticas u ODS</div>
+    <div class="bg-light border rounded p-2 text-muted">${indicador.relacionPoliticasAmbientales || ''}</div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="mt-3">
+    <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Tabla de datos</div>
+    <div class="bg-light border rounded p-2">
+      <div id="tablaDatosContainer">${tablaHTML}</div>
+    </div>
+  </div>
+
+  <!-- Fuente / Requisitos -->
+  <div class="row g-3 mt-1">
+    <div class="col-md-6">
+      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Fuente de datos</div>
+      <div class="bg-light border rounded p-2 small text-muted">${indicador.fuenteDatos || ''}</div>
+    </div>
+    <div class="col-md-6">
+      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Requisitos de coordinación</div>
+      <div class="bg-light border rounded p-2 small text-muted">${indicador.requisitosCoordinacion || ''}</div>
+    </div>
+  </div>
+</div>
      
   `;
     const onShown = () => {

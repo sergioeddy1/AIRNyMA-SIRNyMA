@@ -293,8 +293,17 @@ padding-bottom: 6px;
   color: #2c2c2c;
   border-radius: 999px;
   padding: 4px 10px;
-  border: 1px solid #ffd24d;
+  border: 2px solid #ffd24d;
   font-weight: 600;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+  cursor: pointer;
+}
+
+.timeline .li.complete-hit .date:hover {
+  transform: scale(1.12) rotate(-2deg);
+  box-shadow: 0 4px 16px rgba(255, 214, 77, 0.25);
+  background: #fff3b0;
+  border-color: #ffce00;
 }
 
 /* Scrollbar horizontal sutil */

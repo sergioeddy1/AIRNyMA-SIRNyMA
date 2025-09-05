@@ -173,8 +173,6 @@ searchForm?.addEventListener("submit", function (e) {
     }
 
 
-
-
 // 🔁 Cargar procesos y variables en paralelo
 Promise.all([
   fetch("/api/proceso").then(res => res.json()),
