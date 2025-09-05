@@ -114,156 +114,144 @@ document.addEventListener("DOMContentLoaded", function () {
     const indicador = indicadoresData.find(i => i.nombreIndicador === indicadorNombre);
 
     const modalEl = document.getElementById('indicadorModal');
-    const modalBody = document.getElementById('indicadorModalBody');
+      const modalBody = document.getElementById('indicadorModalBody');
 
-    if (indicador) {
-      document.getElementById('indicadorModalLabel').textContent = indicador.nombreIndicador;
+      if (indicador) {
+        document.getElementById('indicadorModalLabel').textContent = indicador.nombreIndicador;
 
-      // Parseo y tabla HTML
-      const filasTabla = parseTablaDatos(indicador.tablaDatos);
-      const tablaHTML = buildTableHTML(filasTabla);
+        // Parseo y tabla HTML
+        const filasTabla = parseTablaDatos(indicador.tablaDatos);
+        const tablaHTML = buildTableHTML(filasTabla);
 
-  document.getElementById('indicadorModalBody').innerHTML = `
-  <div class="container">
-  <!-- Título interno -->
-  <div class="mb-2">
-    <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Nombre del Indicador</div>
-    <div class="bg-light border rounded p-2">${indicador.nombreIndicador || ''}</div>
-  </div>
-
-  <!-- Tipo y Unidad -->
-  <div class="row g-3">
-    <div class="col-md-6">
-      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Tipo de indicador</div>
-      <div class="bg-light border rounded p-2">${indicador.tipoIndicador || ''}</div>
+ document.getElementById('indicadorModalBody').innerHTML = `
+   <div class="container">
+    <!-- Nombre del Indicador -->
+    <div class="row align-items-start mb-3">
+      <div class="col-md-4"><div class="fw-semibold text-uppercase small text-muted bg-light border rounded p-2">Nombre del indicador</div></div>
+      <div class="col-md-8 bg-light border rounded p-2">${indicador.nombreIndicador || ''}</div>
     </div>
-    <div class="col-md-6">
-      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Unidad de medida</div>
-      <div class="bg-light border rounded p-2">${indicador.unidadMedida || ''}</div>
+
+    <!-- Tipo / Unidad -->
+    <div class="row align-items-start mb-3">
+      <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Tipo de indicador</div></div>
+      <div class="col-md-8 bg-light border rounded p-2">${indicador.tipoIndicador || ''}</div>
     </div>
-  </div>
-
-  <!-- Descripciones -->
-  <div class="mt-3">
-    <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Descripción corta del indicador</div>
-    <div class="bg-light border rounded p-2">${indicador.descripcionCorta || ''}</div>
-  </div>
-
-  <div class="mt-3">
-    <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Descripción del valor en el espacio/tiempo</div>
-    <div class="bg-light border rounded p-2">${indicador.descripcionValor || ''}</div>
-  </div>
-
-  <!-- Definición y Fórmula / Alcance -->
-  <div class="mt-3">
-    <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Definición de variables</div>
-    <div class="bg-light border rounded p-2 text-muted">${indicador.definicionVariables || ''}</div>
-  </div>
-
-  <div class="row g-3 mt-1">
-    <div class="col-md-6">
-      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Fórmula de cálculo</div>
-      <div class="bg-light border rounded p-2 text-muted">${indicador.formulaCalculo || ''}</div>
+    <div class="row align-items-start mb-3">
+      <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Unidad de medida</div></div>
+      <div class="col-md-8 bg-light border rounded p-2">${indicador.unidadMedida || ''}</div>
     </div>
-    <div class="col-md-6">
-      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Alcance (qué mide)</div>
-      <div class="bg-light border rounded p-2">${indicador.alcance || ''}</div>
-    </div>
-  </div>
 
-  <!-- Limitaciones / Relevancia -->
-  <div class="row g-3 mt-1">
-    <div class="col-md-6">
-      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Limitaciones (qué no mide)</div>
-      <div class="bg-light border rounded p-2">${indicador.limitaciones || ''}</div>
+    <!-- Descripciones -->
+    <div class="row align-items-start mb-3">
+      <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Descripción corta</div></div>
+      <div class="col-md-8 bg-light border rounded p-2">${indicador.descripcionCorta || ''}</div>
     </div>
-    <div class="col-md-6">
-      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Relevancia</div>
-      <div class="bg-light border rounded p-2">${indicador.relevancia || ''}</div>
+    <div class="row align-items-start mb-3">
+      <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Descripción del valor (espacio/tiempo)</div></div>
+      <div class="col-md-8 bg-light border rounded p-2">${indicador.descripcionValor || ''}</div>
     </div>
-  </div>
 
-  <!-- Gráfico -->
-  <div class="mt-3">
-    <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Gráfico / tendencia</div>
-    <div class="bg-light border rounded p-2">
-      <div class="ratio ratio-16x9">
-        <canvas id="indicadorChart"></canvas>
+    <!-- Definición / Fórmula / Alcance -->
+    <div class="row align-items-start mb-3">
+      <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Definición de variables</div></div>
+      <div class="col-md-8 bg-light border rounded p-2">${indicador.definicionVariables || ''}</div>
+    </div>
+    <div class="row align-items-start mb-3">
+      <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Fórmula de cálculo</div></div>
+      <div class="col-md-8 bg-light border rounded p-2">${indicador.formulaCalculo || ''}</div>
+    </div>
+    <div class="row align-items-start mb-3">
+      <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Alcance (qué mide)</div></div>
+      <div class="col-md-8 bg-light border rounded p-2">${indicador.alcance || ''}</div>
+    </div>
+
+    <!-- Limitaciones / Relevancia -->
+    <div class="row align-items-start mb-3">
+      <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Limitaciones (qué no mide)</div></div>
+      <div class="col-md-8 bg-light border rounded p-2">${indicador.limitaciones || ''}</div>
+    </div>
+    <div class="row align-items-start mb-3">
+      <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Relevancia</div></div>
+      <div class="col-md-8 bg-light border rounded p-2">${indicador.relevancia || ''}</div>
+    </div>
+
+    <!-- Gráfico -->
+    <div class="row align-items-start mb-3">
+      <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Gráfico / tendencia</div></div>
+      <div class="col-md-8 bg-light border rounded p-2">
+        <div class="ratio ratio-16x9">
+          <canvas id="indicadorChart"></canvas>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Frase / Notas -->
-  <div class="row g-3 mt-1">
-    <div class="col-md-6">
-      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Frase de tendencia</div>
-      <div class="bg-light border rounded p-2">${indicador.fraseTendencia || ''}</div>
+    <!-- Frase / Notas -->
+    <div class="row align-items-start mb-3">
+      <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Frase de tendencia</div></div>
+      <div class="col-md-8 bg-light border rounded p-2">${indicador.fraseTendencia || ''}</div>
     </div>
-    <div class="col-md-6">
-      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Notas sobre la serie</div>
-      <div class="bg-light border rounded p-2">${indicador.notasSerie || 'No aplica'}</div>
+    <div class="row align-items-start mb-3">
+      <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Notas de la serie</div></div>
+      <div class="col-md-8 bg-light border rounded p-2">${indicador.notasSerie || 'No aplica'}</div>
     </div>
-  </div>
 
-  <!-- Cobertura / Desagregación / Periodo -->
-  <div class="row g-3 mt-1">
-    <div class="col-md-4">
-      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Cobertura</div>
-      <div class="bg-light border rounded p-2">${indicador.cobertura || ''}</div>
+    <!-- Cobertura / Desagregación / Periodo -->
+    <div class="row align-items-start mb-3">
+      <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Cobertura</div></div>
+      <div class="col-md-8 bg-light border rounded p-2">${indicador.cobertura || ''}</div>
     </div>
-    <div class="col-md-4">
-      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Desagregación</div>
-      <div class="bg-light border rounded p-2">${indicador.desagregacion || ''}</div>
+    <div class="row align-items-start mb-3">
+      <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Desagregación</div></div>
+      <div class="col-md-8 bg-light border rounded p-2">${indicador.desagregacion || ''}</div>
     </div>
-    <div class="col-md-4">
-      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Periodo disponible</div>
-      <div class="bg-light border rounded p-2">${indicador.periodoDisponible || ''}</div>
+    <div class="row align-items-start mb-3">
+      <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Periodo disponible</div></div>
+      <div class="col-md-8 bg-light border rounded p-2">${indicador.periodoDisponible || ''}</div>
     </div>
-  </div>
 
-  <!-- Método / Disponibilidad / Periodicidad -->
-  <div class="row g-3 mt-1">
-    <div class="col-md-6">
-      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Método de captura</div>
-      <div class="bg-light border rounded p-2 text-muted">${indicador.metodoCaptura || ''}</div>
+    <!-- Método / Disponibilidad / Periodicidad -->
+    <div class="row align-items-start mb-3">
+      <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Método de captura</div></div>
+      <div class="col-md-8 bg-light border rounded p-2">${indicador.metodoCaptura || ''}</div>
     </div>
-    <div class="col-md-6">
-      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Disponibilidad y periodicidad</div>
-      <div class="bg-light border rounded p-2 text-muted">
-        <div><strong>Disponibilidad:</strong> ${indicador.disponibilidadDatos || ''}</div>
-        <div><strong>Periodicidad de datos:</strong> ${indicador.periodicidadDatos || ''}</div>
-        <div><strong>Actualización:</strong> ${indicador.periodicidadActualizacion || ''}</div>
+    <div class="row align-items-start mb-3">
+      <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Disponibilidad de datos</div></div>
+      <div class="col-md-8 bg-light border rounded p-2">${indicador.disponibilidadDatos || ''}</div>
+    </div>
+    <div class="row align-items-start mb-3">
+      <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Periodicidad de los datos</div></div>
+      <div class="col-md-8 bg-light border rounded p-2">${indicador.periodicidadDatos || ''}</div>
+    </div>
+    <div class="row align-items-start mb-3">
+      <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Periodicidad de actualización</div></div>
+      <div class="col-md-8 bg-light border rounded p-2">${indicador.periodicidadActualizacion || ''}</div>
+    </div>
+
+    <!-- Políticas -->
+    <div class="row align-items-start mb-3">
+      <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Relación con políticas ambientales / ODS</div></div>
+      <div class="col-md-8 bg-light border rounded p-2">${indicador.relacionPoliticasAmbientales || ''}</div>
+    </div>
+
+    <!-- Tabla de datos -->
+    <div class="row align-items-start mb-3">
+      <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Tabla de datos</div></div>
+      <div class="col-md-8 bg-light border rounded p-2">
+        <div id="tablaDatosContainer">${tablaHTML}</div>
       </div>
     </div>
-  </div>
 
-  <!-- Políticas -->
-  <div class="mt-3">
-    <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Relación con políticas u ODS</div>
-    <div class="bg-light border rounded p-2 text-muted">${indicador.relacionPoliticasAmbientales || ''}</div>
-  </div>
-
-  <!-- Tabla -->
-  <div class="mt-3">
-    <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Tabla de datos</div>
-    <div class="bg-light border rounded p-2">
-      <div id="tablaDatosContainer">${tablaHTML}</div>
+    <!-- Fuente / Requisitos -->
+    <div class="row align-items-start mb-3">
+      <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Fuente de datos</div></div>
+      <div class="col-md-8 bg-light border rounded p-2 small text-muted">${indicador.fuenteDatos || ''}</div>
+    </div>
+    <div class="row align-items-start">
+      <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Requisitos de coordinación</div></div>
+      <div class="col-md-8 bg-light border rounded p-2 small text-muted">${indicador.requisitosCoordinacion || ''}</div>
     </div>
   </div>
 
-  <!-- Fuente / Requisitos -->
-  <div class="row g-3 mt-1">
-    <div class="col-md-6">
-      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Fuente de datos</div>
-      <div class="bg-light border rounded p-2 small text-muted">${indicador.fuenteDatos || ''}</div>
-    </div>
-    <div class="col-md-6">
-      <div class="fw-bold fs-6 border-start border-4 border-success ps-2">Requisitos de coordinación</div>
-      <div class="bg-light border rounded p-2 small text-muted">${indicador.requisitosCoordinacion || ''}</div>
-    </div>
-  </div>
-</div>
-     
   `;
     const onShown = () => {
         renderIndicadorChart('indicadorChart', indicador.tablaDatos || indicador.tablaGraficos);
@@ -274,7 +262,6 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       document.getElementById('indicadorModalLabel').textContent = indicadorNombre;
       modalBody.innerHTML = `<p>No se encontró información adicional para este indicador.</p>`;
-      // ⛔️ No llames render aquí
     }
 
     const modal = new bootstrap.Modal(modalEl);
