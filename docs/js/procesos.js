@@ -98,8 +98,8 @@
 
 if (proceso.idPp === "CPV") {
   if (extensionesGif.includes(proceso.idPp)) extension = "gif";
-  const iconoRuta = `/img/${proceso.idPp}.${extension}`;
-  const iconoFallback = `/img/no_disponible.png`;
+  const iconoRuta = `img/${proceso.idPp}.${extension}`;
+  const iconoFallback = `img/no_disponible.png`;
   iconoHTML = `
     <img src="${iconoRuta}" 
          class="img-fluid proceso-icon rounded-start" 
@@ -109,8 +109,8 @@ if (proceso.idPp === "CPV") {
   `;
 } else {
   if (extensionesGif.includes(proceso.idPp)) extension = "gif";
-  const iconoRuta = `/img/${proceso.idPp}.${extension}`;
-  const iconoFallback = `/img/no_disponible.png`;
+  const iconoRuta = `img/${proceso.idPp}.${extension}`;
+  const iconoFallback = `img/no_disponible.png`;
   iconoHTML = `
     <img src="${iconoRuta}" 
          class="img-fluid proceso-icon rounded-start" 
