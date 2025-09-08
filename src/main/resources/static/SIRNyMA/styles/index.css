@@ -18,139 +18,66 @@
 }
 
 
-/* Estilos para el carousel */
-  
-  .carousel-caption {
-    bottom: 5rem;
-    z-index: 10;
-    
-  }
-  .carousel-item {
-    height: 30rem;
-    
+/* --- Normaliza el layout del slide --- */
+/* Base: evita que márgenes internos empujen las imágenes hacia abajo */
+#myCarousel .carousel-item .col-md-6 {
+  margin-bottom: 0 !important;
+}
+
+/* Columna de la imagen centra horizontal, controlamos vertical con flex-start */
+#myCarousel .carousel-media {
+  display: flex;
+  justify-content: center;
+  align-items: center; /* default desktop: center; lo cambiaremos por breakpoint */
+  padding: 0 1rem;
+}
+
+/* Imagen: sin distorsión */
+#myCarousel .carousel-img {
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+/* --- Ajuste específico para 1280x800 (y desktops cercanos) --- */
+@media (min-width: 992px) and (max-width: 1366px) {
+  /* Mantener dos columnas sin wrap y bajar un poco el alto total */
+  #myCarousel .carousel-item .d-flex {
+    flex-wrap: nowrap;
+    height: 420px; /* antes 500px: evita que “caiga” visualmente */
+    align-items: stretch; /* que las columnas ocupen todo el alto */
   }
 
-  #myCarousel{
-    background-color: #f8f9fa;
-  }
-  
-  @media only screen and (max-width: 1366px) {
-    .carousel-item {
-      height: 24rem;
-    }
-  }
-  
-  @media only screen and (max-width: 1024px) {
-    .carousel-item {
-      height: 24rem;
-    }
-  }
-  
-  @media only screen and (max-width: 480px) {
-    .carousel-item {
-      height: 22rem;
-    }
+  /* TOP align de la columna de imagen para que no quede “baja” */
+  #myCarousel .carousel-media {
+    align-items: flex-start;   /* <— coloca la imagen arriba */
   }
 
-  /*Estilos para la imagen del carousel adapatadas a diferentes resoluciones*/
-
-  @media screen and (max-width: 1366px) {
-    #imgProcesosInegi {
-      width: 100%;
-      height: 100%;
-     
-    }
-    
-  }
-  @media screen and (max-width: 1024px) {
-    #imgProcesosInegi {
-      width: 100%;
-      height: 100%;
-     
-    }
-  } 
-  @media screen and (max-width: 480px) {
-    #imgProcesosInegi {               
-      width: 100%;
-      height: 100%;
-    
-    }
+  /* Levantar aún más la imagen si fuera necesario */
+  #myCarousel .carousel-img {
+    max-height: calc(100% - 32px); /* deja respiro arriba-abajo */
+    margin-top: -10px;             /* pequeño lift visual */
   }
 
-  @media screen and (max-width: 1366px) {
-  #imgVariables {
-    width: 100%;
-    height: 100%;
-  
-  }
-    }
+  /* Si alguna columna trae mb-* o estilos inline con margin-bottom, neutralízalos */
+  #myCarousel .carousel-item .col-md-6[class*="mb-"] { margin-bottom: 0 !important; }
+  #myCarousel .carousel-item .col-md-6[style*="margin-bottom"] { margin-bottom: 0 !important; }
+}
 
-  @media screen and (max-width: 1024px) {
-    #imgVariables {
-      width: 100%;
-      height: 100%;
-    
-    }
+/* Tablets/móvil: apilado vertical y cota de altura de imagen */
+@media (max-width: 991.98px) {
+  #myCarousel .carousel-item .d-flex {
+    flex-wrap: wrap;
+    height: auto;
   }
-
-  @media screen and (max-width: 480px) {
-    #imgVariables {
-      width: 100%;
-      height: 100%;
-     
-    }
+  #myCarousel .carousel-media {
+    align-items: center;
   }
-
-  @media screen and (max-width: 1366px) {
-    #imgODS {
-      width: 50%;
-      height: 50%;
-      
-    }
+  #myCarousel .carousel-img {
+    max-height: 320px;
   }
-  @media screen and (max-width: 1024px) {
-    #imgODS {
-       width: 50%;
-      height: 50%;
-      
-    }
-  }
-  @media screen and (max-width: 480px) {
-    #imgODS {
-      width: 100%;
-      height: 100%;
-      
-    }
-  }
-
-  @media screen and (max-width: 1366px) {
-    #imgIndicadores {
-      width: 100%;
-      height: 100%;
-     
-    }
-  }
-
-  @media screen and (max-width: 1280px) {
-    #imgIndicadores {
-      width: 100%;
-      height: 100%;
-    }
-  }
-
-  @media screen and (max-width: 1024px) {
-    #imgIndicadores {
-      width: 100%;
-      height: 100%;
-    }
-  }
-  @media screen and (max-width: 480px) {
-    #imgIndicadores {
-      width: 100%;
-      height: 100%;
-    }
-  }
-  
+}
 
 
   /*! botones modificados */
