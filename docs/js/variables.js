@@ -1112,7 +1112,7 @@ searchForm.addEventListener("submit", function (e) {
             currentPage = 1;
             searchVariables(searchTerm);
         }
-        }, 200);
+        }, 100);
     }
     });
 
@@ -1301,12 +1301,12 @@ function renderComentarios(comentario) {
   `;
 }
 
-// Espera al menos 1000ms antes de mostrar el contenido principal
+// Espera al menos 1500ms antes de mostrar el contenido principal
 window.addEventListener("DOMContentLoaded", function() {
   setTimeout(function() {
     document.getElementById("loader").style.display = "none";
     document.getElementById("mainContent").style.display = "";
-  }, 1200);
+  }, 1500);
 });
 
 
