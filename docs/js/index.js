@@ -80,11 +80,11 @@
       </div>
     `).join('') || "<p class='text-center text-muted'>No hay elementos para mostrar.</p>";
   }
-  
+
   // ---- Carga inicial ----
   async function loadAllVariables() {
     try {
-      const response = await fetch(`https://sale-regulatory-usc-collectables.trycloudflare.com/api/variables`);
+      const response = await fetch(`https://invision-comparing-cheap-construct.trycloudflare.com/api/variables`);
       const data = await response.json();
       allData = Array.isArray(data) ? data : [];
 

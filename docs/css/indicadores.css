@@ -118,4 +118,20 @@ td:nth-child(2) {
   /* Año sin wrap (si prefieres fijo) */
   .table-modal td.year { white-space: nowrap; }
 
-
+/* Estilo “Hoja Metodológica” dentro del modal */
+.hm-section-title{
+  font-weight:700;
+  font-size:1.05rem;
+  border-left:4px solid #198754;
+  padding-left:.5rem;
+  margin:1rem 0 .25rem;
+}
+.hm-block{
+  background:#f8f9fa;
+  border:1px solid #e9ecef;
+  border-radius:.5rem;
+  padding:.75rem .9rem;
+}
+.hm-meta{ color:#6c757d; font-size:.925rem; }
+.hm-table th{ white-space:nowrap; }
+.hm-footnote{ font-size:.85rem; color:#6c757d; }

@@ -1,89 +1,26 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const searchForm = document.getElementById("searchForm");
-    const searchInput = document.getElementById("searchInput");
-    const container = document.getElementById("variablesContainer");
-    const paginationContainer = document.getElementById("pagination");
-    const processSelect = document.getElementById("processSelect");
-    const temaSelect = document.getElementById("temaSelect"); // AÑADE ESTA LÍNEA SI NO LA TIENES
-    const clearFiltersBtn = document.getElementById("clearFiltersBtn");
-    const itemsPerPageSelect = document.getElementById("itemsPerPage"); // Selector de elementos por página
-    const unidadSection = document.getElementById("unidadAdministrativaSection");
-    const params = new URLSearchParams(window.location.search); // Obtener los parámetros de la URL
-    const idPpParam = params.get("idPp"); // Obtener el valor del parámetro idPp
-    const sortSelect = document.getElementById("sortOptions"); // Selector de ordenación
-    const alinMdeaCheckbox = document.getElementById("alinMdeaCheckbox");
-    const alinOdsCheckbox = document.getElementById("alinOdsCheckbox");
-    
+  // Elementos del DOM
+  const searchForm = document.getElementById("searchForm");
+  const searchInput = document.getElementById("searchInput");
+  const container = document.getElementById("variablesContainer");
+  const paginationContainer = document.getElementById("pagination");
+  const processSelect = document.getElementById("processSelect");
+  const temaSelect = document.getElementById("temaSelect");
+  const clearFiltersBtn = document.getElementById("clearFiltersBtn");
+  const itemsPerPageSelect = document.getElementById("itemsPerPage");
+  const unidadSection = document.getElementById("unidadAdministrativaSection");
+  const sortSelect = document.getElementById("sortOptions");
+  const alinMdeaCheckbox = document.getElementById("alinMdeaCheckbox");
+  const alinOdsCheckbox = document.getElementById("alinOdsCheckbox");
 
-    let itemsPerPage = parseInt(itemsPerPageSelect.value, 15); // Número de elementos por página
-    let currentPage = 1; // Página actual
-    let procesosGlobal = [];
-let allData = [];
-let currentFilteredData = [];
-
-
-// Llenar el select de procesos y aplicar filtro inicial si hay idPp en la URL
-fetch("https://sale-regulatory-usc-collectables.trycloudflare.com/api/proceso")
-  .then(response => response.json())
-  .then(data => {
-    procesosGlobal = data;
-    data.forEach(proc => {
-      const option = document.createElement("option");
-      option.value = proc.idPp;
-      option.textContent = `• ${proc.pp} (${proc.idPp})`;
-      processSelect.appendChild(option);
-    });
-
-    // Ahora carga las variables
-    fetch("https://sale-regulatory-usc-collectables.trycloudflare.com/api/variables")
-      .then(response => response.json())
-      .then(variables => {
-        allData = variables;
-        const urlParams = new URLSearchParams(window.location.search);
-        const selectedIdPp = urlParams.get("idPp");
-
-        if (selectedIdPp) {
-          // Selecciona el proceso en el select
-          Array.from(processSelect.options).forEach(option => {
-            option.selected = option.value === selectedIdPp;
-          });
-          // Filtra y muestra solo las variables de ese proceso
-          const filteredData = allData.filter(variable => variable.idPp === selectedIdPp);
-          currentFilteredData = filteredData;
-          renderPage(currentFilteredData, 1);
-          setupPagination(currentFilteredData);
-          updateVariableCounter(filteredData.length);
-        } else {
-          // Si no hay filtro, muestra todo
-          currentFilteredData = allData;
-          renderPage(allData, 1);
-          setupPagination(allData);
-          updateVariableCounter(allData.length);
-        }
-      });
-  });
-
-// Listener para cambios manuales en el select
-processSelect.addEventListener("change", function () {
-  const selectedOptions = Array.from(this.selectedOptions);
-  const selectedValues = selectedOptions.map(opt => opt.value);
-
-  checkMostrarUnidadSection();
-
-  if (selectedValues.length === 0) {
-    currentFilteredData = allData;
-    renderPage(allData, 1);
-    setupPagination(allData);
-    updateVariableCounter(allData.length);
-    return;
-  }
-
-  const filteredData = allData.filter(variable => selectedValues.includes(variable.idPp));
-  currentFilteredData = filteredData;
-  renderPage(currentFilteredData, 1);
-  setupPagination(currentFilteredData);
-  updateVariableCounter(filteredData.length);
-});
+  // Variables globales
+  const params = new URLSearchParams(window.location.search);
+  const idPpParam = params.get("idPp");
+  let itemsPerPage = parseInt(itemsPerPageSelect.value, 15);
+  let currentPage = 1;
+  let procesosGlobal = [];
+  let allData = [];
+  let currentFilteredData = [];
 
     // Referencias a los checkboxes
 const relTabCheckbox = document.getElementById("relTabCheckbox");
@@ -236,12 +173,10 @@ searchForm?.addEventListener("submit", function (e) {
     }
 
 
-
-
 // 🔁 Cargar procesos y variables en paralelo
 Promise.all([
-  fetch("https://sale-regulatory-usc-collectables.trycloudflare.com/api/proceso").then(res => res.json()),
-  fetch("https://sale-regulatory-usc-collectables.trycloudflare.com/api/variables").then(res => res.json())
+  fetch("https://invision-comparing-cheap-construct.trycloudflare.com/api/proceso").then(res => res.json()),
+  fetch("https://invision-comparing-cheap-construct.trycloudflare.com/api/variables").then(res => res.json())
 ])
   .then(([procesos, variables]) => {
     procesosGlobal = procesos;
@@ -475,7 +410,7 @@ function renderSelectedTags(selectedOptions) {
 
 
     //Fetch para cargar los datos de proceso
-    fetch("https://sale-regulatory-usc-collectables.trycloudflare.com/api/proceso")
+    fetch("https://invision-comparing-cheap-construct.trycloudflare.com/api/proceso")
     .then(res => res.json())
     .then(data => {
         allData = data;
@@ -486,7 +421,7 @@ function renderSelectedTags(selectedOptions) {
     // Función para cargar todos los elementos al entrar a la página
     async function loadAllVariables() {
     try {
-        const response = await fetch('https://sale-regulatory-usc-collectables.trycloudflare.com/api/variables');
+        const response = await fetch('https://invision-comparing-cheap-construct.trycloudflare.com/api/variables');
         const data = await response.json();
         allData = data;
         currentFilteredData = [...allData];
@@ -561,10 +496,10 @@ let microdatosGlobal = [];
 let fuentesGlobal = [];
 
 Promise.all([
-  fetch('https://sale-regulatory-usc-collectables.trycloudflare.com/api/proceso').then(r => r.json()),
-  fetch('https://sale-regulatory-usc-collectables.trycloudflare.com/api/variables').then(r => r.json()),
-  fetch('https://sale-regulatory-usc-collectables.trycloudflare.com/api/microdatos').then(r => r.json()),
-  fetch('https://sale-regulatory-usc-collectables.trycloudflare.com/api/fuentes').then(r => r.json()) // tabla "fuente" con anioEvento, idPp, ligaFuente/ligas
+  fetch('https://invision-comparing-cheap-construct.trycloudflare.com/api/proceso').then(r => r.json()),
+  fetch('https://invision-comparing-cheap-construct.trycloudflare.com/api/variables').then(r => r.json()),
+  fetch('https://invision-comparing-cheap-construct.trycloudflare.com/api/microdatos').then(r => r.json()),
+  fetch('https://invision-comparing-cheap-construct.trycloudflare.com/api/fuentes').then(r => r.json()) // tabla "fuente" con anioEvento, idPp, ligaFuente/ligas
 ]).then(([procesos, variables, microdatos, fuentes]) => {
   procesosGlobal = procesos;
   variablesGlobal = variables;
@@ -1192,7 +1127,7 @@ searchForm.addEventListener("submit", function (e) {
 
             try {
                 // 1. Obtener relaciones var-tab
-                const resVarTab = await fetch('https://sale-regulatory-usc-collectables.trycloudflare.com/api/var-tab');
+                const resVarTab = await fetch('https://invision-comparing-cheap-construct.trycloudflare.com/api/var-tab');
                 const dataVarTab = await resVarTab.json();
 
                 // Filtrar todas las coincidencias por idVar
@@ -1204,7 +1139,7 @@ searchForm.addEventListener("submit", function (e) {
                 }
 
                 // 2. Obtener todos los tabulados
-                const resTabulados = await fetch('https://sale-regulatory-usc-collectables.trycloudflare.com/api/tabulado');
+                const resTabulados = await fetch('https://invision-comparing-cheap-construct.trycloudflare.com/api/tabulado');
                 const tabulados = await resTabulados.json();
 
                 // 3. Construir HTML con las ligas y nuevos campos
@@ -1256,7 +1191,7 @@ searchForm.addEventListener("submit", function (e) {
             modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
             try {
                 // Trae todos los microdatos y filtra por idVar
-                const res = await fetch(`https://sale-regulatory-usc-collectables.trycloudflare.com/api/microdatos`);
+                const res = await fetch('https://invision-comparing-cheap-construct.trycloudflare.com/api/microdatos');
                 const data = await res.json();
                 // Busca el microdato que corresponde a la variable
                 const info = Array.isArray(data)
@@ -1311,16 +1246,16 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 // Cargar clasificaciones antes de renderizar variables
-fetch('https://sale-regulatory-usc-collectables.trycloudflare.com/api/clasificaciones')
+fetch('https://invision-comparing-cheap-construct.trycloudflare.com/api/clasificaciones')
   .then(res => res.json())
   .then(clasificaciones => {
     clasificacionesGlobal = clasificaciones;
     // Ahora carga las variables y eventos como ya lo haces
-    fetch('https://sale-regulatory-usc-collectables.trycloudflare.com/api/eventos')
+    fetch('https://invision-comparing-cheap-construct.trycloudflare.com/api/eventos')
       .then(res => res.json())
       .then(eventos => {
         eventosGlobal = eventos;
-        fetch('https://sale-regulatory-usc-collectables.trycloudflare.com/api/variables')
+        fetch('https://invision-comparing-cheap-construct.trycloudflare.com/api/variables')
           .then(res => res.json())
           .then(variables => {
             (variables, 1);
@@ -1373,6 +1308,5 @@ window.addEventListener("DOMContentLoaded", function() {
     document.getElementById("mainContent").style.display = "";
   }, 1000);
 });
-
 
 
