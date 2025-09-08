@@ -1112,7 +1112,7 @@ searchForm.addEventListener("submit", function (e) {
             currentPage = 1;
             searchVariables(searchTerm);
         }
-        }, 100);
+        }, 200);
     }
     });
 
@@ -1306,7 +1306,7 @@ window.addEventListener("DOMContentLoaded", function() {
   setTimeout(function() {
     document.getElementById("loader").style.display = "none";
     document.getElementById("mainContent").style.display = "";
-  }, 1000);
+  }, 1200);
 });
 
 
