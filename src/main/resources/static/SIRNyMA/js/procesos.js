@@ -93,32 +93,34 @@
                          procesos.forEach(proceso => {
     // Detecta extensión según idPp (puedes personalizar si tienes un mapeo de extensiones)
     let extension = "png";
-    const extensionesGif = ["ENADID", "ENIGH", "CAAS", "ENCEVI", "MSM", "ESMNG"]; // agrega aquí los idPp que son gif
-    let iconoHTML = ""; // Inicializa iconoHTML
+    const extensionesGif = ["ENADID", "ENIGH", "CAAS", "ENCEVI", "MSM", "ESMNG"];
+    let iconoHTML = "";
 
-if (proceso.idPp === "CPV") {
-  if (extensionesGif.includes(proceso.idPp)) extension = "gif";
-  const iconoRuta = `/assets/${proceso.idPp}.${extension}`;
-  const iconoFallback = `/assets/no_disponible.png`;
-  iconoHTML = `
-    <img src="${iconoRuta}" 
-         class="img-fluid proceso-icon rounded-start" 
-         alt="Icono ${proceso.idPp}" 
-         style="max-height: 80px; object-fit: contain; filter: invert(1);"
-         onerror="this.onerror=null;this.src='${iconoFallback}';">
-  `;
-} else {
-  if (extensionesGif.includes(proceso.idPp)) extension = "gif";
-  const iconoRuta = `/assets/${proceso.idPp}.${extension}`;
-  const iconoFallback = `/assets/no_disponible.png`;
-  iconoHTML = `
-    <img src="${iconoRuta}" 
-         class="img-fluid proceso-icon rounded-start" 
-         alt="Icono ${proceso.idPp}" 
-         style="max-height: 80px; object-fit: contain;"
-         onerror="this.onerror=null;this.src='${iconoFallback}';">
-  `;
-}
+    // Detectar si es GIF
+    if (extensionesGif.includes(proceso.idPp)) extension = "gif";
+
+    // Ruta base e íconos
+    const baseName = `/assets/${proceso.idPp}`;
+    const iconoFallback = `/assets/no_disponible.png`;
+    const iconoRutaMin = `${baseName}.${extension}`;
+    const iconoRutaMay = `${baseName}.${extension.toUpperCase()}`;
+
+    // Construir el HTML con lógica para intentar PNG y PNG en mayúsculas
+    iconoHTML = `
+      <img src="${iconoRutaMin}" 
+           class="img-fluid proceso-icon rounded-start" 
+           alt="Icono ${proceso.idPp}" 
+           style="max-height: 80px; object-fit: contain; ${proceso.idPp === "CPV" ? "filter: invert(1);" : ""}"
+           onerror="
+             if (this.src.includes('.png') && !this.src.includes('.PNG')) {
+               this.onerror = null;
+               this.src = '${iconoRutaMay}';
+             } else {
+               this.onerror = null;
+               this.src = '${iconoFallback}';
+             }
+           ">
+    `;
 
     const card = `
         <div class="col-md-4 mb-4">

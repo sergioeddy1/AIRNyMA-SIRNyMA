@@ -265,7 +265,7 @@ function aplicarFiltroDesdeURL() {
     renderPage(allData, 1);
     setupPagination(allData);
     updateVariableCounter(allData.length);
-  }, 1000);
+  }, 1500);
 }
 
 
@@ -499,7 +499,7 @@ Promise.all([
   fetch('/api/proceso').then(r => r.json()),
   fetch('/api/variables').then(r => r.json()),
   fetch('/api/microdatos').then(r => r.json()),
-  fetch('/api/fuentes').then(r => r.json()) // tabla "fuente" con anioEvento, idPp, ligaFuente/ligas
+  fetch('/api/fuente').then(r => r.json()) // tabla "fuente" con anioEvento, idPp, ligaFuente/ligas
 ]).then(([procesos, variables, microdatos, fuentes]) => {
   procesosGlobal = procesos;
   variablesGlobal = variables;
@@ -788,28 +788,46 @@ function renderPage(data, page) {
                                 <span class="text-dark mb-1 fw-normal">${variable.subtema2}</span>
                             </div>
                         </div>
-                        <div class="mb-2">
-                            <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Verifica si la variable seleccionada cuenta con información disponible en relación a tabulados publicados o en microdatos">
-                            <i class="bi bi-link-45deg me-1"></i>Relación con Tabulados o Microdatos</span>
-                            <div class="ps-3 d-flex flex-wrap gap-2">
-                                <span class="badge bg-${variable.relTab === 'Sí' ? 'success badge-tabulado' : 'danger'}"
-                                      style="cursor:pointer"
-                                      data-idvar="${variable.idVar}"
-                                      ${variable.relTab === 'Sí' ? 'data-bs-toggle="modal" data-bs-target="#infoModal" data-type="tabulado"' : ''}
-                                >${variable.relTab === 'Sí' ? 'Tabulados' : 'Sin Tabulados'}</span>
-                                <span class="badge bg-${variable.relMicro === 'Sí' ? 'success badge-microdatos' : 'danger'}"
-                                      style="cursor:pointer"
-                                      data-idvar="${variable.idVar}"
-                                      ${variable.relMicro === 'Sí' ? 'data-bs-toggle="modal" data-bs-target="#infoModal" data-type="microdatos"' : ''}
-                                >${variable.relMicro === 'Sí' ? 'Microdatos' : 'Sin Microdatos'}</span>
-                            </div>
-                        <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Verifica si la variable seleccionada está alineada con la estructura del MDEA o con los ODS.">
-                        <i class="bi bi-link-45deg me-1"></i>Alineación con MDEA y ODS</span>
-                            <div class="ps-3 d-flex flex-wrap gap-2">
-                                <span class="badge bg-${variable.alinMdea === 'Sí' ? 'primary' : 'secondary'}">${variable.alinMdea === 'Sí' ? 'MDEA' : 'Sin MDEA'}</span>
-                                <span class="badge bg-${variable.alinOds === 'Sí' ? 'primary' : 'secondary'}">${variable.alinOds === 'Sí' ? 'ODS' : 'Sin ODS'}</span>
-                            </div>
-                        </div>
+                          <div class="mb-2">
+                             <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left"
+                                   data-bs-title="Verifica si la variable seleccionada cuenta con información disponible en relación a tabulados publicados o en microdatos">
+                               <i class="bi bi-link-45deg me-1"></i>Relación con Tabulados o Microdatos
+                             </span>
+                             <div class="ps-3 d-flex flex-wrap gap-2">
+                               <span class="badge bg-${variable.relTab === 'Sí' ? 'success badge-tabulado' : 'danger'}"
+                                     style="cursor:pointer"
+                                     data-idvar="${variable.idVar}"
+                                     ${variable.relTab === 'Sí' ? 'data-bs-toggle="modal" data-bs-target="#infoModal" data-type="tabulado"' : ''}>
+                                 ${variable.relTab === 'Sí' ? 'Tabulados' : 'Sin Tabulados'}
+                               </span>
+
+                               <span class="badge bg-${variable.relMicro === 'Sí' ? 'success badge-microdatos' : 'danger'}"
+                                     style="cursor:pointer"
+                                     data-idvar="${variable.idVar}"
+                                     ${variable.relMicro === 'Sí' ? 'data-bs-toggle="modal" data-bs-target="#infoModal" data-type="microdatos"' : ''}>
+                                 ${variable.relMicro === 'Sí' ? 'Microdatos' : 'Sin Microdatos'}
+                               </span>
+                             </div>
+
+                             <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left"
+                                   data-bs-title="Verifica si la variable seleccionada está alineada con la estructura del MDEA o con los ODS.">
+                               <i class="bi bi-link-45deg me-1"></i>Alineación con MDEA y ODS
+                             </span>
+                             <div class="ps-3 d-flex flex-wrap gap-2">
+                               <span class="badge ${variable.alinMdea === 'Sí' ? 'bg-primary badge-mdea' : 'bg-secondary'}"
+                                     style="cursor:${variable.alinMdea === 'Sí' ? 'pointer' : 'default'}"
+                                     data-idvar="${variable.idVar}"
+                                     ${variable.alinMdea === 'Sí' ? 'data-bs-toggle="modal" data-bs-target="#infoModal" data-type="mdea"' : ''}>
+                                 ${variable.alinMdea === 'Sí' ? 'MDEA' : 'Sin MDEA'}
+                               </span>
+
+                               <span class="badge ${variable.alinOds === 'Sí' ? 'bg-primary badge-ods' : 'bg-secondary'}"
+                                     style="cursor:${variable.alinOds === 'Sí' ? 'pointer' : 'default'}"
+                                     data-idvar="${variable.idVar}"
+                                     ${variable.alinOds === 'Sí' ? 'data-bs-toggle="modal" data-bs-target="#infoModal" data-type="ods"' : ''}>
+                                 ${variable.alinOds === 'Sí' ? 'ODS' : 'Sin ODS'}
+                               </span>
+                             </div>
                        ${renderComentarios(variable.comentVar)}
                     </div>
                 </div>
@@ -1226,6 +1244,126 @@ searchForm.addEventListener("submit", function (e) {
                 modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información.</div>";
             }
         }
+
+        // Badges de MDEA
+       // Badge de MDEA
+        if (e.target.classList.contains("badge-mdea")) {
+            document.getElementById("infoModalLabel").textContent = "Relación de la variable con el MDEA";
+            const idVar = e.target.getAttribute("data-idvar");
+            const modalBody = document.getElementById("infoModalBody");
+            modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
+
+            try {
+              const res = await fetch(`/api/mdea`);
+              const data = await res.json();
+
+              // Busca el registro del MDEA para la variable (uno)
+              const info = Array.isArray(data)
+                ? data.find(mdea => String(mdea.idVar) === String(idVar))
+                : (data && data.idVar === idVar ? data : null);
+
+              if (info) {
+                 // Formateo básico para evitar guiones bajos y espacios extraños en el texto
+                const fmt = (s) => (s || "-").toString().replace(/_/g, " ").replace(/\s+/g, " ").trim();
+
+                modalBody.innerHTML = `
+                  <div class="mb-2">
+                    <strong>Componente:</strong><br>
+                    <span style="word-break: break-all;">${fmt(info.compo) || "-"}</span>
+                  </div>
+                  <div class="mb-2">
+                    <strong>Subcomponente:</strong><br>
+                    <span style="word-break: break-all;">${fmt(info.subcompo) || "-"}</span>
+                  </div>
+                  <div class="mb-2">
+                    <strong>Tópico:</strong><br>
+                    <span style="word-break: break-all;">${fmt(info.topico) || "-"}</span>
+                  </div>
+                  <div class="mb-2">
+                    <strong>Clasificación Temática</strong>
+                  </div>
+                  <div class="mb-2">
+                    <strong>Variable del MDEA:</strong><br>
+                    <span style="word-break: break-all;">${fmt(info.estAmbiental) || "-"}</span>
+                  </div>
+                  <div class="mb-2">
+                    <strong>Estadístico del MDEA:</strong><br>
+                    <span>${(info.estadMdea ?? "No disponible") || "No disponible"}</span>
+                  </div>
+                  <div class="mb-2">
+                    <strong>Nivel de Contribución de la variable con el MDEA:</strong><br>
+                    <span>${info.nivContMdea || "-"}</span>
+                  </div>
+                  <div class="mb-2">
+                    <strong>Comentario(s) sobre la relación de la variable con el MDEA:</strong><br>
+                    ${renderComentarios(info.comentMdea) || "<span>No disponible</span>"}
+                  </div>
+                `;
+              } else {
+                modalBody.innerHTML = "<div class='text-danger'>No hay información del MDEA para esta variable.</div>";
+              }
+            } catch {
+              modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información del MDEA.</div>";
+            }
+        }
+
+
+        // Badge de ODS
+        if (e.target.classList.contains("badge-ods")) {
+          document.getElementById("infoModalLabel").textContent = "Relación de la variable mostrada con los ODS";
+          const idVar = e.target.getAttribute("data-idvar");
+          const modalBody = document.getElementById("infoModalBody");
+          modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
+
+          try {
+            const res = await fetch(`/api/ods`);
+            const data = await res.json();
+
+            // ⬅️ Ahora obtenemos TODAS las relaciones de esta variable
+            const registros = Array.isArray(data)
+              ? data.filter(ods => String(ods.idVar) === String(idVar))
+              : (data && data.idVar === idVar ? [data] : []);
+
+            if (!registros.length) {
+              modalBody.innerHTML = "<div class='text-danger'>No hay información de ODS para esta variable.</div>";
+              return;
+            }
+
+            const fmt = (s) => (s || "-").toString().replace(/_/g, " ").replace(/\s+/g, " ").trim();
+
+            // Cabecera con el nombre de variable (si viene)
+            const varTitle = fmt(registros[0].varAsig || idVar);
+
+            const contenido = `
+              <div class="mb-2">
+                <strong>${varTitle}</strong>
+              </div>
+              <div class="list-group">
+                ${registros.map(info => `
+                  <div class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between align-items-start">
+                      <h6 class="mb-1">ODS: ${fmt(info.ods)}</h6>
+                      <span class="badge text-bg-light border">${fmt(info.nivContOds)}</span>
+                    </div>
+                    <div class="small mb-1"><strong>Meta ODS detectada:</strong> ${fmt(info.meta)}</div>
+                    <div class="small mb-1"><strong>Indicador ODS:</strong> ${fmt(info.indicador)}</div>
+                    ${
+                      info.comentOds && info.comentOds.trim() !== "-" 
+                        ? `<div class="small text-muted">${info.comentOds}</div>` 
+                        : ""
+                    }
+                  </div>
+                `).join("")}
+              </div>
+            `;
+
+            modalBody.innerHTML = contenido;
+
+          } catch {
+            modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información de ODS.</div>";
+          }
+        }
+
     });
 
 });
