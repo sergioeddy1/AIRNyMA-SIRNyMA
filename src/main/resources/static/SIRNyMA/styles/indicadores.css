@@ -50,6 +50,7 @@
 .tabla-indicadores thead {
   background-color: #113250;
   color: white;
+   padding-top:.15rem; padding-bottom:.15rem;
 }
 
 .tabla-indicadores thead th {

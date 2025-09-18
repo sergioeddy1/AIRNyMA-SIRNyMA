@@ -100,33 +100,40 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
   
-  const filtroAnio  = document.getElementById('filtroAnio');
-  const ordenNombre = document.getElementById('ordenNombre');
-  const ordenAnio   = document.getElementById('ordenAnio');
-
-  const tbody = document.querySelector('.tabla-indicadores tbody');
+ const tbody         = document.querySelector('.tabla-indicadores tbody');
   if (!tbody) return;
 
-  // Guardamos referencia a TODAS las filas originales
+  const filtroAnio    = document.getElementById('filtroAnio');
+  const ordenNombre   = document.getElementById('ordenNombre');
+  const ordenAnio     = document.getElementById('ordenAnio');
+  const buscaIndicador= document.getElementById('buscaIndicador');
+
+  // Guardamos las filas originales
   const allRows = Array.from(tbody.querySelectorAll('tr.indicador-row'));
 
   function apply() {
-    // 1) Filtrar por año (usa data-anio del <tr>)
-    const year = (filtroAnio && filtroAnio.value) ? filtroAnio.value : '';
-    let rows = allRows.filter(tr => !year || tr.dataset.anio === year);
+    const year = filtroAnio?.value || '';
+    const term = (buscaIndicador?.value || '').trim().toLowerCase();
 
-    // 2) Ordenar (si se pide)
-    //   a) Por nombre (primer <td>)
+    // 1) Filtrar por año y por texto del indicador (1a celda)
+    let rows = allRows.filter(tr => {
+      const okYear = !year || tr.dataset.anio === year;
+      const name   = tr.cells[0]?.textContent?.toLowerCase() || '';
+      const okTerm = !term || name.includes(term);
+      return okYear && okTerm;
+    });
+
+    // 2) Ordenar por nombre (si procede)
     if (ordenNombre && ordenNombre.value) {
       const dir = ordenNombre.value === 'asc' ? 1 : -1;
       rows.sort((a, b) => {
         const na = a.cells[0].textContent.trim().toLowerCase();
         const nb = b.cells[0].textContent.trim().toLowerCase();
-        return na < nb ? -1 * dir : na > nb ? 1 * dir : 0;
+        return na < nb ? -1*dir : na > nb ? 1*dir : 0;
       });
     }
 
-    //   b) Por año (data-anio)
+    // 3) Ordenar por año (si procede)
     if (ordenAnio && ordenAnio.value) {
       const dir = ordenAnio.value === 'asc' ? 1 : -1;
       rows.sort((a, b) => {
@@ -136,15 +143,16 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
 
-    // 3) Re-render en el <tbody>
+    // 4) Pintar
     tbody.innerHTML = '';
     rows.forEach(tr => tbody.appendChild(tr));
   }
 
   // Listeners
-  if (filtroAnio)  filtroAnio.addEventListener('change', apply);
-  if (ordenNombre) ordenNombre.addEventListener('change', apply);
-  if (ordenAnio)   ordenAnio.addEventListener('change', apply);
+  filtroAnio?.addEventListener('change', apply);
+  ordenNombre?.addEventListener('change', apply);
+  ordenAnio?.addEventListener('change', apply);
+  buscaIndicador?.addEventListener('input', apply);
 
   // Primer render
   apply();
