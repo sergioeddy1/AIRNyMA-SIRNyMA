@@ -1,3 +1,5 @@
+const VARIABLES_API_ENDPOINT = "/api/variables/extendidas";
+
 document.addEventListener("DOMContentLoaded", function () {
   // Elementos del DOM
   const searchForm = document.getElementById("searchForm");
@@ -12,6 +14,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const sortSelect = document.getElementById("sortOptions");
   const alinMdeaCheckbox = document.getElementById("alinMdeaCheckbox");
   const alinOdsCheckbox = document.getElementById("alinOdsCheckbox");
+  const loader = document.getElementById("loader");
+  const mainContent = document.getElementById("mainContent");
 
   // Variables globales
   const params = new URLSearchParams(window.location.search);
@@ -176,7 +180,7 @@ searchForm?.addEventListener("submit", function (e) {
 // 🔁 Cargar procesos y variables en paralelo
 Promise.all([
   fetch("/api/proceso").then(res => res.json()),
-  fetch("/api/variables").then(res => res.json())
+  fetch(VARIABLES_API_ENDPOINT).then(res => res.json())
 ])
   .then(([procesos, variables]) => {
     procesosGlobal = procesos;
@@ -420,25 +424,48 @@ function renderSelectedTags(selectedOptions) {
 
     // Función para cargar todos los elementos al entrar a la página
     async function loadAllVariables() {
-    try {
-        const response = await fetch('/api/variables');
-        const data = await response.json();
-        allData = data;
-        currentFilteredData = [...allData];
+        try {
+            if (loader) {
+                loader.style.display = "flex";
+            }
+            if (mainContent) {
+                mainContent.style.display = "none";
+            }
+            if (container) {
+                container.innerHTML = "";
+            }
+            if (paginationContainer) {
+                paginationContainer.innerHTML = "";
+            }
 
-        renderPage(currentFilteredData, currentPage);
-        setupPagination(currentFilteredData);
-        updateVariableCounter(allData.length);
+            const response = await fetch(VARIABLES_API_ENDPOINT);
+            const data = await response.json();
+            allData = data;
+            currentFilteredData = [...allData];
+            currentPage = 1;
 
-        if (idPpParam) {
-            processSelect.value = `proc${idPpParam}`;
-            applyFilters();
+            renderPage(currentFilteredData, currentPage);
+            setupPagination(currentFilteredData);
+            updateVariableCounter(allData.length);
+
+            if (idPpParam) {
+                processSelect.value = `proc${idPpParam}`;
+                applyFilters();
+            }
+        } catch (error) {
+            console.error("Error al cargar los datos:", error);
+            if (container) {
+                container.innerHTML = "<p class='text-center text-danger'>Ocurrió un error al cargar los datos. Inténtalo nuevamente.</p>";
+            }
+        } finally {
+            if (loader) {
+                loader.style.display = "none";
+            }
+            if (mainContent) {
+                mainContent.style.display = "block";
+            }
         }
-    } catch (error) {
-        console.error('Error al cargar los datos:', error);
-        container.innerHTML = "<p class='text-center text-danger'>Ocurrió un error al cargar los datos. Inténtalo nuevamente.</p>";
     }
-}
 
 // Buscar variables por término ingresado
 function searchVariables(term) {
@@ -497,7 +524,7 @@ let fuentesGlobal = [];
 
 Promise.all([
   fetch('/api/proceso').then(r => r.json()),
-  fetch('/api/variables').then(r => r.json()),
+  fetch(VARIABLES_API_ENDPOINT).then(r => r.json()),
   fetch('/api/microdatos').then(r => r.json()),
   fetch('/api/fuente').then(r => r.json()) // tabla "fuente" con anioEvento, idPp, ligaFuente/ligas
 ]).then(([procesos, variables, microdatos, fuentes]) => {
@@ -1393,7 +1420,7 @@ fetch('/api/clasificaciones')
       .then(res => res.json())
       .then(eventos => {
         eventosGlobal = eventos;
-        fetch('/api/variables')
+        fetch(VARIABLES_API_ENDPOINT)
           .then(res => res.json())
           .then(variables => {
             (variables, 1);
