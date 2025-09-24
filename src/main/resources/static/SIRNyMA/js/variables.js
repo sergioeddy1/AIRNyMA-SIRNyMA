@@ -424,45 +424,48 @@ function renderSelectedTags(selectedOptions) {
 
     // Función para cargar todos los elementos al entrar a la página
     async function loadAllVariables() {
-    try {
-        if (loader) {
-            loader.style.display = "flex";
-        }
-        if (mainContent) {
-            mainContent.style.display = "none";
-        }
-        if (container) {
-            container.innerHTML = "";
-        }
-        if (paginationContainer) {
-            paginationContainer.innerHTML = "";
-        }
+        try {
+            if (loader) {
+                loader.style.display = "flex";
+            }
+            if (mainContent) {
+                mainContent.style.display = "none";
+            }
+            if (container) {
+                container.innerHTML = "";
+            }
+            if (paginationContainer) {
+                paginationContainer.innerHTML = "";
+            }
 
-        const response = await fetch(VARIABLES_API_ENDPOINT);
-        const data = await response.json();
-        allData = data;
-        currentFilteredData = [...allData];
+            const response = await fetch(VARIABLES_API_ENDPOINT);
+            const data = await response.json();
+            allData = data;
+            currentFilteredData = [...allData];
+            currentPage = 1;
 
-        renderPage(currentFilteredData, currentPage);
-        setupPagination(currentFilteredData);
-        updateVariableCounter(allData.length);
+            renderPage(currentFilteredData, currentPage);
+            setupPagination(currentFilteredData);
+            updateVariableCounter(allData.length);
 
-        if (idPpParam) {
-            processSelect.value = `proc${idPpParam}`;
-            applyFilters();
-        }
-    } catch (error) {
-        console.error('Error al cargar los datos:', error);
-        container.innerHTML = "<p class='text-center text-danger'>Ocurrió un error al cargar los datos. Inténtalo nuevamente.</p>";
-    } finally {
-        if (loader) {
-            loader.style.display = "none";
-        }
-        if (mainContent) {
-            mainContent.style.display = "";
+            if (idPpParam) {
+                processSelect.value = `proc${idPpParam}`;
+                applyFilters();
+            }
+        } catch (error) {
+            console.error("Error al cargar los datos:", error);
+            if (container) {
+                container.innerHTML = "<p class='text-center text-danger'>Ocurrió un error al cargar los datos. Inténtalo nuevamente.</p>";
+            }
+        } finally {
+            if (loader) {
+                loader.style.display = "none";
+            }
+            if (mainContent) {
+                mainContent.style.display = "block";
+            }
         }
     }
-}
 
 // Buscar variables por término ingresado
 function searchVariables(term) {
