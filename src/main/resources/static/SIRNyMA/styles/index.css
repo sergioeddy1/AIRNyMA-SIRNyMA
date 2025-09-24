@@ -553,6 +553,26 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
+/* --- Mejoras para proyector: legibilidad y claridad en pantallas grandes --- */
+@media only screen and (min-width: 1024px) {
+  body, html {
+    font-size: 1.5rem;
+    background: #fff;
+    color: #222;
+  }
+  h1, h2, h3 {
+    font-size: 2.5rem;
+    font-weight: bold;
+  }
+  .nav-link, .custom-btn-color, .custom-btn-colorWhite {
+    font-size: 1.25rem;
+    padding: 12px 24px;
+  }
+  .card {
+    width: 30rem;
+    height: 40rem;
+  }
+}
 .tab-menu {
   width: 30%;
   background: #f0f8ff;
