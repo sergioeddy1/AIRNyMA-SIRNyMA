@@ -24,10 +24,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // ==== PARCHE: globals seguros (evita "is not defined") ====
 let eventosGlobal = window.eventosGlobal || [];
-let clasificacionesGlobal = window.clasificacionesGlobal || [];
 let procesosGlobal = window.procesosGlobal || [];
-let microdatosGlobal = window.microdatosGlobal || [];
-let fuentesGlobal = window.fuentesGlobal || [];
+
 
 // ==== PARCHE: helpers faltantes usados más abajo ====
 function buildPeriodicidadPorPp(procesos) {
@@ -78,12 +76,21 @@ function safeNameFromUrl(u) {
 }
 
 function mapUltimaVariableToLocal(v, eventosList = []) {
+  // ... (lo que ya tienes)
   const years = (Array.isArray(eventosList) ? eventosList : [])
     .map(e => parseInt(String(e.anioEvento ?? e.evento ?? '').trim(), 10))
     .filter(Number.isFinite);
 
   const minY = years.length ? Math.min(...years) : (v.anioReferencia || null);
   const maxY = years.length ? Math.max(...years) : (v.anioReferencia || new Date().getFullYear());
+
+  function safeNameFromUrl(u) {
+    try {
+      if (!u || !/^https?:/i.test(String(u))) return null;
+      const url = new URL(u);
+      return url.searchParams.get("name");
+    } catch { return null; }
+  }
 
   const codIdenVar =
     (Array.isArray(v.microdatosList) && v.microdatosList[0]?.campo)
@@ -110,17 +117,19 @@ function mapUltimaVariableToLocal(v, eventosList = []) {
     alinOds: (typeof v.ods === "boolean") ? (v.ods ? "Sí" : "No") : "No",
     comentVar: v.comentarioA || v.comentarioS || "-",
 
-    // Vigencia para que el filtro de periodo no las descarte
     vigInicial: minY ? String(minY) : null,
     vigFinal: years.length ? String(maxY) : "A la fecha",
 
-    // Extras útiles
-    _fuenteUrl: v.idFuente || null,
-    _varUrl: v.url || null,
-    _anioReferencia: v.anioReferencia || null,
-    _source: "economicas-ultima"
+    _source: "economicas-ultima",
+
+    // 👇 guarda las listas para modales
+    _microdatosList: Array.isArray(v.microdatosList) ? v.microdatosList : [],
+    _tabuladosList: Array.isArray(v.tabuladosList) ? v.tabuladosList : [],
+    _mdeasList: Array.isArray(v.mdeasList) ? v.mdeasList : [],
+    _odsList: Array.isArray(v.odsList) ? v.odsList : []
   };
 }
+
 
 async function fetchVariablesDesdeUltima() {
   const urlUltima = "http://10.109.1.13:3001/api/indicadores/ultima";
@@ -177,6 +186,58 @@ function mergeVariablesLocalYUltima(locales, ultima) {
   return Array.from(map.values());
 }
 // ==== FIN HELPERS /indicadores/ultima ====
+
+// Mapeo de procesos de economicas
+function mapEconomicasProcesoToLocal(item) {
+  const perPub = (item.periodicidadpublicacion && item.periodicidadpublicacion.trim())
+    ? item.periodicidadpublicacion.trim()
+    : (item.periodicidad || null);
+
+  const grado = (String(item.iin || '').toLowerCase() === 'sí' || String(item.iin || '').toLowerCase() === 'si')
+    ? "Información de Interés Nacional"
+    : null;
+
+  const desc = [item.objetivo, item.pobjeto].filter(Boolean).join(" ");
+
+  return {
+    idPp: item.acronimo || "SD",
+    pi: item.proceso || "No disponible",
+    pp: item.proceso || "No disponible",
+    dgaRespPp: null,
+    perioProd: null,
+    vigInicial: item.inicio || null,
+    vigFinal: item.fin || null,
+    metGenInf: item.metodo || null,
+    gradoMadur: grado,
+    perPubResul: perPub || "No disponible",
+    estatus: item.estatus || "Activo",
+    descPp: desc || "No disponible",
+    comentPp: item.comentarioS || item.comentarioA || "-",
+    responCaptura: null,
+    _source: 'economicas',
+    _unidad: item.unidad || null,
+  };
+}
+
+async function fetchProcesosEconomicas() {
+  const urlProcesosEco = "http://10.109.1.13:3001/api/procesos/buscar?unidad=" +
+                         encodeURIComponent("Unidad de Estadísticas Económicas");
+  const res = await fetch(urlProcesosEco);
+  if (!res.ok) throw new Error("procesos Económicas respondió " + res.status);
+  const data = await res.json();
+  return (Array.isArray(data) ? data : []).map(mapEconomicasProcesoToLocal);
+}
+
+function mergeProcesos(locales, economicas) {
+  const map = new Map();
+  // primero eco
+  for (const p of economicas) map.set(p.idPp, p);
+  // pisa con locales (si quieres priorizar locales)
+  for (const p of locales)   map.set(p.idPp, p);
+  return Array.from(map.values());
+}
+
+
 
     // Referencias a los checkboxes
 const relTabCheckbox = document.getElementById("relTabCheckbox");
@@ -651,52 +712,41 @@ function updateVariableCounter(count) {
 
 // 🔁 CARGA INICIAL “TODO ANTES DE PINTAR”
 Promise.all([
-  fetch("/api/proceso").then(r => r.json()),
-  fetch("/api/variables").then(r => r.json()),
-  fetchVariablesDesdeUltima(),                   // <- nuevas variables
-  fetch('/api/eventos').then(r => r.json()),     // <- eventos ANTES de pintar
-  fetch('/api/clasificaciones').then(r => r.json()) // <- clasificaciones ANTES de pintar
+  fetch("/api/proceso").then(r => r.json()),       // procesos locales
+  fetchProcesosEconomicas(),                       // procesos económicas
+  fetch("/api/variables").then(r => r.json()),     // variables locales
+  fetchVariablesDesdeUltima(),                     // variables económicas
+  fetch('/api/eventos').then(r => r.json()),
+  fetch('/api/clasificaciones').then(r => r.json())
 ])
-.then(([procesos, variablesLocal, variablesUltima, eventos, clasificaciones]) => {
-  // globals
-  procesosGlobal        = procesos;
-  window.eventosGlobal  = eventos;
+.then(([procesosLocal, procesosEco, variablesLocal, variablesUltima, eventos, clasificaciones]) => {
+  procesosGlobal = mergeProcesos(procesosLocal, procesosEco);
+  window.eventosGlobal = eventos;
   window.clasificacionesGlobal = clasificaciones;
 
-  // mapas auxiliares (si los usas)
-  window._periodicidadPorPp = buildPeriodicidadPorPp(procesosGlobal);
-  window._rangoPorPp        = buildRangoPorPp(procesosGlobal);
-  // estas dos son opcionales si no las usas en la UI inicial
-  // window._ultimoAnioPorPp   = buildUltimoAnioPorPp(fuentesGlobal);
-  // window._ligaMicroPorVar   = buildLigaMicroPorVar(microdatosGlobal);
-
-  // llenar select de procesos
-  processSelect.innerHTML = ""; // limpia por si acaso
-  procesos.forEach(proc => {
-    const opt = document.createElement("option");
-    opt.value = proc.idPp;
-    opt.textContent = `• ${proc.pp} (${proc.idPp})`;
-    processSelect.appendChild(opt);
-  });
-
-  // fusiona variables locales + “ultima”
+  // fusiona variables
   allData = mergeVariablesLocalYUltima(variablesLocal, variablesUltima);
 
-  // logs de sanidad
-  console.log("[init] procesos:", procesos.length, "varsLocal:", variablesLocal.length, "varsUltima:", variablesUltima.length, "merge:", allData.length);
-  console.log("[init] eventos:", eventos.length, "clasificaciones:", clasificaciones.length);
+  // 🔎 Poblar el select SOLO con procesos que tengan variables en allData
+  const idPpConVars = new Set(allData.map(v => v.idPp).filter(Boolean));
+  processSelect.innerHTML = "";
+  procesosGlobal
+    .filter(p => idPpConVars.has(p.idPp))
+    .sort((a,b) => (a.pp||"").localeCompare(b.pp||""))
+    .forEach(proc => {
+      const opt = document.createElement("option");
+      opt.value = proc.idPp;
+      opt.textContent = `• ${proc.pp} (${proc.idPp})`;
+      processSelect.appendChild(opt);
+    });
 
-  // pinta por primera vez
+  // pinta
   currentFilteredData = [...allData];
   currentPage = 1;
   renderPage(currentFilteredData, currentPage);
   setupPagination(currentFilteredData);
   updateVariableCounter(allData.length);
-
-  // filtros de periodo (ya con procesos)
   populatePeriodFilters([]);
-
-  // aplica filtros via URL si vino idPp/search
   aplicarFiltroDesdeURL();
 })
 .catch(err => {
@@ -1338,237 +1388,264 @@ searchForm.addEventListener("submit", function (e) {
     });
 
     // Evento delegado para mostrar información de tabulados y microdatos en el modal
-    document.addEventListener("click", async function (e) {
-        // Badge de Tabulados
-        if (e.target.classList.contains("badge-tabulado")) {
-            document.getElementById("infoModalLabel").textContent = "Detalle de la Relación con Tabulados"; // <-- Cambia el título
-            const idVar = e.target.getAttribute("data-idvar");
-            const modalBody = document.getElementById("infoModalBody");
-            modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
+ // === REEMPLAZA COMPLETO TU LISTENER ACTUAL POR ESTE ===
+document.addEventListener("click", async function (e) {
+  // Utilidad: busca la variable en allData por idVar
+  function getVariableByIdVar(idVar) {
+    return (Array.isArray(allData) ? allData : []).find(v => String(v.idVar) === String(idVar));
+  }
 
-            try {
-                // 1. Obtener relaciones var-tab
-                const resVarTab = await fetch('/api/var-tab');
-                const dataVarTab = await resVarTab.json();
+  // ============ TABULADOS ============
+  if (e.target.classList.contains("badge-tabulado")) {
+    document.getElementById("infoModalLabel").textContent = "Detalle de la Relación con Tabulados";
+    const idVar = e.target.getAttribute("data-idvar");
+    const modalBody = document.getElementById("infoModalBody");
+    modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
 
-                // Filtrar todas las coincidencias por idVar
-                const relaciones = dataVarTab.filter(rel => rel.idVar === idVar);
+    try {
+      const variable = getVariableByIdVar(idVar);
 
-                if (relaciones.length === 0) {
-                    modalBody.innerHTML = "<div class='text-danger'>No hay tabulados relacionados con esta variable.</div>";
-                    return;
-                }
-
-                // 2. Obtener todos los tabulados
-                const resTabulados = await fetch('/api/tabulado');
-                const tabulados = await resTabulados.json();
-
-                // 3. Construir HTML con las ligas y nuevos campos
-                let contenido = "";
-
-                relaciones.forEach(rel => {
-                    const tabulado = tabulados.find(tab => tab.idTab === rel.idTab);
-                    if (tabulado && (tabulado.ligaTab || tabulado.ligaDescTab)) {
-                        contenido += `
-                            <div class="mb-3 border-bottom pb-2">
-                                ${tabulado.tituloTab ? `
-                                <strong>Título del tabulado:</strong><br>
-                                <span>${tabulado.tituloTab}</span><br>` : ''}
-                                <div class="row">
-                                    <div class="col-6">
-                                        ${tabulado.ligaTab ? `
-                                        <strong>Liga Tabulado INEGI:</strong><br>
-                                        <a href="${tabulado.ligaTab}" target="_blank" style="word-break: break-all;">Tabulado</a><br>` : ''}
-                                    </div>
-                                    <div class="col-6">
-                                        ${tabulado.ligaDescTab ? `
-                                        <strong>Liga de Descarga:</strong><br>
-                                        <a href="${tabulado.ligaDescTab}" target="_blank" style="word-break: break-all;">Documento Directo</a><br>` : ''}
-                                    </div>
-                                </div>
-                                ${(tabulado.numTab || tabulado.tipoTab) ? `
-                                <strong>Información adicional:</strong><br>
-                                ${tabulado.numTab ? `Número: ${tabulado.numTab}<br>` : ''}
-                                ${tabulado.tipoTab ? `Tipo: ${tabulado.tipoTab}<br>` : ''}` : ''}
-                            </div>
-                        `;
-                    }
-                });
-
-                modalBody.innerHTML = contenido || "<div class='text-danger'>No hay ligas disponibles para los tabulados relacionados.</div>";
-
-            } catch (error) {
-                console.error(error);
-                modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información.</div>";
-            }
-        }
-
-
-        // Badge de Microdatos
-        if (e.target.classList.contains("badge-microdatos")) {
-            document.getElementById("infoModalLabel").textContent = "Detalle de la Relación con Microdatos"; // <-- Cambia el título
-            const idVar = e.target.getAttribute("data-idvar");
-            const modalBody = document.getElementById("infoModalBody");
-            modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
-            try {
-                // Trae todos los microdatos y filtra por idVar
-                const res = await fetch(`/api/microdatos`);
-                const data = await res.json();
-                // Busca el microdato que corresponde a la variable
-                const info = Array.isArray(data)
-                    ? data.find(micro => String(micro.idVar) === String(idVar))
-                    : (data.idVar === idVar ? data : null);
-                if (info && (info.ligaMicro || info.ligaDd)) {
-                    modalBody.innerHTML = `
-                    <div class="mb-2">
-                        <strong>Liga Microdatos:</strong><br>
-                        <a href="${info.ligaMicro}" target="_blank" style="word-break: break-all;">Página Microdatos INEGI</a>
-                    </div>
-                    <div class="mb-2">
-                        <strong>Liga de Descarga:</strong><br>
-                        <a href="${info.ligaDd}" target="_blank" style="word-break: break-all;">Documento Directo</a>
-                    </div>
-                    <div class="mb-2">
-                        <strong>Tabla donde se encuentra:</strong><br>
-                        ${info.nomTabla || "No disponible"}
-                    </div>
-                    <div class="mb-2">
-                        <strong>Se localiza en el Campo:</strong><br>
-                        ${info.nomCampo || "No disponible"}
-                    </div>
-                    <div class="mb-2">
-                        ${renderComentarios(info.comentMicro)}
-                    </div>
-                `;
-                } else {
-                    modalBody.innerHTML = "<div class='text-danger'>No hay información de microdatos disponible.</div>";
-                }
-            } catch {
-                modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información.</div>";
-            }
-        }
-
-        // Badges de MDEA
-       // Badge de MDEA
-        if (e.target.classList.contains("badge-mdea")) {
-            document.getElementById("infoModalLabel").textContent = "Relación de la variable con el MDEA";
-            const idVar = e.target.getAttribute("data-idvar");
-            const modalBody = document.getElementById("infoModalBody");
-            modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
-
-            try {
-              const res = await fetch(`/api/mdea`);
-              const data = await res.json();
-
-              // Busca el registro del MDEA para la variable (uno)
-              const info = Array.isArray(data)
-                ? data.find(mdea => String(mdea.idVar) === String(idVar))
-                : (data && data.idVar === idVar ? data : null);
-
-              if (info) {
-                 // Formateo básico para evitar guiones bajos y espacios extraños en el texto
-                const fmt = (s) => (s || "-").toString().replace(/_/g, " ").replace(/\s+/g, " ").trim();
-
-                modalBody.innerHTML = `
-                  <div class="mb-2">
-                    <strong>Componente:</strong><br>
-                    <span style="word-break: break-all;">${fmt(info.compo) || "-"}</span>
-                  </div>
-                  <div class="mb-2">
-                    <strong>Subcomponente:</strong><br>
-                    <span style="word-break: break-all;">${fmt(info.subcompo) || "-"}</span>
-                  </div>
-                  <div class="mb-2">
-                    <strong>Tópico:</strong><br>
-                    <span style="word-break: break-all;">${fmt(info.topico) || "-"}</span>
-                  </div>
-                  <div class="mb-2">
-                    <strong>Clasificación Temática</strong>
-                  </div>
-                  <div class="mb-2">
-                    <strong>Variable del MDEA:</strong><br>
-                    <span style="word-break: break-all;">${fmt(info.estAmbiental) || "-"}</span>
-                  </div>
-                  <div class="mb-2">
-                    <strong>Estadístico del MDEA:</strong><br>
-                    <span>${(info.estadMdea ?? "No disponible") || "No disponible"}</span>
-                  </div>
-                  <div class="mb-2">
-                    <strong>Nivel de Contribución de la variable con el MDEA:</strong><br>
-                    <span>${info.nivContMdea || "-"}</span>
-                  </div>
-                  <div class="mb-2">
-                    <strong>Comentario(s) sobre la relación de la variable con el MDEA:</strong><br>
-                    ${renderComentarios(info.comentMdea) || "<span>No disponible</span>"}
-                  </div>
-                `;
-              } else {
-                modalBody.innerHTML = "<div class='text-danger'>No hay información del MDEA para esta variable.</div>";
-              }
-            } catch {
-              modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información del MDEA.</div>";
-            }
-        }
-
-
-        // Badge de ODS
-        if (e.target.classList.contains("badge-ods")) {
-          document.getElementById("infoModalLabel").textContent = "Relación de la variable mostrada con los ODS";
-          const idVar = e.target.getAttribute("data-idvar");
-          const modalBody = document.getElementById("infoModalBody");
-          modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
-
-          try {
-            const res = await fetch(`/api/ods`);
-            const data = await res.json();
-
-            // ⬅️ Ahora obtenemos TODAS las relaciones de esta variable
-            const registros = Array.isArray(data)
-              ? data.filter(ods => String(ods.idVar) === String(idVar))
-              : (data && data.idVar === idVar ? [data] : []);
-
-            if (!registros.length) {
-              modalBody.innerHTML = "<div class='text-danger'>No hay información de ODS para esta variable.</div>";
-              return;
-            }
-
-            const fmt = (s) => (s || "-").toString().replace(/_/g, " ").replace(/\s+/g, " ").trim();
-
-            // Cabecera con el nombre de variable (si viene)
-            const varTitle = fmt(registros[0].varAsig || idVar);
-
-            const contenido = `
-              <div class="mb-2">
-                <strong>${varTitle}</strong>
+      // 1) Si la variable viene de Económicas y trae tabulados embebidos, úsalo
+      if (variable && variable._source === "economicas-ultima" && Array.isArray(variable._tabuladosList) && variable._tabuladosList.length) {
+        const html = variable._tabuladosList.map(t => `
+          <div class="mb-3 border-bottom pb-2">
+            <strong>${t.tabulado || "Tabulado"}</strong><br>
+            ${t.tipo ? `<span class="small text-muted">${t.tipo}</span><br>` : ""}
+            <div class="row">
+              <div class="col-6">
+                ${t.urlAcceso ? `<strong>Acceso:</strong> <a href="${t.urlAcceso}" target="_blank" style="word-break: break-all;">Abrir</a>` : ""}
               </div>
-              <div class="list-group">
-                ${registros.map(info => `
-                  <div class="list-group-item">
-                    <div class="d-flex w-100 justify-content-between align-items-start">
-                      <h6 class="mb-1">ODS: ${fmt(info.ods)}</h6>
-                      <span class="badge text-bg-light border">${fmt(info.nivContOds)}</span>
-                    </div>
-                    <div class="small mb-1"><strong>Meta ODS detectada:</strong> ${fmt(info.meta)}</div>
-                    <div class="small mb-1"><strong>Indicador ODS:</strong> ${fmt(info.indicador)}</div>
-                    ${
-                      info.comentOds && info.comentOds.trim() !== "-" 
-                        ? `<div class="small text-muted">${info.comentOds}</div>` 
-                        : ""
-                    }
-                  </div>
-                `).join("")}
+              <div class="col-6">
+                ${t.urlDescarga ? `<strong>Descarga:</strong> <a href="${t.urlDescarga}" target="_blank" style="word-break: break-all;">Descargar</a>` : ""}
               </div>
-            `;
+            </div>
+            ${t.comentarioA ? `<div class="small mt-1">${t.comentarioA}</div>` : ""}
+          </div>
+        `).join("");
+        modalBody.innerHTML = html || "<div class='text-danger'>No hay tabulados disponibles.</div>";
+        return;
+      }
 
-            modalBody.innerHTML = contenido;
+      // 2) Fallback a tus endpoints locales
+      const resVarTab = await fetch('/api/var-tab');
+      const dataVarTab = await resVarTab.json();
+      const relaciones = Array.isArray(dataVarTab) ? dataVarTab.filter(rel => rel.idVar === idVar) : [];
 
-          } catch {
-            modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información de ODS.</div>";
-          }
-        }
+      if (!relaciones.length) {
+        modalBody.innerHTML = "<div class='text-danger'>No hay tabulados relacionados con esta variable.</div>";
+        return;
+      }
 
-    });
+      const resTabulados = await fetch('/api/tabulado');
+      const tabulados = await resTabulados.json();
 
+      const contenido = relaciones.map(rel => {
+        const tabulado = Array.isArray(tabulados) ? tabulados.find(tab => tab.idTab === rel.idTab) : null;
+        if (!tabulado) return "";
+        return `
+          <div class="mb-3 border-bottom pb-2">
+            ${tabulado.tituloTab ? `<strong>Título del tabulado:</strong><br><span>${tabulado.tituloTab}</span><br>` : ''}
+            <div class="row">
+              <div class="col-6">
+                ${tabulado.ligaTab ? `<strong>Liga Tabulado INEGI:</strong><br><a href="${tabulado.ligaTab}" target="_blank" style="word-break: break-all;">Tabulado</a><br>` : ''}
+              </div>
+              <div class="col-6">
+                ${tabulado.ligaDescTab ? `<strong>Liga de Descarga:</strong><br><a href="${tabulado.ligaDescTab}" target="_blank" style="word-break: break-all;">Documento Directo</a><br>` : ''}
+              </div>
+            </div>
+            ${(tabulado.numTab || tabulado.tipoTab) ? `
+              <strong>Información adicional:</strong><br>
+              ${tabulado.numTab ? `Número: ${tabulado.numTab}<br>` : ''}
+              ${tabulado.tipoTab ? `Tipo: ${tabulado.tipoTab}<br>` : ''}` : ''}
+          </div>
+        `;
+      }).join("");
+
+      modalBody.innerHTML = contenido || "<div class='text-danger'>No hay ligas disponibles para los tabulados relacionados.</div>";
+    } catch (error) {
+      console.error(error);
+      document.getElementById("infoModalBody").innerHTML = "<div class='text-danger'>Error al cargar la información.</div>";
+    }
+  }
+
+  // ============ MICRODATOS ============
+  if (e.target.classList.contains("badge-microdatos")) {
+    document.getElementById("infoModalLabel").textContent = "Detalle de la Relación con Microdatos";
+    const idVar = e.target.getAttribute("data-idvar");
+    const modalBody = document.getElementById("infoModalBody");
+    modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
+
+    try {
+      const variable = getVariableByIdVar(idVar);
+
+      // 1) Si viene de Económicas y trae microdatos embebidos, úsalo
+      if (variable && variable._source === "economicas-ultima" && Array.isArray(variable._microdatosList) && variable._microdatosList.length) {
+        const html = variable._microdatosList.map(m => `
+          <div class="mb-2 border-bottom pb-2">
+            ${m.urlAcceso ? `<div><strong>Acceso:</strong> <a href="${m.urlAcceso}" target="_blank" style="word-break: break-all;">${m.urlAcceso}</a></div>` : ""}
+            ${m.urlDescriptor ? `<div><strong>Descriptor:</strong> <a href="${m.urlDescriptor}" target="_blank" style="word-break: break-all;">${m.urlDescriptor}</a></div>` : ""}
+            ${(m.tabla || m.campo) ? `<div><strong>Ubicación:</strong> ${m.tabla || "-"} / ${m.campo || "-"}</div>` : ""}
+            ${m.descriptor ? `<div class="small text-muted">${m.descriptor}</div>` : ""}
+          </div>
+        `).join("");
+        modalBody.innerHTML = html || "<div class='text-danger'>No hay microdatos disponibles.</div>";
+        return;
+      }
+
+      // 2) Fallback a /api/microdatos
+      const res = await fetch(`/api/microdatos`);
+      const data = await res.json();
+      const info = Array.isArray(data)
+        ? data.find(micro => String(micro.idVar) === String(idVar))
+        : (data && data.idVar === idVar ? data : null);
+
+      if (info && (info.ligaMicro || info.ligaDd || info.nomTabla || info.nomCampo)) {
+        modalBody.innerHTML = `
+          ${info.ligaMicro ? `
+            <div class="mb-2"><strong>Liga Microdatos:</strong><br>
+            <a href="${info.ligaMicro}" target="_blank" style="word-break: break-all;">Página Microdatos INEGI</a></div>` : ""}
+
+          ${info.ligaDd ? `
+            <div class="mb-2"><strong>Liga de Descarga:</strong><br>
+            <a href="${info.ligaDd}" target="_blank" style="word-break: break-all;">Documento Directo</a></div>` : ""}
+
+          ${(info.nomTabla || info.nomCampo) ? `
+            <div class="mb-2"><strong>Ubicación:</strong><br>
+              ${info.nomTabla || "No disponible"} / ${info.nomCampo || "No disponible"}
+            </div>` : ""}
+
+          <div class="mb-2">${renderComentarios(info.comentMicro || "-")}</div>
+        `;
+      } else {
+        modalBody.innerHTML = "<div class='text-danger'>No hay información de microdatos disponible.</div>";
+      }
+    } catch (err) {
+      console.error(err);
+      modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información.</div>";
+    }
+  }
+
+  // ============ MDEA ============
+  if (e.target.classList.contains("badge-mdea")) {
+    document.getElementById("infoModalLabel").textContent = "Relación de la variable con el MDEA";
+    const idVar = e.target.getAttribute("data-idvar");
+    const modalBody = document.getElementById("infoModalBody");
+    modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
+
+    const fmt = (s) => (s || "-").toString().replace(/_/g, " ").replace(/\s+/g, " ").trim();
+
+    try {
+      const variable = getVariableByIdVar(idVar);
+
+      // 1) Económicas con mdeas embebidos
+      if (variable && variable._source === "economicas-ultima" && Array.isArray(variable._mdeasList) && variable._mdeasList.length) {
+        modalBody.innerHTML = variable._mdeasList.map(m => `
+          <div class="mb-2 border-bottom pb-2">
+            <div><strong>Componente:</strong> ${fmt(m.componente)}</div>
+            <div><strong>Subcomponente:</strong> ${fmt(m.subcomponente)}</div>
+            <div><strong>Tema:</strong> ${fmt(m.tema)}</div>
+            <div><strong>Estadística 1:</strong> ${fmt(m.estadistica1)}</div>
+            ${m.estadistica2 ? `<div><strong>Estadística 2:</strong> ${fmt(m.estadistica2)}</div>` : ""}
+            <div><strong>Contribución:</strong> ${fmt(m.contribucion)}</div>
+          </div>
+        `).join("");
+        return;
+      }
+
+      // 2) Fallback a /api/mdea (tu lógica original – uno por idVar)
+      const res = await fetch(`/api/mdea`);
+      const data = await res.json();
+      const info = Array.isArray(data)
+        ? data.find(mdea => String(mdea.idVar) === String(idVar))
+        : (data && data.idVar === idVar ? data : null);
+
+      if (info) {
+        modalBody.innerHTML = `
+          <div class="mb-2"><strong>Componente:</strong><br>${fmt(info.compo)}</div>
+          <div class="mb-2"><strong>Subcomponente:</strong><br>${fmt(info.subcompo)}</div>
+          <div class="mb-2"><strong>Tópico:</strong><br>${fmt(info.topico)}</div>
+          <div class="mb-2"><strong>Variable del MDEA:</strong><br>${fmt(info.estAmbiental)}</div>
+          <div class="mb-2"><strong>Estadístico del MDEA:</strong><br>${(info.estadMdea ?? "No disponible")}</div>
+          <div class="mb-2"><strong>Nivel de Contribución:</strong><br>${info.nivContMdea || "-"}</div>
+          <div class="mb-2"><strong>Comentario(s):</strong><br>${renderComentarios(info.comentMdea) || "<span>No disponible</span>"}</div>
+        `;
+      } else {
+        modalBody.innerHTML = "<div class='text-danger'>No hay información del MDEA para esta variable.</div>";
+      }
+    } catch (err) {
+      console.error(err);
+      modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información del MDEA.</div>";
+    }
+  }
+
+  // ============ ODS ============
+  if (e.target.classList.contains("badge-ods")) {
+    document.getElementById("infoModalLabel").textContent = "Relación de la variable mostrada con los ODS";
+    const idVar = e.target.getAttribute("data-idvar");
+    const modalBody = document.getElementById("infoModalBody");
+    modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
+
+    const fmt = (s) => (s || "-").toString().replace(/_/g, " ").replace(/\s+/g, " ").trim();
+
+    try {
+      const variable = getVariableByIdVar(idVar);
+
+      // 1) Económicas con ods embebidos
+      if (variable && variable._source === "economicas-ultima" && Array.isArray(variable._odsList) && variable._odsList.length) {
+        modalBody.innerHTML = `
+          <div class="list-group">
+            ${variable._odsList.map(o => `
+              <div class="list-group-item">
+                <div class="d-flex w-100 justify-content-between align-items-start">
+                  <h6 class="mb-1">ODS: ${fmt(o.objetivo)}</h6>
+                  <span class="badge text-bg-light border">${fmt(o.contribucion)}</span>
+                </div>
+                <div class="small mb-1"><strong>Meta:</strong> ${fmt(o.meta)}</div>
+                <div class="small mb-1"><strong>Indicador:</strong> ${fmt(o.indicador)}</div>
+                ${o.comentarioS && o.comentarioS !== '-' ? `<div class="small text-muted">${o.comentarioS}</div>` : ""}
+              </div>
+            `).join("")}
+          </div>
+        `;
+        return;
+      }
+
+      // 2) Fallback a /api/ods (pueden ser varias relaciones por variable)
+      const res = await fetch(`/api/ods`);
+      const data = await res.json();
+      const registros = Array.isArray(data)
+        ? data.filter(ods => String(ods.idVar) === String(idVar))
+        : (data && data.idVar === idVar ? [data] : []);
+
+      if (!registros.length) {
+        modalBody.innerHTML = "<div class='text-danger'>No hay información de ODS para esta variable.</div>";
+        return;
+      }
+
+      const varTitle = fmt((getVariableByIdVar(idVar)?.varAsig) || idVar);
+      const contenido = `
+        <div class="mb-2"><strong>${varTitle}</strong></div>
+        <div class="list-group">
+          ${registros.map(info => `
+            <div class="list-group-item">
+              <div class="d-flex w-100 justify-content-between align-items-start">
+                <h6 class="mb-1">ODS: ${fmt(info.ods)}</h6>
+                <span class="badge text-bg-light border">${fmt(info.nivContOds)}</span>
+              </div>
+              <div class="small mb-1"><strong>Meta ODS detectada:</strong> ${fmt(info.meta)}</div>
+              <div class="small mb-1"><strong>Indicador ODS:</strong> ${fmt(info.indicador)}</div>
+              ${info.comentOds && info.comentOds.trim() !== "-" ? `<div class="small text-muted">${info.comentOds}</div>` : ""}
+            </div>
+          `).join("")}
+        </div>
+      `;
+      modalBody.innerHTML = contenido;
+    } catch (err) {
+      console.error(err);
+      modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información de ODS.</div>";
+    }
+  }
+});
 });
 
 // Almacenar y recuperar término de búsqueda en localStorage
