@@ -18,9 +18,165 @@ document.addEventListener("DOMContentLoaded", function () {
   const idPpParam = params.get("idPp");
   let itemsPerPage = parseInt(itemsPerPageSelect.value, 15);
   let currentPage = 1;
-  let procesosGlobal = [];
+ 
   let allData = [];
   let currentFilteredData = [];
+
+  // ==== PARCHE: globals seguros (evita "is not defined") ====
+let eventosGlobal = window.eventosGlobal || [];
+let clasificacionesGlobal = window.clasificacionesGlobal || [];
+let procesosGlobal = window.procesosGlobal || [];
+let microdatosGlobal = window.microdatosGlobal || [];
+let fuentesGlobal = window.fuentesGlobal || [];
+
+// ==== PARCHE: helpers faltantes usados más abajo ====
+function buildPeriodicidadPorPp(procesos) {
+  const m = {};
+  (procesos || []).forEach(p => {
+    m[p.idPp] = parsePeriodicidadAnios(p.perPubResul || p.perioProd || "Anual");
+  });
+  return m;
+}
+
+function buildRangoPorPp(procesos) {
+  const m = {};
+  (procesos || []).forEach(p => {
+    m[p.idPp] = {
+      startYear: parseYearSafe(p.vigInicial),
+      endYear: resolveEndYear(p)
+    };
+  });
+  return m;
+}
+
+function buildUltimoAnioPorPp(fuentes) {
+  const m = {};
+  (fuentes || []).forEach(f => {
+    const id = f.idPp || f.id_pp;
+    const y = parseInt(f.anioEvento ?? f.evento, 10);
+    if (!id || !Number.isFinite(y)) return;
+    m[id] = Math.max(m[id] ?? -Infinity, y);
+  });
+  return m;
+}
+
+function buildLigaMicroPorVar(microdatos) {
+  const m = {};
+  (microdatos || []).forEach(md => {
+    if (md.idVar) m[md.idVar] = md.ligaMicro || md.ligaDd || null;
+  });
+  return m;
+}
+
+// ==== HELPERS: mapear API /indicadores/ultima al shape local de /api/variables ====
+function safeNameFromUrl(u) {
+  try {
+    if (!u || !/^https?:/i.test(String(u))) return null;
+    const url = new URL(u);
+    return url.searchParams.get("name");
+  } catch { return null; }
+}
+
+function mapUltimaVariableToLocal(v, eventosList = []) {
+  const years = (Array.isArray(eventosList) ? eventosList : [])
+    .map(e => parseInt(String(e.anioEvento ?? e.evento ?? '').trim(), 10))
+    .filter(Number.isFinite);
+
+  const minY = years.length ? Math.min(...years) : (v.anioReferencia || null);
+  const maxY = years.length ? Math.max(...years) : (v.anioReferencia || new Date().getFullYear());
+
+  const codIdenVar =
+    (Array.isArray(v.microdatosList) && v.microdatosList[0]?.campo)
+      ? v.microdatosList[0].campo
+      : safeNameFromUrl(v.url);
+
+  return {
+    idVar: v.idS || v.idA || (v.acronimo ? `${v.acronimo}-SD` : "SD"),
+    idPp: v.acronimo || "SD",
+    nomVar: v.variableA || v.variableS || "No disponible",
+    tipoVar: "Primaria",
+    codIdenVar,
+    pregLit: v.pregunta || "-",
+    tema: v.tema1 || v.tematica || null,
+    subtema: v.subtema1 || null,
+    tema2: v.tema2 || null,
+    subtema2: v.subtema2 || null,
+    categoria: v.universo || "-",
+    varAsig: v.variableA || v.variableS || "No disponible",
+    defVar: v.definicion || "-",
+    relTab: (typeof v.tabulados === "boolean") ? (v.tabulados ? "Sí" : "No") : "No",
+    relMicro: (typeof v.microdatos === "boolean") ? (v.microdatos ? "Sí" : "No") : "No",
+    alinMdea: (typeof v.mdea === "boolean") ? (v.mdea ? "Sí" : "No") : "No",
+    alinOds: (typeof v.ods === "boolean") ? (v.ods ? "Sí" : "No") : "No",
+    comentVar: v.comentarioA || v.comentarioS || "-",
+
+    // Vigencia para que el filtro de periodo no las descarte
+    vigInicial: minY ? String(minY) : null,
+    vigFinal: years.length ? String(maxY) : "A la fecha",
+
+    // Extras útiles
+    _fuenteUrl: v.idFuente || null,
+    _varUrl: v.url || null,
+    _anioReferencia: v.anioReferencia || null,
+    _source: "economicas-ultima"
+  };
+}
+
+async function fetchVariablesDesdeUltima() {
+  const urlUltima = "http://10.109.1.13:3001/api/indicadores/ultima";
+  const res = await fetch(urlUltima);
+  if (!res.ok) throw new Error(`ultima respondió ${res.status}`);
+  const payload = await res.json();
+
+  const registros = Array.isArray(payload) ? payload : [payload];
+  const out = [];
+  for (const reg of registros) {
+    const lista = Array.isArray(reg.variableList) ? reg.variableList : [];
+    const evs = Array.isArray(reg.eventosList) ? reg.eventosList : [];
+    for (const v of lista) out.push(mapUltimaVariableToLocal(v, evs));
+  }
+  return out;
+}
+
+function mergeVariablesLocalYUltima(locales = [], ultima = []) {
+  const map = new Map();
+  // mete primero ultima (para que luego locales "pisen" si hay misma idVar)
+  for (const v of (ultima || [])) if (v) {
+    map.set(v.idVar || v.idS || v.idA, v);
+  }
+  for (const v of (locales || [])) if (v && v.idVar) {
+    map.set(v.idVar, v);
+  }
+  return Array.from(map.values());
+}
+// ==== FIN HELPERS /indicadores/ultima ====
+
+// trae y aplana /indicadores/ultima → array de variables en shape local
+async function fetchVariablesDesdeUltima() {
+  const urlUltima = "http://10.109.1.13:3001/api/indicadores/ultima";
+  const res = await fetch(urlUltima);
+  if (!res.ok) throw new Error(`ultima respondió ${res.status}`);
+  const payload = await res.json();
+
+  const registros = Array.isArray(payload) ? payload : [payload];
+  const out = [];
+  for (const reg of registros) {
+    const lista = Array.isArray(reg.variableList) ? reg.variableList : [];
+    const evs = Array.isArray(reg.eventosList) ? reg.eventosList : [];
+    for (const v of lista) out.push(mapUltimaVariableToLocal(v, evs)); // 👈 pasa eventosList
+  }
+  return out;
+}
+
+
+// fusiona dos listas de variables y de‑duplica por idVar (prioriza locales)
+function mergeVariablesLocalYUltima(locales, ultima) {
+  const map = new Map();
+  for (const v of ultima)  map.set(v.idVar, v);
+  for (const v of locales) map.set(v.idVar, v); // pisa con locales si hay misma idVar
+  return Array.from(map.values());
+}
+// ==== FIN HELPERS /indicadores/ultima ====
 
     // Referencias a los checkboxes
 const relTabCheckbox = document.getElementById("relTabCheckbox");
@@ -110,17 +266,20 @@ function filterByRelation() {
     const selectedEnd = parseInt(document.getElementById("periodFin").value);
 
 //Filtro de periodo de tiempo
-    if (!isNaN(selectedStart) && !isNaN(selectedEnd)) {
-    filtered = filtered.filter(variable => {
+        if (!isNaN(selectedStart) && !isNaN(selectedEnd)) {
+      filtered = filtered.filter(variable => {
         const varStart = parseInt(variable.vigInicial);
-        let varEnd = variable.vigFinal.includes("A la fecha") ? new Date().getFullYear() : parseInt(variable.vigFinal);
+        const varEnd = (variable.vigFinal && String(variable.vigFinal).includes("A la fecha"))
+          ? new Date().getFullYear()
+          : parseInt(variable.vigFinal);
 
-        // Validación doble por seguridad
-        if (isNaN(varStart) || isNaN(varEnd)) return false;
+        // Si no hay años válidos, NO la descartes (déjala pasar)
+        if (isNaN(varStart) || isNaN(varEnd)) return true;
 
         return varStart <= selectedEnd && varEnd >= selectedStart;
-    });
+      });
     }
+
 
     // Filtro de relación temática
     if (relTabCheckbox?.checked || relMicroCheckbox?.checked) {
@@ -174,33 +333,38 @@ searchForm?.addEventListener("submit", function (e) {
 
 
 // 🔁 Cargar procesos y variables en paralelo
+// 🔁 Cargar procesos + variables locales + variables de /indicadores/ultima
 Promise.all([
   fetch("/api/proceso").then(res => res.json()),
-  fetch("/api/variables").then(res => res.json())
+  fetch("/api/variables").then(res => res.json()),
+  fetchVariablesDesdeUltima()
 ])
-  .then(([procesos, variables]) => {
-    procesosGlobal = procesos;
-    allData = variables;
+.then(([procesos, variablesLocal, variablesUltima]) => {
+  procesosGlobal = procesos;
 
-    // Llenar el select de procesos
-    procesos.forEach(proc => {
-      const option = document.createElement("option");
-      option.value = proc.idPp;
-      option.textContent = `• ${proc.pp} (${proc.idPp})`;
-      processSelect.appendChild(option);
-    });
+  // llena select de procesos
+  procesos.forEach(proc => {
+    const opt = document.createElement("option");
+    opt.value = proc.idPp;
+    opt.textContent = `• ${proc.pp} (${proc.idPp})`;
+    processSelect.appendChild(opt);
+  });
 
-    // Manejo de clic para selección múltiple estilo checkbox
-    processSelect.addEventListener("mousedown", function (e) {
-      e.preventDefault();
-      const option = e.target;
-      option.selected = !option.selected;
-      processSelect.dispatchEvent(new Event("change"));
-    });
+  // fusiona y pinta
+  allData = mergeVariablesLocalYUltima(variablesLocal, variablesUltima);
+  currentFilteredData = [...allData];
+  currentPage = 1;
+  renderPage(currentFilteredData, currentPage);
+  setupPagination(currentFilteredData);
+  updateVariableCounter(allData.length);
 
-    aplicarFiltroDesdeURL(); // ✅ Aplicar filtro inicial si viene desde otra página
-  })
-  .catch(error => console.error("Error al cargar procesos o variables:", error));
+  // filtros de periodo en base a procesos
+  populatePeriodFilters([]);
+
+  // aplica filtros por URL si llegan
+  aplicarFiltroDesdeURL();
+})
+.catch(e => console.error("Error al cargar procesos o variables:", e));
 
 
 // ✅ Listener de cambio del select de procesos
@@ -409,36 +573,31 @@ function renderSelectedTags(selectedOptions) {
 });
 
 
-    //Fetch para cargar los datos de proceso
-    fetch("/api/proceso")
-    .then(res => res.json())
-    .then(data => {
-        allData = data;
-        populatePeriodFilters(); // llena los selects con los años
-        filterByRelation();      // muestra los datos iniciales si deseas
-    });
-
     // Función para cargar todos los elementos al entrar a la página
     async function loadAllVariables() {
-    try {
-        const response = await fetch('/api/variables');
-        const data = await response.json();
-        allData = data;
-        currentFilteredData = [...allData];
+  try {
+    // Cargar ambas fuentes y fusionar
+    const [localRes, ultimaVars] = await Promise.all([
+      fetch('/api/variables').then(r => r.json()),
+      fetchVariablesDesdeUltima()
+    ]);
+    allData = mergeVariablesLocalYUltima(localRes, ultimaVars);
 
-        renderPage(currentFilteredData, currentPage);
-        setupPagination(currentFilteredData);
-        updateVariableCounter(allData.length);
+    currentFilteredData = [...allData];
+    renderPage(currentFilteredData, currentPage);
+    setupPagination(currentFilteredData);
+    updateVariableCounter(allData.length);
 
-        if (idPpParam) {
-            processSelect.value = `proc${idPpParam}`;
-            applyFilters();
-        }
-    } catch (error) {
-        console.error('Error al cargar los datos:', error);
-        container.innerHTML = "<p class='text-center text-danger'>Ocurrió un error al cargar los datos. Inténtalo nuevamente.</p>";
+    if (idPpParam) {
+      processSelect.value = `proc${idPpParam}`;
+      applyFilters();
     }
+  } catch (error) {
+    console.error('Error al cargar los datos:', error);
+    container.innerHTML = "<p class='text-center text-danger'>Ocurrió un error al cargar los datos. Inténtalo nuevamente.</p>";
+  }
 }
+
 
 // Buscar variables por término ingresado
 function searchVariables(term) {
@@ -490,30 +649,59 @@ function updateVariableCounter(count) {
     animate();
 }
 
-// Funcion para la linea de tiempo 
-let variablesGlobal = [];
-let microdatosGlobal = [];
-let fuentesGlobal = [];
-
+// 🔁 CARGA INICIAL “TODO ANTES DE PINTAR”
 Promise.all([
-  fetch('/api/proceso').then(r => r.json()),
-  fetch('/api/variables').then(r => r.json()),
-  fetch('/api/microdatos').then(r => r.json()),
-  fetch('/api/fuente').then(r => r.json()) // tabla "fuente" con anioEvento, idPp, ligaFuente/ligas
-]).then(([procesos, variables, microdatos, fuentes]) => {
-  procesosGlobal = procesos;
-  variablesGlobal = variables;
-  microdatosGlobal = microdatos;
-  fuentesGlobal = fuentes;
+  fetch("/api/proceso").then(r => r.json()),
+  fetch("/api/variables").then(r => r.json()),
+  fetchVariablesDesdeUltima(),                   // <- nuevas variables
+  fetch('/api/eventos').then(r => r.json()),     // <- eventos ANTES de pintar
+  fetch('/api/clasificaciones').then(r => r.json()) // <- clasificaciones ANTES de pintar
+])
+.then(([procesos, variablesLocal, variablesUltima, eventos, clasificaciones]) => {
+  // globals
+  procesosGlobal        = procesos;
+  window.eventosGlobal  = eventos;
+  window.clasificacionesGlobal = clasificaciones;
 
-  // Preprocesos: mapas para resoluciones rápidas
-  window._periodicidadPorPp = buildPeriodicidadPorPp(procesosGlobal); // idPp -> step años
-  window._rangoPorPp       = buildRangoPorPp(procesosGlobal);         // idPp -> {startYear, endYear}
-  window._ultimoAnioPorPp  = buildUltimoAnioPorPp(fuentesGlobal);      // idPp -> max(anioEvento)
-  window._ligaMicroPorVar  = buildLigaMicroPorVar(microdatosGlobal);   // idVar -> ligaMicro
+  // mapas auxiliares (si los usas)
+  window._periodicidadPorPp = buildPeriodicidadPorPp(procesosGlobal);
+  window._rangoPorPp        = buildRangoPorPp(procesosGlobal);
+  // estas dos son opcionales si no las usas en la UI inicial
+  // window._ultimoAnioPorPp   = buildUltimoAnioPorPp(fuentesGlobal);
+  // window._ligaMicroPorVar   = buildLigaMicroPorVar(microdatosGlobal);
 
-  // Llama a tu renderPage(variables, 1) como ya lo haces
-  renderPage(variablesGlobal, 1);
+  // llenar select de procesos
+  processSelect.innerHTML = ""; // limpia por si acaso
+  procesos.forEach(proc => {
+    const opt = document.createElement("option");
+    opt.value = proc.idPp;
+    opt.textContent = `• ${proc.pp} (${proc.idPp})`;
+    processSelect.appendChild(opt);
+  });
+
+  // fusiona variables locales + “ultima”
+  allData = mergeVariablesLocalYUltima(variablesLocal, variablesUltima);
+
+  // logs de sanidad
+  console.log("[init] procesos:", procesos.length, "varsLocal:", variablesLocal.length, "varsUltima:", variablesUltima.length, "merge:", allData.length);
+  console.log("[init] eventos:", eventos.length, "clasificaciones:", clasificaciones.length);
+
+  // pinta por primera vez
+  currentFilteredData = [...allData];
+  currentPage = 1;
+  renderPage(currentFilteredData, currentPage);
+  setupPagination(currentFilteredData);
+  updateVariableCounter(allData.length);
+
+  // filtros de periodo (ya con procesos)
+  populatePeriodFilters([]);
+
+  // aplica filtros via URL si vino idPp/search
+  aplicarFiltroDesdeURL();
+})
+.catch(err => {
+  console.error("Error en carga inicial:", err);
+  container.innerHTML = `<div class="alert alert-danger">No se pudo cargar la información inicial.</div>`;
 });
 
 // 1. Cargar eventos antes de llamar a renderPage
@@ -710,8 +898,23 @@ function renderPage(data, page) {
 
   paginatedData.forEach((variable, index) => {
     // 2. Filtrar los eventos que pertenecen a esta variable
-    const eventosRelacionados = eventosGlobal.filter(ev => ev.idVar === variable.idVar);
-    const timelineHTML = construirLineaDeTiempoVariable(variable, eventosRelacionados);
+      // ...dentro de renderPage, antes de construir card.innerHTML
+    // dentro de renderPage, por cada variable...
+    const evs = Array.isArray(window.eventosGlobal) ? window.eventosGlobal : [];
+    const eventosRelacionados = evs.filter(ev => String(ev.idVar) === String(variable.idVar));
+
+    // asegura que SIEMPRE existirá timelineHTML
+    let timelineHTML = "";
+    try {
+      timelineHTML = construirLineaDeTiempoVariable(variable, eventosRelacionados);
+    } catch (e) {
+      console.warn("Fallo timeline; uso fallback neutral:", e);
+      // fallback mínimo si tu helper no está disponible
+      const label = (variable.vigInicial || variable.vigFinal) 
+        ? `${variable.vigInicial || "?"} - ${variable.vigFinal || "?"}`
+        : "Sin periodo";
+      timelineHTML = `<div class="small text-muted">${label}</div>`;
+    }
 
     // 3. Fuentes dinámicas
     const fuentesHTML = eventosRelacionados.map(ev => 
@@ -939,7 +1142,7 @@ function renderPage(data, page) {
 
     // Manejar el evento de cambio en el selector de elementos por página
     itemsPerPageSelect.addEventListener("change", function () {
-        itemsPerPage = parseInt(this.value, 15); // Actualizar el número de elementos por página
+        itemsPerPage = parseInt(this.value, 15);
         currentPage = 1; // Reiniciar a la primera página
         renderPage(allData, currentPage); // Renderizar la nueva página
         setupPagination(allData); // Actualizar el paginador
@@ -1384,22 +1587,23 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 // Cargar clasificaciones antes de renderizar variables
+// Si decides conservar ese bloque, ajústalo así:
 fetch('/api/clasificaciones')
   .then(res => res.json())
   .then(clasificaciones => {
     clasificacionesGlobal = clasificaciones;
-    // Ahora carga las variables y eventos como ya lo haces
-    fetch('/api/eventos')
-      .then(res => res.json())
-      .then(eventos => {
-        eventosGlobal = eventos;
-        fetch('/api/variables')
-          .then(res => res.json())
-          .then(variables => {
-            (variables, 1);
-          });
-      });
-  });
+    return fetch('/api/eventos').then(res => res.json());
+  })
+  .then(eventos => {
+    eventosGlobal = eventos;
+    // Re-render si ya hay data
+    if (Array.isArray(allData) && allData.length) {
+      renderPage(currentFilteredData.length ? currentFilteredData : allData, currentPage);
+      setupPagination(currentFilteredData.length ? currentFilteredData : allData);
+    }
+  })
+  .catch(console.error);
+
 
 function getClasificacionesPorVariable(idVar) {
   // Filtra las clasificaciones que correspondan a la variable y descarta vacíos, nulos o '-'
@@ -1444,7 +1648,7 @@ window.addEventListener("DOMContentLoaded", function() {
   setTimeout(function() {
     document.getElementById("loader").style.display = "none";
     document.getElementById("mainContent").style.display = "";
-  }, 1000);
+  }, 1850);
 });
 
 
