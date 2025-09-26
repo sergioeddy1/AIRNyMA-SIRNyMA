@@ -236,7 +236,6 @@ function removeLoader() {
 
 // Helper: intenta obtener el idPp de un registro de variable aunque el esquema cambie
 function getVariableIdPp(v) {
-  // Ajusta/añade aquí si sabes el nombre exacto del campo en la nueva API
   return (
     v.idPp ||
     v.acronimo ||
@@ -245,6 +244,25 @@ function getVariableIdPp(v) {
     null
   );
 }
+
+
+// Conteo específico para /api/indicadores/ultima
+// Estructura: [ { idA, variableList:[ { acronimo, ... }, ... ] }, ... ]
+function buildConteoPorIdPpDesdeUltima(ultimaPayload) {
+  const counts = {};
+  const registros = Array.isArray(ultimaPayload) ? ultimaPayload : (ultimaPayload ? [ultimaPayload] : []);
+
+  for (const reg of registros) {
+    const lista = Array.isArray(reg.variableList) ? reg.variableList : [];
+    for (const v of lista) {
+      const key = (v.acronimo || v.idPp || v.id_pp || "").toString().trim();
+      if (!key) continue;
+      counts[key] = (counts[key] || 0) + 1;
+    }
+  }
+  return counts;
+}
+
 
 //  Helper: construye un índice de conteo { idPp: cantidad } en O(n)
 function buildConteoPorIdPp(variables) {
@@ -292,20 +310,20 @@ async function cargarEconomicas({ container }) {
 
   const urlProcesos = "http://10.109.1.13:3001/api/procesos/buscar?unidad=" + 
                       encodeURIComponent("Unidad de Estadísticas Económicas");
-  const urlVariablesEco = "http://10.109.1.13:3001/api/variables";
+  const urlVariablesEco = "http://10.109.1.13:3001/api/indicadores/ultima";
 
   try {
     // 1) Procesos
     const economicasRaw = await fetch(urlProcesos).then(r => r.json());
     const procesos = economicasRaw.map(mapEconomicasToLocal);
 
-    // 2) Conteo de variables (prioriza API nueva; fallback a local)
+    // 2) Conteo de variables: primero desde /indicadores/ultima
     let conteoGlobal = {};
     try {
-      const variablesEco = await fetch(urlVariablesEco).then(r => r.json());
-      conteoGlobal = buildConteoPorIdPp(variablesEco);
+      const payloadUltima = await fetch(urlVariablesEco).then(r => r.json());
+      conteoGlobal = buildConteoPorIdPpDesdeUltima(payloadUltima);
     } catch (e) {
-      console.warn("No se pudieron cargar variables de la API nueva, usando /api/variables", e);
+      console.warn("No se pudieron cargar variables de /indicadores/ultima, usando /api/variables", e);
       try {
         const variablesLocal = await fetch("/api/variables").then(r => r.json());
         conteoGlobal = buildConteoPorIdPp(variablesLocal);
@@ -315,15 +333,15 @@ async function cargarEconomicas({ container }) {
       }
     }
 
-    // 3) Asegura llaves con 0
+    // 3) Asegura llaves con 0 para evitar undefined
     procesos.forEach(p => {
       if (!(p.idPp in conteoGlobal)) conteoGlobal[p.idPp] = 0;
     });
 
-    // 4) Filtro: ocultar Económicas con 0
+    // 4) Ocultar procesos de Económicas con 0 variables
     const procesosFiltrados = filtrarEconomicasSinVariables(procesos, conteoGlobal);
 
-    // 5) Si no hay nada válido, mensaje y salir
+    // 5) Si quedó vacío, mensaje
     if (procesosFiltrados.length === 0) {
       removeLoader();
       container.innerHTML = `<div class="alert alert-info text-center">
@@ -334,15 +352,15 @@ async function cargarEconomicas({ container }) {
       return;
     }
 
-    // 6) Render normal (esto reemplaza el loader)
+    // 6) Render
     wireFiltrosYOrden({ procesosGlobal: procesosFiltrados, conteoGlobal, container });
-
   } catch (err) {
     console.error("Error cargando económicas", err);
     removeLoader();
     container.innerHTML = "<p class='text-danger text-center my-4'>Error al cargar los procesos (Económicas).</p>";
   }
 }
+
 
 // --- Arranque DOM ---
 document.addEventListener("DOMContentLoaded", async function () {

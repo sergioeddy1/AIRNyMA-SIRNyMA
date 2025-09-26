@@ -392,6 +392,87 @@ searchForm?.addEventListener("submit", function (e) {
     }
     }
 
+    // —— Skeletons helpers ——
+
+// Procesos (select) ----------------------
+function showProcessSkeleton() {
+  try {
+    processSelect.setAttribute('disabled', 'true');
+  } catch {}
+  // evita duplicar
+  if (document.getElementById('processSelectSkeleton')) return;
+
+  const sk = document.createElement('div');
+  sk.id = 'processSelectSkeleton';
+  sk.className = 'skeleton skeleton-select';
+  processSelect.insertAdjacentElement('afterend', sk);
+}
+function hideProcessSkeleton() {
+  processSelect?.removeAttribute('disabled');
+  document.getElementById('processSelectSkeleton')?.remove();
+}
+
+// Variables (listado) --------------------
+function showVariablesSkeleton(count = 6) {
+  container.innerHTML = "";
+  for (let i = 0; i < count; i++) {
+    const card = document.createElement('div');
+    card.className = 'skeleton skeleton-card mb-3';
+    container.appendChild(card);
+  }
+  // opcional: un par de chips fantasmas arriba/derecha
+  const chipsRow = document.createElement('div');
+  chipsRow.className = 'd-flex gap-2 mb-3';
+  chipsRow.innerHTML = `<span class="skeleton skeleton-chip"></span>
+                        <span class="skeleton skeleton-chip"></span>`;
+  container.prepend(chipsRow);
+}
+function hideVariablesSkeleton() {
+  // Limpia solo si el contenedor tiene puros skeletons
+  const onlySkeletons = Array.from(container.children).every(
+    n => n.classList && (n.classList.contains('skeleton') || n.querySelector?.('.skeleton'))
+  );
+  if (onlySkeletons) container.innerHTML = "";
+}
+
+// —— SPINNER en contador Total de Variables ——
+function showCounterSpinner() {
+  const cardBody = document.querySelector('#variableCounter .card .card-body');
+  if (!cardBody || cardBody.querySelector('.counter-spinner')) return;
+
+  const box = document.createElement('div');
+  box.className = 'counter-spinner d-flex align-items-center gap-2 mt-1';
+  box.innerHTML = `
+    <div class="spinner-border spinner-border-sm text-secondary" role="status" aria-hidden="true"></div>
+    <small class="text-secondary">Contando…</small>
+  `;
+  cardBody.appendChild(box);
+}
+function hideCounterSpinner() {
+  document.querySelector('.counter-spinner')?.remove();
+}
+
+// —— SPINNER centrado en el listado de variables ——
+function showListSpinner() {
+  // no duplicar
+  if (document.getElementById('listSpinner')) return;
+  // asegurar posicionamiento relativo del contenedor
+  if (!container.style.position) container.style.position = 'relative';
+
+  const wrap = document.createElement('div');
+  wrap.id = 'listSpinner';
+  wrap.className = 'position-absolute top-50 start-50 translate-middle text-center';
+  wrap.innerHTML = `
+    <div class="spinner-border" role="status" aria-hidden="true"></div>
+    <div class="mt-2 small text-secondary">Cargando variables…</div>
+  `;
+  container.appendChild(wrap);
+}
+function hideListSpinner() {
+  document.getElementById('listSpinner')?.remove();
+}
+
+
 
 // 🔁 Cargar procesos y variables en paralelo
 // 🔁 Cargar procesos + variables locales + variables de /indicadores/ultima
@@ -636,6 +717,9 @@ function renderSelectedTags(selectedOptions) {
 
     // Función para cargar todos los elementos al entrar a la página
     async function loadAllVariables() {
+      showCounterSpinner();
+showListSpinner();
+
   try {
     // Cargar ambas fuentes y fusionar
     const [localRes, ultimaVars] = await Promise.all([
@@ -657,6 +741,9 @@ function renderSelectedTags(selectedOptions) {
     console.error('Error al cargar los datos:', error);
     container.innerHTML = "<p class='text-center text-danger'>Ocurrió un error al cargar los datos. Inténtalo nuevamente.</p>";
   }
+  hideCounterSpinner();
+hideListSpinner();
+
 }
 
 
@@ -710,47 +797,43 @@ function updateVariableCounter(count) {
     animate();
 }
 
+
 // 🔁 CARGA INICIAL “TODO ANTES DE PINTAR”
+showProcessSkeleton();
+showVariablesSkeleton(8);
+
+// NUEVOS spinners
+showCounterSpinner();
+showListSpinner();
+
 Promise.all([
-  fetch("/api/proceso").then(r => r.json()),       // procesos locales
-  fetchProcesosEconomicas(),                       // procesos económicas
-  fetch("/api/variables").then(r => r.json()),     // variables locales
-  fetchVariablesDesdeUltima(),                     // variables económicas
+  fetch("/api/proceso").then(r => r.json()),
+  fetchProcesosEconomicas(),
+  fetch("/api/variables").then(r => r.json()),
+  fetchVariablesDesdeUltima(),
   fetch('/api/eventos').then(r => r.json()),
   fetch('/api/clasificaciones').then(r => r.json())
 ])
 .then(([procesosLocal, procesosEco, variablesLocal, variablesUltima, eventos, clasificaciones]) => {
+  // …tu lógica existente…
+
+  // ✅ Oculta skeletons y spinners ANTES de pintar
+  hideProcessSkeleton();
+  hideVariablesSkeleton();
+  hideCounterSpinner();
+  hideListSpinner();
+
+  // pinta…
   procesosGlobal = mergeProcesos(procesosLocal, procesosEco);
-  window.eventosGlobal = eventos;
-  window.clasificacionesGlobal = clasificaciones;
-
-  // fusiona variables
-  allData = mergeVariablesLocalYUltima(variablesLocal, variablesUltima);
-
-  // 🔎 Poblar el select SOLO con procesos que tengan variables en allData
-  const idPpConVars = new Set(allData.map(v => v.idPp).filter(Boolean));
-  processSelect.innerHTML = "";
-  procesosGlobal
-    .filter(p => idPpConVars.has(p.idPp))
-    .sort((a,b) => (a.pp||"").localeCompare(b.pp||""))
-    .forEach(proc => {
-      const opt = document.createElement("option");
-      opt.value = proc.idPp;
-      opt.textContent = `• ${proc.pp} (${proc.idPp})`;
-      processSelect.appendChild(opt);
-    });
-
-  // pinta
-  currentFilteredData = [...allData];
-  currentPage = 1;
-  renderPage(currentFilteredData, currentPage);
-  setupPagination(currentFilteredData);
-  updateVariableCounter(allData.length);
-  populatePeriodFilters([]);
-  aplicarFiltroDesdeURL();
+  // poblar select procesos…
+  // fusionar variables…
 })
 .catch(err => {
   console.error("Error en carga inicial:", err);
+  hideProcessSkeleton();
+  hideVariablesSkeleton();
+  hideCounterSpinner();
+  hideListSpinner();
   container.innerHTML = `<div class="alert alert-danger">No se pudo cargar la información inicial.</div>`;
 });
 
@@ -1725,7 +1808,7 @@ window.addEventListener("DOMContentLoaded", function() {
   setTimeout(function() {
     document.getElementById("loader").style.display = "none";
     document.getElementById("mainContent").style.display = "";
-  }, 1850);
+  }, 2000);
 });
 
 

@@ -351,3 +351,30 @@ padding-bottom: 6px;
 @media (max-width: 768px) {
   .status { width: 80px; }
 }
+
+/* Estilos adicionales para loader fantasma de card */
+
+/* Tarjetas fantasma para el listado */
+/* —— Skeleton base —— */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: #eceff1;          /* gris clarito */
+  border-radius: 8px;
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.6), transparent);
+  animation: shimmer 1.25s infinite;
+}
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+
+/* —— Skeletons específicos —— */
+.skeleton-select { height: 38px; border-radius: .375rem; margin-top: .5rem; }
+.skeleton-card   { height: 140px; border-radius: 12px; }
+.skeleton-card.sm{ height: 100px; }
+.skeleton-chip   { height: 26px; width: 120px; border-radius: 999px; display:inline-block; }
+
