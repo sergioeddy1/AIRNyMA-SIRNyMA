@@ -69,7 +69,7 @@
             <div class="col-md-12">
                 <h2 class="mb-4">Información en contexto</h2>
                 <p class="lead">La información en contexto es un conjunto de datos que permite entender y analizar un fenómeno o situación específica. En el caso de los procesos de producción, esta información es crucial para la toma de decisiones y la planificación estratégica.</p>
-                <p>En esta sección, podrás explorar los diferentes procesos de producción y las variables ambientles asociadas a cada uno de ellos. Utiliza el menú desplegable para seleccionar un proceso específico y ver sus detalles.</p>
+                <p>En esta sección, podrás explorar los diferentes procesos de producción y las variables ambientales asociadas a cada uno de ellos. Utiliza el menú desplegable para seleccionar un proceso específico y ver sus detalles.</p>
             </div>
         </div>
         <p>Procesos de Producción de Información del INEGI
@@ -82,7 +82,7 @@
     </div>
 
     <div class="container mt-4 mb-3">
-        <h2 class="mb-2">Unidades Administrativa</h2>
+        <h2 class="mb-2">Unidades Administrativas</h2>
         <hr>
 
         <div class="row row-cols-1 row-cols-md-3 g-4">
@@ -99,7 +99,7 @@
             </div>
             <!-- OTRAS CARDS DESHABILITADAS -->
                 <div class="col">
-                    <div class="card h-100 text-center disabled" data-grupo="grupo2" style="background-color: #e9ecef; opacity: 0.6; cursor: auto; pointer-events: painted;" data-bs-toggle="tooltip" title="Esta información está siendo capturada para mostrarse en 2026.">
+                    <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn" id="btnDireccionEconomicas" style="cursor:pointer;">
                     <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-cash-stack display-4 mb-3 iconcustom" ></i>
                         <h5 class="card-title texto-direction nameofDirection">
@@ -109,7 +109,8 @@
                 </div>
             </div>
             <div class="col">
-                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn disabled" data-grupo="grupo3" style="background-color: #e9ecef; opacity: 0.6; cursor:not-allowed; pointer-events: none;">
+                <div class="card h-100 text-center disabled" data-grupo="grupo3" style="background-color: #e9ecef; opacity: 0.6; cursor: auto; pointer-events: painted;"
+                data-bs-toggle="tooltip" title="En proceso de captura.">
                     <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-globe display-4 mb-3 iconcustom"></i>
                         <h5 class="card-title texto-direction nameofDirection">
@@ -119,7 +120,8 @@
                 </div>
             </div>
             <div class="col">
-                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn disabled" data-grupo="grupo4" style="background-color: #e9ecef; opacity: 0.6; cursor:not-allowed; pointer-events: none;">
+                <div class="card h-100 text-center disabled" data-grupo="grupo4" style="background-color: #e9ecef; opacity: 0.6; cursor: auto; pointer-events: painted;"
+                data-bs-toggle="tooltip" title="En proceso de captura.">
                     <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-bank display-4 mb-3 iconcustom"></i>
                         <h5 class="card-title texto-direction nameofDirection">
@@ -129,7 +131,8 @@
                 </div>
             </div>
             <div class="col">
-                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn disabled"  data-grupo="grupo5" style="background-color: #e9ecef; opacity: 0.6; cursor:not-allowed; pointer-events: none;">
+                <div class="card h-100 text-center disabled"  data-grupo="grupo5" style="background-color: #e9ecef; opacity: 0.6; cursor: auto; pointer-events: painted;"
+                data-bs-toggle="tooltip" title="En proceso de captura.">
                     <div class="card-body d-flex flex-column justify-content-center">
                         <i class="bi bi-file-earmark-text display-4 mb-3 iconcustom"></i>
                         <h5 class="card-title texto-direction nameofDirection">
@@ -150,7 +153,10 @@
   <hr>
   <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-3">
     <div>
-      <strong>Total de procesos: <span id="procesosCounter" style="font-family: 'Monaco', monospace; font-weight: bold;">0</span></strong>
+      <strong>Total de procesos con variables ambientales: <span id="procesosCounter" style="font-family: 'Monaco', monospace; font-weight: bold;">0</span></strong>
+    </div>
+    <div>
+      <strong>Total de variables ambientales dentro de esta unidad: <span id="contadorVariablesUnidad" style="font-family: 'Monaco', monospace; font-weight: bold;">0</span></strong>
     </div>
 
     <div class="d-flex flex-wrap align-items-center gap-2">

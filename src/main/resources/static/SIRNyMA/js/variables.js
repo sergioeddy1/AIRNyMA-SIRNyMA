@@ -1,89 +1,26 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const searchForm = document.getElementById("searchForm");
-    const searchInput = document.getElementById("searchInput");
-    const container = document.getElementById("variablesContainer");
-    const paginationContainer = document.getElementById("pagination");
-    const processSelect = document.getElementById("processSelect");
-    const temaSelect = document.getElementById("temaSelect"); // AÑADE ESTA LÍNEA SI NO LA TIENES
-    const clearFiltersBtn = document.getElementById("clearFiltersBtn");
-    const itemsPerPageSelect = document.getElementById("itemsPerPage"); // Selector de elementos por página
-    const unidadSection = document.getElementById("unidadAdministrativaSection");
-    const params = new URLSearchParams(window.location.search); // Obtener los parámetros de la URL
-    const idPpParam = params.get("idPp"); // Obtener el valor del parámetro idPp
-    const sortSelect = document.getElementById("sortOptions"); // Selector de ordenación
-    const alinMdeaCheckbox = document.getElementById("alinMdeaCheckbox");
-    const alinOdsCheckbox = document.getElementById("alinOdsCheckbox");
-    
+  // Elementos del DOM
+  const searchForm = document.getElementById("searchForm");
+  const searchInput = document.getElementById("searchInput");
+  const container = document.getElementById("variablesContainer");
+  const paginationContainer = document.getElementById("pagination");
+  const processSelect = document.getElementById("processSelect");
+  const temaSelect = document.getElementById("temaSelect");
+  const clearFiltersBtn = document.getElementById("clearFiltersBtn");
+  const itemsPerPageSelect = document.getElementById("itemsPerPage");
+  const unidadSection = document.getElementById("unidadAdministrativaSection");
+  const sortSelect = document.getElementById("sortOptions");
+  const alinMdeaCheckbox = document.getElementById("alinMdeaCheckbox");
+  const alinOdsCheckbox = document.getElementById("alinOdsCheckbox");
 
-    let itemsPerPage = parseInt(itemsPerPageSelect.value, 10); // Número de elementos por página
-    let currentPage = 1; // Página actual
-    let procesosGlobal = [];
-let allData = [];
-let currentFilteredData = [];
-
-
-// Llenar el select de procesos y aplicar filtro inicial si hay idPp en la URL
-fetch("/api/proceso")
-  .then(response => response.json())
-  .then(data => {
-    procesosGlobal = data;
-    data.forEach(proc => {
-      const option = document.createElement("option");
-      option.value = proc.idPp;
-      option.textContent = `• ${proc.pp} (${proc.idPp})`;
-      processSelect.appendChild(option);
-    });
-
-    // Ahora carga las variables
-    fetch("/api/variables")
-      .then(response => response.json())
-      .then(variables => {
-        allData = variables;
-        const urlParams = new URLSearchParams(window.location.search);
-        const selectedIdPp = urlParams.get("idPp");
-
-        if (selectedIdPp) {
-          // Selecciona el proceso en el select
-          Array.from(processSelect.options).forEach(option => {
-            option.selected = option.value === selectedIdPp;
-          });
-          // Filtra y muestra solo las variables de ese proceso
-          const filteredData = allData.filter(variable => variable.idPp === selectedIdPp);
-          currentFilteredData = filteredData;
-          renderPage(currentFilteredData, 1);
-          setupPagination(currentFilteredData);
-          updateVariableCounter(filteredData.length);
-        } else {
-          // Si no hay filtro, muestra todo
-          currentFilteredData = allData;
-          renderPage(allData, 1);
-          setupPagination(allData);
-          updateVariableCounter(allData.length);
-        }
-      });
-  });
-
-// Listener para cambios manuales en el select
-processSelect.addEventListener("change", function () {
-  const selectedOptions = Array.from(this.selectedOptions);
-  const selectedValues = selectedOptions.map(opt => opt.value);
-
-  checkMostrarUnidadSection();
-
-  if (selectedValues.length === 0) {
-    currentFilteredData = allData;
-    renderPage(allData, 1);
-    setupPagination(allData);
-    updateVariableCounter(allData.length);
-    return;
-  }
-
-  const filteredData = allData.filter(variable => selectedValues.includes(variable.idPp));
-  currentFilteredData = filteredData;
-  renderPage(currentFilteredData, 1);
-  setupPagination(currentFilteredData);
-  updateVariableCounter(filteredData.length);
-});
+  // Variables globales
+  const params = new URLSearchParams(window.location.search);
+  const idPpParam = params.get("idPp");
+  let itemsPerPage = parseInt(itemsPerPageSelect.value, 15);
+  let currentPage = 1;
+  let procesosGlobal = [];
+  let allData = [];
+  let currentFilteredData = [];
 
     // Referencias a los checkboxes
 const relTabCheckbox = document.getElementById("relTabCheckbox");
@@ -173,17 +110,20 @@ function filterByRelation() {
     const selectedEnd = parseInt(document.getElementById("periodFin").value);
 
 //Filtro de periodo de tiempo
-    if (!isNaN(selectedStart) && !isNaN(selectedEnd)) {
-    filtered = filtered.filter(variable => {
+        if (!isNaN(selectedStart) && !isNaN(selectedEnd)) {
+      filtered = filtered.filter(variable => {
         const varStart = parseInt(variable.vigInicial);
-        let varEnd = variable.vigFinal.includes("A la fecha") ? new Date().getFullYear() : parseInt(variable.vigFinal);
+        const varEnd = (variable.vigFinal && String(variable.vigFinal).includes("A la fecha"))
+          ? new Date().getFullYear()
+          : parseInt(variable.vigFinal);
 
-        // Validación doble por seguridad
-        if (isNaN(varStart) || isNaN(varEnd)) return false;
+        // Si no hay años válidos, NO la descartes (déjala pasar)
+        if (isNaN(varStart) || isNaN(varEnd)) return true;
 
         return varStart <= selectedEnd && varEnd >= selectedStart;
-    });
+      });
     }
+
 
     // Filtro de relación temática
     if (relTabCheckbox?.checked || relMicroCheckbox?.checked) {
@@ -235,103 +175,173 @@ searchForm?.addEventListener("submit", function (e) {
     }
     }
 
+    // —— Skeletons helpers ——
 
+// Procesos (select) ----------------------
+function showProcessSkeleton() {
+  try {
+    processSelect.setAttribute('disabled', 'true');
+  } catch {}
+  // evita duplicar
+  if (document.getElementById('processSelectSkeleton')) return;
 
+  const sk = document.createElement('div');
+  sk.id = 'processSelectSkeleton';
+  sk.className = 'skeleton skeleton-select';
+  processSelect.insertAdjacentElement('afterend', sk);
+}
+function hideProcessSkeleton() {
+  processSelect?.removeAttribute('disabled');
+  document.getElementById('processSelectSkeleton')?.remove();
+}
 
-// 🔁 Cargar procesos y variables en paralelo
-Promise.all([
-  fetch("/api/proceso").then(res => res.json()),
-  fetch("/api/variables").then(res => res.json())
-])
-  .then(([procesos, variables]) => {
-    procesosGlobal = procesos;
-    allData = variables;
+// Variables (listado) --------------------
+function showVariablesSkeleton(count = 6) {
+  container.innerHTML = "";
+  for (let i = 0; i < count; i++) {
+    const card = document.createElement('div');
+    card.className = 'skeleton skeleton-card mb-3';
+    container.appendChild(card);
+  }
+  // opcional: un par de chips fantasmas arriba/derecha
+  const chipsRow = document.createElement('div');
+  chipsRow.className = 'd-flex gap-2 mb-3';
+  chipsRow.innerHTML = `<span class="skeleton skeleton-chip"></span>
+                        <span class="skeleton skeleton-chip"></span>`;
+  container.prepend(chipsRow);
+}
+function hideVariablesSkeleton() {
+  // Limpia solo si el contenedor tiene puros skeletons
+  const onlySkeletons = Array.from(container.children).every(
+    n => n.classList && (n.classList.contains('skeleton') || n.querySelector?.('.skeleton'))
+  );
+  if (onlySkeletons) container.innerHTML = "";
+}
 
-    // Llenar el select de procesos
-    procesos.forEach(proc => {
-      const option = document.createElement("option");
-      option.value = proc.idPp;
-      option.textContent = `• ${proc.pp} (${proc.idPp})`;
-      processSelect.appendChild(option);
-    });
+// —— SPINNER en contador Total de Variables ——
+function showCounterSpinner() {
+  const cardBody = document.querySelector('#variableCounter .card .card-body');
+  if (!cardBody || cardBody.querySelector('.counter-spinner')) return;
 
-    // Manejo de clic para selección múltiple estilo checkbox
-    processSelect.addEventListener("mousedown", function (e) {
-      e.preventDefault();
-      const option = e.target;
-      option.selected = !option.selected;
-      processSelect.dispatchEvent(new Event("change"));
-    });
+  const box = document.createElement('div');
+  box.className = 'counter-spinner d-flex align-items-center gap-2 mt-1';
+  box.innerHTML = `
+    <div class="spinner-border spinner-border-sm text-secondary" role="status" aria-hidden="true"></div>
+    <small class="text-secondary">Contando…</small>
+  `;
+  cardBody.appendChild(box);
+}
+function hideCounterSpinner() {
+  document.querySelector('.counter-spinner')?.remove();
+}
 
-    aplicarFiltroDesdeURL(); // ✅ Aplicar filtro inicial si viene desde otra página
-  })
-  .catch(error => console.error("Error al cargar procesos o variables:", error));
+// —— SPINNER centrado en el listado de variables ——
+function showListSpinner() {
+  // no duplicar
+  if (document.getElementById('listSpinner')) return;
+  // asegurar posicionamiento relativo del contenedor
+  if (!container.style.position) container.style.position = 'relative';
 
+  const wrap = document.createElement('div');
+  wrap.id = 'listSpinner';
+  wrap.className = 'position-absolute top-50 start-50 translate-middle text-center';
+  wrap.innerHTML = `
+    <div class="spinner-border" role="status" aria-hidden="true"></div>
+    <div class="mt-2 small text-secondary">Cargando variables…</div>
+  `;
+  container.appendChild(wrap);
+}
+function hideListSpinner() {
+  document.getElementById('listSpinner')?.remove();
+}
 
+let listenersWired = false;
 // ✅ Listener de cambio del select de procesos
-processSelect.addEventListener("change", () => {
-  const selected = Array.from(processSelect.selectedOptions).map(o => o.value);
-  populatePeriodFilters(selected);   // <- repoblar años según procesos elegidos
-  handleProcessSelectChange();       // <- tu lógica existente de filtrado por proceso
-});
-
+if (!listenersWired) {
+  processSelect.addEventListener("change", () => {
+    const selected = Array.from(processSelect.selectedOptions).map(o => o.value);
+    populatePeriodFilters(selected);
+    handleProcessSelectChange();
+  });
+  listenersWired = true;
+}
 // Tras cargar procesos/variables:
 populatePeriodFilters([]); // sin selección inicial -> usa unión de todos
 
 // 🔍 Aplicar filtro desde la URL si hay `idPp`
+let filtroURLAplicado = false;
+
 function aplicarFiltroDesdeURL() {
-  const urlParams = new URLSearchParams(window.location.search);
+  if (filtroURLAplicado) return;
+  const urlParams    = new URLSearchParams(window.location.search);
   const selectedIdPp = urlParams.get("idPp");
-  const searchTerm = urlParams.get("search");
+  const searchTerm   = urlParams.get("search");
 
-  const interval = setInterval(() => {
-    const selectReady = processSelect.options.length > 0;
-    const dataReady = allData.length > 0;
+  // si no hay filtros en URL, solo dejar que el flujo normal pinte una vez
+  if (!selectedIdPp && !searchTerm) return;
 
-    if (!selectReady || !dataReady) return;
+  // 🔒 bloquea renders “por defecto”
+  renderLocked = true;
 
-    clearInterval(interval);
-
-    // Filtro por Proceso (idPp)
+  const apply = () => {
+    // 1) proceso (si viene)
     if (selectedIdPp) {
-      Array.from(processSelect.options).forEach(option => {
-        if (option.value === selectedIdPp) option.selected = true;
+      Array.from(processSelect.options).forEach(opt => {
+        opt.selected = (opt.value === selectedIdPp);
       });
-      processSelect.dispatchEvent(new Event("change"));
-      return;
+      processSelect.dispatchEvent(new Event("change")); // esto ya pinta filtrado
     }
 
-    // Filtro por término de búsqueda
+    // 2) search (si viene): se aplica sobre el estado actual (ya filtrado por proceso si lo había)
     if (searchTerm) {
-      searchInput.value = searchTerm;
+      searchInput.value = searchTerm.trim();
+      const base = (Array.isArray(currentFilteredData) && currentFilteredData.length)
+        ? currentFilteredData
+        : allData;
 
-      const filteredData = allData.filter(variable =>
-        variable.nomVar.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        variable.defVar.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        variable.varAsig.toLowerCase().includes(searchTerm.toLowerCase())
+      const needle = searchTerm.toLowerCase();
+      const filtered = base.filter(v =>
+        (v.nomVar  && v.nomVar.toLowerCase().includes(needle)) ||
+        (v.defVar  && v.defVar.toLowerCase().includes(needle)) ||
+        (v.varAsig && v.varAsig.toLowerCase().includes(needle))
       );
 
-      currentFilteredData = filteredData;
+      currentFilteredData = filtered;
       currentPage = 1;
 
-      if (filteredData.length === 0) {
+      if (!filtered.length) {
         container.innerHTML = "<p class='text-center'>No se encontraron resultados para el término ingresado.</p>";
         paginationContainer.innerHTML = "";
         updateVariableCounter(0);
       } else {
         renderPage(currentFilteredData, currentPage);
         setupPagination(currentFilteredData);
-        updateVariableCounter(filteredData.length);
+        updateVariableCounter(filtered.length);
       }
-      return;
     }
 
-    // Si no hay filtros, mostrar todo
-    renderPage(allData, 1);
-    setupPagination(allData);
-    updateVariableCounter(allData.length);
-  }, 1000);
+    // ✅ aplicar una única vez
+    filtroURLAplicado = true;
+    initialPaintDone  = true;
+
+    // 🔓 suelta el candado
+    renderLocked = false;
+  };
+
+  // esperamos a que select + datos estén listos
+  const start = Date.now();
+  (function waitReady(){
+    const selectReady = processSelect && processSelect.options.length > 0;
+    const dataReady   = Array.isArray(allData) && allData.length > 0;
+    if (selectReady && dataReady) return apply();
+    if (Date.now() - start > 10000) { // fallback por si algo falla
+      renderLocked = false;
+      return;
+    }
+    setTimeout(waitReady, 60);
+  })();
 }
+
 
 
 // ✅ Función central de cambio del select
@@ -474,36 +484,37 @@ function renderSelectedTags(selectedOptions) {
 });
 
 
-    //Fetch para cargar los datos de proceso
-    fetch("/api/proceso")
-    .then(res => res.json())
-    .then(data => {
-        allData = data;
-        populatePeriodFilters(); // llena los selects con los años
-        filterByRelation();      // muestra los datos iniciales si deseas
-    });
-
     // Función para cargar todos los elementos al entrar a la página
     async function loadAllVariables() {
-    try {
-        const response = await fetch('/api/variables');
-        const data = await response.json();
-        allData = data;
-        currentFilteredData = [...allData];
+      showCounterSpinner();
+showListSpinner();
 
-        renderPage(currentFilteredData, currentPage);
-        setupPagination(currentFilteredData);
-        updateVariableCounter(allData.length);
+  try {
+    // Cargar ambas fuentes y fusionar
+    const [localRes, ultimaVars] = await Promise.all([
+      fetch('/api/variables').then(r => r.json()),
+      fetchVariablesDesdeUltima()
+    ]);
+    allData = mergeVariablesLocalYUltima(localRes, ultimaVars);
 
-        if (idPpParam) {
-            processSelect.value = `proc${idPpParam}`;
-            applyFilters();
-        }
-    } catch (error) {
-        console.error('Error al cargar los datos:', error);
-        container.innerHTML = "<p class='text-center text-danger'>Ocurrió un error al cargar los datos. Inténtalo nuevamente.</p>";
+    currentFilteredData = [...allData];
+    renderPage(currentFilteredData, currentPage);
+    setupPagination(currentFilteredData);
+    updateVariableCounter(allData.length);
+
+    if (idPpParam) {
+      processSelect.value = `proc${idPpParam}`;
+      applyFilters();
     }
+  } catch (error) {
+    console.error('Error al cargar los datos:', error);
+    container.innerHTML = "<p class='text-center text-danger'>Ocurrió un error al cargar los datos. Inténtalo nuevamente.</p>";
+  }
+  hideCounterSpinner();
+hideListSpinner();
+
 }
+
 
 // Buscar variables por término ingresado
 function searchVariables(term) {
@@ -555,36 +566,81 @@ function updateVariableCounter(count) {
     animate();
 }
 
-// Funcion para la linea de tiempo 
-let variablesGlobal = [];
-let microdatosGlobal = [];
-let fuentesGlobal = [];
+
+// 🔁 CARGA INICIAL “TODO ANTES DE PINTAR”
+showProcessSkeleton();
+showVariablesSkeleton(8);
+
+// NUEVOS spinners
+showCounterSpinner();
+showListSpinner();
 
 Promise.all([
-  fetch('/api/proceso').then(r => r.json()),
-  fetch('/api/variables').then(r => r.json()),
-  fetch('/api/microdatos').then(r => r.json()),
-  fetch('/api/fuentes').then(r => r.json()) // tabla "fuente" con anioEvento, idPp, ligaFuente/ligas
-]).then(([procesos, variables, microdatos, fuentes]) => {
-  procesosGlobal = procesos;
-  variablesGlobal = variables;
-  microdatosGlobal = microdatos;
-  fuentesGlobal = fuentes;
+  fetch("/api/proceso").then(r => r.json()),
+  fetchProcesosEconomicas(),
+  fetch("/api/variables").then(r => r.json()),
+  fetchVariablesDesdeUltima(),
+  fetch('/api/eventos').then(r => r.json()),
+  fetch('/api/clasificaciones').then(r => r.json())
+])
+.then(([procesosLocal, procesosEco, variablesLocal, variablesUltima, eventos, clasificaciones]) => {
+  procesosGlobal = mergeProcesos(procesosLocal, procesosEco);
+  window.eventosGlobal = eventos;
+  window.clasificacionesGlobal = clasificaciones;
 
-  // Preprocesos: mapas para resoluciones rápidas
-  window._periodicidadPorPp = buildPeriodicidadPorPp(procesosGlobal); // idPp -> step años
-  window._rangoPorPp       = buildRangoPorPp(procesosGlobal);         // idPp -> {startYear, endYear}
-  window._ultimoAnioPorPp  = buildUltimoAnioPorPp(fuentesGlobal);      // idPp -> max(anioEvento)
-  window._ligaMicroPorVar  = buildLigaMicroPorVar(microdatosGlobal);   // idVar -> ligaMicro
+  allData = mergeVariablesLocalYUltima(variablesLocal, variablesUltima);
 
-  // Llama a tu renderPage(variables, 1) como ya lo haces
-  renderPage(variablesGlobal, 1);
+  // poblar select solo con procesos que tengan variables
+  const idPpConVars = new Set(allData.map(v => v.idPp).filter(Boolean));
+  processSelect.innerHTML = "";
+  procesosGlobal
+    .filter(p => idPpConVars.has(p.idPp))
+    .sort((a,b) => (a.pp||"").localeCompare(b.pp||""))
+    .forEach(proc => {
+      const opt = document.createElement("option");
+      opt.value = proc.idPp;
+      opt.textContent = `• ${proc.pp} (${proc.idPp})`;
+      processSelect.appendChild(opt);
+    });
+
+  currentFilteredData = [...allData];
+  currentPage = 1;
+
+  // filtros de periodo
+  populatePeriodFilters([]);
+
+  // 👉 aplica filtro de URL (esto puede pintar)
+  aplicarFiltroDesdeURL();
+
+  // si NO había filtros en URL y nadie ha pintado aún, pinta el “todo” una sola vez
+  if (!initialPaintDone && !renderLocked) {
+    renderPage(currentFilteredData, currentPage);
+    setupPagination(currentFilteredData);
+    updateVariableCounter(allData.length);
+    initialPaintDone = true;
+  }
+
+  hideProcessSkeleton();
+  hideVariablesSkeleton();
+  hideCounterSpinner();
+  hideListSpinner();
+  // pinta…
+  procesosGlobal = mergeProcesos(procesosLocal, procesosEco);
+  // poblar select procesos…
+  // fusionar variables…
+})
+.catch(err => {
+  console.error("Error en carga inicial:", err);
+  hideProcessSkeleton();
+  hideVariablesSkeleton();
+  hideCounterSpinner();
+  hideListSpinner();
+  container.innerHTML = `<div class="alert alert-danger">No se pudo cargar la información inicial.</div>`;
 });
 
 // 1. Cargar eventos antes de llamar a renderPage
 // --- Helpers: leer periodicidad, rango y último año por proceso ---
 // Deshabilitar anchors en el nodo destacado (amarillo) a nivel global:
-const DISABLE_LINKS_ON_HIT = true;
 
 // Tope general si vigFinal == "A la fecha" (cuando no haya override específico)
 const DEFAULT_END_YEAR_CAP = 2025;
@@ -775,8 +831,23 @@ function renderPage(data, page) {
 
   paginatedData.forEach((variable, index) => {
     // 2. Filtrar los eventos que pertenecen a esta variable
-    const eventosRelacionados = eventosGlobal.filter(ev => ev.idVar === variable.idVar);
-    const timelineHTML = construirLineaDeTiempoVariable(variable, eventosRelacionados);
+      // ...dentro de renderPage, antes de construir card.innerHTML
+    // dentro de renderPage, por cada variable...
+    const evs = Array.isArray(window.eventosGlobal) ? window.eventosGlobal : [];
+    const eventosRelacionados = evs.filter(ev => String(ev.idVar) === String(variable.idVar));
+
+    // asegura que SIEMPRE existirá timelineHTML
+    let timelineHTML = "";
+    try {
+      timelineHTML = construirLineaDeTiempoVariable(variable, eventosRelacionados);
+    } catch (e) {
+      console.warn("Fallo timeline; uso fallback neutral:", e);
+      // fallback mínimo si tu helper no está disponible
+      const label = (variable.vigInicial || variable.vigFinal) 
+        ? `${variable.vigInicial || "?"} - ${variable.vigFinal || "?"}`
+        : "Sin periodo";
+      timelineHTML = `<div class="small text-muted">${label}</div>`;
+    }
 
     // 3. Fuentes dinámicas
     const fuentesHTML = eventosRelacionados.map(ev => 
@@ -853,28 +924,46 @@ function renderPage(data, page) {
                                 <span class="text-dark mb-1 fw-normal">${variable.subtema2}</span>
                             </div>
                         </div>
-                        <div class="mb-2">
-                            <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Verifica si la variable seleccionada cuenta con información disponible en relación a tabulados publicados o en microdatos">
-                            <i class="bi bi-link-45deg me-1"></i>Relación con Tabulados o Microdatos</span>
-                            <div class="ps-3 d-flex flex-wrap gap-2">
-                                <span class="badge bg-${variable.relTab === 'Sí' ? 'success badge-tabulado' : 'danger'}"
-                                      style="cursor:pointer"
-                                      data-idvar="${variable.idVar}"
-                                      ${variable.relTab === 'Sí' ? 'data-bs-toggle="modal" data-bs-target="#infoModal" data-type="tabulado"' : ''}
-                                >${variable.relTab === 'Sí' ? 'Tabulados' : 'Sin Tabulados'}</span>
-                                <span class="badge bg-${variable.relMicro === 'Sí' ? 'success badge-microdatos' : 'danger'}"
-                                      style="cursor:pointer"
-                                      data-idvar="${variable.idVar}"
-                                      ${variable.relMicro === 'Sí' ? 'data-bs-toggle="modal" data-bs-target="#infoModal" data-type="microdatos"' : ''}
-                                >${variable.relMicro === 'Sí' ? 'Microdatos' : 'Sin Microdatos'}</span>
-                            </div>
-                        <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Verifica si la variable seleccionada está alineada con la estructura del MDEA o con los ODS.">
-                        <i class="bi bi-link-45deg me-1"></i>Alineación con MDEA y ODS</span>
-                            <div class="ps-3 d-flex flex-wrap gap-2">
-                                <span class="badge bg-${variable.alinMdea === 'Sí' ? 'primary' : 'secondary'}">${variable.alinMdea === 'Sí' ? 'MDEA' : 'Sin MDEA'}</span>
-                                <span class="badge bg-${variable.alinOds === 'Sí' ? 'primary' : 'secondary'}">${variable.alinOds === 'Sí' ? 'ODS' : 'Sin ODS'}</span>
-                            </div>
-                        </div>
+                          <div class="mb-2">
+                             <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left"
+                                   data-bs-title="Verifica si la variable seleccionada cuenta con información disponible en relación a tabulados publicados o en microdatos">
+                               <i class="bi bi-link-45deg me-1"></i>Relación con Tabulados o Microdatos
+                             </span>
+                             <div class="ps-3 d-flex flex-wrap gap-2">
+                               <span class="badge bg-${variable.relTab === 'Sí' ? 'success badge-tabulado' : 'danger'}"
+                                     style="cursor:pointer"
+                                     data-idvar="${variable.idVar}"
+                                     ${variable.relTab === 'Sí' ? 'data-bs-toggle="modal" data-bs-target="#infoModal" data-type="tabulado"' : ''}>
+                                 ${variable.relTab === 'Sí' ? 'Tabulados' : 'Sin Tabulados'}
+                               </span>
+
+                               <span class="badge bg-${variable.relMicro === 'Sí' ? 'success badge-microdatos' : 'danger'}"
+                                     style="cursor:pointer"
+                                     data-idvar="${variable.idVar}"
+                                     ${variable.relMicro === 'Sí' ? 'data-bs-toggle="modal" data-bs-target="#infoModal" data-type="microdatos"' : ''}>
+                                 ${variable.relMicro === 'Sí' ? 'Microdatos' : 'Sin Microdatos'}
+                               </span>
+                             </div>
+
+                             <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left"
+                                   data-bs-title="Verifica si la variable seleccionada está alineada con la estructura del MDEA o con los ODS.">
+                               <i class="bi bi-link-45deg me-1"></i>Alineación con MDEA y ODS
+                             </span>
+                             <div class="ps-3 d-flex flex-wrap gap-2">
+                               <span class="badge ${variable.alinMdea === 'Sí' ? 'bg-primary badge-mdea' : 'bg-secondary'}"
+                                     style="cursor:${variable.alinMdea === 'Sí' ? 'pointer' : 'default'}"
+                                     data-idvar="${variable.idVar}"
+                                     ${variable.alinMdea === 'Sí' ? 'data-bs-toggle="modal" data-bs-target="#infoModal" data-type="mdea"' : ''}>
+                                 ${variable.alinMdea === 'Sí' ? 'MDEA' : 'Sin MDEA'}
+                               </span>
+
+                               <span class="badge ${variable.alinOds === 'Sí' ? 'bg-primary badge-ods' : 'bg-secondary'}"
+                                     style="cursor:${variable.alinOds === 'Sí' ? 'pointer' : 'default'}"
+                                     data-idvar="${variable.idVar}"
+                                     ${variable.alinOds === 'Sí' ? 'data-bs-toggle="modal" data-bs-target="#infoModal" data-type="ods"' : ''}>
+                                 ${variable.alinOds === 'Sí' ? 'ODS' : 'Sin ODS'}
+                               </span>
+                             </div>
                        ${renderComentarios(variable.comentVar)}
                     </div>
                 </div>
@@ -986,7 +1075,7 @@ function renderPage(data, page) {
 
     // Manejar el evento de cambio en el selector de elementos por página
     itemsPerPageSelect.addEventListener("change", function () {
-        itemsPerPage = parseInt(this.value, 15); // Actualizar el número de elementos por página
+        itemsPerPage = parseInt(this.value, 15);
         currentPage = 1; // Reiniciar a la primera página
         renderPage(allData, currentPage); // Renderizar la nueva página
         setupPagination(allData); // Actualizar el paginador
@@ -1010,7 +1099,7 @@ function renderPage(data, page) {
     });
 
     // Cargar todos los elementos al entrar a la página
-    loadAllVariables();
+  
 
     //Filtrado de ordemaniento de la A-Z 
         // Función para ordenar variables alfabéticamente
@@ -1182,117 +1271,259 @@ searchForm.addEventListener("submit", function (e) {
     });
 
     // Evento delegado para mostrar información de tabulados y microdatos en el modal
-    document.addEventListener("click", async function (e) {
-        // Badge de Tabulados
-        if (e.target.classList.contains("badge-tabulado")) {
-            document.getElementById("infoModalLabel").textContent = "Detalle de la Relación con Tabulados"; // <-- Cambia el título
-            const idVar = e.target.getAttribute("data-idvar");
-            const modalBody = document.getElementById("infoModalBody");
-            modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
+ // === REEMPLAZA COMPLETO TU LISTENER ACTUAL POR ESTE ===
+document.addEventListener("click", async function (e) {
+  // Utilidad: busca la variable en allData por idVar
+  function getVariableByIdVar(idVar) {
+    return (Array.isArray(allData) ? allData : []).find(v => String(v.idVar) === String(idVar));
+  }
 
-            try {
-                // 1. Obtener relaciones var-tab
-                const resVarTab = await fetch('/api/var-tab');
-                const dataVarTab = await resVarTab.json();
+  // ============ TABULADOS ============
+  if (e.target.classList.contains("badge-tabulado")) {
+    document.getElementById("infoModalLabel").textContent = "Detalle de la Relación con Tabulados";
+    const idVar = e.target.getAttribute("data-idvar");
+    const modalBody = document.getElementById("infoModalBody");
+    modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
 
-                // Filtrar todas las coincidencias por idVar
-                const relaciones = dataVarTab.filter(rel => rel.idVar === idVar);
+    try {
+      const variable = getVariableByIdVar(idVar);
 
-                if (relaciones.length === 0) {
-                    modalBody.innerHTML = "<div class='text-danger'>No hay tabulados relacionados con esta variable.</div>";
-                    return;
-                }
+      // 1) Si la variable viene de Económicas y trae tabulados embebidos, úsalo
+      if (variable && variable._source === "economicas-ultima" && Array.isArray(variable._tabuladosList) && variable._tabuladosList.length) {
+        const html = variable._tabuladosList.map(t => `
+          <div class="mb-3 border-bottom pb-2">
+            <strong>${t.tabulado || "Tabulado"}</strong><br>
+            ${t.tipo ? `<span class="small text-muted">${t.tipo}</span><br>` : ""}
+            <div class="row">
+              <div class="col-6">
+                ${t.urlAcceso ? `<strong>Acceso:</strong> <a href="${t.urlAcceso}" target="_blank" style="word-break: break-all;">Abrir</a>` : ""}
+              </div>
+              <div class="col-6">
+                ${t.urlDescarga ? `<strong>Descarga:</strong> <a href="${t.urlDescarga}" target="_blank" style="word-break: break-all;">Descargar</a>` : ""}
+              </div>
+            </div>
+            ${t.comentarioA ? `<div class="small mt-1">${t.comentarioA}</div>` : ""}
+          </div>
+        `).join("");
+        modalBody.innerHTML = html || "<div class='text-danger'>No hay tabulados disponibles.</div>";
+        return;
+      }
 
-                // 2. Obtener todos los tabulados
-                const resTabulados = await fetch('/api/tabulado');
-                const tabulados = await resTabulados.json();
+      // 2) Fallback a tus endpoints locales
+      const resVarTab = await fetch('/api/var-tab');
+      const dataVarTab = await resVarTab.json();
+      const relaciones = Array.isArray(dataVarTab) ? dataVarTab.filter(rel => rel.idVar === idVar) : [];
 
-                // 3. Construir HTML con las ligas y nuevos campos
-                let contenido = "";
+      if (!relaciones.length) {
+        modalBody.innerHTML = "<div class='text-danger'>No hay tabulados relacionados con esta variable.</div>";
+        return;
+      }
 
-                relaciones.forEach(rel => {
-                    const tabulado = tabulados.find(tab => tab.idTab === rel.idTab);
-                    if (tabulado && (tabulado.ligaTab || tabulado.ligaDescTab)) {
-                        contenido += `
-                            <div class="mb-3 border-bottom pb-2">
-                                ${tabulado.tituloTab ? `
-                                <strong>Título del tabulado:</strong><br>
-                                <span>${tabulado.tituloTab}</span><br>` : ''}
-                                <div class="row">
-                                    <div class="col-6">
-                                        ${tabulado.ligaTab ? `
-                                        <strong>Liga Tabulado INEGI:</strong><br>
-                                        <a href="${tabulado.ligaTab}" target="_blank" style="word-break: break-all;">Tabulado</a><br>` : ''}
-                                    </div>
-                                    <div class="col-6">
-                                        ${tabulado.ligaDescTab ? `
-                                        <strong>Liga de Descarga:</strong><br>
-                                        <a href="${tabulado.ligaDescTab}" target="_blank" style="word-break: break-all;">Documento Directo</a><br>` : ''}
-                                    </div>
-                                </div>
-                                ${(tabulado.numTab || tabulado.tipoTab) ? `
-                                <strong>Información adicional:</strong><br>
-                                ${tabulado.numTab ? `Número: ${tabulado.numTab}<br>` : ''}
-                                ${tabulado.tipoTab ? `Tipo: ${tabulado.tipoTab}<br>` : ''}` : ''}
-                            </div>
-                        `;
-                    }
-                });
+      const resTabulados = await fetch('/api/tabulado');
+      const tabulados = await resTabulados.json();
 
-                modalBody.innerHTML = contenido || "<div class='text-danger'>No hay ligas disponibles para los tabulados relacionados.</div>";
+      const contenido = relaciones.map(rel => {
+        const tabulado = Array.isArray(tabulados) ? tabulados.find(tab => tab.idTab === rel.idTab) : null;
+        if (!tabulado) return "";
+        return `
+          <div class="mb-3 border-bottom pb-2">
+            ${tabulado.tituloTab ? `<strong>Título del tabulado:</strong><br><span>${tabulado.tituloTab}</span><br>` : ''}
+            <div class="row">
+              <div class="col-6">
+                ${tabulado.ligaTab ? `<strong>Liga Tabulado INEGI:</strong><br><a href="${tabulado.ligaTab}" target="_blank" style="word-break: break-all;">Tabulado</a><br>` : ''}
+              </div>
+              <div class="col-6">
+                ${tabulado.ligaDescTab ? `<strong>Liga de Descarga:</strong><br><a href="${tabulado.ligaDescTab}" target="_blank" style="word-break: break-all;">Documento Directo</a><br>` : ''}
+              </div>
+            </div>
+            ${(tabulado.numTab || tabulado.tipoTab) ? `
+              <strong>Información adicional:</strong><br>
+              ${tabulado.numTab ? `Número: ${tabulado.numTab}<br>` : ''}
+              ${tabulado.tipoTab ? `Tipo: ${tabulado.tipoTab}<br>` : ''}` : ''}
+          </div>
+        `;
+      }).join("");
 
-            } catch (error) {
-                console.error(error);
-                modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información.</div>";
-            }
-        }
+      modalBody.innerHTML = contenido || "<div class='text-danger'>No hay ligas disponibles para los tabulados relacionados.</div>";
+    } catch (error) {
+      console.error(error);
+      document.getElementById("infoModalBody").innerHTML = "<div class='text-danger'>Error al cargar la información.</div>";
+    }
+  }
 
+  // ============ MICRODATOS ============
+  if (e.target.classList.contains("badge-microdatos")) {
+    document.getElementById("infoModalLabel").textContent = "Detalle de la Relación con Microdatos";
+    const idVar = e.target.getAttribute("data-idvar");
+    const modalBody = document.getElementById("infoModalBody");
+    modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
 
-        // Badge de Microdatos
-        if (e.target.classList.contains("badge-microdatos")) {
-            document.getElementById("infoModalLabel").textContent = "Detalle de la Relación con Microdatos"; // <-- Cambia el título
-            const idVar = e.target.getAttribute("data-idvar");
-            const modalBody = document.getElementById("infoModalBody");
-            modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
-            try {
-                // Trae todos los microdatos y filtra por idVar
-                const res = await fetch(`/api/microdatos`);
-                const data = await res.json();
-                // Busca el microdato que corresponde a la variable
-                const info = Array.isArray(data)
-                    ? data.find(micro => String(micro.idVar) === String(idVar))
-                    : (data.idVar === idVar ? data : null);
-                if (info && (info.ligaMicro || info.ligaDd)) {
-                    modalBody.innerHTML = `
-                    <div class="mb-2">
-                        <strong>Liga Microdatos:</strong><br>
-                        <a href="${info.ligaMicro}" target="_blank" style="word-break: break-all;">Página Microdatos INEGI</a>
-                    </div>
-                    <div class="mb-2">
-                        <strong>Liga de Descarga:</strong><br>
-                        <a href="${info.ligaDd}" target="_blank" style="word-break: break-all;">Documento Directo</a>
-                    </div>
-                    <div class="mb-2">
-                        <strong>Tabla donde se encuentra:</strong><br>
-                        ${info.nomTabla || "No disponible"}
-                    </div>
-                    <div class="mb-2">
-                        <strong>Se localiza en el Campo:</strong><br>
-                        ${info.nomCampo || "No disponible"}
-                    </div>
-                    <div class="mb-2">
-                        ${renderComentarios(info.comentMicro)}
-                    </div>
-                `;
-                } else {
-                    modalBody.innerHTML = "<div class='text-danger'>No hay información de microdatos disponible.</div>";
-                }
-            } catch {
-                modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información.</div>";
-            }
-        }
-    });
+    try {
+      const variable = getVariableByIdVar(idVar);
 
+      // 1) Si viene de Económicas y trae microdatos embebidos, úsalo
+      if (variable && variable._source === "economicas-ultima" && Array.isArray(variable._microdatosList) && variable._microdatosList.length) {
+        const html = variable._microdatosList.map(m => `
+          <div class="mb-2 border-bottom pb-2">
+            ${m.urlAcceso ? `<div><strong>Acceso:</strong> <a href="${m.urlAcceso}" target="_blank" style="word-break: break-all;">${m.urlAcceso}</a></div>` : ""}
+            ${m.urlDescriptor ? `<div><strong>Descriptor:</strong> <a href="${m.urlDescriptor}" target="_blank" style="word-break: break-all;">${m.urlDescriptor}</a></div>` : ""}
+            ${(m.tabla || m.campo) ? `<div><strong>Ubicación:</strong> ${m.tabla || "-"} / ${m.campo || "-"}</div>` : ""}
+            ${m.descriptor ? `<div class="small text-muted">${m.descriptor}</div>` : ""}
+          </div>
+        `).join("");
+        modalBody.innerHTML = html || "<div class='text-danger'>No hay microdatos disponibles.</div>";
+        return;
+      }
+
+      // 2) Fallback a /api/microdatos
+      const res = await fetch(`/api/microdatos`);
+      const data = await res.json();
+      const info = Array.isArray(data)
+        ? data.find(micro => String(micro.idVar) === String(idVar))
+        : (data && data.idVar === idVar ? data : null);
+
+      if (info && (info.ligaMicro || info.ligaDd || info.nomTabla || info.nomCampo)) {
+        modalBody.innerHTML = `
+          ${info.ligaMicro ? `
+            <div class="mb-2"><strong>Liga Microdatos:</strong><br>
+            <a href="${info.ligaMicro}" target="_blank" style="word-break: break-all;">Página Microdatos INEGI</a></div>` : ""}
+
+          ${info.ligaDd ? `
+            <div class="mb-2"><strong>Liga de Descarga:</strong><br>
+            <a href="${info.ligaDd}" target="_blank" style="word-break: break-all;">Documento Directo</a></div>` : ""}
+
+          ${(info.nomTabla || info.nomCampo) ? `
+            <div class="mb-2"><strong>Ubicación:</strong><br>
+              ${info.nomTabla || "No disponible"} / ${info.nomCampo || "No disponible"}
+            </div>` : ""}
+
+          <div class="mb-2">${renderComentarios(info.comentMicro || "-")}</div>
+        `;
+      } else {
+        modalBody.innerHTML = "<div class='text-danger'>No hay información de microdatos disponible.</div>";
+      }
+    } catch (err) {
+      console.error(err);
+      modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información.</div>";
+    }
+  }
+
+  // ============ MDEA ============
+  if (e.target.classList.contains("badge-mdea")) {
+    document.getElementById("infoModalLabel").textContent = "Relación de la variable con el MDEA";
+    const idVar = e.target.getAttribute("data-idvar");
+    const modalBody = document.getElementById("infoModalBody");
+    modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
+
+    const fmt = (s) => (s || "-").toString().replace(/_/g, " ").replace(/\s+/g, " ").trim();
+
+    try {
+      const variable = getVariableByIdVar(idVar);
+
+      // 1) Económicas con mdeas embebidos
+      if (variable && variable._source === "economicas-ultima" && Array.isArray(variable._mdeasList) && variable._mdeasList.length) {
+        modalBody.innerHTML = variable._mdeasList.map(m => `
+          <div class="mb-2 border-bottom pb-2">
+            <div><strong>Componente:</strong> ${formatIdWithDots(m.componente)} ${fmt(m.componenteNombre)}</div>
+            <div><strong>Subcomponente:</strong> ${formatIdWithDots(m.subcomponente)} ${fmt(m.subcomponenteNombre)}</div>
+            <div><strong>Tema:</strong> ${formatIdWithDots(m.tema)} ${fmt(m.temaNombre)}</div>
+            <div><strong>Estadística 1:</strong> ${formatIdWithDots(m.estadistica1)} ${fmt(m.estadistica1Nombre)}</div>
+            ${m.estadistica2 ? `<div><strong>Estadística 2:</strong> ${formatIdWithDots(m.estadistica2)} ${fmt(m.estadistica2Nombre)}</div>` : ""}
+          </div>
+        `).join("");
+        return;
+      }
+
+      // 2) Fallback a /api/mdea (tu lógica original – uno por idVar)
+      const res = await fetch(`/api/mdea`);
+      const data = await res.json();
+      const info = Array.isArray(data)
+        ? data.find(mdea => String(mdea.idVar) === String(idVar))
+        : (data && data.idVar === idVar ? data : null);
+
+      if (info) {
+        modalBody.innerHTML = `
+          <div class="mb-2"><strong>Componente:</strong><br>${fmt(info.compo)}${fmt(info.componenteNombre)}</div>
+          <div class="mb-2"><strong>Subcomponente:</strong><br>${fmt(info.subcompo)}</div>
+          <div class="mb-2"><strong>Tópico:</strong><br>${fmt(info.topico)}</div>
+          <div class="mb-2"><strong>Variable del MDEA:</strong><br>${fmt(info.estAmbiental)}</div>
+          <div class="mb-2"><strong>Estadístico del MDEA:</strong><br>${(info.estadMdea ?? "No disponible")}</div>
+        `;
+      } else {
+        modalBody.innerHTML = "<div class='text-danger'>No hay información del MDEA para esta variable.</div>";
+      }
+    } catch (err) {
+      console.error(err);
+      modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información del MDEA.</div>";
+    }
+  }
+
+  // ============ ODS ============
+  if (e.target.classList.contains("badge-ods")) {
+    document.getElementById("infoModalLabel").textContent = "Relación de la variable mostrada con los ODS";
+    const idVar = e.target.getAttribute("data-idvar");
+    const modalBody = document.getElementById("infoModalBody");
+    modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
+
+    const fmt = (s) => (s || "-").toString().replace(/_/g, " ").replace(/\s+/g, " ").trim();
+
+    try {
+      const variable = getVariableByIdVar(idVar);
+
+      // 1) Económicas con ods embebidos
+      if (variable && variable._source === "economicas-ultima" && Array.isArray(variable._odsList) && variable._odsList.length) {
+        modalBody.innerHTML = `
+          <div class="list-group">
+            ${variable._odsList.map(o => `
+              <div class="list-group-item">
+                <div class="d-flex w-100 justify-content-between align-items-start">
+                  <h6 class="mb-1">ODS: ${formatIdWithDots(o.objetivo)} ${fmt(o.objetivoNombre)}</h6>
+                </div>
+                <div class="small mb-1"><strong>Meta:</strong> ${formatIdWithDots(o.meta)} ${fmt(o.metaNombre)}</div>
+                <div class="small mb-1"><strong>Indicador:</strong> ${formatIdWithDots(o.indicador)} ${fmt(o.indicadorNombre)}</div>
+              </div>
+            `).join("")}
+          </div>
+        `;
+        return;
+      }
+
+      // 2) Fallback a /api/ods (pueden ser varias relaciones por variable)
+      const res = await fetch(`/api/ods`);
+      const data = await res.json();
+      const registros = Array.isArray(data)
+        ? data.filter(ods => String(ods.idVar) === String(idVar))
+        : (data && data.idVar === idVar ? [data] : []);
+
+      if (!registros.length) {
+        modalBody.innerHTML = "<div class='text-danger'>No hay información de ODS para esta variable.</div>";
+        return;
+      }
+
+      const varTitle = fmt((getVariableByIdVar(idVar)?.varAsig) || idVar);
+      const contenido = `
+        <div class="mb-2"><strong>${varTitle}</strong></div>
+        <div class="list-group">
+          ${registros.map(info => `
+            <div class="list-group-item">
+              <div class="d-flex w-100 justify-content-between align-items-start">
+                <h6 class="mb-1">ODS: ${fmt(info.ods)}</h6>
+                <span class="badge text-bg-light border">${fmt(info.nivContOds)}</span>
+              </div>
+              <div class="small mb-1"><strong>Meta ODS detectada:</strong> ${fmt(info.meta)}</div>
+              <div class="small mb-1"><strong>Indicador ODS:</strong> ${fmt(info.indicador)}</div>
+              ${info.comentOds && info.comentOds.trim() !== "-" ? `<div class="small text-muted">${info.comentOds}</div>` : ""}
+            </div>
+          `).join("")}
+        </div>
+      `;
+      modalBody.innerHTML = contenido;
+    } catch (err) {
+      console.error(err);
+      modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información de ODS.</div>";
+    }
+  }
+});
 });
 
 // Almacenar y recuperar término de búsqueda en localStorage
@@ -1311,22 +1542,25 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 // Cargar clasificaciones antes de renderizar variables
+// Si decides conservar ese bloque, ajústalo así:
 fetch('/api/clasificaciones')
   .then(res => res.json())
   .then(clasificaciones => {
     clasificacionesGlobal = clasificaciones;
-    // Ahora carga las variables y eventos como ya lo haces
-    fetch('/api/eventos')
-      .then(res => res.json())
-      .then(eventos => {
-        eventosGlobal = eventos;
-        fetch('/api/variables')
-          .then(res => res.json())
-          .then(variables => {
-            (variables, 1);
-          });
-      });
-  });
+    return fetch('/api/eventos').then(res => res.json());
+  })
+  .then(eventos => {
+    eventosGlobal = eventos;
+    // Solo re-render si ya hicimos el primer pintado y SIN romper filtros
+    if (initialPaintDone && !renderLocked) {
+      const base = (currentFilteredData && currentFilteredData.length) ? currentFilteredData : allData;
+      renderPage(base, currentPage);
+      setupPagination(base);
+    }
+  })
+  .catch(console.error);
+
+
 
 function getClasificacionesPorVariable(idVar) {
   // Filtra las clasificaciones que correspondan a la variable y descarta vacíos, nulos o '-'
@@ -1371,8 +1605,15 @@ window.addEventListener("DOMContentLoaded", function() {
   setTimeout(function() {
     document.getElementById("loader").style.display = "none";
     document.getElementById("mainContent").style.display = "";
-  }, 1000);
+  }, 2000);
 });
+
+function formatIdWithDots(id) {
+  if (!id) return "";
+  const str = String(id).trim();
+  // Divide cada caracter por punto, incluyendo letras
+  return str.split("").join(".");
+}
 
 
 

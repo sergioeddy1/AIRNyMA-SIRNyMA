@@ -73,3 +73,29 @@
 body, html {
     font-family: Helvetica, Sans-Serif !important;
 }
+
+/* --- Mejoras para proyector: legibilidad y claridad en pantallas grandes --- */
+@media only screen and (min-width: 768px) and (max-width: 1024px) {
+    body, html {
+        font-size: 1.5rem;
+        background: #fff;
+        color: #222;
+    }
+    .nav-link {
+        font-size: 1.25rem;
+        padding: 1rem 2rem;
+    }
+    .iconcustom {
+        font-size: 4rem;
+    }
+    .texto-direction, .texto-numero {
+        font-size: 2rem;
+    }
+    .custom-card-btn {
+        font-size: 1.25rem;
+        padding: 24px;
+    }
+    #procesosCounter {
+        font-size: 1.5em;
+    }
+}
