@@ -22,6 +22,11 @@ document.addEventListener("DOMContentLoaded", function () {
   let allData = [];
   let currentFilteredData = [];
 
+ 
+let renderLocked        = false;  // evita renders mientras aplicamos URL
+let initialPaintDone    = false;  // ya hicimos el primer render “válido”
+
+
   // ==== PARCHE: globals seguros (evita "is not defined") ====
 let eventosGlobal = window.eventosGlobal || [];
 let procesosGlobal = window.procesosGlobal || [];
@@ -132,7 +137,7 @@ function mapUltimaVariableToLocal(v, eventosList = []) {
 
 
 async function fetchVariablesDesdeUltima() {
-  const urlUltima = "http://10.109.1.13:3001/api/indicadores/ultima";
+  const urlUltima = "http://10.109.1.13:3002/api/indicadores/ultima";
   const res = await fetch(urlUltima);
   if (!res.ok) throw new Error(`ultima respondió ${res.status}`);
   const payload = await res.json();
@@ -162,7 +167,7 @@ function mergeVariablesLocalYUltima(locales = [], ultima = []) {
 
 // trae y aplana /indicadores/ultima → array de variables en shape local
 async function fetchVariablesDesdeUltima() {
-  const urlUltima = "http://10.109.1.13:3001/api/indicadores/ultima";
+  const urlUltima = "http://10.109.1.13:3002/api/indicadores/ultima";
   const res = await fetch(urlUltima);
   if (!res.ok) throw new Error(`ultima respondió ${res.status}`);
   const payload = await res.json();
@@ -220,7 +225,7 @@ function mapEconomicasProcesoToLocal(item) {
 }
 
 async function fetchProcesosEconomicas() {
-  const urlProcesosEco = "http://10.109.1.13:3001/api/procesos/buscar?unidad=" +
+  const urlProcesosEco = "http://10.109.1.13:3002/api/procesos/buscar?unidad=" +
                          encodeURIComponent("Unidad de Estadísticas Económicas");
   const res = await fetch(urlProcesosEco);
   if (!res.ok) throw new Error("procesos Económicas respondió " + res.status);
@@ -472,107 +477,93 @@ function hideListSpinner() {
   document.getElementById('listSpinner')?.remove();
 }
 
-
-
-// 🔁 Cargar procesos y variables en paralelo
-// 🔁 Cargar procesos + variables locales + variables de /indicadores/ultima
-Promise.all([
-  fetch("/api/proceso").then(res => res.json()),
-  fetch("/api/variables").then(res => res.json()),
-  fetchVariablesDesdeUltima()
-])
-.then(([procesos, variablesLocal, variablesUltima]) => {
-  procesosGlobal = procesos;
-
-  // llena select de procesos
-  procesos.forEach(proc => {
-    const opt = document.createElement("option");
-    opt.value = proc.idPp;
-    opt.textContent = `• ${proc.pp} (${proc.idPp})`;
-    processSelect.appendChild(opt);
-  });
-
-  // fusiona y pinta
-  allData = mergeVariablesLocalYUltima(variablesLocal, variablesUltima);
-  currentFilteredData = [...allData];
-  currentPage = 1;
-  renderPage(currentFilteredData, currentPage);
-  setupPagination(currentFilteredData);
-  updateVariableCounter(allData.length);
-
-  // filtros de periodo en base a procesos
-  populatePeriodFilters([]);
-
-  // aplica filtros por URL si llegan
-  aplicarFiltroDesdeURL();
-})
-.catch(e => console.error("Error al cargar procesos o variables:", e));
-
-
+let listenersWired = false;
 // ✅ Listener de cambio del select de procesos
-processSelect.addEventListener("change", () => {
-  const selected = Array.from(processSelect.selectedOptions).map(o => o.value);
-  populatePeriodFilters(selected);   // <- repoblar años según procesos elegidos
-  handleProcessSelectChange();       // <- tu lógica existente de filtrado por proceso
-});
-
+if (!listenersWired) {
+  processSelect.addEventListener("change", () => {
+    const selected = Array.from(processSelect.selectedOptions).map(o => o.value);
+    populatePeriodFilters(selected);
+    handleProcessSelectChange();
+  });
+  listenersWired = true;
+}
 // Tras cargar procesos/variables:
 populatePeriodFilters([]); // sin selección inicial -> usa unión de todos
 
 // 🔍 Aplicar filtro desde la URL si hay `idPp`
+let filtroURLAplicado = false;
+
 function aplicarFiltroDesdeURL() {
-  const urlParams = new URLSearchParams(window.location.search);
+  if (filtroURLAplicado) return;
+  const urlParams    = new URLSearchParams(window.location.search);
   const selectedIdPp = urlParams.get("idPp");
-  const searchTerm = urlParams.get("search");
+  const searchTerm   = urlParams.get("search");
 
-  const interval = setInterval(() => {
-    const selectReady = processSelect.options.length > 0;
-    const dataReady = allData.length > 0;
+  // si no hay filtros en URL, solo dejar que el flujo normal pinte una vez
+  if (!selectedIdPp && !searchTerm) return;
 
-    if (!selectReady || !dataReady) return;
+  // 🔒 bloquea renders “por defecto”
+  renderLocked = true;
 
-    clearInterval(interval);
-
-    // Filtro por Proceso (idPp)
+  const apply = () => {
+    // 1) proceso (si viene)
     if (selectedIdPp) {
-      Array.from(processSelect.options).forEach(option => {
-        if (option.value === selectedIdPp) option.selected = true;
+      Array.from(processSelect.options).forEach(opt => {
+        opt.selected = (opt.value === selectedIdPp);
       });
-      processSelect.dispatchEvent(new Event("change"));
-      return;
+      processSelect.dispatchEvent(new Event("change")); // esto ya pinta filtrado
     }
 
-    // Filtro por término de búsqueda
+    // 2) search (si viene): se aplica sobre el estado actual (ya filtrado por proceso si lo había)
     if (searchTerm) {
-      searchInput.value = searchTerm;
+      searchInput.value = searchTerm.trim();
+      const base = (Array.isArray(currentFilteredData) && currentFilteredData.length)
+        ? currentFilteredData
+        : allData;
 
-      const filteredData = allData.filter(variable =>
-        variable.nomVar.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        variable.defVar.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        variable.varAsig.toLowerCase().includes(searchTerm.toLowerCase())
+      const needle = searchTerm.toLowerCase();
+      const filtered = base.filter(v =>
+        (v.nomVar  && v.nomVar.toLowerCase().includes(needle)) ||
+        (v.defVar  && v.defVar.toLowerCase().includes(needle)) ||
+        (v.varAsig && v.varAsig.toLowerCase().includes(needle))
       );
 
-      currentFilteredData = filteredData;
+      currentFilteredData = filtered;
       currentPage = 1;
 
-      if (filteredData.length === 0) {
+      if (!filtered.length) {
         container.innerHTML = "<p class='text-center'>No se encontraron resultados para el término ingresado.</p>";
         paginationContainer.innerHTML = "";
         updateVariableCounter(0);
       } else {
         renderPage(currentFilteredData, currentPage);
         setupPagination(currentFilteredData);
-        updateVariableCounter(filteredData.length);
+        updateVariableCounter(filtered.length);
       }
-      return;
     }
 
-    // Si no hay filtros, mostrar todo
-    renderPage(allData, 1);
-    setupPagination(allData);
-    updateVariableCounter(allData.length);
-  }, 1500);
+    // ✅ aplicar una única vez
+    filtroURLAplicado = true;
+    initialPaintDone  = true;
+
+    // 🔓 suelta el candado
+    renderLocked = false;
+  };
+
+  // esperamos a que select + datos estén listos
+  const start = Date.now();
+  (function waitReady(){
+    const selectReady = processSelect && processSelect.options.length > 0;
+    const dataReady   = Array.isArray(allData) && allData.length > 0;
+    if (selectReady && dataReady) return apply();
+    if (Date.now() - start > 10000) { // fallback por si algo falla
+      renderLocked = false;
+      return;
+    }
+    setTimeout(waitReady, 60);
+  })();
 }
+
 
 
 // ✅ Función central de cambio del select
@@ -815,14 +806,46 @@ Promise.all([
   fetch('/api/clasificaciones').then(r => r.json())
 ])
 .then(([procesosLocal, procesosEco, variablesLocal, variablesUltima, eventos, clasificaciones]) => {
-  // …tu lógica existente…
+  procesosGlobal = mergeProcesos(procesosLocal, procesosEco);
+  window.eventosGlobal = eventos;
+  window.clasificacionesGlobal = clasificaciones;
 
-  // ✅ Oculta skeletons y spinners ANTES de pintar
+  allData = mergeVariablesLocalYUltima(variablesLocal, variablesUltima);
+
+  // poblar select solo con procesos que tengan variables
+  const idPpConVars = new Set(allData.map(v => v.idPp).filter(Boolean));
+  processSelect.innerHTML = "";
+  procesosGlobal
+    .filter(p => idPpConVars.has(p.idPp))
+    .sort((a,b) => (a.pp||"").localeCompare(b.pp||""))
+    .forEach(proc => {
+      const opt = document.createElement("option");
+      opt.value = proc.idPp;
+      opt.textContent = `• ${proc.pp} (${proc.idPp})`;
+      processSelect.appendChild(opt);
+    });
+
+  currentFilteredData = [...allData];
+  currentPage = 1;
+
+  // filtros de periodo
+  populatePeriodFilters([]);
+
+  // 👉 aplica filtro de URL (esto puede pintar)
+  aplicarFiltroDesdeURL();
+
+  // si NO había filtros en URL y nadie ha pintado aún, pinta el “todo” una sola vez
+  if (!initialPaintDone && !renderLocked) {
+    renderPage(currentFilteredData, currentPage);
+    setupPagination(currentFilteredData);
+    updateVariableCounter(allData.length);
+    initialPaintDone = true;
+  }
+
   hideProcessSkeleton();
   hideVariablesSkeleton();
   hideCounterSpinner();
   hideListSpinner();
-
   // pinta…
   procesosGlobal = mergeProcesos(procesosLocal, procesosEco);
   // poblar select procesos…
@@ -840,7 +863,6 @@ Promise.all([
 // 1. Cargar eventos antes de llamar a renderPage
 // --- Helpers: leer periodicidad, rango y último año por proceso ---
 // Deshabilitar anchors en el nodo destacado (amarillo) a nivel global:
-const DISABLE_LINKS_ON_HIT = true;
 
 // Tope general si vigFinal == "A la fecha" (cuando no haya override específico)
 const DEFAULT_END_YEAR_CAP = 2025;
@@ -1299,7 +1321,7 @@ function renderPage(data, page) {
     });
 
     // Cargar todos los elementos al entrar a la página
-    loadAllVariables();
+  
 
     //Filtrado de ordemaniento de la A-Z 
         // Función para ordenar variables alfabéticamente
@@ -1624,12 +1646,11 @@ document.addEventListener("click", async function (e) {
       if (variable && variable._source === "economicas-ultima" && Array.isArray(variable._mdeasList) && variable._mdeasList.length) {
         modalBody.innerHTML = variable._mdeasList.map(m => `
           <div class="mb-2 border-bottom pb-2">
-            <div><strong>Componente:</strong> ${fmt(m.componente)}</div>
-            <div><strong>Subcomponente:</strong> ${fmt(m.subcomponente)}</div>
-            <div><strong>Tema:</strong> ${fmt(m.tema)}</div>
-            <div><strong>Estadística 1:</strong> ${fmt(m.estadistica1)}</div>
-            ${m.estadistica2 ? `<div><strong>Estadística 2:</strong> ${fmt(m.estadistica2)}</div>` : ""}
-            <div><strong>Contribución:</strong> ${fmt(m.contribucion)}</div>
+            <div><strong>Componente:</strong> ${formatIdWithDots(m.componente)} ${fmt(m.componenteNombre)}</div>
+            <div><strong>Subcomponente:</strong> ${formatIdWithDots(m.subcomponente)} ${fmt(m.subcomponenteNombre)}</div>
+            <div><strong>Tema:</strong> ${formatIdWithDots(m.tema)} ${fmt(m.temaNombre)}</div>
+            <div><strong>Estadística 1:</strong> ${formatIdWithDots(m.estadistica1)} ${fmt(m.estadistica1Nombre)}</div>
+            ${m.estadistica2 ? `<div><strong>Estadística 2:</strong> ${formatIdWithDots(m.estadistica2)} ${fmt(m.estadistica2Nombre)}</div>` : ""}
           </div>
         `).join("");
         return;
@@ -1644,13 +1665,11 @@ document.addEventListener("click", async function (e) {
 
       if (info) {
         modalBody.innerHTML = `
-          <div class="mb-2"><strong>Componente:</strong><br>${fmt(info.compo)}</div>
+          <div class="mb-2"><strong>Componente:</strong><br>${fmt(info.compo)}${fmt(info.componenteNombre)}</div>
           <div class="mb-2"><strong>Subcomponente:</strong><br>${fmt(info.subcompo)}</div>
           <div class="mb-2"><strong>Tópico:</strong><br>${fmt(info.topico)}</div>
           <div class="mb-2"><strong>Variable del MDEA:</strong><br>${fmt(info.estAmbiental)}</div>
           <div class="mb-2"><strong>Estadístico del MDEA:</strong><br>${(info.estadMdea ?? "No disponible")}</div>
-          <div class="mb-2"><strong>Nivel de Contribución:</strong><br>${info.nivContMdea || "-"}</div>
-          <div class="mb-2"><strong>Comentario(s):</strong><br>${renderComentarios(info.comentMdea) || "<span>No disponible</span>"}</div>
         `;
       } else {
         modalBody.innerHTML = "<div class='text-danger'>No hay información del MDEA para esta variable.</div>";
@@ -1680,12 +1699,10 @@ document.addEventListener("click", async function (e) {
             ${variable._odsList.map(o => `
               <div class="list-group-item">
                 <div class="d-flex w-100 justify-content-between align-items-start">
-                  <h6 class="mb-1">ODS: ${fmt(o.objetivo)}</h6>
-                  <span class="badge text-bg-light border">${fmt(o.contribucion)}</span>
+                  <h6 class="mb-1">ODS: ${formatIdWithDots(o.objetivo)} ${fmt(o.objetivoNombre)}</h6>
                 </div>
-                <div class="small mb-1"><strong>Meta:</strong> ${fmt(o.meta)}</div>
-                <div class="small mb-1"><strong>Indicador:</strong> ${fmt(o.indicador)}</div>
-                ${o.comentarioS && o.comentarioS !== '-' ? `<div class="small text-muted">${o.comentarioS}</div>` : ""}
+                <div class="small mb-1"><strong>Meta:</strong> ${formatIdWithDots(o.meta)} ${fmt(o.metaNombre)}</div>
+                <div class="small mb-1"><strong>Indicador:</strong> ${formatIdWithDots(o.indicador)} ${fmt(o.indicadorNombre)}</div>
               </div>
             `).join("")}
           </div>
@@ -1756,13 +1773,15 @@ fetch('/api/clasificaciones')
   })
   .then(eventos => {
     eventosGlobal = eventos;
-    // Re-render si ya hay data
-    if (Array.isArray(allData) && allData.length) {
-      renderPage(currentFilteredData.length ? currentFilteredData : allData, currentPage);
-      setupPagination(currentFilteredData.length ? currentFilteredData : allData);
+    // Solo re-render si ya hicimos el primer pintado y SIN romper filtros
+    if (initialPaintDone && !renderLocked) {
+      const base = (currentFilteredData && currentFilteredData.length) ? currentFilteredData : allData;
+      renderPage(base, currentPage);
+      setupPagination(base);
     }
   })
   .catch(console.error);
+
 
 
 function getClasificacionesPorVariable(idVar) {
@@ -1810,6 +1829,13 @@ window.addEventListener("DOMContentLoaded", function() {
     document.getElementById("mainContent").style.display = "";
   }, 2000);
 });
+
+function formatIdWithDots(id) {
+  if (!id) return "";
+  const str = String(id).trim();
+  // Divide cada caracter por punto, incluyendo letras
+  return str.split("").join(".");
+}
 
 
 
