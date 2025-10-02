@@ -30,7 +30,7 @@ public class EntityIndicadores {
     private String periodoDisponible;
     private String periodicidadActualizacion;
     private String relacionPoliticasAmbientales;
-    private String TablaGraficos;
+    private String graficoUrl;
     private String tablaDatos; // Puedes mapear JSONB como String o usar una clase específica si lo deseas
     private String fuenteDatos;
     private String requisitosCoordinacion;
@@ -99,8 +99,8 @@ public class EntityIndicadores {
     public String getRelacionPoliticasAmbientales() { return relacionPoliticasAmbientales; }
     public void setRelacionPoliticasAmbientales(String relacionPoliticasAmbientales) { this.relacionPoliticasAmbientales = relacionPoliticasAmbientales; }
 
-    public String getTablaGraficos() { return TablaGraficos; }
-    public void setTablaGraficos(String TablaGraficos) { this.TablaGraficos = TablaGraficos; }
+    public String getGraficoUrl() { return graficoUrl; }
+    public void setGraficoUrl(String graficoUrl) { this.graficoUrl = graficoUrl; }
 
     public String getTablaDatos() { return tablaDatos; }
     public void setTablaDatos(String tablaDatos) { this.tablaDatos = tablaDatos; }
