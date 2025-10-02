@@ -165,24 +165,6 @@ function mergeVariablesLocalYUltima(locales = [], ultima = []) {
 }
 // ==== FIN HELPERS /indicadores/ultima ====
 
-// trae y aplana /indicadores/ultima → array de variables en shape local
-async function fetchVariablesDesdeUltima() {
-  const urlUltima = "https://reid-stuffed-staying-luther.trycloudflare/api/indicadores/ultima";
-  const res = await fetch(urlUltima);
-  if (!res.ok) throw new Error(`ultima respondió ${res.status}`);
-  const payload = await res.json();
-
-  const registros = Array.isArray(payload) ? payload : [payload];
-  const out = [];
-  for (const reg of registros) {
-    const lista = Array.isArray(reg.variableList) ? reg.variableList : [];
-    const evs = Array.isArray(reg.eventosList) ? reg.eventosList : [];
-    for (const v of lista) out.push(mapUltimaVariableToLocal(v, evs)); // 👈 pasa eventosList
-  }
-  return out;
-}
-
-
 // fusiona dos listas de variables y de‑duplica por idVar (prioriza locales)
 function mergeVariablesLocalYUltima(locales, ultima) {
   const map = new Map();
