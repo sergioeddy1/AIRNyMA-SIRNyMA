@@ -18,9 +18,231 @@ document.addEventListener("DOMContentLoaded", function () {
   const idPpParam = params.get("idPp");
   let itemsPerPage = parseInt(itemsPerPageSelect.value, 15);
   let currentPage = 1;
-  let procesosGlobal = [];
+ 
   let allData = [];
   let currentFilteredData = [];
+
+ 
+let renderLocked        = false;  // evita renders mientras aplicamos URL
+let initialPaintDone    = false;  // ya hicimos el primer render “válido”
+
+
+  // ==== PARCHE: globals seguros (evita "is not defined") ====
+let eventosGlobal = window.eventosGlobal || [];
+let procesosGlobal = window.procesosGlobal || [];
+
+
+// ==== PARCHE: helpers faltantes usados más abajo ====
+function buildPeriodicidadPorPp(procesos) {
+  const m = {};
+  (procesos || []).forEach(p => {
+    m[p.idPp] = parsePeriodicidadAnios(p.perPubResul || p.perioProd || "Anual");
+  });
+  return m;
+}
+
+function buildRangoPorPp(procesos) {
+  const m = {};
+  (procesos || []).forEach(p => {
+    m[p.idPp] = {
+      startYear: parseYearSafe(p.vigInicial),
+      endYear: resolveEndYear(p)
+    };
+  });
+  return m;
+}
+
+function buildUltimoAnioPorPp(fuentes) {
+  const m = {};
+  (fuentes || []).forEach(f => {
+    const id = f.idPp || f.id_pp;
+    const y = parseInt(f.anioEvento ?? f.evento, 10);
+    if (!id || !Number.isFinite(y)) return;
+    m[id] = Math.max(m[id] ?? -Infinity, y);
+  });
+  return m;
+}
+
+function buildLigaMicroPorVar(microdatos) {
+  const m = {};
+  (microdatos || []).forEach(md => {
+    if (md.idVar) m[md.idVar] = md.ligaMicro || md.ligaDd || null;
+  });
+  return m;
+}
+
+// ==== HELPERS: mapear API /indicadores/ultima al shape local de /api/variables ====
+function safeNameFromUrl(u) {
+  try {
+    if (!u || !/^https?:/i.test(String(u))) return null;
+    const url = new URL(u);
+    return url.searchParams.get("name");
+  } catch { return null; }
+}
+
+function mapUltimaVariableToLocal(v, eventosList = []) {
+  // ... (lo que ya tienes)
+  const years = (Array.isArray(eventosList) ? eventosList : [])
+    .map(e => parseInt(String(e.anioEvento ?? e.evento ?? '').trim(), 10))
+    .filter(Number.isFinite);
+
+  const minY = years.length ? Math.min(...years) : (v.anioReferencia || null);
+  const maxY = years.length ? Math.max(...years) : (v.anioReferencia || new Date().getFullYear());
+
+  function safeNameFromUrl(u) {
+    try {
+      if (!u || !/^https?:/i.test(String(u))) return null;
+      const url = new URL(u);
+      return url.searchParams.get("name");
+    } catch { return null; }
+  }
+
+  const codIdenVar =
+    (Array.isArray(v.microdatosList) && v.microdatosList[0]?.campo)
+      ? v.microdatosList[0].campo
+      : safeNameFromUrl(v.url);
+
+  return {
+    idVar: v.idS || v.idA || (v.acronimo ? `${v.acronimo}-SD` : "SD"),
+    idPp: v.acronimo || "SD",
+    nomVar: v.variableA || v.variableS || "No disponible",
+    tipoVar: "Primaria",
+    codIdenVar,
+    pregLit: v.pregunta || "-",
+    tema: v.tema1 || v.tematica || null,
+    subtema: v.subtema1 || null,
+    tema2: v.tema2 || null,
+    subtema2: v.subtema2 || null,
+    categoria: v.universo || "-",
+    varAsig: v.variableA || v.variableS || "No disponible",
+    defVar: v.definicion || "-",
+    relTab: (typeof v.tabulados === "boolean") ? (v.tabulados ? "Sí" : "No") : "No",
+    relMicro: (typeof v.microdatos === "boolean") ? (v.microdatos ? "Sí" : "No") : "No",
+    alinMdea: (typeof v.mdea === "boolean") ? (v.mdea ? "Sí" : "No") : "No",
+    alinOds: (typeof v.ods === "boolean") ? (v.ods ? "Sí" : "No") : "No",
+    comentVar: v.comentarioA || v.comentarioS || "-",
+
+    vigInicial: minY ? String(minY) : null,
+    vigFinal: years.length ? String(maxY) : "A la fecha",
+
+    _source: "economicas-ultima",
+
+    // 👇 guarda las listas para modales
+    _microdatosList: Array.isArray(v.microdatosList) ? v.microdatosList : [],
+    _tabuladosList: Array.isArray(v.tabuladosList) ? v.tabuladosList : [],
+    _mdeasList: Array.isArray(v.mdeasList) ? v.mdeasList : [],
+    _odsList: Array.isArray(v.odsList) ? v.odsList : []
+  };
+}
+
+
+async function fetchVariablesDesdeUltima() {
+  const urlUltima = "https://reid-stuffed-staying-luther.trycloudflare/api/indicadores/ultima";
+  const res = await fetch(urlUltima);
+  if (!res.ok) throw new Error(`ultima respondió ${res.status}`);
+  const payload = await res.json();
+
+  const registros = Array.isArray(payload) ? payload : [payload];
+  const out = [];
+  for (const reg of registros) {
+    const lista = Array.isArray(reg.variableList) ? reg.variableList : [];
+    const evs = Array.isArray(reg.eventosList) ? reg.eventosList : [];
+    for (const v of lista) out.push(mapUltimaVariableToLocal(v, evs));
+  }
+  return out;
+}
+
+function mergeVariablesLocalYUltima(locales = [], ultima = []) {
+  const map = new Map();
+  // mete primero ultima (para que luego locales "pisen" si hay misma idVar)
+  for (const v of (ultima || [])) if (v) {
+    map.set(v.idVar || v.idS || v.idA, v);
+  }
+  for (const v of (locales || [])) if (v && v.idVar) {
+    map.set(v.idVar, v);
+  }
+  return Array.from(map.values());
+}
+// ==== FIN HELPERS /indicadores/ultima ====
+
+// trae y aplana /indicadores/ultima → array de variables en shape local
+async function fetchVariablesDesdeUltima() {
+  const urlUltima = "https://reid-stuffed-staying-luther.trycloudflare/api/indicadores/ultima";
+  const res = await fetch(urlUltima);
+  if (!res.ok) throw new Error(`ultima respondió ${res.status}`);
+  const payload = await res.json();
+
+  const registros = Array.isArray(payload) ? payload : [payload];
+  const out = [];
+  for (const reg of registros) {
+    const lista = Array.isArray(reg.variableList) ? reg.variableList : [];
+    const evs = Array.isArray(reg.eventosList) ? reg.eventosList : [];
+    for (const v of lista) out.push(mapUltimaVariableToLocal(v, evs)); // 👈 pasa eventosList
+  }
+  return out;
+}
+
+
+// fusiona dos listas de variables y de‑duplica por idVar (prioriza locales)
+function mergeVariablesLocalYUltima(locales, ultima) {
+  const map = new Map();
+  for (const v of ultima)  map.set(v.idVar, v);
+  for (const v of locales) map.set(v.idVar, v); // pisa con locales si hay misma idVar
+  return Array.from(map.values());
+}
+// ==== FIN HELPERS /indicadores/ultima ====
+
+// Mapeo de procesos de economicas
+function mapEconomicasProcesoToLocal(item) {
+  const perPub = (item.periodicidadpublicacion && item.periodicidadpublicacion.trim())
+    ? item.periodicidadpublicacion.trim()
+    : (item.periodicidad || null);
+
+  const grado = (String(item.iin || '').toLowerCase() === 'sí' || String(item.iin || '').toLowerCase() === 'si')
+    ? "Información de Interés Nacional"
+    : null;
+
+  const desc = [item.objetivo, item.pobjeto].filter(Boolean).join(" ");
+
+  return {
+    idPp: item.acronimo || "SD",
+    pi: item.proceso || "No disponible",
+    pp: item.proceso || "No disponible",
+    dgaRespPp: null,
+    perioProd: null,
+    vigInicial: item.inicio || null,
+    vigFinal: item.fin || null,
+    metGenInf: item.metodo || null,
+    gradoMadur: grado,
+    perPubResul: perPub || "No disponible",
+    estatus: item.estatus || "Activo",
+    descPp: desc || "No disponible",
+    comentPp: item.comentarioS || item.comentarioA || "-",
+    responCaptura: null,
+    _source: 'economicas',
+    _unidad: item.unidad || null,
+  };
+}
+
+async function fetchProcesosEconomicas() {
+  const urlProcesosEco = "https://reid-stuffed-staying-luther.trycloudflare/api/procesos/buscar?unidad=" +
+                         encodeURIComponent("Unidad de Estadísticas Económicas");
+  const res = await fetch(urlProcesosEco);
+  if (!res.ok) throw new Error("procesos Económicas respondió " + res.status);
+  const data = await res.json();
+  return (Array.isArray(data) ? data : []).map(mapEconomicasProcesoToLocal);
+}
+
+function mergeProcesos(locales, economicas) {
+  const map = new Map();
+  // primero eco
+  for (const p of economicas) map.set(p.idPp, p);
+  // pisa con locales (si quieres priorizar locales)
+  for (const p of locales)   map.set(p.idPp, p);
+  return Array.from(map.values());
+}
+
+
 
     // Referencias a los checkboxes
 const relTabCheckbox = document.getElementById("relTabCheckbox");
@@ -492,7 +714,7 @@ showListSpinner();
   try {
     // Cargar ambas fuentes y fusionar
     const [localRes, ultimaVars] = await Promise.all([
-      fetch('https://til-attitude-tires-vault.trycloudflare.com/api/variables').then(r => r.json()),
+      fetch('https://till-attitude-tires-vault.trycloudflare/api/variables').then(r => r.json()),
       fetchVariablesDesdeUltima()
     ]);
     allData = mergeVariablesLocalYUltima(localRes, ultimaVars);
@@ -576,12 +798,12 @@ showCounterSpinner();
 showListSpinner();
 
 Promise.all([
-  fetch("https://til-attitude-tires-vault.trycloudflare.com/api/proceso").then(r => r.json()),
+  fetch("https://till-attitude-tires-vault.trycloudflare/api/proceso").then(r => r.json()),
   fetchProcesosEconomicas(),
-  fetch("https://til-attitude-tires-vault.trycloudflare.com/api/variables").then(r => r.json()),
+  fetch("https://till-attitude-tires-vault.trycloudflare/api/variables").then(r => r.json()),
   fetchVariablesDesdeUltima(),
-  fetch("https://til-attitude-tires-vault.trycloudflare.com/api/eventos").then(r => r.json()),
-  fetch("https://til-attitude-tires-vault.trycloudflare.com/api/clasificaciones").then(r => r.json())
+  fetch('https://till-attitude-tires-vault.trycloudflare/api/eventos').then(r => r.json()),
+  fetch('https://till-attitude-tires-vault.trycloudflare/api/clasificaciones').then(r => r.json())
 ])
 .then(([procesosLocal, procesosEco, variablesLocal, variablesUltima, eventos, clasificaciones]) => {
   procesosGlobal = mergeProcesos(procesosLocal, procesosEco);
@@ -1310,7 +1532,7 @@ document.addEventListener("click", async function (e) {
       }
 
       // 2) Fallback a tus endpoints locales
-      const resVarTab = await fetch('https://til-attitude-tires-vault.trycloudflare.com/api/var-tab');
+      const resVarTab = await fetch('https://till-attitude-tires-vault.trycloudflare/api/var-tab');
       const dataVarTab = await resVarTab.json();
       const relaciones = Array.isArray(dataVarTab) ? dataVarTab.filter(rel => rel.idVar === idVar) : [];
 
@@ -1319,7 +1541,7 @@ document.addEventListener("click", async function (e) {
         return;
       }
 
-      const resTabulados = await fetch('https://til-attitude-tires-vault.trycloudflare.com/api/tabulado');
+      const resTabulados = await fetch('https://till-attitude-tires-vault.trycloudflare/api/tabulado');
       const tabulados = await resTabulados.json();
 
       const contenido = relaciones.map(rel => {
@@ -1376,7 +1598,7 @@ document.addEventListener("click", async function (e) {
       }
 
       // 2) Fallback a /api/microdatos
-      const res = await fetch('https://til-attitude-tires-vault.trycloudflare.com/api/microdatos');
+      const res = await fetch('https://till-attitude-tires-vault.trycloudflare/api/microdatos');
       const data = await res.json();
       const info = Array.isArray(data)
         ? data.find(micro => String(micro.idVar) === String(idVar))
@@ -1435,7 +1657,7 @@ document.addEventListener("click", async function (e) {
       }
 
       // 2) Fallback a /api/mdea (tu lógica original – uno por idVar)
-      const res = await fetch('https://til-attitude-tires-vault.trycloudflare.com/api/mdea');
+      const res = await fetch('https://till-attitude-tires-vault.trycloudflare/api/mdea');
       const data = await res.json();
       const info = Array.isArray(data)
         ? data.find(mdea => String(mdea.idVar) === String(idVar))
@@ -1489,7 +1711,7 @@ document.addEventListener("click", async function (e) {
       }
 
       // 2) Fallback a /api/ods (pueden ser varias relaciones por variable)
-      const res = await fetch(`https://til-attitude-tires-vault.trycloudflare.com/api/ods`);
+      const res = await fetch('https://till-attitude-tires-vault.trycloudflare/api/ods');
       const data = await res.json();
       const registros = Array.isArray(data)
         ? data.filter(ods => String(ods.idVar) === String(idVar))
@@ -1543,11 +1765,11 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 // Cargar clasificaciones antes de renderizar variables
 // Si decides conservar ese bloque, ajústalo así:
-fetch('https://til-attitude-tires-vault.trycloudflare.com/api/clasificaciones')
+fetch('https://till-attitude-tires-vault.trycloudflare/api/clasificaciones')
   .then(res => res.json())
   .then(clasificaciones => {
     clasificacionesGlobal = clasificaciones;
-    return fetch('https://til-attitude-tires-vault.trycloudflare.com/api/eventos').then(res => res.json());
+    return fetch('https://till-attitude-tires-vault.trycloudflare/api/eventos').then(res => res.json());
   })
   .then(eventos => {
     eventosGlobal = eventos;
@@ -1614,6 +1836,3 @@ function formatIdWithDots(id) {
   // Divide cada caracter por punto, incluyendo letras
   return str.split("").join(".");
 }
-
-
-
