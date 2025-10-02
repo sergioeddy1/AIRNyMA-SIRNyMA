@@ -340,7 +340,7 @@ async function cargarEconomicas({ container }) {
       conteoGlobal = buildConteoPorIdPpDesdeUltima(payloadUltima);
     } catch (e) {
       try {
-        const variablesLocal = await fetch("https://golden-alan-malpractice-biological.trycloudflare.com/api/variables").then(r => r.json());
+        const variablesLocal = await fetch("https://til-attitude-tires-vault.trycloudflare.com/api/variables").then(r => r.json());
         conteoGlobal = buildConteoPorIdPp(variablesLocal);
       } catch (e2) {
         conteoGlobal = {};
