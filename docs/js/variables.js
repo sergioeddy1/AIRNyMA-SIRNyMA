@@ -492,7 +492,7 @@ showListSpinner();
   try {
     // Cargar ambas fuentes y fusionar
     const [localRes, ultimaVars] = await Promise.all([
-      fetch('https://golden-alan-malpractice-biological.trycloudflare.com/api/variables').then(r => r.json()),
+      fetch('https://til-attitude-tires-vault.trycloudflare.com/api/variables').then(r => r.json()),
       fetchVariablesDesdeUltima()
     ]);
     allData = mergeVariablesLocalYUltima(localRes, ultimaVars);
@@ -576,12 +576,12 @@ showCounterSpinner();
 showListSpinner();
 
 Promise.all([
-  fetch("https://golden-alan-malpractice-biological.trycloudflare.com/api/proceso").then(r => r.json()),
+  fetch("https://til-attitude-tires-vault.trycloudflare.com/api/proceso").then(r => r.json()),
   fetchProcesosEconomicas(),
-  fetch("https://golden-alan-malpractice-biological.trycloudflare.com/api/variables").then(r => r.json()),
+  fetch("https://til-attitude-tires-vault.trycloudflare.com/api/variables").then(r => r.json()),
   fetchVariablesDesdeUltima(),
-  fetch("https://golden-alan-malpractice-biological.trycloudflare.com/api/eventos").then(r => r.json()),
-  fetch("https://golden-alan-malpractice-biological.trycloudflare.com/api/clasificaciones").then(r => r.json())
+  fetch("https://til-attitude-tires-vault.trycloudflare.com/api/eventos").then(r => r.json()),
+  fetch("https://til-attitude-tires-vault.trycloudflare.com/api/clasificaciones").then(r => r.json())
 ])
 .then(([procesosLocal, procesosEco, variablesLocal, variablesUltima, eventos, clasificaciones]) => {
   procesosGlobal = mergeProcesos(procesosLocal, procesosEco);
@@ -1310,7 +1310,7 @@ document.addEventListener("click", async function (e) {
       }
 
       // 2) Fallback a tus endpoints locales
-      const resVarTab = await fetch('https://golden-alan-malpractice-biological.trycloudflare.com/api/var-tab');
+      const resVarTab = await fetch('https://til-attitude-tires-vault.trycloudflare.com/api/var-tab');
       const dataVarTab = await resVarTab.json();
       const relaciones = Array.isArray(dataVarTab) ? dataVarTab.filter(rel => rel.idVar === idVar) : [];
 
@@ -1319,7 +1319,7 @@ document.addEventListener("click", async function (e) {
         return;
       }
 
-      const resTabulados = await fetch('https://golden-alan-malpractice-biological.trycloudflare.com/api/tabulado');
+      const resTabulados = await fetch('https://til-attitude-tires-vault.trycloudflare.com/api/tabulado');
       const tabulados = await resTabulados.json();
 
       const contenido = relaciones.map(rel => {
@@ -1376,7 +1376,7 @@ document.addEventListener("click", async function (e) {
       }
 
       // 2) Fallback a /api/microdatos
-      const res = await fetch('https://golden-alan-malpractice-biological.trycloudflare.com/api/microdatos');
+      const res = await fetch('https://til-attitude-tires-vault.trycloudflare.com/api/microdatos');
       const data = await res.json();
       const info = Array.isArray(data)
         ? data.find(micro => String(micro.idVar) === String(idVar))
@@ -1435,7 +1435,7 @@ document.addEventListener("click", async function (e) {
       }
 
       // 2) Fallback a /api/mdea (tu lógica original – uno por idVar)
-      const res = await fetch('https://golden-alan-malpractice-biological.trycloudflare.com/api/mdea');
+      const res = await fetch('https://til-attitude-tires-vault.trycloudflare.com/api/mdea');
       const data = await res.json();
       const info = Array.isArray(data)
         ? data.find(mdea => String(mdea.idVar) === String(idVar))
@@ -1489,7 +1489,7 @@ document.addEventListener("click", async function (e) {
       }
 
       // 2) Fallback a /api/ods (pueden ser varias relaciones por variable)
-      const res = await fetch(`https://golden-alan-malpractice-biological.trycloudflare.com/api/ods`);
+      const res = await fetch(`https://til-attitude-tires-vault.trycloudflare.com/api/ods`);
       const data = await res.json();
       const registros = Array.isArray(data)
         ? data.filter(ods => String(ods.idVar) === String(idVar))
@@ -1543,11 +1543,11 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 // Cargar clasificaciones antes de renderizar variables
 // Si decides conservar ese bloque, ajústalo así:
-fetch('https://golden-alan-malpractice-biological.trycloudflare.com/api/clasificaciones')
+fetch('https://til-attitude-tires-vault.trycloudflare.com/api/clasificaciones')
   .then(res => res.json())
   .then(clasificaciones => {
     clasificacionesGlobal = clasificaciones;
-    return fetch('https://golden-alan-malpractice-biological.trycloudflare.com/api/eventos').then(res => res.json());
+    return fetch('https://til-attitude-tires-vault.trycloudflare.com/api/eventos').then(res => res.json());
   })
   .then(eventos => {
     eventosGlobal = eventos;

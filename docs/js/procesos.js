@@ -288,8 +288,8 @@ function filtrarEconomicasSinVariables(procesos, conteo) {
 async function cargarSociodemograficas({ container }) {
   renderLoader(container, "Cargando procesos (Sociodemográficas)...");
   try {
-    const procesos  = await fetch("https://golden-alan-malpractice-biological.trycloudflare.com/api/proceso").then(res => res.json());
-    const variables = await fetch("https://golden-alan-malpractice-biological.trycloudflare.com/api/variables").then(res => res.json());
+    const procesos  = await fetch("https://til-attitude-tires-vault.trycloudflare.com/api/proceso").then(res => res.json());
+    const variables = await fetch("https://til-attitude-tires-vault.trycloudflare.com/api/variables").then(res => res.json());
 
     const conteoGlobal = buildConteoPorIdPp(variables);
     procesos.forEach(p => { if (!(p.idPp in conteoGlobal)) conteoGlobal[p.idPp] = 0; });
@@ -326,9 +326,9 @@ function renderContadorVariablesUnidad(conteoGlobal) {
 async function cargarEconomicas({ container }) {
   renderLoader(container, "Cargando procesos (Económicas)...");
 
-  const urlProcesos = "http://10.109.1.13:3002/api/procesos/buscar?unidad=" + 
+  const urlProcesos = "http://prospective-opening-karma-idol.trycloudflare.com/api/procesos/buscar?unidad=" +
                       encodeURIComponent("Unidad de Estadísticas Económicas");
-  const urlVariablesEco = "http://10.109.1.13:3002/api/indicadores/ultima";
+  const urlVariablesEco = "http://prospective-opening-karma-idol.trycloudflare.com/api/indicadores/ultima";
 
   try {
     const economicasRaw = await fetch(urlProcesos).then(r => r.json());
