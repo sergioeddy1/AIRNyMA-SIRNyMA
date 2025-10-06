@@ -1206,53 +1206,61 @@ function renderPage(data, page) {
         }
 
         // Rango de páginas visibles
-        const startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-        const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    // Mostrar solo las primeras 5 páginas
+    let endPage = Math.min(5, totalPages);
+    for (let i = 1; i <= endPage; i++) {
+      const li = document.createElement("li");
+      li.classList.add("page-item");
+      if (i === currentPage) li.classList.add("active");
+      const a = document.createElement("a");
+      a.classList.add("page-link");
+      a.href = "#";
+      a.textContent = i;
+      a.addEventListener("click", function (e) {
+        e.preventDefault();
+        currentPage = i;
+        renderPage(data, currentPage);
+        setupPagination(data);
+      });
+      li.appendChild(a);
+      paginationContainer.appendChild(li);
+    }
 
-        // Mostrar "..." al inicio si hay páginas anteriores al rango visible
-        if (startPage > 1) {
-            const dotsLi = document.createElement("li");
-            dotsLi.classList.add("page-item", "disabled");
-            const dotsA = document.createElement("a");
-            dotsA.classList.add("page-link");
-            dotsA.href = "#";
-            dotsA.textContent = "...";
-            dotsLi.appendChild(dotsA);
-            paginationContainer.appendChild(dotsLi);
-        }
-
-        // Números de página visibles
-        for (let i = startPage; i <= endPage; i++) {
-            const li = document.createElement("li");
-            li.classList.add("page-item");
-            if (i === currentPage) li.classList.add("active");
-
-            const a = document.createElement("a");
-            a.classList.add("page-link");
-            a.href = "#";
-            a.textContent = i;
-            a.addEventListener("click", function (e) {
-                e.preventDefault();
-                currentPage = i;
-                renderPage(data, currentPage);
-                setupPagination(data);
-            });
-
-            li.appendChild(a);
-            paginationContainer.appendChild(li);
-        }
-
-        // Mostrar "..." al final si hay páginas posteriores al rango visible
-        if (endPage < totalPages) {
-            const dotsLi = document.createElement("li");
-            dotsLi.classList.add("page-item", "disabled");
-            const dotsA = document.createElement("a");
-            dotsA.classList.add("page-link");
-            dotsA.href = "#";
-            dotsA.textContent = "...";
-            dotsLi.appendChild(dotsA);
-            paginationContainer.appendChild(dotsLi);
-        }
+    // Si hay más de 5 páginas, mostrar flecha para avanzar y botón 'Página final'
+    if (totalPages > 5) {
+      // Flecha para avanzar
+      if (currentPage < totalPages) {
+        const nextLi = document.createElement("li");
+        nextLi.classList.add("page-item");
+        const nextA = document.createElement("a");
+        nextA.classList.add("page-link");
+        nextA.href = "#";
+        nextA.textContent = "»";
+        nextA.addEventListener("click", function (e) {
+          e.preventDefault();
+          currentPage = Math.min(currentPage + 1, totalPages);
+          renderPage(data, currentPage);
+          setupPagination(data);
+        });
+        nextLi.appendChild(nextA);
+        paginationContainer.appendChild(nextLi);
+      }
+      // Botón 'Página final'
+      const lastLi = document.createElement("li");
+      lastLi.classList.add("page-item");
+      const lastA = document.createElement("a");
+      lastA.classList.add("page-link");
+      lastA.href = "#";
+      lastA.textContent = "Página final";
+      lastA.addEventListener("click", function (e) {
+        e.preventDefault();
+        currentPage = totalPages;
+        renderPage(data, currentPage);
+        setupPagination(data);
+      });
+      lastLi.appendChild(lastA);
+      paginationContainer.appendChild(lastLi);
+    }
 
         // Botón "Siguiente"
         if (currentPage < totalPages) {
