@@ -1,4 +1,3 @@
-
 // --- Abre variables.html en otra pestaña ---
 function handleVariableClick(idPp) {
   window.open(`variables.html?idPp=${idPp}`, '_blank');
@@ -295,7 +294,9 @@ async function cargarSociodemograficas({ container }) {
     const conteoGlobal = buildConteoPorIdPp(variables);
     procesos.forEach(p => { if (!(p.idPp in conteoGlobal)) conteoGlobal[p.idPp] = 0; });
 
-    // Al renderizar, se reemplaza el loader
+    // Nuevo: Renderiza contador de variables ambientales por unidad
+    renderContadorVariablesUnidad(conteoGlobal, "Sociodemográficas");
+
     wireFiltrosYOrden({ procesosGlobal: procesos, conteoGlobal, container });
   } catch (err) {
     removeLoader();
@@ -304,44 +305,57 @@ async function cargarSociodemograficas({ container }) {
   }
 }
 
+// --- Nuevo: Renderiza contador de variables ambientales por unidad ---
+function renderContadorVariablesUnidad(conteoGlobal) {
+  const contadorUnidad = document.getElementById("contadorVariablesUnidad");
+  if (contadorUnidad) {
+    // Muestra 0 mientras se carga la nueva unidad
+    contadorUnidad.textContent = "0";
+    // Calcula el total después de un breve tiempo (simula espera de servidor)
+    setTimeout(() => {
+      const totalVariables = Object.entries(conteoGlobal)
+        .filter(([_, count]) => typeof count === "number" && count > 0)
+        .reduce((acc, [, count]) => acc + count, 0);
+      contadorUnidad.textContent = `${totalVariables}`;
+    }, 300); // Puedes ajustar el tiempo si lo deseas
+  }
+}
+
+
 // --- Carga ECONÓMICAS (Base de datos nueva) ---
 async function cargarEconomicas({ container }) {
   renderLoader(container, "Cargando procesos (Económicas)...");
 
-  const urlProcesos = "http://10.109.1.13:3001/api/procesos/buscar?unidad=" + 
+  const urlProcesos = "http://10.109.1.13:3002/api/procesos/buscar?unidad=" + 
                       encodeURIComponent("Unidad de Estadísticas Económicas");
-  const urlVariablesEco = "http://10.109.1.13:3001/api/indicadores/ultima";
+  const urlVariablesEco = "http://10.109.1.13:3002/api/indicadores/ultima";
 
   try {
-    // 1) Procesos
     const economicasRaw = await fetch(urlProcesos).then(r => r.json());
     const procesos = economicasRaw.map(mapEconomicasToLocal);
 
-    // 2) Conteo de variables: primero desde /indicadores/ultima
     let conteoGlobal = {};
     try {
       const payloadUltima = await fetch(urlVariablesEco).then(r => r.json());
       conteoGlobal = buildConteoPorIdPpDesdeUltima(payloadUltima);
     } catch (e) {
-      console.warn("No se pudieron cargar variables de /indicadores/ultima, usando /api/variables", e);
       try {
         const variablesLocal = await fetch("/api/variables").then(r => r.json());
         conteoGlobal = buildConteoPorIdPp(variablesLocal);
       } catch (e2) {
-        console.warn("Tampoco se pudo /api/variables; se mostrarán conteos en 0", e2);
         conteoGlobal = {};
       }
     }
 
-    // 3) Asegura llaves con 0 para evitar undefined
     procesos.forEach(p => {
       if (!(p.idPp in conteoGlobal)) conteoGlobal[p.idPp] = 0;
     });
 
-    // 4) Ocultar procesos de Económicas con 0 variables
+    // Nuevo: Renderiza contador de variables ambientales por unidad
+    renderContadorVariablesUnidad(conteoGlobal, "Económicas");
+
     const procesosFiltrados = filtrarEconomicasSinVariables(procesos, conteoGlobal);
 
-    // 5) Si quedó vacío, mensaje
     if (procesosFiltrados.length === 0) {
       removeLoader();
       container.innerHTML = `<div class="alert alert-info text-center">
@@ -352,10 +366,8 @@ async function cargarEconomicas({ container }) {
       return;
     }
 
-    // 6) Render
     wireFiltrosYOrden({ procesosGlobal: procesosFiltrados, conteoGlobal, container });
   } catch (err) {
-    console.error("Error cargando económicas", err);
     removeLoader();
     container.innerHTML = "<p class='text-danger text-center my-4'>Error al cargar los procesos (Económicas).</p>";
   }
@@ -382,12 +394,15 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (!seccionProcesos) return;
     seccionProcesos.hidden = false;
     seccionProcesos.scrollIntoView({ behavior: 'smooth' });
-    // Limpia contenedor y contador
+    // Limpia contenedor y contador de procesos
     if (container) container.innerHTML = "";
     const counter = document.getElementById("procesosCounter");
     if (counter) counter.textContent = "0";
     // Limpia selects por si cambia la fuente
     document.getElementById("filtrarPeriodicidad").innerHTML = `<option value="">Filtrar por periodicidad...</option>`;
+    // Limpia el contador de variables ambientales
+    const contadorUnidad = document.getElementById("contadorVariablesUnidad");
+    if (contadorUnidad) contadorUnidad.textContent = "0";
   }
 
   if (btnSocio && seccionProcesos && container) {
