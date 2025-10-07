@@ -88,6 +88,31 @@ body, html {
                             <input id="searchInput" class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Buscar">
                         </form>
                         <hr>
+                           <!--Filtros de Unidad Administrativa -->
+                        <div id="unidadAdministrativaSection">
+                         <h5>Unidad Administrativa</h5>
+                         <div class="form-check">
+                             <input type="radio" value="DGA1" id="infoDemografica" name="inlineRadioOptions" class="form-check-input" >
+                             <label for="infoDemografica" class="form-check-label" style="font-size: small;">Unidad de Estadísticas Sociodemográficas</label>
+                         </div>
+                         <div class="form-check">
+                             <input type="radio" value="DGA2" id="infoEconomica" name="inlineRadioOptions" class="form-check-input" >
+                             <label for="infoEconomica" class="form-check-label" style="font-size: small;">Unidad de Estadísticas Económicas</label>
+                         </div>
+                         <div class="form-check">
+                             <input type="radio" value="DGA3" id="infoGeografica" name="inlineRadioOptions" class="form-check-input" disabled>
+                             <label for="infoGeografica" class="form-check-label text-muted" style="font-size: small;">Unidad de Geografía y Medio Ambiente</label>
+                         </div>
+                         <div class="form-check">
+                             <input type="radio" value="DGA4" id="infoGobierno" name="inlineRadioOptions" class="form-check-input" disabled>
+                             <label for="infoGobierno" class="form-check-label text-muted" style="font-size: small;">Unidad de Estadísticas de Gobierno, Seguridad Pública y Justicia.</label>
+                         </div>
+                         <div class="form-check">
+                             <input type="radio" value="DGA5" id="infoIntegracion" name="inlineRadioOptions" class="form-check-input" disabled>
+                             <label for="infoIntegracion" class="form-check-label text-muted" style="font-size: small;">Dirección General de Integración, Análisis e Investigación.</label>
+                         </div>
+                        </div>
+                         <hr>
                         <!--Filtros de Tematica--> 
                            <h5>Temática</h5>
                         <select class="form-select" id="temaSelect" aria-label="Temáticas">
@@ -162,36 +187,12 @@ body, html {
 
                         <!--Fitro de Procesos de producción-->  
                         <h5>Procesos de Producción</h5>
-                        <select id="processSelect" class="form-select" multiple size="6" aria-label="Procesos estadísticos"></select>
+                        <select id="processSelect" class="form-select" multiple size="6" aria-label="Procesos estadísticos" multiple></select>
                         <div id="processSelectContainer" class="d-flex flex-wrap gap-1 mt-2"></div>
 
                         <hr>
 
-                        <!--Filtros de Unidad Administrativa -->
-                        <div id="unidadAdministrativaSection" style="display: none;">
-                         <h5>Unidad Administrativa</h5>
-                         <div class="form-check">
-                             <input type="radio" value="DGA1" id="infoDemografica" name="inlineRadioOptions" class="form-check-input" >
-                             <label for="infoDemografica" class="form-check-label" style="font-size: small;">Dirección General de Estadísticas Sociodemográficas</label>
-                         </div>
-                         <div class="form-check">
-                             <input type="radio" value="DGA2" id="infoEconomica" name="inlineRadioOptions" class="form-check-input" >
-                             <label for="infoEconomica" class="form-check-label" style="font-size: small;">Dirección General de Estadísticas Económicas</label>
-                         </div>
-                         <div class="form-check">
-                             <input type="radio" value="DGA3" id="infoGeografica" name="inlineRadioOptions" class="form-check-input" >
-                             <label for="infoGeografica" class="form-check-label" style="font-size: small;">Dirección General de Geografía y Medio Ambiente</label>
-                         </div>
-                         <div class="form-check">
-                             <input type="radio" value="DGA4" id="infoGobierno" name="inlineRadioOptions" class="form-check-input" >
-                             <label for="infoGobierno" class="form-check-label" style="font-size: small;">Dirección General de Estadísticas de Gobierno, Seguridad Pública y Justicia.</label>
-                         </div>
-                         <div class="form-check">
-                             <input type="radio" value="DGA5" id="infoIntegracion" name="inlineRadioOptions" class="form-check-input" >
-                             <label for="infoIntegracion" class="form-check-label" style="font-size: small;">Dirección General de Integración, Análisis e Investigación.</label>
-                         </div>
-                        </div>
-                         <hr>
+                     
                         <!--Filtros de Relación -->
                         <h5>Relación</h5>
                         <div class="form-check form-check-inline">

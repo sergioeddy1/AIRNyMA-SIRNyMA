@@ -22,6 +22,12 @@ document.addEventListener("DOMContentLoaded", function () {
   let allData = [];
   let currentFilteredData = [];
 
+  let currentSearchTerm = ""; // término activo para <mark>
+function getCurrentSearchTerm() {
+  return (searchInput?.value || "").trim();
+}
+
+
  
 let renderLocked        = false;  // evita renders mientras aplicamos URL
 let initialPaintDone    = false;  // ya hicimos el primer render “válido”
@@ -31,64 +37,116 @@ let initialPaintDone    = false;  // ya hicimos el primer render “válido”
 let eventosGlobal = window.eventosGlobal || [];
 let procesosGlobal = window.procesosGlobal || [];
 
+// Filtro por unidad: 'todas' | 'socio' | 'eco'
+let unidadFiltro = 'todas';
 
-// ==== PARCHE: helpers faltantes usados más abajo ====
-function buildPeriodicidadPorPp(procesos) {
-  const m = {};
-  (procesos || []).forEach(p => {
-    m[p.idPp] = parsePeriodicidadAnios(p.perPubResul || p.perioProd || "Anual");
-  });
-  return m;
-}
+// Sets por unidad (globales)
+let socioSet = new Set();
+let ecoSet   = new Set();
 
-function buildRangoPorPp(procesos) {
-  const m = {};
-  (procesos || []).forEach(p => {
-    m[p.idPp] = {
-      startYear: parseYearSafe(p.vigInicial),
-      endYear: resolveEndYear(p)
-    };
-  });
-  return m;
-}
 
-function buildUltimoAnioPorPp(fuentes) {
-  const m = {};
-  (fuentes || []).forEach(f => {
-    const id = f.idPp || f.id_pp;
-    const y = parseInt(f.anioEvento ?? f.evento, 10);
-    if (!id || !Number.isFinite(y)) return;
-    m[id] = Math.max(m[id] ?? -Infinity, y);
-  });
-  return m;
-}
+  // Determina a qué unidad pertenece una variable
+  function getUnidadDeVariable(variable) {
+    // a) Económicas que vienen de la API nueva
+    if (variable && variable._source === 'economicas-ultima') return 'eco';
 
-function buildLigaMicroPorVar(microdatos) {
-  const m = {};
-  (microdatos || []).forEach(md => {
-    if (md.idVar) m[md.idVar] = md.ligaMicro || md.ligaDd || null;
-  });
-  return m;
-}
+    // b) Variables locales: inferimos por su proceso (si ese proceso proviene de 'economicas')
+    try {
+      const proc = Array.isArray(procesosGlobal)
+        ? procesosGlobal.find(p => String(p.idPp) === String(variable.idPp))
+        : null;
+      if (proc && proc._source === 'economicas') return 'eco';
+    } catch {}
 
-// ==== HELPERS: mapear API /indicadores/ultima al shape local de /api/variables ====
-function safeNameFromUrl(u) {
-  try {
-    if (!u || !/^https?:/i.test(String(u))) return null;
-    const url = new URL(u);
-    return url.searchParams.get("name");
-  } catch { return null; }
-}
+    // c) Predeterminado: sociodemográficas
+    return 'socio';
+  }
 
-function mapUltimaVariableToLocal(v, eventosList = []) {
-  // ... (lo que ya tienes)
-  const years = (Array.isArray(eventosList) ? eventosList : [])
-    .map(e => parseInt(String(e.anioEvento ?? e.evento ?? '').trim(), 10))
-    .filter(Number.isFinite);
+  const radioSocio = document.getElementById("infoDemografica");
+  const radioEco   = document.getElementById("infoEconomica");
 
-  const minY = years.length ? Math.min(...years) : (v.anioReferencia || null);
-  const maxY = years.length ? Math.max(...years) : (v.anioReferencia || new Date().getFullYear());
 
+  function aplicarFiltroUnidadYRepintar() {
+    // 1) Base de datos de trabajo (respeta el resto de filtros ya aplicados)
+    let base = (currentFilteredData && currentFilteredData.length) ? currentFilteredData : allData;
+
+    // 2) Aplica filtro por unidad
+    if (unidadFiltro === 'socio') {
+      base = base.filter(v => getUnidadDeVariable(v) === 'socio');
+    } else if (unidadFiltro === 'eco') {
+      base = base.filter(v => getUnidadDeVariable(v) === 'eco');
+    } // 'todas' => no filtramos
+
+    // 3) Repinta
+    currentPage = 1;
+    renderPage(base, currentPage);
+    setupPagination(base);
+    updateVariableCounter(base.length);
+
+    // 4) Conserva la lista filtrada actual para que otros filtros (orden, tema, etc.) se apliquen encima
+    currentFilteredData = base;
+  }
+
+  // Listeners
+  if (radioSocio) {
+    radioSocio.addEventListener("change", () => {
+      unidadFiltro = radioSocio.checked ? 'socio' : (radioEco?.checked ? 'eco' : 'todas');
+      aplicarFiltroUnidadYRepintar();
+    });
+  }
+  if (radioEco) {
+    radioEco.addEventListener("change", () => {
+      unidadFiltro = radioEco.checked ? 'eco' : (radioSocio?.checked ? 'socio' : 'todas');
+      aplicarFiltroUnidadYRepintar();
+    });
+  }
+
+  // ==== PARCHE: helpers faltantes usados más abajo ====
+  function buildPeriodicidadPorPp(procesos) {
+    const m = {};
+    (procesos || []).forEach(p => {
+      m[p.idPp] = parsePeriodicidadAnios(p.perPubResul || p.perioProd || "Anual");
+    });
+    return m;
+  }
+
+  function buildRangoPorPp(procesos) {
+    const m = {};
+    (procesos || []).forEach(p => {
+      m[p.idPp] = {
+        startYear: parseYearSafe(p.vigInicial),
+        endYear: resolveEndYear(p)
+      };
+    });
+    return m;
+  }
+
+  function buildUltimoAnioPorPp(fuentes) {
+    const m = {};
+    (fuentes || []).forEach(f => {
+      const id = f.idPp || f.id_pp;
+      const y = parseInt(f.anioEvento ?? f.evento, 10);
+      if (!id || !Number.isFinite(y)) return;
+      m[id] = Math.max(m[id] ?? -Infinity, y);
+    });
+    return m;
+  }
+
+  function buildLigaMicroPorVar(microdatos) {
+    const m = {};
+    (microdatos || []).forEach(md => {
+      if (md.idVar) m[md.idVar] = md.ligaMicro || md.ligaDd || null;
+    });
+    return m;
+  }
+
+  function filterByUnidad(data) {
+    if (!Array.isArray(data)) return [];
+    if (unidadFiltro === 'todas') return data;
+    return data.filter(v => getUnidadDeVariable(v) === (unidadFiltro === 'socio' ? 'socio' : 'eco'));
+  }
+
+  // ==== HELPERS: mapear API /indicadores/ultima al shape local de /api/variables ====
   function safeNameFromUrl(u) {
     try {
       if (!u || !/^https?:/i.test(String(u))) return null;
@@ -97,150 +155,219 @@ function mapUltimaVariableToLocal(v, eventosList = []) {
     } catch { return null; }
   }
 
-  const codIdenVar =
-    (Array.isArray(v.microdatosList) && v.microdatosList[0]?.campo)
-      ? v.microdatosList[0].campo
-      : safeNameFromUrl(v.url);
+  function mapUltimaVariableToLocal(v, eventosList = []) {
+    // ... (lo que ya tienes)
+    const years = (Array.isArray(eventosList) ? eventosList : [])
+      .map(e => parseInt(String(e.anioEvento ?? e.evento ?? '').trim(), 10))
+      .filter(Number.isFinite);
 
-  return {
-    idVar: v.idS || v.idA || (v.acronimo ? `${v.acronimo}-SD` : "SD"),
-    idPp: v.acronimo || "SD",
-    nomVar: v.variableA || v.variableS || "No disponible",
-    tipoVar: "Primaria",
-    codIdenVar,
-    pregLit: v.pregunta || "-",
-    tema: v.tema1 || v.tematica || null,
-    subtema: v.subtema1 || null,
-    tema2: v.tema2 || null,
-    subtema2: v.subtema2 || null,
-    categoria: v.universo || "-",
-    varAsig: v.variableA || v.variableS || "No disponible",
-    defVar: v.definicion || "-",
-    relTab: (typeof v.tabulados === "boolean") ? (v.tabulados ? "Sí" : "No") : "No",
-    relMicro: (typeof v.microdatos === "boolean") ? (v.microdatos ? "Sí" : "No") : "No",
-    alinMdea: (typeof v.mdea === "boolean") ? (v.mdea ? "Sí" : "No") : "No",
-    alinOds: (typeof v.ods === "boolean") ? (v.ods ? "Sí" : "No") : "No",
-    comentVar: v.comentarioA || v.comentarioS || "-",
+    const minY = years.length ? Math.min(...years) : (v.anioReferencia || null);
+    const maxY = years.length ? Math.max(...years) : (v.anioReferencia || new Date().getFullYear());
 
-    vigInicial: minY ? String(minY) : null,
-    vigFinal: years.length ? String(maxY) : "A la fecha",
+    function safeNameFromUrl(u) {
+      try {
+        if (!u || !/^https?:/i.test(String(u))) return null;
+        const url = new URL(u);
+        return url.searchParams.get("name");
+      } catch { return null; }
+    }
 
-    _source: "economicas-ultima",
+    const codIdenVar =
+      (Array.isArray(v.microdatosList) && v.microdatosList[0]?.campo)
+        ? v.microdatosList[0].campo
+        : safeNameFromUrl(v.url);
 
-    // 👇 guarda las listas para modales
-    _microdatosList: Array.isArray(v.microdatosList) ? v.microdatosList : [],
-    _tabuladosList: Array.isArray(v.tabuladosList) ? v.tabuladosList : [],
-    _mdeasList: Array.isArray(v.mdeasList) ? v.mdeasList : [],
-    _odsList: Array.isArray(v.odsList) ? v.odsList : []
-  };
-}
+    return {
+      idVar: v.idS || v.idA || (v.acronimo ? `${v.acronimo}-SD` : "SD"),
+      idPp: v.acronimo || "SD",
+      nomVar: v.variableA || v.variableS || "No disponible",
+      tipoVar: "Primaria",
+      codIdenVar,
+      pregLit: v.pregunta || "-",
+      tema: v.tema1 || null,
+      subtema: v.subtema1 || null,
+      tema2: v.tema2 || null,
+      subtema2: v.subtema2 || null,
+      categoria: v.universo || "-",
+      varAsig: v.variableA || v.variableS || "No disponible",
+      defVar: v.definicion || "-",
+      relTab: (typeof v.tabulados === "boolean") ? (v.tabulados ? "Sí" : "No") : "No",
+      relMicro: (typeof v.microdatos === "boolean") ? (v.microdatos ? "Sí" : "No") : "No",
+      alinMdea: (typeof v.mdea === "boolean") ? (v.mdea ? "Sí" : "No") : "No",
+      alinOds: (typeof v.ods === "boolean") ? (v.ods ? "Sí" : "No") : "No",
+      comentVar: v.comentarioA || v.comentarioS || "-",
 
+      vigInicial: minY ? String(minY) : null,
+      vigFinal: years.length ? String(maxY) : "A la fecha",
 
-async function fetchVariablesDesdeUltima() {
-  const urlUltima = "http://10.109.1.13:3002/api/indicadores/ultima";
-  const res = await fetch(urlUltima);
-  if (!res.ok) throw new Error(`ultima respondió ${res.status}`);
-  const payload = await res.json();
+      _source: "economicas-ultima",
 
-  const registros = Array.isArray(payload) ? payload : [payload];
-  const out = [];
-  for (const reg of registros) {
-    const lista = Array.isArray(reg.variableList) ? reg.variableList : [];
-    const evs = Array.isArray(reg.eventosList) ? reg.eventosList : [];
-    for (const v of lista) out.push(mapUltimaVariableToLocal(v, evs));
+      // 👇 guarda las listas para modales
+      _microdatosList: Array.isArray(v.microdatosList) ? v.microdatosList : [],
+      _tabuladosList: Array.isArray(v.tabuladosList) ? v.tabuladosList : [],
+      _mdeasList: Array.isArray(v.mdeasList) ? v.mdeasList : [],
+      _odsList: Array.isArray(v.odsList) ? v.odsList : []
+    };
   }
-  return out;
-}
 
-function mergeVariablesLocalYUltima(locales = [], ultima = []) {
-  const map = new Map();
-  // mete primero ultima (para que luego locales "pisen" si hay misma idVar)
-  for (const v of (ultima || [])) if (v) {
-    map.set(v.idVar || v.idS || v.idA, v);
+
+  async function fetchVariablesDesdeUltima() {
+    const urlUltima = "http://10.109.1.13:3002/api/indicadores/ultima";
+    const res = await fetch(urlUltima);
+    if (!res.ok) throw new Error(`ultima respondió ${res.status}`);
+    const payload = await res.json();
+
+    const registros = Array.isArray(payload) ? payload : [payload];
+    const out = [];
+    for (const reg of registros) {
+      const lista = Array.isArray(reg.variableList) ? reg.variableList : [];
+      const evs = Array.isArray(reg.eventosList) ? reg.eventosList : [];
+      for (const v of lista) out.push(mapUltimaVariableToLocal(v, evs));
+    }
+    return out;
   }
-  for (const v of (locales || [])) if (v && v.idVar) {
-    map.set(v.idVar, v);
+
+  function mergeVariablesLocalYUltima(locales = [], ultima = []) {
+    const map = new Map();
+    // mete primero ultima (para que luego locales "pisen" si hay misma idVar)
+    for (const v of (ultima || [])) if (v) {
+      map.set(v.idVar || v.idS || v.idA, v);
+    }
+    for (const v of (locales || [])) if (v && v.idVar) {
+      map.set(v.idVar, v);
+    }
+    return Array.from(map.values());
   }
-  return Array.from(map.values());
-}
-// ==== FIN HELPERS /indicadores/ultima ====
 
-// trae y aplana /indicadores/ultima → array de variables en shape local
-async function fetchVariablesDesdeUltima() {
-  const urlUltima = "http://10.109.1.13:3002/api/indicadores/ultima";
-  const res = await fetch(urlUltima);
-  if (!res.ok) throw new Error(`ultima respondió ${res.status}`);
-  const payload = await res.json();
 
-  const registros = Array.isArray(payload) ? payload : [payload];
-  const out = [];
-  for (const reg of registros) {
-    const lista = Array.isArray(reg.variableList) ? reg.variableList : [];
-    const evs = Array.isArray(reg.eventosList) ? reg.eventosList : [];
-    for (const v of lista) out.push(mapUltimaVariableToLocal(v, evs)); // 👈 pasa eventosList
+  // Devuelve la "base" de variables para poblar el select de temáticas
+function getBaseParaTemas() {
+  let base = Array.isArray(allData) ? allData : [];
+
+  // 1) Filtrar por unidad (usa tu getUnidadDeVariable)
+  if (unidadFiltro === 'socio') {
+    base = base.filter(v => getUnidadDeVariable(v) === 'socio');
+  } else if (unidadFiltro === 'eco') {
+    base = base.filter(v => getUnidadDeVariable(v) === 'eco');
   }
-  return out;
+
+   // 2) (Opcional) Filtrar por procesos actualmente seleccionados
+  const selectedProcesses = Array.from(processSelect?.selectedOptions || []).map(o => o.value);
+  if (selectedProcesses.length) {
+    base = base.filter(v => selectedProcesses.includes(v.idPp));
+  }
+
+  return base;
+}
+
+function repoblarTematicas() {
+  if (!temaSelect) return;
+
+  const prev = temaSelect.value; // recuerda selección anterior
+  const base = getBaseParaTemas();
+  const temas = collectTematicas(base);
+
+  // Reconstruye opciones
+  temaSelect.innerHTML = "";
+  const placeholder = document.createElement('option');
+  placeholder.value = "";
+  placeholder.textContent = "Seleccione una temática";
+  temaSelect.appendChild(placeholder);
+
+  temas.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t;
+    opt.textContent = t;
+    temaSelect.appendChild(opt);
+  });
+
+  // Si el valor anterior todavía existe, recupéralo
+  if (prev && temas.includes(prev)) {
+    temaSelect.value = prev;
+  } else {
+    temaSelect.value = ""; // vuelve a placeholder si no aplica
+  }
 }
 
 
-// fusiona dos listas de variables y de‑duplica por idVar (prioriza locales)
-function mergeVariablesLocalYUltima(locales, ultima) {
-  const map = new Map();
-  for (const v of ultima)  map.set(v.idVar, v);
-  for (const v of locales) map.set(v.idVar, v); // pisa con locales si hay misma idVar
-  return Array.from(map.values());
-}
-// ==== FIN HELPERS /indicadores/ultima ====
+  // ==== FIN HELPERS /indicadores/ultima ====
 
-// Mapeo de procesos de economicas
-function mapEconomicasProcesoToLocal(item) {
-  const perPub = (item.periodicidadpublicacion && item.periodicidadpublicacion.trim())
-    ? item.periodicidadpublicacion.trim()
-    : (item.periodicidad || null);
+  // trae y aplana /indicadores/ultima → array de variables en shape local
+  async function fetchVariablesDesdeUltima() {
+    const urlUltima = "http://10.109.1.13:3002/api/indicadores/ultima";
+    const res = await fetch(urlUltima);
+    if (!res.ok) throw new Error(`ultima respondió ${res.status}`);
+    const payload = await res.json();
 
-  const grado = (String(item.iin || '').toLowerCase() === 'sí' || String(item.iin || '').toLowerCase() === 'si')
-    ? "Información de Interés Nacional"
-    : null;
+    const registros = Array.isArray(payload) ? payload : [payload];
+    const out = [];
+    for (const reg of registros) {
+      const lista = Array.isArray(reg.variableList) ? reg.variableList : [];
+      const evs = Array.isArray(reg.eventosList) ? reg.eventosList : [];
+      for (const v of lista) out.push(mapUltimaVariableToLocal(v, evs)); // 👈 pasa eventosList
+    }
+    return out;
+  }
 
-  const desc = [item.objetivo, item.pobjeto].filter(Boolean).join(" ");
 
-  return {
-    idPp: item.acronimo || "SD",
-    pi: item.proceso || "No disponible",
-    pp: item.proceso || "No disponible",
-    dgaRespPp: null,
-    perioProd: null,
-    vigInicial: item.inicio || null,
-    vigFinal: item.fin || null,
-    metGenInf: item.metodo || null,
-    gradoMadur: grado,
-    perPubResul: perPub || "No disponible",
-    estatus: item.estatus || "Activo",
-    descPp: desc || "No disponible",
-    comentPp: item.comentarioS || item.comentarioA || "-",
-    responCaptura: null,
-    _source: 'economicas',
-    _unidad: item.unidad || null,
-  };
-}
+  // fusiona dos listas de variables y de‑duplica por idVar (prioriza locales)
+  function mergeVariablesLocalYUltima(locales, ultima) {
+    const map = new Map();
+    for (const v of ultima)  map.set(v.idVar, v);
+    for (const v of locales) map.set(v.idVar, v); // pisa con locales si hay misma idVar
+    return Array.from(map.values());
+  }
+  // ==== FIN HELPERS /indicadores/ultima ====
 
-async function fetchProcesosEconomicas() {
-  const urlProcesosEco = "http://10.109.1.13:3002/api/procesos/buscar?unidad=" +
-                         encodeURIComponent("Unidad de Estadísticas Económicas");
-  const res = await fetch(urlProcesosEco);
-  if (!res.ok) throw new Error("procesos Económicas respondió " + res.status);
-  const data = await res.json();
-  return (Array.isArray(data) ? data : []).map(mapEconomicasProcesoToLocal);
-}
+  // Mapeo de procesos de economicas
+  function mapEconomicasProcesoToLocal(item) {
+    const perPub = (item.periodicidadpublicacion && item.periodicidadpublicacion.trim())
+      ? item.periodicidadpublicacion.trim()
+      : (item.periodicidad || null);
 
-function mergeProcesos(locales, economicas) {
-  const map = new Map();
-  // primero eco
-  for (const p of economicas) map.set(p.idPp, p);
-  // pisa con locales (si quieres priorizar locales)
-  for (const p of locales)   map.set(p.idPp, p);
-  return Array.from(map.values());
-}
+    const grado = (String(item.iin || '').toLowerCase() === 'sí' || String(item.iin || '').toLowerCase() === 'si')
+      ? "Información de Interés Nacional"
+      : null;
+
+    const desc = [item.objetivo, item.pobjeto].filter(Boolean).join(" ");
+
+    return {
+      idPp: item.acronimo || "SD",
+      pi: item.proceso || "No disponible",
+      pp: item.proceso || "No disponible",
+      dgaRespPp: null,
+      perioProd: null,
+      vigInicial: item.inicio || null,
+      vigFinal: item.fin || null,
+      metGenInf: item.metodo || null,
+      gradoMadur: grado,
+      perPubResul: perPub || "No disponible",
+      estatus: item.estatus || "Activo",
+      descPp: desc || "No disponible",
+      comentPp: item.comentarioS || item.comentarioA || "-",
+      responCaptura: null,
+      _source: 'economicas',
+      _unidad: item.unidad || null,
+    };
+  }
+
+  async function fetchProcesosEconomicas() {
+    const urlProcesosEco = "http://10.109.1.13:3002/api/procesos/buscar?unidad=" +
+                           encodeURIComponent("Unidad de Estadísticas Económicas");
+    const res = await fetch(urlProcesosEco);
+    if (!res.ok) throw new Error("procesos Económicas respondió " + res.status);
+    const data = await res.json();
+    return (Array.isArray(data) ? data : []).map(mapEconomicasProcesoToLocal);
+  }
+
+  function mergeProcesos(locales, economicas) {
+    const map = new Map();
+    // primero eco
+    for (const p of economicas) map.set(p.idPp, p);
+    // pisa con locales (si quieres priorizar locales)
+    for (const p of locales)   map.set(p.idPp, p);
+    return Array.from(map.values());
+  }
 
 
 
@@ -384,17 +511,11 @@ searchForm?.addEventListener("submit", function (e) {
     filterByRelation(); // Aquí podrías combinar también texto de búsqueda
 });
 
+if (unidadSection) unidadSection.style.display = "block";
 
     //Mostrar y ocultar seccion de filtros Unidad administrativa dependiendo de condicional 
     function checkMostrarUnidadSection() {
-    const procesoValido = processSelect.value && processSelect.value !== "Seleccione un proceso de producción";
-    const temaValido = temaSelect.value && temaSelect.value !== "Seleccione una temática";
-
-    if (procesoValido && temaValido) {
-        unidadSection.style.display = "block";
-    } else {
-        unidadSection.style.display = "none";
-    }
+    if (unidadSection) unidadSection.style.display = "block";
     }
 
     // —— Skeletons helpers ——
@@ -477,16 +598,77 @@ function hideListSpinner() {
   document.getElementById('listSpinner')?.remove();
 }
 
+// 🔁 Permitir selección múltiple solo con clic (sin Ctrl)
+processSelect.addEventListener("mousedown", function (e) {
+  e.preventDefault(); // evita el comportamiento por defecto
+  const option = e.target;
+  if (option && option.tagName === "OPTION") {
+    option.selected = !option.selected; // alterna selección
+    processSelect.dispatchEvent(new Event("change")); // dispara evento manualmente
+  }
+});
 let listenersWired = false;
 // ✅ Listener de cambio del select de procesos
 if (!listenersWired) {
   processSelect.addEventListener("change", () => {
     const selected = Array.from(processSelect.selectedOptions).map(o => o.value);
     populatePeriodFilters(selected);
-    handleProcessSelectChange();
+    repoblarTematicas();
+    handleProcessSelectChange(); // <-- mantiene el renderizado y contador
   });
   listenersWired = true;
 }
+
+
+
+function onUnidadChange() {
+  unidadFiltro = radioSocio.checked ? 'socio' : (radioEco.checked ? 'eco' : 'todas');
+
+  // Si los sets aún no se han poblado, deriva el allowedSet desde procesosGlobal
+  let allowedSet = null;
+  if (unidadFiltro === 'socio') {
+    allowedSet = socioSet && socioSet.size ? socioSet
+      : new Set((procesosGlobal || []).filter(p => getUnidadDeVariable({ idPp: p.idPp }) === 'socio').map(p => p.idPp));
+  } else if (unidadFiltro === 'eco') {
+    allowedSet = ecoSet && ecoSet.size ? ecoSet
+      : new Set((procesosGlobal || []).filter(p => p._source === 'economicas').map(p => p.idPp));
+  }
+
+  // 1) Mostrar/ocultar opciones del select y quitar selecciones inválidas
+  Array.from(processSelect.options).forEach(opt => {
+    const allowed = (unidadFiltro === 'todas') ? true : (allowedSet ? allowedSet.has(opt.value) : true);
+    opt.hidden = !allowed;
+    if (!allowed && opt.selected) opt.selected = false;
+  });
+
+  // 2) Repoblar años:
+  const stillSelected = Array.from(processSelect.selectedOptions).map(o => o.value);
+  if (stillSelected.length > 0) {
+    populatePeriodFilters(stillSelected);
+  } else if (unidadFiltro !== 'todas' && allowedSet && allowedSet.size) {
+    populatePeriodFilters(Array.from(allowedSet));
+  } else {
+    populatePeriodFilters([]); // todas las unidades
+  }
+
+  // (Opcional) limpia búsqueda/tema para evitar intersecciones imposibles
+  searchInput.value = "";
+  temaSelect.selectedIndex = 0;
+
+  // En tu onUnidadChange (al final)
+  repoblarTematicas();   // <- actualiza el select
+  // 3) Aplicar filtros con la nueva base por unidad
+  applyFilters();
+    
+
+  // 4) Asegurar visible
+  if (unidadSection) unidadSection.style.display = "block";
+}
+
+radioSocio.addEventListener('change', onUnidadChange);
+radioEco.addEventListener('change', onUnidadChange);
+
+
 // Tras cargar procesos/variables:
 populatePeriodFilters([]); // sin selección inicial -> usa unión de todos
 
@@ -564,25 +746,33 @@ function aplicarFiltroDesdeURL() {
   })();
 }
 
+// Utilidad
+function getSelectedProcessIds() {
+  return Array.from(processSelect.selectedOptions).map(o => o.value);
+}
 
-
-// ✅ Función central de cambio del select
+// ✅ Función central de cambio del select (REEMPLAZA LA TUYA)
 function handleProcessSelectChange() {
-  const selectedOptions = Array.from(processSelect.selectedOptions);
-  const selectedValues = selectedOptions.map(opt => opt.value);
+  // Base correcta: respeta la unidad seleccionada
+  const base = (typeof filterByUnidad === 'function') ? filterByUnidad(allData) : allData;
 
-  renderSelectedTags(selectedOptions);
-  checkMostrarUnidadSection();
+  const selectedValues = getSelectedProcessIds();
 
+  // Chips siempre reflejan la selección actual
+  renderSelectedTags(selectedValues);
+
+  // Si no hay procesos seleccionados, muestra la base (no borres todo)
   if (selectedValues.length === 0) {
-    currentFilteredData = allData;
-    renderPage(allData, 1);
-    setupPagination(allData);
-    updateVariableCounter(allData.length);
+    currentFilteredData = [...base];
+    currentPage = 1;
+    renderPage(currentFilteredData, currentPage);
+    setupPagination(currentFilteredData);
+    updateVariableCounter(currentFilteredData.length);
     return;
   }
 
-  const filteredData = allData.filter(variable => selectedValues.includes(variable.idPp));
+  // Filtra por proceso SOBRE la base (no sobre allData crudo)
+  const filteredData = base.filter(v => selectedValues.includes(v.idPp));
   currentFilteredData = filteredData;
 
   if (filteredData.length === 0) {
@@ -598,24 +788,34 @@ function handleProcessSelectChange() {
   updateVariableCounter(filteredData.length);
 }
 
+// ✅ Renderizado de tags (REEMPLAZA LA TUYA)
+// Ahora acepta directamente un array de IDs seleccionados
+function renderSelectedTags(selectedIds) {
+  const chipsBox = document.getElementById("processSelectContainer");
+  if (!chipsBox) return;
 
-// ✅ Renderizado de tags (chips) de procesos seleccionados
-function renderSelectedTags(selectedOptions) {
-  const container = document.getElementById("processSelectContainer");
-  container.innerHTML = "";
+  chipsBox.innerHTML = "";
+  const frag = document.createDocumentFragment();
 
+  // Evita chips duplicados
   const seen = new Set();
 
-  selectedOptions.forEach(option => {
-    if (seen.has(option.value)) return;
-    seen.add(option.value);
+  selectedIds.forEach(id => {
+    if (seen.has(id)) return;
+    seen.add(id);
+
+    // Busca el <option> para obtener el texto bonito
+    const opt = Array.from(processSelect.options).find(o => o.value === id);
+    const label = opt ? opt.textContent : id;
 
     const tag = document.createElement("div");
-    tag.className = "badge bg-primary d-flex align-items-center me-2 mb-1";
+    tag.className = "badge d-inline-flex align-items-center me-2 mb-1";
     tag.style.paddingRight = "0.5rem";
+    tag.style.backgroundColor = "#003057";
+    tag.style.color = "#fff";
 
     const text = document.createElement("span");
-    text.textContent = option.textContent;
+    text.textContent = label;
     text.style.marginRight = "0.5rem";
 
     const closeBtn = document.createElement("button");
@@ -623,88 +823,96 @@ function renderSelectedTags(selectedOptions) {
     closeBtn.className = "btn-close btn-close-white btn-sm";
     closeBtn.setAttribute("aria-label", "Eliminar");
     closeBtn.onclick = () => {
-      option.selected = false;
+      // Des-selecciona el option correspondiente
+      const option = Array.from(processSelect.options).find(o => o.value === id);
+      if (option) option.selected = false;
       processSelect.dispatchEvent(new Event("change"));
     };
 
     tag.appendChild(text);
     tag.appendChild(closeBtn);
-    container.appendChild(tag);
+    frag.appendChild(tag);
   });
+
+  chipsBox.appendChild(frag);
 }
 
     
-    // Filtrado por temática
-    temaSelect.addEventListener("change", function () {
-        const selectedValue = this.value;
-        checkMostrarUnidadSection()
-        if (!selectedValue || selectedValue === "Seleccione una temática") {
-            renderPage(allData, 1);
-            setupPagination(allData);
-            return;
-        }
+  // Filtrado por temática
+  temaSelect.addEventListener("change", function () {
+      const selectedValue = this.value;
+      checkMostrarUnidadSection()
+      if (!selectedValue || selectedValue === "Seleccione una temática") {
+          renderPage(allData, 1);
+          setupPagination(allData);
+          return;
+      }
 
-        // Filtrar por coincidencia exacta en tema o tema2
-        const filteredData = allData.filter(variable =>
-            variable.tema === selectedValue || variable.tema2 === selectedValue
-        );
+      // Filtrar por coincidencia exacta en tema o tema2
+      const filteredData = allData.filter(variable =>
+          variable.tema === selectedValue || variable.tema2 === selectedValue
+      );
 
-        if (filteredData.length === 0) {
-            container.innerHTML = "<p class='text-center'>No hay variables para la temática seleccionada.</p>";
-            paginationContainer.innerHTML = "";
-            return;
-        }
+      if (filteredData.length === 0) {
+          container.innerHTML = "<p class='text-center'>No hay variables para la temática seleccionada.</p>";
+          paginationContainer.innerHTML = "";
+          return;
+      }
 
-        currentPage = 1;
-            currentFilteredData = filteredData;
-    renderPage(currentFilteredData, currentPage);
-    setupPagination(currentFilteredData);
+      currentPage = 1;
+          currentFilteredData = filteredData;
+  renderPage(currentFilteredData, currentPage);
+  setupPagination(currentFilteredData);
 
-    });
+  });
     
 
-  /* Funcionalidad para borrar filtros */
-  clearFiltersBtn.addEventListener("click", function () {
-    // Limpiar campos de texto y selects
-    searchInput.value = "";
-    temaSelect.selectedIndex = 0;
-    itemsPerPageSelect.selectedIndex = 0;
-    sortSelect.selectedIndex = 0;
+clearFiltersBtn.addEventListener("click", function () {
+  // Limpiar campos de texto y selects
+  searchInput.value = "";
+  temaSelect.selectedIndex = 1;
+  itemsPerPageSelect.selectedIndex = 0;
+  sortSelect.selectedIndex = 0;
 
-    // Limpiar select múltiple de procesos
-    Array.from(processSelect.options).forEach(option => option.selected = false);
+  // Limpiar select múltiple de procesos
+  Array.from(processSelect.options).forEach(option => option.selected = false);
 
-    // Limpiar chips visuales de procesos seleccionados
-    const chipsContainer = document.getElementById("processSelectContainer");
-    if (chipsContainer) chipsContainer.innerHTML = "";
+  // Limpiar chips visuales de procesos seleccionados
+  const chipsContainer = document.getElementById("processSelectContainer");
+  if (chipsContainer) chipsContainer.innerHTML = "";
 
-    // Limpiar checkboxes
-    relTabCheckbox.checked = false;
-    relMicroCheckbox.checked = false;
-    alinMdeaCheckbox.checked = false;
-    alinOdsCheckbox.checked = false;
+  // Limpiar checkboxes
+  relTabCheckbox.checked = false;
+  relMicroCheckbox.checked = false;
+  alinMdeaCheckbox.checked = false;
+  alinOdsCheckbox.checked = false;
 
-    // Limpiar selects de periodo
-    const periodInic = document.getElementById("periodInic");
-    const periodFin = document.getElementById("periodFin");
-    if (periodInic) periodInic.selectedIndex = 0;
-    if (periodFin) periodFin.selectedIndex = 0;
+  // Limpiar selects de periodo
+  const periodInic = document.getElementById("periodInic");
+  const periodFin = document.getElementById("periodFin");
+  if (periodInic) periodInic.selectedIndex = 0;
+  if (periodFin) periodFin.selectedIndex = 0;
 
-    // Ocultar sección de unidad administrativa
-    if (unidadSection) unidadSection.style.display = "none";
+  // 🔁 Ya no se oculta unidadAdministrativaSection, se mantiene visible
+  // Desmarcar unidad administrativa
+ if (radioSocio) radioSocio.checked = false;
+  if (radioEco)   radioEco.checked   = false;
+  Array.from(processSelect.options).forEach(opt => opt.hidden = false);
+  if (unidadSection) unidadSection.style.display = "block";
 
-    // Reiniciar datos y paginación
-    currentPage = 1;
-    currentFilteredData = [...allData];
-    renderPage(currentFilteredData, currentPage);
-    setupPagination(currentFilteredData);
-    updateVariableCounter(allData.length);
+  unidadFiltro = 'todas';
+  repoblarTematicas(); // <- reconstruye temáticas para todas las unidades
+  // Reiniciar datos y paginación
+  currentPage = 1;
+  currentFilteredData = [...allData];
+  renderPage(currentFilteredData, currentPage);
+  setupPagination(currentFilteredData);
+  updateVariableCounter(allData.length);
 
-    // Eliminar parámetros de la URL sin recargar
-    const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-    window.history.replaceState({}, document.title, newUrl);
+  // Eliminar parámetros de la URL sin recargar
+  const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+  window.history.replaceState({}, document.title, newUrl);
 });
-
 
     // Función para cargar todos los elementos al entrar a la página
     async function loadAllVariables() {
@@ -788,6 +996,14 @@ function updateVariableCounter(count) {
     animate();
 }
 
+// Ordenar variables alfabéticamente por varAsig al cargar y al aplicar filtros
+function sortVariablesAZ(data) {
+  return [...data].sort((a, b) => {
+    const nameA = (a.varAsig || "").toLowerCase();
+    const nameB = (b.varAsig || "").toLowerCase();
+    return nameA.localeCompare(nameB);
+  });
+}
 
 // 🔁 CARGA INICIAL “TODO ANTES DE PINTAR”
 showProcessSkeleton();
@@ -810,7 +1026,22 @@ Promise.all([
   window.eventosGlobal = eventos;
   window.clasificacionesGlobal = clasificaciones;
 
-  allData = mergeVariablesLocalYUltima(variablesLocal, variablesUltima);
+  allData = sortVariablesAZ(mergeVariablesLocalYUltima(variablesLocal, variablesUltima)); // <-- Ordena aquí
+
+socioSet = new Set(
+  (procesosGlobal || [])
+    .filter(p => p._source !== 'economicas') // ajusta si tienes otra señal
+    .map(p => p.idPp)
+);
+ecoSet = new Set(
+  (procesosGlobal || [])
+    .filter(p => p._source === 'economicas')
+    .map(p => p.idPp)
+);
+
+if (radioSocio?.checked || radioEco?.checked) {
+  onUnidadChange();
+}
 
   // poblar select solo con procesos que tengan variables
   const idPpConVars = new Set(allData.map(v => v.idPp).filter(Boolean));
@@ -846,10 +1077,6 @@ Promise.all([
   hideVariablesSkeleton();
   hideCounterSpinner();
   hideListSpinner();
-  // pinta…
-  procesosGlobal = mergeProcesos(procesosLocal, procesosEco);
-  // poblar select procesos…
-  // fusionar variables…
 })
 .catch(err => {
   console.error("Error en carga inicial:", err);
@@ -978,6 +1205,21 @@ function getEventYearsForVar(idVar, eventosRelacionados) {
   return Array.from(años).sort((a,b)=>a-b); // orden asc
 }
 
+function buildUnidadBadge(variable) {
+  const tipo = getUnidadDeVariable(variable); // 'socio' | 'eco'
+  const label = (tipo === 'eco')
+    ? 'Unidad de Estadísticas Económicas'
+    : 'Unidad de Estadísticas Sociodemográficas';
+
+  // Colores personalizados (usando los códigos hexadecimales)
+ const style = (tipo === 'eco')
+  ? 'background-color:#E26C3B; color:white; box-shadow:0 1px 4px rgba(0,0,0,0.2);'
+  : 'background-color:#9F2578; color:white; box-shadow:0 1px 4px rgba(0,0,0,0.2);';
+
+  return `<span class="badge rounded-pill ms-2" style="${style}" title="${label}">${label}</span>`;
+}
+
+
 // ⚠️ Reemplaza sólo esta función
 function construirLineaDeTiempoVariable(variable, eventosRelacionados) {
   try {
@@ -1043,11 +1285,25 @@ function construirLineaDeTiempoVariable(variable, eventosRelacionados) {
   }
 }
 
+// Devuelve un array de temáticas únicas (tema y tema2) de la "base" que le pases
+function collectTematicas(baseData) {
+  const set = new Set();
+  (baseData || []).forEach(v => {
+    if (v?.tema && String(v.tema).trim())  set.add(String(v.tema).trim());
+    if (v?.tema2 && String(v.tema2).trim()) set.add(String(v.tema2).trim());
+  });
+  // orden alfabético
+  return Array.from(set).sort((a,b) => a.localeCompare(b));
+}
+
+
+
 
 function renderPage(data, page) {
   container.innerHTML = "";
   const startIndex = (page - 1) * itemsPerPage;
   const paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
+ 
 
   updateVariableCounter(data.length);
 
@@ -1081,70 +1337,89 @@ function renderPage(data, page) {
     const card = document.createElement('div');
     card.classList.add('accordion', 'mb-3');
 
-    card.innerHTML = `
-    <div class="accordion-item shadow-sm rounded-3 border-0">
-        <h2 class="accordion-header custom-accordion-header" id="heading${index}">
-            <button class="accordion-button collapsed fw-bold" type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#collapse${index}"
-                aria-expanded="false"
-                aria-controls="collapse${index}">
-                ${variable.varAsig}
-                ${proceso && proceso.pp ? `<span class="badge ms-2 bg-secondary">${proceso.pp}</span>` : ''}
-            </button>
-        </h2>
-        <div id="collapse${index}" class="accordion-collapse collapse" aria-labelledby="heading${index}" data-bs-parent="#variablesContainer">
-          <div class="accordion-body">
-               <!-- Cambia aquí: usa un div normal, NO d-flex -->
-               <div class="mb-2">
-                    <div class="mb-2 text-dark fw-semibold" style="font-size:1rem;">
-                      Periodo de Pertinencia del Evento:
+    const term = currentSearchTerm; // 👈 usa el término global
+     const unidadBadgeHTML = buildUnidadBadge(variable);
+
+
+    // Campos que quieres resaltar (usa el original si no hay término)
+    const hVarAsig  = variable.varAsig  ? highlightTerm(variable.varAsig,  term) : "";
+    const hPregLit  = variable.pregLit  ? highlightTerm(variable.pregLit,  term) : "";
+    const hDefVar   = variable.defVar   ? highlightTerm(variable.defVar,   term) : "";
+    const hNomVar   = variable.nomVar   ? highlightTerm(variable.nomVar,   term) : "";
+    const hCategoria= variable.categoria? highlightTerm(variable.categoria,term) : "";
+    const hTema     = variable.tema     ? highlightTerm(variable.tema,     term) : "";
+    const hSubtema  = variable.subtema  ? highlightTerm(variable.subtema,  term) : "";
+    const hTema2    = variable.tema2    ? highlightTerm(variable.tema2,    term) : "";
+    const hSubtema2 = variable.subtema2 ? highlightTerm(variable.subtema2, term) : "";
+
+
+   
+            card.innerHTML = `
+              <div class="accordion-item shadow-sm rounded-3 border-0">
+                <h2 class="accordion-header custom-accordion-header" id="heading${index}">
+                  <button class="accordion-button collapsed fw-bold" type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapse${index}"
+                    aria-expanded="false"
+                    aria-controls="collapse${index}">
+                    ${hVarAsig}
+                    ${proceso && proceso.pp ? `<span class="badge ms-2 bg-secondary">${proceso.pp}</span>` : ''}
+                    ${unidadBadgeHTML} 
+                  </button>
+                </h2>
+                <div id="collapse${index}" class="accordion-collapse collapse" aria-labelledby="heading${index}" data-bs-parent="#variablesContainer">
+                  <div class="accordion-body">
+                    <div class="mb-2">
+                      <div class="mb-2 text-dark fw-semibold" style="font-size:1rem;">Periodo de Pertinencia del Evento:</div>
+                      ${timelineHTML}
                     </div>
-                    ${timelineHTML}
-                </div>
-                <div class="row g-3">
-                    <div class="col-md-6">
+                    <div class="row g-3">
+                      <div class="col-md-6">
                         <div class="mb-2">
-                            <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Pregunta elaborada cuyo objetivo es obtener una respuesta directa y explícita basada en información específica y detallada proporcionada por un informante">
+                          <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Pregunta elaborada cuyo objetivo es obtener una respuesta directa y explícita basada en información específica y detallada proporcionada por un informante">
                             <i class="bi bi-question-circle me-1"></i>Pregunta:</span>
-                            <div class="ps-3">
-                            <p>${variable.pregLit}</p>
-                            </div>
-                             <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Ordenamiento de todas y cada una de las modalidades cualitativas o intervalos numéricos admitidos por una variable">
-                             <i class="bi bi-question-circle me-1"></i>Clasificación de la variable correspondiente a la pregunta:</span>
-                             <div class="ps-3">
-                                ${getClasificacionesPorVariable(variable.idVar)}
-                              </div>
+                          <div class="ps-3">
+                            <p>${hPregLit}
+                          </div>
+
+                          <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Ordenamiento de todas y cada una de las modalidades cualitativas o intervalos numéricos admitidos por una variable">
+                            <i class="bi bi-question-circle me-1"></i>Clasificación de la variable correspondiente a la pregunta:</span>
+                          <div class="ps-3">
+                            ${getClasificacionesPorVariableHighlighted(variable.idVar, term)} <!-- 👈 (ver paso 4) -->
+                          </div>
                         </div>
+
                         <div class="mb-2">
-                            <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Concepto o termino que incluya sus aspectos principales brindando un contexto de la variable">
-                                <i class="bi bi-info-circle me-1"></i>Definición:</span>
-                            <div class="ps-3">${variable.defVar}</div>
+                          <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Concepto o termino que incluya sus aspectos principales brindando un contexto de la variable">
+                            <i class="bi bi-info-circle me-1"></i>Definición:</span>
+                          <div class="ps-3">${hDefVar}</div> <!-- 👈 -->
                         </div>
+
                         <div class="mb-2">
-                            <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Nombre de la variable seleccionada, tal y como aparece en la fuente del evento en mención">
-                                <i class="bi bi-tag me-1"></i>Variable Fuente:</span>
-                            <span class="text-dark ms-1 fw-normal">${variable.nomVar}</span>
+                          <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Nombre de la variable seleccionada, tal y como aparece en la fuente del evento en mención">
+                            <i class="bi bi-tag me-1"></i>Variable Fuente:</span>
+                          <span class="text-dark ms-1 fw-normal">${hNomVar}</span> <!-- 👈 -->
                         </div>
-                    </div>
-               
-                    <div class="col-md-6">
+                      </div>
+
+                      <div class="col-md-6">
                         <div class="mb-2">
-                            <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Conjunto objeto de cuantificación y caracterización para fines de estudio">
-                               <i class="bi bi-diagram-3 me-1"></i>Categoría:</span>
-                            <span class="text-dark ms-1 fw-normal">${variable.categoria}</span>
+                          <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Conjunto objeto de cuantificación y caracterización para fines de estudio">
+                            <i class="bi bi-diagram-3 me-1"></i>Categoría:</span>
+                          <span class="text-dark ms-1 fw-normal">${hCategoria}</span> <!-- 👈 -->
                         </div>
+
                         <div class="mb-2">
-                            <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Son enunciados genéricos referentes a campos específicos de interés y cuyo estudio constituye la justificación del proyecto estadístico">
-                                <i class="bi bi-layers me-1"></i>Clasificación Temática:</span>
-                            <div class="ps-3">
-                                <span>Tema y Subtema 1:</span>
-                                <span class="text-dark mb-1 fw-normal">${variable.tema}</span>/
-                                <span class="text-dark mb-1 fw-normal">${variable.subtema}</span><br>
-                                <span>Tema y Subtema 2:</span>
-                                <span class="text-dark mb-1 fw-normal">${variable.tema2}</span>/
-                                <span class="text-dark mb-1 fw-normal">${variable.subtema2}</span>
-                            </div>
+                          <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Son enunciados genéricos referentes a campos específicos de interés y cuyo estudio constituye la justificación del proyecto estadístico">
+                            <i class="bi bi-layers me-1"></i>Clasificación Temática:</span>
+                          <div class="ps-3">
+                            <span>Tema y Subtema 1:</span>
+                            <span class="text-dark mb-1 fw-normal">${hTema}</span>/
+                            <span class="text-dark mb-1 fw-normal">${hSubtema}</span><br>
+                            <span>Tema y Subtema 2:</span>
+                            <span class="text-dark mb-1 fw-normal">${hTema2}</span>/
+                            <span class="text-dark mb-1 fw-normal">${hSubtema2}</span>
+                          </div>
                         </div>
                           <div class="mb-2">
                              <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left"
@@ -1205,154 +1480,142 @@ function renderPage(data, page) {
 
     // Función para configurar el paginador
     function setupPagination(data) {
-    // Botón 'Página final' para ir directo a la última página
-    if (totalPages > 1) {
-      const lastLi = document.createElement("li");
-      lastLi.classList.add("page-item");
-      const lastA = document.createElement("a");
-      lastA.classList.add("page-link");
-      lastA.href = "#";
-      lastA.textContent = "Página final";
-      lastA.addEventListener("click", function (e) {
-        e.preventDefault();
-        currentPage = totalPages;
-        renderPage(data, currentPage);
-        setupPagination(data);
-      });
-      lastLi.appendChild(lastA);
-      paginationContainer.appendChild(lastLi);
+    paginationContainer.innerHTML = ""; // Limpia el paginador antes de generarlo nuevamente
+    const totalPages = Math.ceil(data.length / itemsPerPage);
+    const maxVisiblePages = 5; // Número máximo de páginas visibles en el paginador
+
+    // Botón "Anterior"
+    if (currentPage > 1) {
+        const prevLi = document.createElement("li");
+        prevLi.classList.add("page-item");
+        const prevA = document.createElement("a");
+        prevA.classList.add("page-link");
+        prevA.href = "#";
+        prevA.textContent = "«";
+        prevA.addEventListener("click", function (e) {
+            e.preventDefault();
+            currentPage--;
+            renderPage(data, currentPage);
+            setupPagination(data);
+        });
+        prevLi.appendChild(prevA);
+        paginationContainer.appendChild(prevLi);
     }
-        paginationContainer.innerHTML = ""; // Limpia el paginador antes de generarlo nuevamente
-        const totalPages = Math.ceil(data.length / itemsPerPage);
-        const maxVisiblePages = 5; // Número máximo de páginas visibles en el paginador
 
-        // Botón "Anterior"
-        if (currentPage > 1) {
-            const prevLi = document.createElement("li");
-            prevLi.classList.add("page-item");
-            const prevA = document.createElement("a");
-            prevA.classList.add("page-link");
-            prevA.href = "#";
-            prevA.textContent = "«";
-            prevA.addEventListener("click", function (e) {
-                e.preventDefault();
-                currentPage--;
-                renderPage(data, currentPage);
-                setupPagination(data);
-            });
-            prevLi.appendChild(prevA);
-            paginationContainer.appendChild(prevLi);
-        }
-
-        // Rango de páginas visibles
-    const startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    // Rango de páginas visibles
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    if (endPage - startPage < maxVisiblePages - 1) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
 
     // Mostrar "..." al inicio si hay páginas anteriores al rango visible
     if (startPage > 1) {
-  const dotsLi = document.createElement("li");
-  dotsLi.classList.add("page-item", "disabled");
-  const dotsA = document.createElement("a");
-  dotsA.classList.add("page-link");
-  dotsA.href = "#";
-  dotsA.textContent = "...";
-  dotsA.style.backgroundColor = "#003057";
-  dotsA.style.color = "#fff";
-  dotsLi.appendChild(dotsA);
-  paginationContainer.appendChild(dotsLi);
+        const dotsLi = document.createElement("li");
+        dotsLi.classList.add("page-item", "disabled");
+        const dotsA = document.createElement("a");
+        dotsA.classList.add("page-link");
+        dotsA.href = "#";
+        dotsA.textContent = "...";
+        dotsA.style.backgroundColor = "#003057";
+        dotsA.style.color = "#fff";
+        dotsLi.appendChild(dotsA);
+        paginationContainer.appendChild(dotsLi);
     }
 
     // Números de página visibles
     for (let i = startPage; i <= endPage; i++) {
-      const li = document.createElement("li");
-      li.classList.add("page-item");
-      if (i === currentPage) li.classList.add("active");
+        const li = document.createElement("li");
+        li.classList.add("page-item");
+        if (i === currentPage) li.classList.add("active");
 
-      const a = document.createElement("a");
-      a.classList.add("page-link");
-      a.href = "#";
-      a.textContent = i;
-      a.style.backgroundColor = "#003057";
-      a.style.color = "#fff";
-      a.addEventListener("click", function (e) {
-        e.preventDefault();
-        currentPage = i;
-        renderPage(data, currentPage);
-        setupPagination(data);
-      });
+        const a = document.createElement("a");
+        a.classList.add("page-link");
+        a.href = "#";
+        a.textContent = i;
+        a.style.backgroundColor = "#003057";
+        a.style.color = "#fff";
+        a.addEventListener("click", function (e) {
+            e.preventDefault();
+            currentPage = i;
+            renderPage(data, currentPage);
+            setupPagination(data);
+        });
 
-      li.appendChild(a);
-      paginationContainer.appendChild(li);
+        li.appendChild(a);
+        paginationContainer.appendChild(li);
     }
 
     // Mostrar "..." al final si hay páginas posteriores al rango visible
     if (endPage < totalPages) {
-  const dotsLi = document.createElement("li");
-  dotsLi.classList.add("page-item", "disabled");
-  const dotsA = document.createElement("a");
-  dotsA.classList.add("page-link");
-  dotsA.href = "#";
-  dotsA.textContent = "...";
-  dotsA.style.backgroundColor = "#003057";
-  dotsA.style.color = "#fff";
-  dotsLi.appendChild(dotsA);
-  paginationContainer.appendChild(dotsLi);
+        const dotsLi = document.createElement("li");
+        dotsLi.classList.add("page-item", "disabled");
+        const dotsA = document.createElement("a");
+        dotsA.classList.add("page-link");
+        dotsA.href = "#";
+        dotsA.textContent = "...";
+        dotsA.style.backgroundColor = "#003057";
+        dotsA.style.color = "#fff";
+        dotsLi.appendChild(dotsA);
+        paginationContainer.appendChild(dotsLi);
+    }
+
+    // Botón "Siguiente"
+    if (currentPage < totalPages) {
+        const nextLi = document.createElement("li");
+        nextLi.classList.add("page-item");
+        const nextA = document.createElement("a");
+        nextA.classList.add("page-link");
+        nextA.href = "#";
+        nextA.textContent = "»";
+        nextA.addEventListener("click", function (e) {
+            e.preventDefault();
+            currentPage++;
+            renderPage(data, currentPage);
+            setupPagination(data);
+        });
+        nextLi.appendChild(nextA);
+        paginationContainer.appendChild(nextLi);
+    }
+
     // Botón 'Página final' para ir directo a la última página
-    if (totalPages > 1) {
-      const lastLi = document.createElement("li");
-      lastLi.classList.add("page-item");
-      const lastA = document.createElement("a");
-      lastA.classList.add("page-link");
-      lastA.href = "#";
-      lastA.textContent = "Página final";
-      lastA.style.backgroundColor = "#003057";
-      lastA.style.color = "#fff";
-      lastA.addEventListener("click", function (e) {
-        e.preventDefault();
-        currentPage = totalPages;
-        renderPage(data, currentPage);
-        setupPagination(data);
-      });
-      lastLi.appendChild(lastA);
-      paginationContainer.appendChild(lastLi);
+    if (totalPages > 1 && currentPage < totalPages) {
+        const lastLi = document.createElement("li");
+        lastLi.classList.add("page-item");
+        const lastA = document.createElement("a");
+        lastA.classList.add("page-link");
+        lastA.href = "#";
+        lastA.textContent = "Última Página";
+        lastA.style.backgroundColor = "#003057";
+        lastA.style.color = "#fff";
+        lastA.addEventListener("click", function (e) {
+            e.preventDefault();
+            currentPage = totalPages;
+            renderPage(data, currentPage);
+            setupPagination(data);
+        });
+        lastLi.appendChild(lastA);
+        paginationContainer.appendChild(lastLi);
     }
-    }
-
-        // Botón "Siguiente"
-        if (currentPage < totalPages) {
-            const nextLi = document.createElement("li");
-            nextLi.classList.add("page-item");
-            const nextA = document.createElement("a");
-            nextA.classList.add("page-link");
-            nextA.href = "#";
-            nextA.textContent = "»";
-            nextA.addEventListener("click", function (e) {
-                e.preventDefault();
-                currentPage++;
-                renderPage(data, currentPage);
-                setupPagination(data);
-            });
-            nextLi.appendChild(nextA);
-            paginationContainer.appendChild(nextLi);
-        }
-    }
-
+}
     // Manejar el evento de cambio en el selector de elementos por página
     itemsPerPageSelect.addEventListener("change", function () {
-        itemsPerPage = parseInt(this.value, 15);
-        currentPage = 1; // Reiniciar a la primera página
-        renderPage(allData, currentPage); // Renderizar la nueva página
-        setupPagination(allData); // Actualizar el paginador
+      itemsPerPage = parseInt(this.value, 15);
+      currentPage = 1;
+      const base = (currentFilteredData && currentFilteredData.length) ? currentFilteredData : filterByUnidad(allData);
+      renderPage(base, currentPage);
+      setupPagination(base);
     });
 
+
     // Manejar el evento de envío del formulario
-    searchForm.addEventListener("submit", function (e) {
-        e.preventDefault(); // Evitar el comportamiento predeterminado del formulario
-        const searchTerm = searchInput.value.trim();
-        currentPage = 1; // Reiniciar a la primera página
-        searchVariables(searchTerm); // Realizar la búsqueda
+      searchForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      currentSearchTerm = getCurrentSearchTerm();   // 👈 guarda el término
+      currentPage = 1;
+      searchVariables(currentSearchTerm);
     });
-    
+
     //Listener para los periodo de tiempo. 
     document.getElementById("periodInic").addEventListener("change", filterByRelation);
     document.getElementById("periodFin").addEventListener("change", filterByRelation);
@@ -1396,58 +1659,68 @@ function renderPage(data, page) {
     });
     
     // Función para aplicar todos los filtros activos
-    function applyFilters() {
-        let filteredData = [...allData];
+  function applyFilters() {
+  // 1) Base por UNIDAD
+  let filteredData = filterByUnidad(allData);
 
-        // Filtro por procesos de producción (múltiple)
-        const selectedProcesses = Array.from(processSelect.selectedOptions).map(opt => opt.value);
-        if (selectedProcesses.length > 0) {
-            filteredData = filteredData.filter(variable => selectedProcesses.includes(variable.idPp));
-        }
+  // 2) Procesos seleccionados
+  const selectedProcesses = Array.from(processSelect.selectedOptions).map(opt => opt.value);
+  if (selectedProcesses.length > 0) {
+    filteredData = filteredData.filter(v => selectedProcesses.includes(v.idPp));
+  }
 
-        // Filtro por temática
-        const selectedTema = temaSelect.value;
-        if (selectedTema && selectedTema !== "Seleccione una temática") {
-            filteredData = filteredData.filter(variable =>
-                variable.tema === selectedTema || variable.tema2 === selectedTema
-            );
-        }
+  // 3) Tema
+  const selectedTema = temaSelect.value;
+  if (selectedTema && selectedTema !== "Seleccione una temática") {
+    filteredData = filteredData.filter(v =>
+      v.tema === selectedTema || v.tema2 === selectedTema
+    );
+  }
 
-        // Filtro de relación temática
-        if (relTabCheckbox.checked || relMicroCheckbox.checked) {
-            filteredData = filteredData.filter(variable => {
-                const matchRelTab = relTabCheckbox.checked ? variable.relTab === "Sí" : true;
-                const matchRelMicro = relMicroCheckbox.checked ? variable.relMicro === "Sí" : true;
-                return matchRelTab && matchRelMicro;
-            });
-        }
+  // 4) Checkboxes
+  if (relTabCheckbox.checked || relMicroCheckbox.checked) {
+    filteredData = filteredData.filter(v => {
+      const okTab   = relTabCheckbox.checked  ? v.relTab   === "Sí" : true;
+      const okMicro = relMicroCheckbox.checked? v.relMicro === "Sí" : true;
+      return okTab && okMicro;
+    });
+  }
+  if (alinMdeaCheckbox.checked || alinOdsCheckbox.checked) {
+    filteredData = filteredData.filter(v => {
+      const okMdea = alinMdeaCheckbox.checked ? v.alinMdea === "Sí" : true;
+      const okOds  = alinOdsCheckbox.checked  ? v.alinOds  === "Sí" : true;
+      return okMdea && okOds;
+    });
+  }
 
-        // Filtro de alineación con MDEA y ODS
-        if (alinMdeaCheckbox.checked || alinOdsCheckbox.checked) {
-            filteredData = filteredData.filter(variable => {
-                const matchMdea = alinMdeaCheckbox.checked ? variable.alinMdea === "Sí" : true;
-                const matchOds = alinOdsCheckbox.checked ? variable.alinOds === "Sí" : true;
-                return matchMdea && matchOds;
-            });
-        }   
+  // 5) Búsqueda
 
-        // Filtro de búsqueda por término
-        const searchTerm = searchInput.value.trim().toLowerCase();
-        if (searchTerm) {
-            filteredData = filteredData.filter(variable =>
-                variable.nomVar.toLowerCase().includes(searchTerm) ||
-                variable.defVar.toLowerCase().includes(searchTerm) ||
-                variable.varAsig.toLowerCase().includes(searchTerm)
-            );
-        }
+  const needle = getCurrentSearchTerm().toLowerCase();
+  currentSearchTerm = needle ? getCurrentSearchTerm() : "";
+  if (needle) {
+    filteredData = filteredData.filter(v =>
+      (v.categoria && v.categoria.toLowerCase().includes(needle)) ||
+      (v.tema      && v.tema.toLowerCase().includes(needle)) ||
+      (v.tema2     && v.tema2.toLowerCase().includes(needle)) ||
+      (v.subtema   && v.subtema.toLowerCase().includes(needle)) ||
+      (v.subtema2  && v.subtema2.toLowerCase().includes(needle)) ||
+      (v.pregLit   && v.pregLit.toLowerCase().includes(needle)) ||
+      (v.nomVar    && v.nomVar.toLowerCase().includes(needle)) ||
+      (v.defVar    && v.defVar.toLowerCase().includes(needle)) ||
+      (v.varAsig   && v.varAsig.toLowerCase().includes(needle))
+    );
+  }
 
-        // Actualizar los datos filtrados y renderizar
-        currentFilteredData = filteredData;
-        currentPage = 1;
-        renderPage(currentFilteredData, currentPage);
-        setupPagination(currentFilteredData);
-        updateVariableCounter(filteredData.length);
-    }
+  // Ordena A-Z antes de mostrar
+  filteredData = sortVariablesAZ(filteredData);
+
+  currentFilteredData = filteredData;
+  currentPage = 1;
+  renderPage(currentFilteredData, currentPage);
+  setupPagination(currentFilteredData);
+  updateVariableCounter(filteredData.length);
+}
+
 
 
 function updateSelectedProcessesChips() {
@@ -1475,7 +1748,6 @@ function updateSelectedProcessesChips() {
 }
 
 temaSelect.addEventListener("change", function () {
-    checkMostrarUnidadSection();
     applyFilters();
 });
 relTabCheckbox.addEventListener("change", applyFilters);
@@ -1496,9 +1768,6 @@ searchForm.addEventListener("submit", function (e) {
         // Limpiar todas las opciones seleccionadas del select múltiple
         Array.from(processSelect.options).forEach(option => option.selected = false);
         updateSelectedProcessesChips(); // <-- Actualiza los chips visuales
-
-        // Ocultar y limpiar la sección de unidad administrativa
-        unidadSection.style.display = "none";
 
         // Restaurar el listado completo
         currentPage = 1;
@@ -1527,6 +1796,7 @@ searchForm.addEventListener("submit", function (e) {
         if (typeof allData !== 'undefined' && allData.length > 0) {
             clearInterval(checkDataLoaded);
             searchInput.value = searchTerm;
+            currentSearchTerm = searchTerm;
             currentPage = 1;
             searchVariables(searchTerm);
         }
@@ -1737,6 +2007,7 @@ document.addEventListener("click", async function (e) {
       // 1) Económicas con ods embebidos
       if (variable && variable._source === "economicas-ultima" && Array.isArray(variable._odsList) && variable._odsList.length) {
         modalBody.innerHTML = `
+          <div class="mb-2"><strong>ODS Relacionados:</strong></div>
           <div class="list-group">
             ${variable._odsList.map(o => `
               <div class="list-group-item">
@@ -1772,7 +2043,6 @@ document.addEventListener("click", async function (e) {
             <div class="list-group-item">
               <div class="d-flex w-100 justify-content-between align-items-start">
                 <h6 class="mb-1">ODS: ${fmt(info.ods)}</h6>
-                <span class="badge text-bg-light border">${fmt(info.nivContOds)}</span>
               </div>
               <div class="small mb-1"><strong>Meta ODS detectada:</strong> ${fmt(info.meta)}</div>
               <div class="small mb-1"><strong>Indicador ODS:</strong> ${fmt(info.indicador)}</div>
@@ -1844,6 +2114,20 @@ function getClasificacionesPorVariable(idVar) {
   }
 }
 
+function getClasificacionesPorVariableHighlighted(idVar, term) {
+  const clasifs = clasificacionesGlobal
+    .filter(c => c.idVar === idVar)
+    .map(c => c.clasificaciones)
+    .filter(val => val && val.trim() !== '' && val.trim() !== '-');
+
+  if (!clasifs.length) return '<span class="text-muted">Sin clasificación</span>';
+  const html = clasifs
+    .map(c => `<li>${term ? highlightTerm(c, term) : c}</li>`)
+    .join('');
+  return `<ul class="mb-0 ps-3">${html}</ul>`;
+}
+
+
 // Nueva función para renderizar comentarios
 function renderComentarios(comentario) {
   if (
@@ -1877,6 +2161,14 @@ function formatIdWithDots(id) {
   const str = String(id).trim();
   // Divide cada caracter por punto, incluyendo letras
   return str.split("").join(".");
+}
+
+// Resaltar término de búsqueda en los resultados
+function highlightTerm(text, term) {
+  if (!term) return text;
+  const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escaped})`, 'gi');
+  return text.replace(regex, '<mark class="custom-highlight">$1</mark>');
 }
 
 

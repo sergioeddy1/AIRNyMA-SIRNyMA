@@ -40,7 +40,7 @@ function mapEconomicasToLocal(item) {
     pp: item.proceso || "No disponible",
     dgaRespPp: null,
     perioProd: null,
-    vigInicial: item.inicio || null,
+    vigInicial: item.inicio ? String(item.inicio).slice(0, 4) : null, // Solo los primeros 4 dígitos
     vigFinal: item.fin || null,
     metGenInf: item.metodo || null,
     gradoMadur: grado,
@@ -71,8 +71,6 @@ function renderProcesos(procesos, conteo, container) {
   
     // Comportamiento normal para las demás unidades
     let extension = "png";
-    const extensionesGif = ["ENADID", "ENIGH", "CAAS", "ENCEVI", "MSM", "ESMNG"];
-    if (extensionesGif.includes(proceso.idPp)) extension = "gif";
 
     const baseName = `/assets/${proceso.idPp}`;
     const iconoFallback = `/assets/no_disponible.png`;
@@ -117,7 +115,7 @@ function renderProcesos(procesos, conteo, container) {
                 </p>
                 <p class="card-text mb-1" style="font-size: 0.85rem">
                   <strong style="font-size: 0.85rem">Periodicidad:</strong>
-                  ${proceso.perPubResul || "No disponible"}
+                  ${proceso.perioProd || "No disponible"}
                 </p>
                 <p class="card-text mb-1" style="font-size: 0.85rem">
                   <strong style="font-size: 0.85rem">Vigencia:</strong>
