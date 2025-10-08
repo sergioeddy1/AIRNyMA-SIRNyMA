@@ -88,19 +88,19 @@ let ecoSet   = new Set();
   }
 
   // Listeners
-  if (radioSocio) {
-    radioSocio.addEventListener("change", () => {
-      unidadFiltro = radioSocio.checked ? 'socio' : (radioEco?.checked ? 'eco' : 'todas');
-      aplicarFiltroUnidadYRepintar();
-    });
-  }
-  if (radioEco) {
-    radioEco.addEventListener("change", () => {
-      unidadFiltro = radioEco.checked ? 'eco' : (radioSocio?.checked ? 'socio' : 'todas');
-      aplicarFiltroUnidadYRepintar();
-    });
-  }
+ radioSocio.addEventListener("change", () => {
+  unidadFiltro = "socio";
+  const temaActual = (temaSelect.value && temaSelect.value !== "Seleccione una temática") ? temaSelect.value : "";
+  filtrarProcessSelectPorTema(temaActual);  // unidad + tema
+  applyFilters();
+  });
 
+  radioEco.addEventListener("change", () => {
+    unidadFiltro = "eco";
+    const temaActual = (temaSelect.value && temaSelect.value !== "Seleccione una temática") ? temaSelect.value : "";
+    filtrarProcessSelectPorTema(temaActual);  // unidad + tema
+    applyFilters();
+  });
   // ==== PARCHE: helpers faltantes usados más abajo ====
   function buildPeriodicidadPorPp(procesos) {
     const m = {};
@@ -288,6 +288,68 @@ function repoblarTematicas() {
     temaSelect.value = ""; // vuelve a placeholder si no aplica
   }
 }
+
+// Devuelve el Set de idPp permitidos según la unidad (socio/eco/todas)
+function allowedPpsPorUnidad() {
+  const base = new Set();
+  (procesosGlobal || []).forEach(p => {
+    const esEco = p._source === 'economicas';
+    if (unidadFiltro === 'eco' && !esEco) return;
+    if (unidadFiltro === 'socio' && esEco) return;
+    base.add(p.idPp);
+  });
+  return base;
+}
+
+// Devuelve un Set de idPp que tienen variables con la temática seleccionada
+function procesosParaTema(selectedTema) {
+  const pps = new Set();
+  if (!selectedTema) return pps;
+
+  // 1) Filtra por unidad primero (si aplica)
+  const allowedByUnidad = allowedPpsPorUnidad();
+
+  // 2) Busca variables que coincidan con la temática (tema o tema2)
+  (allData || []).forEach(v => {
+    const matchTema = (v.tema && v.tema === selectedTema) || (v.tema2 && v.tema2 === selectedTema);
+    if (!matchTema) return;
+    if (allowedByUnidad.size && !allowedByUnidad.has(v.idPp)) return; // respeta unidad
+    if (v.idPp) pps.add(v.idPp);
+  });
+
+  return pps;
+}
+
+function filtrarProcessSelectPorTema(selectedTema) {
+  // Si no hay tema, mostrar procesos según la unidad; si hay tema, mostrar sólo los que lo tienen
+  const targetSet = selectedTema
+    ? procesosParaTema(selectedTema)
+    : allowedPpsPorUnidad();
+
+  // Mostrar/ocultar opciones del select y quitar selecciones que ya no apliquen
+  Array.from(processSelect.options).forEach(opt => {
+    const permitido = targetSet.size === 0 ? true : targetSet.has(opt.value);
+    opt.hidden = !permitido;
+    if (!permitido && opt.selected) opt.selected = false;
+  });
+
+  // Series de años:
+  // - Si quedan procesos seleccionados válidos → esos
+  // - Si no hay nada seleccionado, pero hay un targetSet → usar todos los permitidos
+  const stillSelected = Array.from(processSelect.selectedOptions).map(o => o.value);
+  if (stillSelected.length > 0) {
+    populatePeriodFilters(stillSelected);
+  } else if (targetSet && targetSet.size) {
+    populatePeriodFilters(Array.from(targetSet));
+  } else {
+    populatePeriodFilters([]); // fallback: todos
+  }
+
+  // Actualiza los chips y aplica filtros
+  renderSelectedTags(Array.from(processSelect.selectedOptions));
+  applyFilters();
+}
+
 
 
   // ==== FIN HELPERS /indicadores/ultima ====
@@ -753,88 +815,45 @@ function getSelectedProcessIds() {
 
 // ✅ Función central de cambio del select (REEMPLAZA LA TUYA)
 function handleProcessSelectChange() {
-  // Base correcta: respeta la unidad seleccionada
-  const base = (typeof filterByUnidad === 'function') ? filterByUnidad(allData) : allData;
-
-  const selectedValues = getSelectedProcessIds();
-
-  // Chips siempre reflejan la selección actual
-  renderSelectedTags(selectedValues);
-
-  // Si no hay procesos seleccionados, muestra la base (no borres todo)
-  if (selectedValues.length === 0) {
-    currentFilteredData = [...base];
-    currentPage = 1;
-    renderPage(currentFilteredData, currentPage);
-    setupPagination(currentFilteredData);
-    updateVariableCounter(currentFilteredData.length);
-    return;
-  }
-
-  // Filtra por proceso SOBRE la base (no sobre allData crudo)
-  const filteredData = base.filter(v => selectedValues.includes(v.idPp));
-  currentFilteredData = filteredData;
-
-  if (filteredData.length === 0) {
-    container.innerHTML = "<p class='text-center'>No hay variables para los procesos seleccionados.</p>";
-    paginationContainer.innerHTML = "";
-    updateVariableCounter(0);
-    return;
-  }
-
-  currentPage = 1;
-  renderPage(currentFilteredData, currentPage);
-  setupPagination(currentFilteredData);
-  updateVariableCounter(filteredData.length);
+  const selectedOptions = Array.from(processSelect.selectedOptions);
+  renderSelectedTags(selectedOptions);   // chips
+  checkMostrarUnidadSection();           // si lo necesitas visible siempre
+  applyFilters();                        // 👈 aquí se combinan unidad + temática + proceso + demás
 }
 
-// ✅ Renderizado de tags (REEMPLAZA LA TUYA)
-// Ahora acepta directamente un array de IDs seleccionados
-function renderSelectedTags(selectedIds) {
-  const chipsBox = document.getElementById("processSelectContainer");
-  if (!chipsBox) return;
+// Renderiza los "chips" de procesos seleccionados
+function renderSelectedTags(selectedOptions) {
+  const chips = document.getElementById("processSelectContainer");
+  if (!chips) return;
+  chips.replaceChildren(); // limpia seguro
 
-  chipsBox.innerHTML = "";
-  const frag = document.createDocumentFragment();
+  selectedOptions.forEach((opt) => {
+    // Toma el texto visible del <option>
+    const label =
+      (typeof opt.label === "string" && opt.label.trim()) ? opt.label :
+      (typeof opt.text  === "string" && opt.text.trim())  ? opt.text  :
+      (opt.textContent || "").trim()                      ? opt.textContent.trim() :
+      String(opt.value);
 
-  // Evita chips duplicados
-  const seen = new Set();
-
-  selectedIds.forEach(id => {
-    if (seen.has(id)) return;
-    seen.add(id);
-
-    // Busca el <option> para obtener el texto bonito
-    const opt = Array.from(processSelect.options).find(o => o.value === id);
-    const label = opt ? opt.textContent : id;
-
-    const tag = document.createElement("div");
-    tag.className = "badge d-inline-flex align-items-center me-2 mb-1";
+    const tag = document.createElement("span");
+    tag.className = "badge bg-primary d-inline-flex align-items-center me-2 mb-1";
     tag.style.paddingRight = "0.5rem";
-    tag.style.backgroundColor = "#003057";
-    tag.style.color = "#fff";
 
-    const text = document.createElement("span");
-    text.textContent = label;
-    text.style.marginRight = "0.5rem";
+    // 🔒 No uses innerHTML para el texto; usa textNode
+    tag.append(document.createTextNode(label));
 
     const closeBtn = document.createElement("button");
     closeBtn.type = "button";
-    closeBtn.className = "btn-close btn-close-white btn-sm";
+    closeBtn.className = "btn-close btn-close-white btn-sm ms-2";
     closeBtn.setAttribute("aria-label", "Eliminar");
-    closeBtn.onclick = () => {
-      // Des-selecciona el option correspondiente
-      const option = Array.from(processSelect.options).find(o => o.value === id);
-      if (option) option.selected = false;
-      processSelect.dispatchEvent(new Event("change"));
-    };
+    closeBtn.addEventListener("click", () => {
+      opt.selected = false; // des-selecciona el proceso
+      processSelect.dispatchEvent(new Event("change")); // re-filtra y repinta
+    });
 
-    tag.appendChild(text);
-    tag.appendChild(closeBtn);
-    frag.appendChild(tag);
+    tag.append(closeBtn);
+    chips.appendChild(tag);
   });
-
-  chipsBox.appendChild(frag);
 }
 
     
@@ -868,48 +887,56 @@ function renderSelectedTags(selectedIds) {
     
 
 clearFiltersBtn.addEventListener("click", function () {
-  // Limpiar campos de texto y selects
-  searchInput.value = "";
-  temaSelect.selectedIndex = 1;
+  // 0) Romper el highlight
+  currentSearchTerm = "";                 // ⬅️ quita el término global
+  searchInput.value = "";                 // limpia el input
+
+  // 1) Campos/selects
+  temaSelect.selectedIndex = 0;           // o "" si tu placeholder es opción vacía
   itemsPerPageSelect.selectedIndex = 0;
   sortSelect.selectedIndex = 0;
 
-  // Limpiar select múltiple de procesos
-  Array.from(processSelect.options).forEach(option => option.selected = false);
+  // 2) Procesos múltiple
+  Array.from(processSelect.options).forEach(option => {
+    option.selected = false;
+    option.hidden = false;               // vuelve a mostrar todos
+  });
 
-  // Limpiar chips visuales de procesos seleccionados
+  // 3) Chips visuales
   const chipsContainer = document.getElementById("processSelectContainer");
   if (chipsContainer) chipsContainer.innerHTML = "";
 
-  // Limpiar checkboxes
+  // 4) Checkboxes
   relTabCheckbox.checked = false;
   relMicroCheckbox.checked = false;
   alinMdeaCheckbox.checked = false;
   alinOdsCheckbox.checked = false;
 
-  // Limpiar selects de periodo
+  // 5) Periodos
   const periodInic = document.getElementById("periodInic");
-  const periodFin = document.getElementById("periodFin");
+  const periodFin  = document.getElementById("periodFin");
   if (periodInic) periodInic.selectedIndex = 0;
-  if (periodFin) periodFin.selectedIndex = 0;
+  if (periodFin)  periodFin.selectedIndex  = 0;
 
-  // 🔁 Ya no se oculta unidadAdministrativaSection, se mantiene visible
-  // Desmarcar unidad administrativa
- if (radioSocio) radioSocio.checked = false;
+  // 6) Unidad (mantener visible, limpiar selección)
+  if (radioSocio) radioSocio.checked = false;
   if (radioEco)   radioEco.checked   = false;
-  Array.from(processSelect.options).forEach(opt => opt.hidden = false);
   if (unidadSection) unidadSection.style.display = "block";
+  unidadFiltro = "todas";
 
-  unidadFiltro = 'todas';
-  repoblarTematicas(); // <- reconstruye temáticas para todas las unidades
-  // Reiniciar datos y paginación
+  // 7) Repoblar catálogos dependientes
+  repoblarTematicas();                   // todas las unidades
+  const temaActual = "";                 // sin tema
+  filtrarProcessSelectPorTema?.(temaActual); // si tienes esta función
+
+  // 8) Re-render sin highlight (porque currentSearchTerm="", ver paso 0)
   currentPage = 1;
   currentFilteredData = [...allData];
   renderPage(currentFilteredData, currentPage);
   setupPagination(currentFilteredData);
   updateVariableCounter(allData.length);
 
-  // Eliminar parámetros de la URL sin recargar
+  // 9) Limpiar querystring
   const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
   window.history.replaceState({}, document.title, newUrl);
 });
@@ -1609,13 +1636,13 @@ function renderPage(data, page) {
 
 
     // Manejar el evento de envío del formulario
-      searchForm.addEventListener("submit", function (e) {
+   searchForm.addEventListener("submit", function (e) {
       e.preventDefault();
-      currentSearchTerm = getCurrentSearchTerm();   // 👈 guarda el término
+      const searchTerm = searchInput.value.trim();
+      currentSearchTerm = searchTerm;  // ⬅️ clave
       currentPage = 1;
-      searchVariables(currentSearchTerm);
+      searchVariables(searchTerm);
     });
-
     //Listener para los periodo de tiempo. 
     document.getElementById("periodInic").addEventListener("change", filterByRelation);
     document.getElementById("periodFin").addEventListener("change", filterByRelation);
@@ -1660,23 +1687,23 @@ function renderPage(data, page) {
     
     // Función para aplicar todos los filtros activos
   function applyFilters() {
-  // 1) Base por UNIDAD
+    // 1) Base por unidad
   let filteredData = filterByUnidad(allData);
 
-  // 2) Procesos seleccionados
-  const selectedProcesses = Array.from(processSelect.selectedOptions).map(opt => opt.value);
-  if (selectedProcesses.length > 0) {
-    filteredData = filteredData.filter(v => selectedProcesses.includes(v.idPp));
-  }
-
-  // 3) Tema
+  // 2) Temática
   const selectedTema = temaSelect.value;
   if (selectedTema && selectedTema !== "Seleccione una temática") {
     filteredData = filteredData.filter(v =>
-      v.tema === selectedTema || v.tema2 === selectedTema
+      (v.tema   && v.tema   === selectedTema) ||
+      (v.tema2  && v.tema2  === selectedTema)
     );
   }
 
+  // 3) Procesos (intersección con lo anterior, no lo sobreescribe)
+  const selectedProcesses = Array.from(processSelect.selectedOptions).map(o => o.value);
+  if (selectedProcesses.length > 0) {
+    filteredData = filteredData.filter(v => selectedProcesses.includes(v.idPp));
+  }
   // 4) Checkboxes
   if (relTabCheckbox.checked || relMicroCheckbox.checked) {
     filteredData = filteredData.filter(v => {
@@ -1724,32 +1751,52 @@ function renderPage(data, page) {
 
 
 function updateSelectedProcessesChips() {
-    const selectedProcessesContainer = document.getElementById("processSelectContainer");
-    if (!selectedProcessesContainer) return;
-    selectedProcessesContainer.innerHTML = "";
-    const selectedOptions = Array.from(processSelect.selectedOptions);
-    selectedOptions.forEach(option => {
-        const chip = document.createElement("span");
-        chip.className = "badge bg-primary text-white me-2 mb-1";
-        chip.textContent = option.textContent;
-        // Botón para quitar
-        const removeBtn = document.createElement("span");
-        removeBtn.innerHTML = '&times;';
-        removeBtn.style.cursor = "pointer";
-        removeBtn.className = "ms-2";
-        removeBtn.onclick = () => {
-            option.selected = false;
-            updateSelectedProcessesChips();
-            applyFilters();
-        };
-        chip.appendChild(removeBtn);
-        selectedProcessesContainer.appendChild(chip);
+  const chips = document.getElementById("processSelectContainer");
+  if (!chips) return;
+  chips.replaceChildren();
+
+  const selectedOptions = Array.from(processSelect.selectedOptions);
+  selectedOptions.forEach((opt) => {
+    const label =
+      (typeof opt.label === "string" && opt.label.trim()) ? opt.label :
+      (typeof opt.text  === "string" && opt.text.trim())  ? opt.text  :
+      (opt.textContent || "").trim()                      ? opt.textContent.trim() :
+      String(opt.value);
+
+    const chip = document.createElement("span");
+    chip.className = "badge bg-primary d-inline-flex align-items-center me-2 mb-1";
+    chip.append(document.createTextNode(label));
+
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "btn-close btn-close-white btn-sm ms-2";
+    removeBtn.setAttribute("aria-label", "Eliminar");
+    removeBtn.addEventListener("click", () => {
+      opt.selected = false;
+      updateSelectedProcessesChips();
+      applyFilters();
     });
+
+    chip.append(removeBtn);
+    chips.appendChild(chip);
+  });
 }
 
 temaSelect.addEventListener("change", function () {
-    applyFilters();
+  const temaActual = (temaSelect.value && temaSelect.value !== "Seleccione una temática")
+    ? temaSelect.value
+    : "";
+
+  // Rehacer las opciones del select de procesos según UNIDAD + TEMÁTICA
+  filtrarProcessSelectPorTema(temaActual);
+
+  // Mantener visible la sección (si aplica)
+  checkMostrarUnidadSection();
+
+  // Delegar en la función central
+  applyFilters();
 });
+
 relTabCheckbox.addEventListener("change", applyFilters);
 relMicroCheckbox.addEventListener("change", applyFilters);
 alinMdeaCheckbox.addEventListener("change", applyFilters);
@@ -1760,27 +1807,7 @@ searchForm.addEventListener("submit", function (e) {
     e.preventDefault();
     applyFilters();
 });
-    // Evento para el botón de borrar filtros
-    clearFiltersBtn.addEventListener("click", function () {
-        // Limpiar los campos de los filtros
-        searchInput.value = "";
-        temaSelect.value = "";
-        // Limpiar todas las opciones seleccionadas del select múltiple
-        Array.from(processSelect.options).forEach(option => option.selected = false);
-        updateSelectedProcessesChips(); // <-- Actualiza los chips visuales
-
-        // Restaurar el listado completo
-        currentPage = 1;
-        currentFilteredData = [...allData];
-        renderPage(currentFilteredData, currentPage);
-        setupPagination(currentFilteredData);
-        updateVariableCounter(allData.length); // Actualizar el contador
-
-        // Eliminar los parámetros de la URL sin recargar
-        const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-        window.history.replaceState({}, document.title, newUrl);
-    });
-
+   
     // Función para obtener parámetros de la URL
    function getQueryParam(param) {
     const urlParams = new URLSearchParams(window.location.search);
