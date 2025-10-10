@@ -430,42 +430,49 @@ padding-bottom: 6px;
 /* Pintado de accordion y listado de variables por unidad */  
 /* Paleta por unidad */
 /* === Parche: neutralizar el verde legacy === */
+/* ================================================
+   Estilos de acordeones por unidad (INEGI style)
+   Colores: Económicas (#af92ff), Sociodemográficas (#00baae)
+   ================================================ */
+
 .custom-accordion-header .accordion-button {
-  border: 2px solid transparent;          /* quita el borde verde */
+  border: 2px solid transparent;          
 }
 .custom-accordion-header .accordion-button.collapsed {
-  border-color: transparent;              /* idem en estado cerrado */
+  border-color: transparent;              
 }
 
-/* El hover genérico neutral (los específicos de unidad ganan) */
+/* Hover neutro */
 .accordion-button:hover {
-  background-color: #ffffff;              /* mantén blanco */
-  transform: none;                        /* sin “zoom” */
+  background-color: #ffffff;              
+  transform: none;                        
 }
 
-/* === Borde y hover por UNIDAD (ganan por especificidad) === */
+/* === Variables de color por unidad === */
 :root {
-  --eco:   #af92ff;
-  --socio: #00baae;
+  --eco:   #af92ff;  /* Económicas */
+  --socio: #00baae;  /* Sociodemográficas */
 }
 
-/* Borde del CONTENEDOR */
+/* ======= Borde general del contenedor ======= */
 .accordion-item.acc-eco   { border: 1px solid var(--eco);   }
 .accordion-item.acc-socio { border: 1px solid var(--socio); }
 
-/* Borde de la CABECERA (button) en estado cerrado */
-.accordion-item.acc-eco   .custom-accordion-header .accordion-button.collapsed {
-  border: 2px solid rgba(175,146,255, .35);
+/* ======= Header coloreado por unidad ======= */
+.accordion-item.acc-eco   .accordion-button {
+  border-left: 4px solid var(--eco); /* barra lateral izquierda */
+  border-bottom: 1px solid rgba(175,146,255, .25);
 }
-.accordion-item.acc-socio .custom-accordion-header .accordion-button.collapsed {
-  border: 2px solid rgba(0,186,174, .35);
+.accordion-item.acc-socio .accordion-button {
+  border-left: 4px solid var(--socio);
+  border-bottom: 1px solid rgba(0,186,174, .25);
 }
 
-/* Hover por unidad (tinte suave) */
+/* ======= Hover ======= */
 .accordion-item.acc-eco   .accordion-button:hover   { background: rgba(175,146,255, 0.08); }
 .accordion-item.acc-socio .accordion-button:hover   { background: rgba(0,186,174, 0.08); }
 
-/* Expandido por unidad */
+/* ======= Expandido ======= */
 .accordion-item.acc-eco   .accordion-button:not(.collapsed) {
   background: rgba(175,146,255, 0.15);
   color: #000;
@@ -479,44 +486,32 @@ padding-bottom: 6px;
   box-shadow: none;
 }
 
-/* Línea divisoria header–body */
-.accordion-item.acc-eco   .accordion-button { border-bottom: 1px solid rgba(175,146,255, .25); }
-.accordion-item.acc-socio .accordion-button { border-bottom: 1px solid rgba(0,186,174, .25); }
-
-/* Focus ring accesible */
+/* ======= Focus ring accesible ======= */
 .accordion-item.acc-eco   .accordion-button:focus { box-shadow: 0 0 0 .2rem rgba(175,146,255, .25); }
 .accordion-item.acc-socio .accordion-button:focus { box-shadow: 0 0 0 .2rem rgba(0,186,174, .25); }
 
-/* Texto del nombre de variable dentro del acordeón */
-.var-nombre {
-  color: #000000 !important;
-}
-
-/* También fuerza el color en el botón */
+/* ======= Texto de variable ======= */
+.var-nombre { color: #000000 !important; }
 .accordion-button,
-.accordion-button.collapsed {
-  color: #000 !important;
-}
+.accordion-button.collapsed { color: #000 !important; }
 
-/* === Estilos para filtros por unidad Administrativa === */
-:root {
-  --eco:   #af92ff;   /* Económicas */
-  --socio: #00baae;   /* Sociodemográficas */
-}
+/* ================================================
+   Filtros de Unidad Administrativa — Colores vivos
+   ================================================ */
 
-/* Radios: color del “bullet” por unidad */
 .form-check-input#infoDemografica { accent-color: var(--socio); }
 .form-check-input#infoEconomica   { accent-color: var(--eco); }
 
-/* Labels base: color de texto por unidad */
-.form-check-label[for="infoDemografica"] {
-  color: var(--socio);
-  font-weight: 600;
-}
+/* Labels base */
+.form-check-label[for="infoDemografica"],
 .form-check-label[for="infoEconomica"] {
-  color: var(--eco);
   font-weight: 600;
+  transition: background-color .2s ease, color .2s ease;
 }
+
+/* Colores base del texto */
+.form-check-label[for="infoDemografica"] { color: var(--socio); }
+.form-check-label[for="infoEconomica"]   { color: var(--eco); }
 
 /* Puntito de color antes del texto */
 .form-check-label[for="infoDemografica"]::before,
@@ -532,7 +527,7 @@ padding-bottom: 6px;
 .form-check-label[for="infoDemografica"]::before { background: var(--socio); }
 .form-check-label[for="infoEconomica"]::before   { background: var(--eco); }
 
-/* Hover sutil sobre el label */
+/* Hover sutil */
 .form-check-input#infoDemografica + .form-check-label:hover {
   text-decoration: underline;
   text-decoration-color: var(--socio);
@@ -542,14 +537,16 @@ padding-bottom: 6px;
   text-decoration-color: var(--eco);
 }
 
-/* Cuando el radio está seleccionado */
+/* Seleccionado */
 .form-check-input#infoDemografica:checked + .form-check-label {
-  background: rgba(0,186,174, .10);
+  background: rgba(0,186,174, .12);
+  color: var(--socio);
   padding: 2px 6px;
   border-radius: 8px;
 }
 .form-check-input#infoEconomica:checked + .form-check-label {
-  background: rgba(175,146,255, .10);
+  background: rgba(175,146,255, .12);
+  color: var(--eco);
   padding: 2px 6px;
   border-radius: 8px;
 }
@@ -563,4 +560,3 @@ padding-bottom: 6px;
   outline: 2px solid rgba(175,146,255, .35);
   outline-offset: 2px;
 }
-
