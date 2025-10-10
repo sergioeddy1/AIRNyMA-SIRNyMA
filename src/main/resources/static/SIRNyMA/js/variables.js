@@ -2085,7 +2085,7 @@ document.addEventListener("click", async function (e) {
 
   // ============ MDEA ============
   if (e.target.classList.contains("badge-mdea")) {
-    document.getElementById("infoModalLabel").textContent = "Relación de la variable con el MDEA";
+    document.getElementById("infoModalLabel").textContent = "Alineación de la variable con el MDEA";
     const idVar = e.target.getAttribute("data-idvar");
     const modalBody = document.getElementById("infoModalBody");
     modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
@@ -2135,7 +2135,7 @@ document.addEventListener("click", async function (e) {
 
   // ============ ODS ============
   if (e.target.classList.contains("badge-ods")) {
-    document.getElementById("infoModalLabel").textContent = "Relación de la variable mostrada con los ODS";
+    document.getElementById("infoModalLabel").textContent = "Alineación de la variable con los ODS";
     const idVar = e.target.getAttribute("data-idvar");
     const modalBody = document.getElementById("infoModalBody");
     modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
