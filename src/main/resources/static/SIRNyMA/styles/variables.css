@@ -52,10 +52,6 @@
     transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-.accordion-button:hover {
-    background-color: #00b395;
-    transform: scale(1.01);
-}
 
 .accordion-button .badge {
     background-color: #6c757d;
@@ -94,10 +90,7 @@
     }
 }
 /* Cuando el acordeón está cerrado */
-.custom-accordion-header .accordion-button.collapsed {
-    color: #000000;             /* Texto negro */
-    border: 2px solid #08989C;  /* Borde del color personalizado */
-}
+
 
 /* Cuando el acordeón está abierto */
 .custom-accordion-header .accordion-button:not(.collapsed) {
@@ -347,10 +340,60 @@ padding-bottom: 6px;
   cursor: default; /* o pointer si quieres */
 }
 
+/* Leyenda del timeline */
+.timeline-legend {
+  margin-top: 1rem;          /* Separación con el timeline */
+  margin-bottom: 1.5rem;     /* 👈 Espacio debajo de la leyenda */
+  color: #444;
+  line-height: 1.3;
+}
+
+.legend-box {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  display: inline-block;
+}
+
+.legend-neutral {
+  background-color: #f4f7fb;
+  border-color: #ddd;
+}
+
+.legend-green {
+  background-color: #c9f7d8;
+  border-color: #43a047;
+}
+
+.legend-yellow {
+  background-color: #ffe680;
+  border-color: #ffd24d;
+}
+
+/* Transiciones de hover (igual que tu estilo actual) */
+.timeline .li.complete-hit .date:hover {
+  transform: scale(1.12) rotate(-2deg);
+  box-shadow: 0 4px 16px rgba(255, 214, 77, 0.25);
+  background: #fff3b0;
+  border-color: #ffce00;
+}
+
+
 /* Responsivo: acorta el segmento en pantallas chicas */
 @media (max-width: 768px) {
   .status { width: 80px; }
 }
+
+
+/* ...existing code... */
+@media (max-width: 1366px) and (max-height: 768px) {
+  .header-img-container {
+    height: 210px !important;
+  }
+}
+
+
 
 /* Estilos adicionales para loader fantasma de card */
 
@@ -382,4 +425,143 @@ padding-bottom: 6px;
   background: #fff3bf; /* amarillo suave */
   padding: 0 2px;
   border-radius: 2px;
+}
+
+/* Pintado de accordion y listado de variables por unidad */  
+/* Paleta por unidad */
+/* === Parche: neutralizar el verde legacy === */
+.custom-accordion-header .accordion-button {
+  border: 2px solid transparent;          /* quita el borde verde */
+}
+.custom-accordion-header .accordion-button.collapsed {
+  border-color: transparent;               /* idem en estado cerrado */
+}
+
+/* El hover genérico en verde: neutralízalo (los específicos de unidad ganan) */
+.accordion-button:hover {
+  background-color: #ffffff;               /* mantén blanco */
+  transform: none;                         /* opcional: sin “zoom” */
+}
+
+/* === Borde y hover por UNIDAD (ganan por especificidad) === */
+:root {
+  --eco:   #E26C3B;
+  --socio: #9F2578;
+}
+
+/* Borde del CONTENEDOR */
+.accordion-item.acc-eco   { border: 1px solid var(--eco);   }
+.accordion-item.acc-socio { border: 1px solid var(--socio); }
+
+/* Borde de la CABECERA (button) en estado cerrado */
+.accordion-item.acc-eco   .custom-accordion-header .accordion-button.collapsed {
+  border: 2px solid rgba(226,108,59, .35);
+}
+.accordion-item.acc-socio .custom-accordion-header .accordion-button.collapsed {
+  border: 2px solid rgba(159, 37,120, .35);
+}
+
+/* Hover por unidad (tinte suave) */
+.accordion-item.acc-eco   .accordion-button:hover   { background: rgba(226,108,59, 0.08); }
+.accordion-item.acc-socio .accordion-button:hover   { background: rgba(159, 37,120, 0.08); }
+
+/* Expandido por unidad */
+.accordion-item.acc-eco   .accordion-button:not(.collapsed) {
+  background: rgba(226,108,59, 0.12);
+  color: #2b190f;
+  border-color: rgba(226,108,59, .45);
+  box-shadow: none;
+}
+.accordion-item.acc-socio .accordion-button:not(.collapsed) {
+  background: rgba(159, 37,120, 0.12);
+  color: #2a0f22;
+  border-color: rgba(159, 37,120, .45);
+  box-shadow: none;
+}
+
+/* Línea divisoria header–body */
+.accordion-item.acc-eco   .accordion-button { border-bottom: 1px solid rgba(226,108,59, .25); }
+.accordion-item.acc-socio .accordion-button { border-bottom: 1px solid rgba(159, 37,120, .25); }
+
+/* Focus ring accesible */
+.accordion-item.acc-eco   .accordion-button:focus { box-shadow: 0 0 0 .2rem rgba(226,108,59, .25); }
+.accordion-item.acc-socio .accordion-button:focus { box-shadow: 0 0 0 .2rem rgba(159, 37,120, .25); }
+
+/* Texto del nombre de variable dentro del acordeón */
+.var-nombre {
+  color: #000000 !important;
+}
+
+/* También fuerza el color en el botón, por si Bootstrap aplica colores por hover o expandido */
+.accordion-button,
+.accordion-button.collapsed {
+  color: #000 !important;
+}
+
+
+/* Estilos para filtros por unidad Administrativas */
+/* Usa tus variables ya definidas */
+:root {
+  --eco:   #E26C3B;   /* Económicas */
+  --socio: #9F2578;   /* Sociodemográficas */
+}
+
+/* ----- Radios: color del “bullet” por unidad ----- */
+.form-check-input#infoDemografica { accent-color: var(--socio); }
+.form-check-input#infoEconomica   { accent-color: var(--eco); }
+
+/* ----- Labels base: color de texto por unidad ----- */
+.form-check-label[for="infoDemografica"] {
+  color: var(--socio);
+  font-weight: 600;
+}
+.form-check-label[for="infoEconomica"] {
+  color: var(--eco);
+  font-weight: 600;
+}
+
+/* Puntito de color antes del texto (indicador visual) */
+.form-check-label[for="infoDemografica"]::before,
+.form-check-label[for="infoEconomica"]::before {
+  content: "";
+  display: inline-block;
+  width: .6rem;
+  height: .6rem;
+  border-radius: 999px;
+  margin-right: .35rem;
+  transform: translateY(-1px);
+}
+.form-check-label[for="infoDemografica"]::before { background: var(--socio); }
+.form-check-label[for="infoEconomica"]::before   { background: var(--eco); }
+
+/* Hover sutil sobre el label */
+.form-check-input#infoDemografica + .form-check-label:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--socio);
+}
+.form-check-input#infoEconomica + .form-check-label:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--eco);
+}
+
+/* Cuando el radio está seleccionado: pill de fondo suave */
+.form-check-input#infoDemografica:checked + .form-check-label {
+  background: rgba(159, 37, 120, .10);
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+.form-check-input#infoEconomica:checked + .form-check-label {
+  background: rgba(226, 108, 59, .10);
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+/* (Opcional) Focus ring accesible en el input */
+.form-check-input#infoDemografica:focus-visible {
+  outline: 2px solid rgba(159, 37, 120, .35);
+  outline-offset: 2px;
+}
+.form-check-input#infoEconomica:focus-visible {
+  outline: 2px solid rgba(226, 108, 59, .35);
+  outline-offset: 2px;
 }

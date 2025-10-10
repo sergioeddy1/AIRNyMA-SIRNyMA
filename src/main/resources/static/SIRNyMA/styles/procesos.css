@@ -97,3 +97,9 @@ body, html {
     font-size: 1rem !important;
   }
 }
+
+@media (max-width: 1366px) and (max-height: 768px) {
+  .header-img-container {
+    height: 210px !important;
+  }
+}

@@ -41,7 +41,9 @@ function mapEconomicasToLocal(item) {
     dgaRespPp: null,
     perioProd: null,
     vigInicial: item.inicio ? String(item.inicio).slice(0, 4) : null, // Solo los primeros 4 dígitos
-    vigFinal: item.fin || null,
+    vigFinal: item.fin 
+  ? (/^\d{4}/.test(String(item.fin)) ? String(item.fin).slice(0, 4) : String(item.fin)) 
+  : null, 
     metGenInf: item.metodo || null,
     gradoMadur: grado,
     perPubResul: perPub || "No disponible",
