@@ -1515,13 +1515,35 @@ function renderPage(data, page) {
 
 
     // Función para configurar el paginador
-    function setupPagination(data) {
-    paginationContainer.innerHTML = ""; // Limpia el paginador antes de generarlo nuevamente
-    const totalPages = Math.ceil(data.length / itemsPerPage);
-    const maxVisiblePages = 5; // Número máximo de páginas visibles en el paginador
+      function setupPagination(data) {
+      paginationContainer.innerHTML = "";
+      const totalPages = Math.ceil(data.length / itemsPerPage);
+      const maxVisiblePages = 5;
 
-    // Botón "Anterior"
-    if (currentPage > 1) {
+      if (totalPages <= 1) return; // nada que paginar
+
+      // === Botón "Primera página" (solo si ya avanzaste) ===
+      if (currentPage > 1) {
+        const firstLi = document.createElement("li");
+        firstLi.classList.add("page-item");
+        const firstA = document.createElement("a");
+        firstA.classList.add("page-link");
+        firstA.href = "#";
+        firstA.textContent = "Primera página";
+        firstA.style.backgroundColor = "#003057";
+        firstA.style.color = "#fff";
+        firstA.addEventListener("click", function (e) {
+          e.preventDefault();
+          currentPage = 1;
+          renderPage(data, currentPage);
+          setupPagination(data);
+        });
+        firstLi.appendChild(firstA);
+        paginationContainer.appendChild(firstLi);
+      }
+
+      // Botón "Anterior"
+      if (currentPage > 1) {
         const prevLi = document.createElement("li");
         prevLi.classList.add("page-item");
         const prevA = document.createElement("a");
@@ -1529,24 +1551,24 @@ function renderPage(data, page) {
         prevA.href = "#";
         prevA.textContent = "«";
         prevA.addEventListener("click", function (e) {
-            e.preventDefault();
-            currentPage--;
-            renderPage(data, currentPage);
-            setupPagination(data);
+          e.preventDefault();
+          currentPage--;
+          renderPage(data, currentPage);
+          setupPagination(data);
         });
         prevLi.appendChild(prevA);
         paginationContainer.appendChild(prevLi);
-    }
+      }
 
-    // Rango de páginas visibles
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-    if (endPage - startPage < maxVisiblePages - 1) {
+      // Rango de páginas visibles
+      let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+      let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+      if (endPage - startPage < maxVisiblePages - 1) {
         startPage = Math.max(1, endPage - maxVisiblePages + 1);
-    }
+      }
 
-    // Mostrar "..." al inicio si hay páginas anteriores al rango visible
-    if (startPage > 1) {
+      // "..." al inicio
+      if (startPage > 1) {
         const dotsLi = document.createElement("li");
         dotsLi.classList.add("page-item", "disabled");
         const dotsA = document.createElement("a");
@@ -1557,10 +1579,10 @@ function renderPage(data, page) {
         dotsA.style.color = "#fff";
         dotsLi.appendChild(dotsA);
         paginationContainer.appendChild(dotsLi);
-    }
+      }
 
-    // Números de página visibles
-    for (let i = startPage; i <= endPage; i++) {
+      // Números
+      for (let i = startPage; i <= endPage; i++) {
         const li = document.createElement("li");
         li.classList.add("page-item");
         if (i === currentPage) li.classList.add("active");
@@ -1572,18 +1594,18 @@ function renderPage(data, page) {
         a.style.backgroundColor = "#003057";
         a.style.color = "#fff";
         a.addEventListener("click", function (e) {
-            e.preventDefault();
-            currentPage = i;
-            renderPage(data, currentPage);
-            setupPagination(data);
+          e.preventDefault();
+          currentPage = i;
+          renderPage(data, currentPage);
+          setupPagination(data);
         });
 
         li.appendChild(a);
         paginationContainer.appendChild(li);
-    }
+      }
 
-    // Mostrar "..." al final si hay páginas posteriores al rango visible
-    if (endPage < totalPages) {
+      // "..." al final
+      if (endPage < totalPages) {
         const dotsLi = document.createElement("li");
         dotsLi.classList.add("page-item", "disabled");
         const dotsA = document.createElement("a");
@@ -1594,10 +1616,10 @@ function renderPage(data, page) {
         dotsA.style.color = "#fff";
         dotsLi.appendChild(dotsA);
         paginationContainer.appendChild(dotsLi);
-    }
+      }
 
-    // Botón "Siguiente"
-    if (currentPage < totalPages) {
+      // Botón "Siguiente"
+      if (currentPage < totalPages) {
         const nextLi = document.createElement("li");
         nextLi.classList.add("page-item");
         const nextA = document.createElement("a");
@@ -1605,17 +1627,17 @@ function renderPage(data, page) {
         nextA.href = "#";
         nextA.textContent = "»";
         nextA.addEventListener("click", function (e) {
-            e.preventDefault();
-            currentPage++;
-            renderPage(data, currentPage);
-            setupPagination(data);
+          e.preventDefault();
+          currentPage++;
+          renderPage(data, currentPage);
+          setupPagination(data);
         });
         nextLi.appendChild(nextA);
         paginationContainer.appendChild(nextLi);
-    }
+      }
 
-    // Botón 'Página final' para ir directo a la última página
-    if (totalPages > 1 && currentPage < totalPages) {
+      // Botón "Última Página"
+      if (totalPages > 1 && currentPage < totalPages) {
         const lastLi = document.createElement("li");
         lastLi.classList.add("page-item");
         const lastA = document.createElement("a");
@@ -1625,15 +1647,17 @@ function renderPage(data, page) {
         lastA.style.backgroundColor = "#003057";
         lastA.style.color = "#fff";
         lastA.addEventListener("click", function (e) {
-            e.preventDefault();
-            currentPage = totalPages;
-            renderPage(data, currentPage);
-            setupPagination(data);
+          e.preventDefault();
+          currentPage = totalPages;
+          renderPage(data, currentPage);
+          setupPagination(data);
         });
         lastLi.appendChild(lastA);
         paginationContainer.appendChild(lastLi);
+      }
     }
-}
+
+
     // Manejar el evento de cambio en el selector de elementos por página
     itemsPerPageSelect.addEventListener("change", function () {
       itemsPerPage = parseInt(this.value, 15);
