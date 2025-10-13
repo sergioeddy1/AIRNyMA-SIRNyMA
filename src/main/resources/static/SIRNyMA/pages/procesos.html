@@ -36,10 +36,10 @@
                         <a class="nav-link" href="index.html">Inicio</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active fw-bold text-decoration-underline" aria-current="page" href="procesos.html">Procesos</a>
+                        <a class="nav-link active fw-bold text-decoration-underline" aria-current="page" href="procesos.html">Procesos de Producción</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="variables.html">Variables</a>
+                        <a class="nav-link" href="variables.html">Inventario de variables ambientales</a>
                     </li>
                     <!-- <li class="nav-item">
                         <a class="nav-link" href="ods.html">ODS</a>
@@ -88,26 +88,29 @@
         <div class="row row-cols-1 row-cols-md-3 g-4">
             <!-- Dirección General de Estadísticas Sociodemográficas (única habilitada) -->
             <div class="col">
-                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn" id="btnDireccionSociodemograficas" style="cursor:pointer;">
+                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn card-unidad"
+                    id="btnDireccionSociodemograficas" style="cursor:pointer;" role="button" aria-pressed="false">
                     <div class="card-body d-flex flex-column justify-content-center">
-                        <i class="bi bi-bar-chart display-4 mb-3 iconcustom"></i>
+                    <i class="bi bi-bar-chart display-4 mb-3 iconcustom"></i>
                     </div>
                     <h5 class="card-title texto-direction nameofDirection">
-                       Unidad de Estadísticas Sociodemográficas
+                    Unidad de Estadísticas Sociodemográficas
                     </h5>
                 </div>
-            </div>
-            <!-- OTRAS CARDS DESHABILITADAS -->
+                </div>
+
                 <div class="col">
-                    <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn" id="btnDireccionEconomicas" style="cursor:pointer;">
+                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn card-unidad"
+                    id="btnDireccionEconomicas" style="cursor:pointer;" role="button" aria-pressed="false">
                     <div class="card-body d-flex flex-column justify-content-center">
-                        <i class="bi bi-cash-stack display-4 mb-3 iconcustom" ></i>
-                        <h5 class="card-title texto-direction nameofDirection">
-                            Unidad de Estadísticas Económicas
-                        </h5>
+                    <i class="bi bi-cash-stack display-4 mb-3 iconcustom"></i>
+                    <h5 class="card-title texto-direction nameofDirection">
+                        Unidad de Estadísticas Económicas
+                    </h5>
                     </div>
                 </div>
             </div>
+              <!-- OTRAS CARDS DESHABILITADAS -->
             <div class="col">
                 <div class="card h-100 text-center disabled" data-grupo="grupo3" style="background-color: #e9ecef; opacity: 0.6; cursor: auto; pointer-events: painted;"
                 data-bs-toggle="tooltip" title="En proceso de captura.">

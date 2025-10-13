@@ -44,10 +44,10 @@ body, html {
                         <a class="nav-link" href="index.html">Inicio</a>
                       </li>
                       <li class="nav-item">
-                        <a class="nav-link" href="procesos.html">Procesos</a>
+                        <a class="nav-link" href="procesos.html">Procesos de Producción</a>
                       </li>
                       <li class="nav-item">
-                        <a class="nav-link active fw-bold text-decoration-underline" aria-current="page" href="variables.html">Variables</a>
+                        <a class="nav-link active fw-bold text-decoration-underline" aria-current="page" href="variables.html">Inventario de variables ambientales</a>
                       </li>
                       <!-- <li class="nav-item">
                         <a class="nav-link" href="ods.html">ODS</a>
@@ -75,127 +75,81 @@ body, html {
     <div class="container-fluid">
         <div class="row">
             <!-- Filtros (Columna izquierda) -->
-            <div class="col-3 mb-5" id="apartadofiltros">
-                <div class="d-flex justify-content-between align-items-center mb-2" style="padding-bottom: 10px; margin-top: -10px;">
-                    <span>FILTROS</span>
-                    <button type="button" id="clearFiltersBtn" class="btn btn-outline-danger">Borrar filtros</button>
-                </div>
-                <div class="card">
-                    <div class="card-body">
-                        <!--Buscador de variables -->
-                        <h5>Búsqueda por término</h5>
-                        <form id="searchForm" class="d-flex m-2" role="search">
-                            <input id="searchInput" class="form-control me-2" type="search" placeholder="Buscar..." aria-label="Buscar">
-                        </form>
-                        <hr>
-                           <!--Filtros de Unidad Administrativa -->
-                        <div id="unidadAdministrativaSection">
-                         <h5>Unidad Administrativa</h5>
-                         <div class="form-check">
-                             <input type="radio" value="DGA1" id="infoDemografica" name="inlineRadioOptions" class="form-check-input" >
-                             <label for="infoDemografica" class="form-check-label" style="font-size: small;">Unidad de Estadísticas Sociodemográficas</label>
-                         </div>
-                         <div class="form-check">
-                             <input type="radio" value="DGA2" id="infoEconomica" name="inlineRadioOptions" class="form-check-input" >
-                             <label for="infoEconomica" class="form-check-label" style="font-size: small;">Unidad de Estadísticas Económicas</label>
-                         </div>
-                         <div class="form-check">
-                             <input type="radio" value="DGA3" id="infoGeografica" name="inlineRadioOptions" class="form-check-input" disabled>
-                             <label for="infoGeografica" class="form-check-label text-muted" style="font-size: small;">Unidad de Geografía y Medio Ambiente</label>
-                         </div>
-                         <div class="form-check">
-                             <input type="radio" value="DGA4" id="infoGobierno" name="inlineRadioOptions" class="form-check-input" disabled>
-                             <label for="infoGobierno" class="form-check-label text-muted" style="font-size: small;">Unidad de Estadísticas de Gobierno, Seguridad Pública y Justicia.</label>
-                         </div>
-                         <div class="form-check">
-                             <input type="radio" value="DGA5" id="infoIntegracion" name="inlineRadioOptions" class="form-check-input" disabled>
-                             <label for="infoIntegracion" class="form-check-label text-muted" style="font-size: small;">Dirección General de Integración, Análisis e Investigación.</label>
-                         </div>
+            <div class="col-3 mb-5">
+                <div id="apartadofiltros" class="filters-card card shadow-sm">
+                  <!-- Header fijo del panel -->
+                    <div class="filters-card-header d-flex justify-content-between align-items-center ">
+                      <span class="fw-semibold">FILTROS</span>
+                      <button type="button" id="clearFiltersBtn" class="btn btn-outline-danger btn-sm">Borrar filtros</button>
+                    </div>
+
+                    <!-- Contenido scrolleable del panel -->
+                    <div class="filters-card-body">
+                      <!-- Buscador -->
+                      <h6 class="section-title">Búsqueda por término</h6>
+                      <form id="searchForm" class="d-flex mb-3" role="search">
+                        <input id="searchInput" class="form-control" type="search" placeholder="Buscar..." aria-label="Buscar">
+                      </form>
+
+                      <hr class="my-3">
+
+                      <!-- Unidad Administrativa -->
+                      <h6 class="section-title">Unidad Administrativa</h6>
+                      <div id="unidadAdministrativaSection" class="mb-3">
+                        <div class="form-check">
+                          <input type="radio" value="DGA1" id="infoDemografica" name="inlineRadioOptions" class="form-check-input">
+                          <label for="infoDemografica" class="form-check-label">Unidad de Estadísticas Sociodemográficas</label>
                         </div>
-                         <hr>
+                        <div class="form-check">
+                          <input type="radio" value="DGA2" id="infoEconomica" name="inlineRadioOptions" class="form-check-input">
+                          <label for="infoEconomica" class="form-check-label">Unidad de Estadísticas Económicas</label>
+                        </div>
+                        <div class="form-check">
+                          <input type="radio" value="DGA3" id="infoGeografica" name="inlineRadioOptions" class="form-check-input" disabled>
+                          <label for="infoGeografica" class="form-check-label text-muted">Unidad de Geografía y Medio Ambiente</label>
+                        </div>
+                        <div class="form-check">
+                          <input type="radio" value="DGA4" id="infoGobierno" name="inlineRadioOptions" class="form-check-input" disabled>
+                          <label for="infoGobierno" class="form-check-label text-muted">Unidad de Estadísticas de Gobierno, Seguridad Pública y Justicia.</label>
+                        </div>
+                        <div class="form-check">
+                          <input type="radio" value="DGA5" id="infoIntegracion" name="inlineRadioOptions" class="form-check-input" disabled>
+                          <label for="infoIntegracion" class="form-check-label text-muted">Dirección General de Integración, Análisis e Investigación.</label>
+                        </div>
+                      </div>
+
+                      <hr class="my-3">
                         <!--Filtros de Tematica--> 
-                           <h5>Temática</h5>
-                        <select class="form-select" id="temaSelect" aria-label="Temáticas">
+                           <h6 class="section-title">Temática</h6>
+                        <select class="form-select mb-3" id="temaSelect" aria-label="Temáticas">
                             <option selected>Seleccione una temática</option>
-                            <option value="Adopción de medidas ambientales">Adopción de medidas ambientales</option>
-                            <option value="Agricultura y Ganadería">Agricultura y Ganadería</option>
-                            <option value="Agua">Agua</option>
-                            <option value="Agua potable y saneamiento">Agua potable y saneamiento</option>
-                            <option value="Almacenamiento">Almacenamiento</option>
-                            <option value="Alojamientos de asistencia social">Alojamientos de asistencia social</option>
-                            <option value="Áreas verdes">Áreas verdes</option>
-                            <option value="Asentamientos humanos">Asentamientos humanos</option>
-                            <option value="Atención de desastres y emergencias">Atención de desastres y emergencias</option>
-                            <option value="Atmósfera">Atmósfera</option>
-                            <option value="Bienestar subjetivo">Bienestar subjetivo</option>
-                            <option value="Causas y consecuencias de la pérdida de empleo">Causas y consecuencias de la pérdida de empleo</option>
-                            <option value="Características de la institución museística">Características de la institución museística</option>
-                            <option value="Características de la vivienda">Características de la vivienda</option>
-                            <option value="Combustibles">Combustibles</option>
-                            <option value="Condiciones de trabajo peligrosas">Condiciones de trabajo peligrosas</option>
-                            <option value="Consumo de agua">Consumo de agua</option>
-                            <option value="Consumo de combustible para calentador de agua">Consumo de combustible para calentador de agua</option>
-                            <option value="Contaminación ambiental">Contaminación ambiental</option>
-                            <option value="Contaminantes en el aire">Contaminantes en el aire</option>
-                            <option value="Cultura y Medio Ambiente">Cultura y Medio Ambiente</option>
-                            <option value="Cultivar">Cultivar</option>
-                            <option value="Daños en las viviendas">Daños en las viviendas</option>
-                            <option value="Demografía">Demografía</option>
-                            <option value="Desarrollo profesional">Desarrollo profesional</option>
-                            <option value="Desarrollo urbano">Desarrollo urbano</option>
-                            <option value="Desastres Naturales">Desastres Naturales</option>
-                            <option value="Disponibilidad de agua">Disponibilidad de agua</option>
-                            <option value="Disponibilidad de energía">Disponibilidad de energía</option>
-                            <option value="Educación">Educación</option>
-                            <option value="Empleo">Empleo</option>
-                            <option value="Energía">Energía</option>
-                            <option value="Energía eléctrica">Energía eléctrica</option>
-                            <option value="Entorno de la localidad">Entorno de la localidad</option>
-                            <option value="Entorno urbano">Entorno urbano</option>
-                            <option value="Espacios verdes">Espacios verdes</option>
-                            <option value="Estudio de la evolución y el pasado">Estudio de la evolución y el pasado</option>
-                            <option value="Fenómeno natural">Fenómeno natural</option>
-                            <option value="Flota vehicular">Flota vehicular</option>
-                            <option value="Gestión de colecciones">Gestión de colecciones</option>
-                            <option value="Inactividad laboral">Inactividad laboral</option>
-                            <option value="Jornadas Laborales y Flexibilidad Horaria">Jornadas Laborales y Flexibilidad Horaria</option>
-                            <option value="Lugar de trabajo">Lugar de trabajo</option>
-                            <option value="Materiales de construcción">Materiales de construcción</option>
-                            <option value="Migración">Migración</option>
-                            <option value="Ocupación">Ocupación</option>
-                            <option value="Patrimonio Natural y Cultural">Patrimonio Natural y Cultural</option>
-                            <option value="Pautas de consumo">Pautas de consumo</option>
-                            <option value="Preocupación ambiental">Preocupación ambiental</option>
-                            <option value="Recursos naturales">Recursos naturales</option>
-                            <option value="Recursos naturales no renovables">Recursos naturales no renovables</option>
-                            <option value="Residuos">Residuos</option>
-                            <option value="Residuos Sólidos Municipales">Residuos Sólidos Municipales</option>
-                            <option value="Residuos sólidos urbanos">Residuos sólidos urbanos</option>
-                            <option value="Riesgos en el trabajo">Riesgos en el trabajo</option>
-                            <option value="Salud ambiental">Salud ambiental</option>
-                            <option value="Saneamiento">Saneamiento</option>
-                            <option value="Sector de actividad económica">Sector de actividad económica</option>
-                            <option value="Servicio de drenaje">Servicio de drenaje</option>
-                            <option value="Servicios básicos">Servicios básicos</option>
-                            <option value="Sustentabilidad/insustentabilidad">Sustentabilidad/insustentabilidad</option>
-                            <option value="Transporte">Transporte</option>
-                            <option value="Transporte y movilidad">Transporte y movilidad</option>
-                            <option value="Vivienda">Vivienda</option>
+                           
                         </select>
-                        <hr>
+                         <hr class="my-3">
 
 
-                        <!--Fitro de Procesos de producción-->  
-                        <h5>Procesos de Producción</h5>
-                        <select id="processSelect" class="form-select" multiple size="6" aria-label="Procesos estadísticos" multiple></select>
-                        <div id="processSelectContainer" class="d-flex flex-wrap gap-1 mt-2"></div>
+                        <!-- Procesos de Producción (colapsable) -->
+                        <div class="section-sticky">
+                          <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="section-title mb-0">Procesos de Producción</h6>
+                            <button class="btn btn-link btn-sm text-decoration-none" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#procCollapse"
+                                    aria-expanded="true" aria-controls="procCollapse">
+                              <span class="collapse-label">Ocultar</span>
+                            </button>
+                          </div>
+                        </div>
+                        <div id="procCollapse" class="collapse show">
+                          <select id="processSelect" class="form-select mt-2" multiple size="6" aria-label="Procesos estadísticos"></select>
+                          <div id="processSelectContainer" class="d-flex flex-wrap gap-1 mt-2"></div>
+                        </div>
 
-                        <hr>
+                        <hr class="my-3">
 
-                     
-                        <!--Filtros de Relación -->
-                        <h5>Relación</h5>
-                        <div class="form-check form-check-inline">
+                        <!-- Relación -->
+                        <h6 class="section-title">Relación</h6>
+                        <div class="mb-2">
+                          <div class="form-check form-check-inline">
                             <input class="form-check-input" type="checkbox" id="relTabCheckbox" value="relTab">
                             <label class="form-check-label" for="relTabCheckbox">Relación con Tabulados</label>
                           </div>
@@ -203,35 +157,40 @@ body, html {
                             <input class="form-check-input" type="checkbox" id="relMicroCheckbox" value="relMicro">
                             <label class="form-check-label" for="relMicroCheckbox">Relación con Microdatos</label>
                           </div>
-                          <hr>
-                        <!--Filtros de Alineación -->
-                        <h5>Alineación</h5>
-                        <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" id="alinMdeaCheckbox" value="alinMdea">
-                        <label class="form-check-label" for="alinMdeaCheckbox">Alineación con MDEA</label>
                         </div>
-                        <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" id="alinOdsCheckbox" value="alinOds">
-                        <label class="form-check-label" for="alinOdsCheckbox">Alineación con ODS</label>
+
+                        <hr class="my-3">
+
+                        <!-- Alineación -->
+                        <h6 class="section-title">Alineación</h6>
+                        <div class="mb-2">
+                          <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="alinMdeaCheckbox" value="alinMdea">
+                            <label class="form-check-label" for="alinMdeaCheckbox">Alineación con MDEA</label>
+                          </div>
+                          <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="alinOdsCheckbox" value="alinOds">
+                            <label class="form-check-label" for="alinOdsCheckbox">Alineación con ODS</label>
+                          </div>
                         </div>
-                        <hr>
-                       <!--Filtros de periodo de tiempo--> 
-                       <div>
-                        <h5 class="mb-2">Periodo de Tiempo</h5>
+
+                        <hr class="my-3">
+
+                        <!-- Periodo de Tiempo -->
+                        <h6 class="section-title">Periodo de Tiempo</h6>
                         <div class="d-flex align-items-center gap-2">
-                          <select id="periodInic" class="form-select form-select-sm w-auto" style="min-width: 100px;">
+                          <select id="periodInic" class="form-select form-select-sm w-auto" style="min-width: 120px;">
                             <option>--Vigencia Inicial--</option>
                           </select>
                           <span class="mx-1">a</span>
-                          <select id="periodFin" class="form-select form-select-sm w-auto" style="min-width: 100px;">
+                          <select id="periodFin" class="form-select form-select-sm w-auto" style="min-width: 120px;">
                             <option>--Vigencia Final--</option>
                           </select>
                         </div>
-                      </div> 
+                      </div>
                     </div>
-                </div>
-             </div>
-    
+                  </div>
+                      
            <!-- Contenido principal (Columna derecha) -->
             <div class="col-9">
 

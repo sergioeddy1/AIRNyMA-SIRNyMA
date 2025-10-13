@@ -390,6 +390,34 @@ document.addEventListener("DOMContentLoaded", async function () {
   const btnSocio = document.getElementById("btnDireccionSociodemograficas");
   const btnEco   = document.getElementById("btnDireccionEconomicas"); // <- agrega este botón en tu HTML
 
+  restoreUnidadCardSelection();
+
+   if (btnSocio && seccionProcesos && container) {
+    btnSocio.addEventListener("click", async function () {
+      setActiveUnidadCard(this);   // <<< pinta la card en azul
+      try {
+        prepararSeccion();
+        await cargarSociodemograficas({ container });
+      } catch (err) {
+        console.error("Error cargando sociodemográficas", err);
+        container.innerHTML = "<p class='text-danger'>Error al cargar los procesos.</p>";
+      }
+    });
+  }
+
+  if (btnEco && seccionProcesos && container) {
+    btnEco.addEventListener("click", async function () {
+      setActiveUnidadCard(this);   // <<< pinta la card en azul
+      try {
+        prepararSeccion();
+        await cargarEconomicas({ container });
+      } catch (err) {
+        console.error("Error cargando económicas", err);
+        container.innerHTML = "<p class='text-danger'>Error al cargar los procesos (Económicas).</p>";
+      }
+    });
+  }
+
   function prepararSeccion() {
     if (!seccionProcesos) return;
     seccionProcesos.hidden = false;
@@ -415,6 +443,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         container.innerHTML = "<p class='text-danger'>Error al cargar los procesos.</p>";
       }
     });
+    
   }
 
   if (btnEco && seccionProcesos && container) {
@@ -439,3 +468,31 @@ document.addEventListener("DOMContentLoaded", async function () {
   });
 });
 
+// --- Selección visual de cards de Unidad ---
+function setActiveUnidadCard(cardEl, persist = false) {
+  document.querySelectorAll('.card-unidad.card-selected').forEach(el => {
+    el.classList.remove('card-selected');
+    el.setAttribute('aria-pressed', 'false');
+  });
+
+  if (cardEl) {
+    cardEl.classList.add('card-selected');
+    cardEl.setAttribute('aria-pressed', 'true');
+    if (persist && cardEl.id) {
+      try { localStorage.setItem('unidadActiva', cardEl.id); } catch (e) {}
+    }
+  }
+}
+
+
+// Restaura selección si existiera (opcional)
+function restoreUnidadCardSelection() {
+  try {
+    const saved = localStorage.getItem('unidadActiva');
+    if (!saved) return;
+    const el = document.getElementById(saved);
+    if (el && el.classList.contains('card-unidad')) {
+      setActiveUnidadCard(el, /*persist*/false);
+    }
+  } catch (e) {}
+}

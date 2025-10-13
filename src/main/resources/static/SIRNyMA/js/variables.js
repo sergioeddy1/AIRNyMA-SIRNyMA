@@ -23,18 +23,22 @@ document.addEventListener("DOMContentLoaded", function () {
   let currentFilteredData = [];
 
   let currentSearchTerm = ""; // término activo para <mark>
-function getCurrentSearchTerm() {
-  return (searchInput?.value || "").trim();
-}
 
+// Apartado de filtros colapsable
+ const toggleBtn = document.querySelector('[data-bs-target="#procCollapse"]');
+    const collapseEl = document.getElementById('procCollapse');
+    const labelEl = toggleBtn?.querySelector('.collapse-label');
 
+    if (collapseEl && toggleBtn && labelEl) {
+      collapseEl.addEventListener('shown.bs.collapse', () => { labelEl.textContent = 'Ocultar'; });
+      collapseEl.addEventListener('hidden.bs.collapse', () => { labelEl.textContent = 'Mostrar'; });
+    }
  
 let renderLocked        = false;  // evita renders mientras aplicamos URL
 let initialPaintDone    = false;  // ya hicimos el primer render “válido”
 
 
   // ==== PARCHE: globals seguros (evita "is not defined") ====
-let eventosGlobal = window.eventosGlobal || [];
 let procesosGlobal = window.procesosGlobal || [];
 
 // Filtro por unidad: 'todas' | 'socio' | 'eco'
@@ -80,26 +84,6 @@ function rebuildClasifIndex() {
   const radioEco   = document.getElementById("infoEconomica");
 
 
-  function aplicarFiltroUnidadYRepintar() {
-    // 1) Base de datos de trabajo (respeta el resto de filtros ya aplicados)
-    let base = (currentFilteredData && currentFilteredData.length) ? currentFilteredData : allData;
-
-    // 2) Aplica filtro por unidad
-    if (unidadFiltro === 'socio') {
-      base = base.filter(v => getUnidadDeVariable(v) === 'socio');
-    } else if (unidadFiltro === 'eco') {
-      base = base.filter(v => getUnidadDeVariable(v) === 'eco');
-    } // 'todas' => no filtramos
-
-    // 3) Repinta
-    currentPage = 1;
-    renderPage(base, currentPage);
-    setupPagination(base);
-    updateVariableCounter(base.length);
-
-    // 4) Conserva la lista filtrada actual para que otros filtros (orden, tema, etc.) se apliquen encima
-    currentFilteredData = base;
-  }
 
   // Listeners
  radioSocio.addEventListener("change", () => {
@@ -116,43 +100,9 @@ function rebuildClasifIndex() {
     applyFilters();
   });
   // ==== PARCHE: helpers faltantes usados más abajo ====
-  function buildPeriodicidadPorPp(procesos) {
-    const m = {};
-    (procesos || []).forEach(p => {
-      m[p.idPp] = parsePeriodicidadAnios(p.perPubResul || p.perioProd || "Anual");
-    });
-    return m;
-  }
 
-  function buildRangoPorPp(procesos) {
-    const m = {};
-    (procesos || []).forEach(p => {
-      m[p.idPp] = {
-        startYear: parseYearSafe(p.vigInicial),
-        endYear: resolveEndYear(p)
-      };
-    });
-    return m;
-  }
 
-  function buildUltimoAnioPorPp(fuentes) {
-    const m = {};
-    (fuentes || []).forEach(f => {
-      const id = f.idPp || f.id_pp;
-      const y = parseInt(f.anioEvento ?? f.evento, 10);
-      if (!id || !Number.isFinite(y)) return;
-      m[id] = Math.max(m[id] ?? -Infinity, y);
-    });
-    return m;
-  }
 
-  function buildLigaMicroPorVar(microdatos) {
-    const m = {};
-    (microdatos || []).forEach(md => {
-      if (md.idVar) m[md.idVar] = md.ligaMicro || md.ligaDd || null;
-    });
-    return m;
-  }
 
   function filterByUnidad(data) {
     if (!Array.isArray(data)) return [];
@@ -161,13 +111,6 @@ function rebuildClasifIndex() {
   }
 
   // ==== HELPERS: mapear API /indicadores/ultima al shape local de /api/variables ====
-  function safeNameFromUrl(u) {
-    try {
-      if (!u || !/^https?:/i.test(String(u))) return null;
-      const url = new URL(u);
-      return url.searchParams.get("name");
-    } catch { return null; }
-  }
 
   function mapUltimaVariableToLocal(v, eventosList = []) {
     // ... (lo que ya tienes)
@@ -856,9 +799,6 @@ function aplicarFiltroDesdeURL() {
 }
 
 // Utilidad
-function getSelectedProcessIds() {
-  return Array.from(processSelect.selectedOptions).map(o => o.value);
-}
 
 // ✅ Función central de cambio del select (REEMPLAZA LA TUYA)
 function handleProcessSelectChange() {
@@ -989,35 +929,6 @@ clearFiltersBtn.addEventListener("click", function () {
 });
 
     // Función para cargar todos los elementos al entrar a la página
-    async function loadAllVariables() {
-      showCounterSpinner();
-showListSpinner();
-
-  try {
-    // Cargar ambas fuentes y fusionar
-    const [localRes, ultimaVars] = await Promise.all([
-      fetch('/api/variables').then(r => r.json()),
-      fetchVariablesDesdeUltima()
-    ]);
-    allData = mergeVariablesLocalYUltima(localRes, ultimaVars);
-
-    currentFilteredData = [...allData];
-    renderPage(currentFilteredData, currentPage);
-    setupPagination(currentFilteredData);
-    updateVariableCounter(allData.length);
-
-    if (idPpParam) {
-      processSelect.value = `proc${idPpParam}`;
-      applyFilters();
-    }
-  } catch (error) {
-    console.error('Error al cargar los datos:', error);
-    container.innerHTML = "<p class='text-center text-danger'>Ocurrió un error al cargar los datos. Inténtalo nuevamente.</p>";
-  }
-  hideCounterSpinner();
-hideListSpinner();
-
-}
 
 
 // Buscar variables por término ingresado
@@ -1136,7 +1047,7 @@ Promise.all([
     .forEach(proc => {
       const opt = document.createElement("option");
       opt.value = proc.idPp;
-      opt.textContent = `• ${proc.pp} (${proc.idPp})`;
+      opt.textContent = `• ${proc.pp} · [${proc.idPp}]`;
       processSelect.appendChild(opt);
     });
 
@@ -1447,9 +1358,6 @@ function renderPage(data, page) {
     }
 
     // 3. Fuentes dinámicas
-    const fuentesHTML = eventosRelacionados.map(ev => 
-      `<a href="${ev.fuenteIden}" target="_blank" class="d-block text-decoration-underline small text-primary">${ev.evento}</a>`
-    ).join('') || '<span class="text-muted">Sin fuentes disponibles</span>';
 
     const proceso = procesosGlobal.find(proc => proc.idPp === variable.idPp);
 
@@ -1465,7 +1373,6 @@ function renderPage(data, page) {
     card.classList.add('accordion', 'mb-3');
 
     const term = currentSearchTerm; // 👈 usa el término global
-     const unidadBadgeHTML = buildUnidadBadge(variable);
      const unit = getUnidadDeVariable(variable);              // 'eco' | 'socio'
     const unitCls = (unit === 'eco') ? 'acc-eco' : 'acc-socio';
 
@@ -1487,7 +1394,7 @@ function renderPage(data, page) {
             card.innerHTML = `
             <div class="accordion-item shadow-sm rounded-3 border-0 ${unitCls}">
               <h2 class="accordion-header custom-accordion-header" id="heading${index}">
-                <button class="accordion-button collapsed fw-bold" type="button"
+                <button class="accordion-button collapsed " type="button"
                   data-bs-toggle="collapse"
                   data-bs-target="#collapse${index}"
                   aria-expanded="false"
@@ -1862,37 +1769,6 @@ if (needle) {
 
 
 
-function updateSelectedProcessesChips() {
-  const chips = document.getElementById("processSelectContainer");
-  if (!chips) return;
-  chips.replaceChildren();
-
-  const selectedOptions = Array.from(processSelect.selectedOptions);
-  selectedOptions.forEach((opt) => {
-    const label =
-      (typeof opt.label === "string" && opt.label.trim()) ? opt.label :
-      (typeof opt.text  === "string" && opt.text.trim())  ? opt.text  :
-      (opt.textContent || "").trim()                      ? opt.textContent.trim() :
-      String(opt.value);
-
-    const chip = document.createElement("span");
-    chip.className = "badge bg-primary d-inline-flex align-items-center me-2 mb-1";
-    chip.append(document.createTextNode(label));
-
-    const removeBtn = document.createElement("button");
-    removeBtn.type = "button";
-    removeBtn.className = "btn-close btn-close-white btn-sm ms-2";
-    removeBtn.setAttribute("aria-label", "Eliminar");
-    removeBtn.addEventListener("click", () => {
-      opt.selected = false;
-      updateSelectedProcessesChips();
-      applyFilters();
-    });
-
-    chip.append(removeBtn);
-    chips.appendChild(chip);
-  });
-}
 
 temaSelect.addEventListener("change", function () {
   const temaActual = (temaSelect.value && temaSelect.value !== "Seleccione una temática")

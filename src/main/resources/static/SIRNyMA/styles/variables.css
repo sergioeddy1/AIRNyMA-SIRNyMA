@@ -104,22 +104,22 @@
 /*Paginación*/
 #pagination .page-item .page-link {
     background-color: #ffffff !important;
-    color: #A590FF !important;
-    border: 2px solid #A590FF !important;
+    color: #08739c !important;
+    border: 2px solid #08739c !important;
     transition: all 0.3s ease;  /* Transición suave */
 }
 
 /* Botones Anterior/Siguiente */
 #pagination .page-item .page-link:hover {
-    background-color: #A590FF;
+    background-color: #08739c;
     color: #ffffff;
 }
 
 /* Página activa: mejorar visibilidad */
 #pagination .page-item.active .page-link {
-    background-color: #A590FF !important;  /* Fondo color activo */
+    background-color: #08739c !important;  /* Fondo color activo */
     color: #ffffff !important;             /* Texto blanco */
-    border-color: #A590FF !important;      /* Borde activo */
+    border-color: #08739c !important;      /* Borde activo */
     font-weight: bold;                     /* Negrita para resaltarlo */
     transform: scale(1.1);                 /* Aumentar el tamaño para mayor visibilidad */
 }
@@ -127,8 +127,8 @@
 /* Deshabilitado (para extremos del paginador) */
 #pagination .page-item.disabled .page-link {
     background-color: #E5E5E5;
-    color: #A590FF;
-    border-color: #A590FF;
+    color: #08739c;
+    border-color: #08739c;
 }
 
 .btncustom {
@@ -140,8 +140,8 @@
 }
 
 #apartadofiltros{
-    padding-top: 50px;
-    padding-bottom: 50px;
+    padding-top: 10px;
+    padding-bottom: 10px;
     background-color: #ffffff;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -559,4 +559,84 @@ padding-bottom: 6px;
 .form-check-input#infoEconomica:focus-visible {
   outline: 2px solid rgba(175,146,255, .35);
   outline-offset: 2px;
+}
+
+/* Estilos para el apartado de filtros */
+/* ==== Panel de filtros sticky con header pegado ==== */
+/* ==== Ajustes finos del panel de filtros ==== */
+.filters-card {
+  position: sticky;
+  top: 0;                      /* Pegado completamente arriba */
+  max-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* Header más compacto y pegado al borde superior */
+.filters-card-header {
+  background: #ffffff;
+  padding: 6px 10px 4px 10px;  /* margen superior más corto */
+  border-bottom: 1px solid #eef1f4;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin-bottom: 5px;
+}
+
+/* Botón de borrar filtros más pequeño y alineado */
+#clearFiltersBtn {
+  padding: 2px 8px;
+  border-radius: 6px;
+  margin-bottom: 3px;
+}
+
+/* Cuerpo con scroll interno */
+.filters-card-body {
+  overflow-y: auto;
+  padding: 10px;
+  scrollbar-width: thin;          /* Firefox */
+  scrollbar-color: #bbb #f9f9f9;  /* Firefox */
+}
+
+/* Scrollbar delgada y moderna (Webkit) */
+.filters-card-body::-webkit-scrollbar {
+  width: 6px;
+}
+.filters-card-body::-webkit-scrollbar-track {
+  background: #f9f9f9;
+  border-radius: 10px;
+}
+.filters-card-body::-webkit-scrollbar-thumb {
+  background: #c2c2c2;
+  border-radius: 10px;
+}
+.filters-card-body::-webkit-scrollbar-thumb:hover {
+  background: #9f9f9f;
+}
+
+/* Sticky para “Procesos de Producción” */
+.section-sticky {
+  position: sticky;
+  top: 38px; /* justo debajo del header del panel */
+  z-index: 1;
+  background: #fff;
+  padding: 6px 0;
+  border-bottom: 1px solid #eef1f4;
+}
+
+/* Títulos de sección */
+.section-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #111827;
+  margin-bottom: .5rem;
+}
+
+/* Disminuir el tamaño de fuente solo en la sección de Unidad Administrativa */
+#unidadAdministrativaSection .form-check-label,
+#unidadAdministrativaSection .form-check-input {
+  font-size: 0.95rem;
 }

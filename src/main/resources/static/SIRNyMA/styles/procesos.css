@@ -103,3 +103,42 @@ body, html {
     height: 210px !important;
   }
 }
+
+/* Estilos para seleccion de unidad  */
+
+/* Estado seleccionado para las cards de Unidades Administrativas */
+.card.card-unidad {
+  transition: background-color .2s ease, color .2s ease, box-shadow .2s ease, transform .1s ease;
+}
+
+.card.card-unidad:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0.35rem 1rem rgba(0,0,0,.12);
+}
+
+/* Selección activa */
+.card.card-unidad.card-selected {
+  background-color: #005fa3 !important;
+  color: #ffffff !important;
+  border-color: #005fa3 !important;
+  box-shadow: 0 0.5rem 1.25rem rgba(0, 95, 163, .35);
+}
+
+/* Asegurar tipografías y/o iconos en blanco dentro del estado activo */
+.card.card-unidad.card-selected .card-title,
+.card.card-unidad.card-selected .texto-direction,
+.card.card-unidad.card-selected .nameofDirection,
+.card.card-unidad.card-selected .iconcustom,
+.card.card-unidad.card-selected i,
+.card.card-unidad.card-selected svg {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+/* Quitar posibles herencias de Bootstrap */
+.card.card-unidad.card-selected .card-body,
+.card.card-unidad.card-selected h5,
+.card.card-unidad.card-selected span,
+.card.card-unidad.card-selected p {
+  color: #ffffff !important;
+}
