@@ -44,6 +44,20 @@ let unidadFiltro = 'todas';
 let socioSet = new Set();
 let ecoSet   = new Set();
 
+let clasifIndex = new Map();
+
+function rebuildClasifIndex() {
+  clasifIndex = new Map();
+  const rows = (window.clasificacionesGlobal || []);
+  rows.forEach(row => {
+    const idVar = String(row.idVar);
+    // El campo puede venir como "clasificaciones" (socio) o como string de econ ya mapeada
+    const val = (row.clasificaciones || row.clase || row.clasificacion || "").toString().trim();
+    if (!val) return;
+    if (!clasifIndex.has(idVar)) clasifIndex.set(idVar, []);
+    clasifIndex.get(idVar).push(val);
+  });
+}
 
   // Determina a qué unidad pertenece una variable
   function getUnidadDeVariable(variable) {
@@ -177,6 +191,13 @@ let ecoSet   = new Set();
         ? v.microdatosList[0].campo
         : safeNameFromUrl(v.url);
 
+      const clasificaciones =
+      Array.isArray(v.clasificacionesList) && v.clasificacionesList.length > 0
+        ? v.clasificacionesList
+            .map(c => c.clase || c.clasificacion || c.nombre || "")
+            .filter(c => c && c.trim() !== "")
+        : [];
+
     return {
       idVar: v.idS || v.idA || (v.acronimo ? `${v.acronimo}-SD` : "SD"),
       idPp: v.acronimo || "SD",
@@ -191,10 +212,13 @@ let ecoSet   = new Set();
       categoria: v.universo || "-",
       varAsig: v.variableA || v.variableS || "No disponible",
       defVar: v.definicion || "-",
-      relTab: (typeof v.tabulados === "boolean") ? (v.tabulados ? "Sí" : "No") : "No",
-      relMicro: (typeof v.microdatos === "boolean") ? (v.microdatos ? "Sí" : "No") : "No",
-      alinMdea: (typeof v.mdea === "boolean") ? (v.mdea ? "Sí" : "No") : "No",
-      alinOds: (typeof v.ods === "boolean") ? (v.ods ? "Sí" : "No") : "No",
+      fuente: v.fuente || "-",
+      metodoCal: v.metodologia || "-",
+
+      relTab: v.tabulados ? "Sí" : "No",
+      relMicro: v.microdatos ? "Sí" : "No",
+      alinMdea: v.mdea ? "Sí" : "No",
+      alinOds: v.ods ? "Sí" : "No",
       comentVar: v.comentarioA || v.comentarioS || "-",
 
       vigInicial: minY ? String(minY) : null,
@@ -202,11 +226,15 @@ let ecoSet   = new Set();
 
       _source: "economicas-ultima",
 
-      // 👇 guarda las listas para modales
       _microdatosList: Array.isArray(v.microdatosList) ? v.microdatosList : [],
       _tabuladosList: Array.isArray(v.tabuladosList) ? v.tabuladosList : [],
       _mdeasList: Array.isArray(v.mdeasList) ? v.mdeasList : [],
-      _odsList: Array.isArray(v.odsList) ? v.odsList : []
+      _odsList: Array.isArray(v.odsList) ? v.odsList : [],
+
+      // 👇 NUEVO: incluir las clasificaciones para usarlas como en /api/clasificaciones
+      _clasificacionesList: clasificaciones,
+      _eventosList: Array.isArray(eventosList) ? eventosList : [], // [{evento: 2023}, ...]
+       _anioReferencia: Number.isFinite(v.anioReferencia) ? v.anioReferencia : null
     };
   }
 
@@ -239,6 +267,25 @@ let ecoSet   = new Set();
     return Array.from(map.values());
   }
 
+  // 🔁 Integrar las clasificaciones de variables económicas
+function mergeClasificacionesEconomicas(variablesUltima) {
+  const ecoClasifs = [];
+
+  (variablesUltima || []).forEach(v => {
+    if (Array.isArray(v._clasificacionesList) && v._clasificacionesList.length) {
+      v._clasificacionesList.forEach(cl => {
+        ecoClasifs.push({
+          idVar: v.idVar,
+          clasificaciones: cl,
+          _source: "economicas-ultima"
+        });
+      });
+    }
+  });
+
+  // Fusiona con las ya existentes (socio)
+  window.clasificacionesGlobal = (window.clasificacionesGlobal || []).concat(ecoClasifs);
+}
 
   // Devuelve la "base" de variables para poblar el select de temáticas
 function getBaseParaTemas() {
@@ -1042,40 +1089,50 @@ showListSpinner();
 
 Promise.all([
   fetch("/api/proceso").then(r => r.json()),
-  fetchProcesosEconomicas(),
+  fetchProcesosEconomicas(),                 // procesosEco
   fetch("/api/variables").then(r => r.json()),
-  fetchVariablesDesdeUltima(),
-  fetch('/api/eventos').then(r => r.json()),
-  fetch('/api/clasificaciones').then(r => r.json())
+  fetchVariablesDesdeUltima(),               // ← variablesUltima (económicas mapeadas)
+  fetch("/api/eventos").then(r => r.json()),
+  fetch("/api/clasificaciones").then(r => r.json())
 ])
 .then(([procesosLocal, procesosEco, variablesLocal, variablesUltima, eventos, clasificaciones]) => {
+  // 1) Procesos (merge locales + eco)
   procesosGlobal = mergeProcesos(procesosLocal, procesosEco);
+
+  // 2) Globals auxiliares
   window.eventosGlobal = eventos;
+
+  // 3) Clasificaciones base (socio)
   window.clasificacionesGlobal = clasificaciones;
 
-  allData = sortVariablesAZ(mergeVariablesLocalYUltima(variablesLocal, variablesUltima)); // <-- Ordena aquí
+  // 4) Variables (merge socio + eco) y orden A-Z si quieres
+  allData = sortVariablesAZ(
+    mergeVariablesLocalYUltima(variablesLocal, variablesUltima)
+  );
 
-socioSet = new Set(
-  (procesosGlobal || [])
-    .filter(p => p._source !== 'economicas') // ajusta si tienes otra señal
-    .map(p => p.idPp)
-);
-ecoSet = new Set(
-  (procesosGlobal || [])
-    .filter(p => p._source === 'economicas')
-    .map(p => p.idPp)
-);
+  // 5) Armar sets por unidad
+  socioSet = new Set(
+    (procesosGlobal || [])
+      .filter(p => p._source !== "economicas")
+      .map(p => p.idPp)
+  );
+  ecoSet = new Set(
+    (procesosGlobal || [])
+      .filter(p => p._source === "economicas")
+      .map(p => p.idPp)
+  );
 
-if (radioSocio?.checked || radioEco?.checked) {
-  onUnidadChange();
-}
+  // 6) ⚠️ Mezclar clasificaciones de económicas en el arreglo global
+  mergeClasificacionesEconomicas(variablesUltima);
+  window.clasificacionesGlobal = clasificacionesGlobal;
+  rebuildClasifIndex(); 
 
-  // poblar select solo con procesos que tengan variables
+  // 7) Poblar select de procesos solo con los que tienen variables
   const idPpConVars = new Set(allData.map(v => v.idPp).filter(Boolean));
   processSelect.innerHTML = "";
   procesosGlobal
     .filter(p => idPpConVars.has(p.idPp))
-    .sort((a,b) => (a.pp||"").localeCompare(b.pp||""))
+    .sort((a, b) => (a.pp || "").localeCompare(b.pp || ""))
     .forEach(proc => {
       const opt = document.createElement("option");
       opt.value = proc.idPp;
@@ -1083,16 +1140,25 @@ if (radioSocio?.checked || radioEco?.checked) {
       processSelect.appendChild(opt);
     });
 
-  currentFilteredData = [...allData];
-  currentPage = 1;
+  // 8) Si ya hay unidad marcada, aplicar inmediatamente
+  if (radioSocio?.checked || radioEco?.checked) {
+    onUnidadChange();
+  }
 
-  // filtros de periodo
+  // 9) Periodos y temáticas iniciales
   populatePeriodFilters([]);
+  repoblarTematicas();
 
-  // 👉 aplica filtro de URL (esto puede pintar)
+  // 10) Si hay tema ya seleccionado, filtra el select de procesos por ese tema (unidad + tema)
+  const temaActual = (temaSelect.value && temaSelect.value !== "Seleccione una temática") ? temaSelect.value : "";
+  filtrarProcessSelectPorTema(temaActual);
+
+  // 11) Aplica filtros de URL (puede pintar)
   aplicarFiltroDesdeURL();
 
-  // si NO había filtros en URL y nadie ha pintado aún, pinta el “todo” una sola vez
+  // 12) Primer render si aún no se pintó
+  currentFilteredData = [...allData];
+  currentPage = 1;
   if (!initialPaintDone && !renderLocked) {
     renderPage(currentFilteredData, currentPage);
     setupPagination(currentFilteredData);
@@ -1219,18 +1285,23 @@ function getProcessYearSeries(proc) {
   return years.sort((a,b)=>a-b);
 }
 
-function getEventYearsForVar(idVar, eventosRelacionados) {
-  const fuente = (eventosRelacionados && eventosRelacionados.length)
-    ? eventosRelacionados
-    : (Array.isArray(eventosGlobal) ? eventosGlobal.filter(e => e.idVar === idVar) : []);
+function getEventYearsForVar(idVar, eventosRelacionados, variableOpt) {
+  // 1) Usa lo que te pasaron (backend local)
+  let fuente = Array.isArray(eventosRelacionados) ? eventosRelacionados : [];
+
+  // 2) Si está vacío y la variable es económica con _eventosList, úsalo
+  if ((!fuente.length) && variableOpt && variableOpt._source === 'economicas-ultima' && Array.isArray(variableOpt._eventosList)) {
+    fuente = variableOpt._eventosList.map(e => ({ evento: e.evento ?? e.anioEvento }));
+  }
 
   const años = new Set();
   for (const ev of fuente) {
     const y = parseInt(String(ev.anioEvento ?? ev.evento ?? '').trim(), 10);
     if (Number.isFinite(y)) años.add(y);
   }
-  return Array.from(años).sort((a,b)=>a-b); // orden asc
+  return Array.from(años).sort((a,b)=>a-b);
 }
+
 
 function buildUnidadBadge(variable) {
   const tipo = getUnidadDeVariable(variable); // 'socio' | 'eco'
@@ -1253,64 +1324,85 @@ function construirLineaDeTiempoVariable(variable, eventosRelacionados) {
     const proc = procesosGlobal?.find(p => p.idPp === variable.idPp);
     if (!proc) return construirLineaDeTiempo(eventosRelacionados);
 
-    // Serie base de años del proceso (usa tus helpers/reglas ya existentes)
+    // Serie base (rango por proceso)
     let years = getProcessYearSeries(proc);
     if (!years.length) return construirLineaDeTiempo(eventosRelacionados);
 
-    // Años con evento para ESTA variable (verde)
-    const eventYears = getEventYearsForVar(variable.idVar, eventosRelacionados);
+    // VERDES: años con evento
+    const eventYears = getEventYearsForVar(variable.idVar, eventosRelacionados, variable);
     const greenYearsSet = new Set(eventYears);
 
-    // Determinar el año amarillo (hitYear) según reglas especiales
+    // AMARILLO: año de referencia (económicas) o último evento
     const rule = SPECIAL_RULES[normIdPp(proc.idPp)];
     let hitYear = null;
-    if (rule && rule.lastYearOverride) {
+
+    if (variable._source === 'economicas-ultima' && Number.isFinite(variable._anioReferencia)) {
+      hitYear = variable._anioReferencia;
+    }
+    if (!hitYear && rule && rule.lastYearOverride) {
       hitYear = rule.lastYearOverride;
-    } else if (eventYears.length) {
+    }
+    if (!hitYear && eventYears.length) {
       hitYear = eventYears[eventYears.length - 1];
     }
 
-    // Si el hitYear no está en la serie de years, lo insertamos para que se dibuje
     if (hitYear && !years.includes(hitYear)) {
       years.push(hitYear);
       years.sort((a,b)=>a-b);
     }
 
-    // Construcción de nodos (mismo HTML que usas)
-   const items = years.map(y => {
-    const isHit   = (hitYear === y);                  // amarillo
-    const isGreen = !isHit && greenYearsSet.has(y);   // verde si tiene evento y no es hit
-    const liClass = isHit
-      ? 'complete-hit'
-      : (isGreen ? 'complete-green' : 'complete-neutral');
+    // 🔹 Construcción de los nodos del timeline
+    const items = years.map(y => {
+      const isHit   = (hitYear === y);
+      const isGreen = !isHit && greenYearsSet.has(y);
+      const liClass = isHit ? 'complete-hit'
+                    : (isGreen ? 'complete-green' : 'complete-neutral');
 
-    // Tooltips por estado
-    const tooltipAttr = isHit
-      ? `data-bs-toggle="tooltip" data-bs-placement="top" title="Año en el que se referencia la relación de esta variable mostrada ${hitYear}"`
-      : (isGreen
-          ? `data-bs-toggle="tooltip" data-bs-placement="top" title="Año en el que aparece la variable"`
-          : '');
+      const tooltipAttr = isHit
+        ? `data-bs-toggle="tooltip" data-bs-placement="top" title="Año de referencia de la variable (${y})"`
+        : (isGreen
+            ? `data-bs-toggle="tooltip" data-bs-placement="top" title="Año en el que se capturó la variable"`
+            : `data-bs-toggle="tooltip" data-bs-placement="top" title="Año del periodo del proceso"`);
 
-    // Sin enlaces (según tu requerimiento actual)
-    const inner = `<span class="tl-year" ${tooltipAttr}>${y}</span>`;
+      const inner = `<span class="tl-year" ${tooltipAttr}>${y}</span>`;
 
-    return `
-      <li class="li ${liClass} d-flex flex-column align-items-center">
-        <div class="timestamp mb-2">
-          <span class="date mb-2">${inner}</span>
+      return `
+        <li class="li ${liClass} d-flex flex-column align-items-center">
+          <div class="timestamp mb-2">
+            <span class="date mb-2">${inner}</span>
+          </div>
+          <div class="status text-center"></div>
+        </li>
+      `;
+    }).join('');
+
+    // 🟡🟢⚪️ Leyenda textual
+    const legend = `
+      <div class="timeline-legend mt-2 text-center small">
+        <div class="d-flex justify-content-center flex-wrap gap-4">
+          <div class="d-flex align-items-center gap-2">
+            <span class="legend-box legend-neutral"></span>
+            <span>Periodo del proceso al que pertenece la variable</span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <span class="legend-box legend-green"></span>
+            <span>Periodo en el que ha sido capturada la variable</span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <span class="legend-box legend-yellow"></span>
+            <span>Periodo en el que se referencia esta variable</span>
+          </div>
         </div>
-        <div class="status text-center"></div>
-      </li>
+      </div>
     `;
-  }).join('');
 
-
-    return `<ul class="timeline" id="timeline">${items}</ul>`;
+    return `<ul class="timeline" id="timeline">${items}</ul>${legend}`;
   } catch (err) {
     console.error('Error en construirLineaDeTiempoVariable:', err);
     return construirLineaDeTiempo(eventosRelacionados);
   }
 }
+
 
 // Devuelve un array de temáticas únicas (tema y tema2) de la "base" que le pases
 function collectTematicas(baseData) {
@@ -1361,11 +1453,22 @@ function renderPage(data, page) {
 
     const proceso = procesosGlobal.find(proc => proc.idPp === variable.idPp);
 
+    // Badge de proceso: acrónimo si es económicas; idPp si es sociodemográficas
+    const esEco = (getUnidadDeVariable(variable) === 'eco');
+    const textoProc = esEco ? (proceso?.idPp || variable.idPp || '—') : (variable.idPp || '—');
+    const badgeProcHTML = textoProc
+      ? `<span class="badge ms-2 bg-secondary" title="${proceso?.pp || textoProc}">${textoProc}</span>`
+      : '';
+
+
     const card = document.createElement('div');
     card.classList.add('accordion', 'mb-3');
 
     const term = currentSearchTerm; // 👈 usa el término global
      const unidadBadgeHTML = buildUnidadBadge(variable);
+     const unit = getUnidadDeVariable(variable);              // 'eco' | 'socio'
+    const unitCls = (unit === 'eco') ? 'acc-eco' : 'acc-socio';
+
 
 
     // Campos que quieres resaltar (usa el original si no hay término)
@@ -1382,18 +1485,17 @@ function renderPage(data, page) {
 
    
             card.innerHTML = `
-              <div class="accordion-item shadow-sm rounded-3 border-0">
-                <h2 class="accordion-header custom-accordion-header" id="heading${index}">
-                  <button class="accordion-button collapsed fw-bold" type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#collapse${index}"
-                    aria-expanded="false"
-                    aria-controls="collapse${index}">
-                    ${hVarAsig}
-                    ${proceso && proceso.pp ? `<span class="badge ms-2 bg-secondary">${proceso.pp}</span>` : ''}
-                    ${unidadBadgeHTML} 
-                  </button>
-                </h2>
+            <div class="accordion-item shadow-sm rounded-3 border-0 ${unitCls}">
+              <h2 class="accordion-header custom-accordion-header" id="heading${index}">
+                <button class="accordion-button collapsed fw-bold" type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#collapse${index}"
+                  aria-expanded="false"
+                  aria-controls="collapse${index}">
+                  <span class="var-nombre">${hVarAsig}</span>
+                  ${badgeProcHTML}
+                </button>
+              </h2>
                 <div id="collapse${index}" class="accordion-collapse collapse" aria-labelledby="heading${index}" data-bs-parent="#variablesContainer">
                   <div class="accordion-body">
                     <div class="mb-2">
@@ -1722,10 +1824,14 @@ function renderPage(data, page) {
 
   // 5) Búsqueda
 
-  const needle = getCurrentSearchTerm().toLowerCase();
-  currentSearchTerm = needle ? getCurrentSearchTerm() : "";
-  if (needle) {
-    filteredData = filteredData.filter(v =>
+ // 5) Búsqueda (incluye clasificaciones)
+currentSearchTerm = (searchInput.value || "").trim();        // 👈 sincroniza el término activo
+const needle = currentSearchTerm.toLowerCase();
+
+if (needle) {
+  filteredData = filteredData.filter(v => {
+    // match en los campos de la variable
+    const f =
       (v.categoria && v.categoria.toLowerCase().includes(needle)) ||
       (v.tema      && v.tema.toLowerCase().includes(needle)) ||
       (v.tema2     && v.tema2.toLowerCase().includes(needle)) ||
@@ -1734,9 +1840,15 @@ function renderPage(data, page) {
       (v.pregLit   && v.pregLit.toLowerCase().includes(needle)) ||
       (v.nomVar    && v.nomVar.toLowerCase().includes(needle)) ||
       (v.defVar    && v.defVar.toLowerCase().includes(needle)) ||
-      (v.varAsig   && v.varAsig.toLowerCase().includes(needle))
-    );
-  }
+      (v.varAsig   && v.varAsig.toLowerCase().includes(needle));
+
+    if (f) return true;
+
+    // match en CLASIFICACIONES de esa variable
+    const list = clasifIndex.get(String(v.idVar)) || [];
+    return list.some(c => (c || "").toLowerCase().includes(needle));
+  });
+}
 
   // Ordena A-Z antes de mostrar
   filteredData = sortVariablesAZ(filteredData);
@@ -1804,10 +1916,12 @@ alinOdsCheckbox.addEventListener("change", applyFilters);
 document.getElementById("periodInic").addEventListener("change", applyFilters);
 document.getElementById("periodFin").addEventListener("change", applyFilters);
 searchForm.addEventListener("submit", function (e) {
-    e.preventDefault();
-    applyFilters();
+  e.preventDefault();
+  currentSearchTerm = (searchInput.value || "").trim(); // sincroniza
+  currentPage = 1;
+  applyFilters(); // ya filtra campos + clasificaciones y hace render
 });
-   
+
     // Función para obtener parámetros de la URL
    function getQueryParam(param) {
     const urlParams = new URLSearchParams(window.location.search);
@@ -1971,7 +2085,7 @@ document.addEventListener("click", async function (e) {
 
   // ============ MDEA ============
   if (e.target.classList.contains("badge-mdea")) {
-    document.getElementById("infoModalLabel").textContent = "Relación de la variable con el MDEA";
+    document.getElementById("infoModalLabel").textContent = "Alineación de la variable con el MDEA";
     const idVar = e.target.getAttribute("data-idvar");
     const modalBody = document.getElementById("infoModalBody");
     modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
@@ -2021,7 +2135,7 @@ document.addEventListener("click", async function (e) {
 
   // ============ ODS ============
   if (e.target.classList.contains("badge-ods")) {
-    document.getElementById("infoModalLabel").textContent = "Relación de la variable mostrada con los ODS";
+    document.getElementById("infoModalLabel").textContent = "Alineación de la variable con los ODS";
     const idVar = e.target.getAttribute("data-idvar");
     const modalBody = document.getElementById("infoModalBody");
     modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
