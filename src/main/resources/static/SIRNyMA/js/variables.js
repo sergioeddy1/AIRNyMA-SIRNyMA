@@ -15,7 +15,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Variables globales
   const params = new URLSearchParams(window.location.search);
-  const idPpParam = params.get("idPp");
   let itemsPerPage = parseInt(itemsPerPageSelect.value, 15);
   let currentPage = 1;
  
@@ -253,9 +252,15 @@ function getBaseParaTemas() {
 function repoblarTematicas() {
   if (!temaSelect) return;
 
-  const prev = temaSelect.value; // recuerda selección anterior
+  const prev = temaSelect.value; // guarda selección anterior
   const base = getBaseParaTemas();
-  const temas = collectTematicas(base);
+  let temas = collectTematicas(base);
+
+  // 🧹 Filtra vacíos, nulos o con solo guiones
+  temas = temas.filter(t => t && t.trim() !== "" && t.trim() !== "-");
+
+  // Elimina duplicados y ordena alfabéticamente
+  temas = [...new Set(temas)].sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
 
   // Reconstruye opciones
   temaSelect.innerHTML = "";
@@ -271,13 +276,14 @@ function repoblarTematicas() {
     temaSelect.appendChild(opt);
   });
 
-  // Si el valor anterior todavía existe, recupéralo
+  // Restaura selección si aún existe
   if (prev && temas.includes(prev)) {
     temaSelect.value = prev;
   } else {
-    temaSelect.value = ""; // vuelve a placeholder si no aplica
+    temaSelect.value = ""; // vuelve al placeholder
   }
 }
+
 
 // Devuelve el Set de idPp permitidos según la unidad (socio/eco/todas)
 function allowedPpsPorUnidad() {
@@ -1214,21 +1220,6 @@ function getEventYearsForVar(idVar, eventosRelacionados, variableOpt) {
 }
 
 
-function buildUnidadBadge(variable) {
-  const tipo = getUnidadDeVariable(variable); // 'socio' | 'eco'
-  const label = (tipo === 'eco')
-    ? 'Unidad de Estadísticas Económicas'
-    : 'Unidad de Estadísticas Sociodemográficas';
-
-  // Colores personalizados (usando los códigos hexadecimales)
- const style = (tipo === 'eco')
-  ? 'background-color:#E26C3B; color:white; box-shadow:0 1px 4px rgba(0,0,0,0.2);'
-  : 'background-color:#9F2578; color:white; box-shadow:0 1px 4px rgba(0,0,0,0.2);';
-
-  return `<span class="badge rounded-pill ms-2" style="${style}" title="${label}">${label}</span>`;
-}
-
-
 // ⚠️ Reemplaza sólo esta función
 function construirLineaDeTiempoVariable(variable, eventosRelacionados) {
   try {
@@ -1450,10 +1441,10 @@ function renderPage(data, page) {
                             <i class="bi bi-layers me-1"></i>Clasificación Temática:</span>
                           <div class="ps-3">
                             <span>Tema y Subtema 1:</span>
-                            <span class="text-dark mb-1 fw-normal">${hTema}</span>/
+                            <span class="text-dark mb-1 fw-normal">${hTema}</span> / 
                             <span class="text-dark mb-1 fw-normal">${hSubtema}</span><br>
                             <span>Tema y Subtema 2:</span>
-                            <span class="text-dark mb-1 fw-normal">${hTema2}</span>/
+                            <span class="text-dark mb-1 fw-normal">${hTema2}</span> / 
                             <span class="text-dark mb-1 fw-normal">${hSubtema2}</span>
                           </div>
                         </div>
@@ -2211,6 +2202,5 @@ function highlightTerm(text, term) {
   const regex = new RegExp(`(${escaped})`, 'gi');
   return text.replace(regex, '<mark class="custom-highlight">$1</mark>');
 }
-
 
 

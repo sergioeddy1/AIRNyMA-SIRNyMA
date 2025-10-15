@@ -1,3 +1,9 @@
+// ---- Estado global para sincronizar cargas y contador ----
+let isCargandoUnidad = false;         // evita cargas en paralelo
+let contadorAnimFrame = null;         // requestAnimationFrame activo
+let contadorTimeoutId = null;         // fallback si usas setTimeout (ya no lo usaremos)
+let unidadToken = 0;                  // versión de carga; invalida renders viejos
+
 // --- Abre variables.html en otra pestaña ---
 function handleVariableClick(idPp) {
   window.open(`variables.html?idPp=${idPp}`, '_blank');
@@ -287,6 +293,7 @@ function filtrarEconomicasSinVariables(procesos, conteo) {
 // --- Carga SOCIODEMOGRÁFICAS (sin cambios de fuente) ---
 async function cargarSociodemograficas({ container }) {
   renderLoader(container, "Cargando procesos (Sociodemográficas)...");
+
   try {
     const procesos  = await fetch("/api/proceso").then(res => res.json());
     const variables = await fetch("/api/variables").then(res => res.json());
@@ -294,10 +301,12 @@ async function cargarSociodemograficas({ container }) {
     const conteoGlobal = buildConteoPorIdPp(variables);
     procesos.forEach(p => { if (!(p.idPp in conteoGlobal)) conteoGlobal[p.idPp] = 0; });
 
-    // Nuevo: Renderiza contador de variables ambientales por unidad
-    renderContadorVariablesUnidad(conteoGlobal, "Sociodemográficas");
+    // ✅ Aquí colocas la línea
+    renderContadorVariablesUnidad(conteoGlobal, { animateMs: 350 });
 
+    // Continúa con tu renderizado normal
     wireFiltrosYOrden({ procesosGlobal: procesos, conteoGlobal, container });
+
   } catch (err) {
     removeLoader();
     console.error("Error cargando sociodemográficas", err);
@@ -306,20 +315,51 @@ async function cargarSociodemograficas({ container }) {
 }
 
 // --- Nuevo: Renderiza contador de variables ambientales por unidad ---
-function renderContadorVariablesUnidad(conteoGlobal) {
-  const contadorUnidad = document.getElementById("contadorVariablesUnidad");
-  if (contadorUnidad) {
-    // Muestra 0 mientras se carga la nueva unidad
-    contadorUnidad.textContent = "0";
-    // Calcula el total después de un breve tiempo (simula espera de servidor)
-    setTimeout(() => {
-      const totalVariables = Object.entries(conteoGlobal)
-        .filter(([_, count]) => typeof count === "number" && count > 0)
-        .reduce((acc, [, count]) => acc + count, 0);
-      contadorUnidad.textContent = `${totalVariables}`;
-    }, 300); // Puedes ajustar el tiempo si lo deseas
+// --- Contador de variables por unidad (sin re-inicializaciones tardías) ---
+function renderContadorVariablesUnidad(conteoGlobal, { animateMs = 350 } = {}) {
+  const el = document.getElementById("contadorVariablesUnidad");
+  if (!el) return;
+
+  // Cancela animaciones/tiempos previos
+  if (contadorAnimFrame) cancelAnimationFrame(contadorAnimFrame);
+  if (contadorTimeoutId) clearTimeout(contadorTimeoutId);
+  contadorAnimFrame = null;
+  contadorTimeoutId = null;
+
+  const total = Object.entries(conteoGlobal)
+    .filter(([_, count]) => typeof count === "number" && count > 0)
+    .reduce((acc, [, count]) => acc + count, 0);
+
+  // Animación simple 0 -> total (opcional)
+  const start = performance.now();
+  const from = 0;
+  const to = total;
+  const myToken = unidadToken; // captura la versión actual
+
+  const step = (now) => {
+    // si cambió la versión (nueva carga), aborta esta animación
+    if (myToken !== unidadToken) return;
+
+    const t = Math.min(1, (now - start) / animateMs);
+    const value = Math.round(from + (to - from) * t);
+    el.textContent = String(value);
+
+    if (t < 1) {
+      contadorAnimFrame = requestAnimationFrame(step);
+    } else {
+      contadorAnimFrame = null;
+    }
+  };
+
+  // Si no quieres animación, pon animateMs = 0
+  if (animateMs > 0) {
+    el.textContent = "0";
+    contadorAnimFrame = requestAnimationFrame(step);
+  } else {
+    el.textContent = String(total);
   }
 }
+
 
 
 // --- Carga ECONÓMICAS (Base de datos nueva) ---
@@ -351,8 +391,8 @@ async function cargarEconomicas({ container }) {
       if (!(p.idPp in conteoGlobal)) conteoGlobal[p.idPp] = 0;
     });
 
-    // Nuevo: Renderiza contador de variables ambientales por unidad
-    renderContadorVariablesUnidad(conteoGlobal, "Económicas");
+    // ✅ Aquí también la colocas
+    renderContadorVariablesUnidad(conteoGlobal, { animateMs: 350 });
 
     const procesosFiltrados = filtrarEconomicasSinVariables(procesos, conteoGlobal);
 
@@ -367,6 +407,7 @@ async function cargarEconomicas({ container }) {
     }
 
     wireFiltrosYOrden({ procesosGlobal: procesosFiltrados, conteoGlobal, container });
+
   } catch (err) {
     removeLoader();
     container.innerHTML = "<p class='text-danger text-center my-4'>Error al cargar los procesos (Económicas).</p>";
@@ -375,8 +416,7 @@ async function cargarEconomicas({ container }) {
 
 
 // --- Arranque DOM ---
-document.addEventListener("DOMContentLoaded", async function () {
-  // Nav activo
+document.addEventListener("DOMContentLoaded", function () {
   const currentPath = window.location.pathname.split("/").pop();
   document.querySelectorAll(".navbar-nav .nav-link").forEach(link => {
     const href = link.getAttribute("href");
@@ -385,77 +425,71 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   const seccionProcesos = document.getElementById("procesosSection");
   const container = document.getElementById("procesosContainer");
-
-  // Botones de las unidades (usa estos IDs en tus cards)
   const btnSocio = document.getElementById("btnDireccionSociodemograficas");
-  const btnEco   = document.getElementById("btnDireccionEconomicas"); // <- agrega este botón en tu HTML
+  const btnEco   = document.getElementById("btnDireccionEconomicas");
 
-  restoreUnidadCardSelection();
+  // Handler común con candado + token
+  const handleUnidadClick = async (btnEl, loaderFn) => {
+    if (isCargandoUnidad) return;   // evita doble click simultáneo
+    isCargandoUnidad = true;
+    unidadToken++;                  // invalida renders viejos
+    setActiveUnidadCard?.(btnEl);   // pinta azul la card
 
-   if (btnSocio && seccionProcesos && container) {
-    btnSocio.addEventListener("click", async function () {
-      setActiveUnidadCard(this);   // <<< pinta la card en azul
-      try {
-        prepararSeccion();
-        await cargarSociodemograficas({ container });
-      } catch (err) {
-        console.error("Error cargando sociodemográficas", err);
-        container.innerHTML = "<p class='text-danger'>Error al cargar los procesos.</p>";
-      }
-    });
+    try {
+      prepararSeccion();
+      await loaderFn({ container });
+    } catch (err) {
+      console.error("Error cargando unidad", err);
+      container.innerHTML = "<p class='text-danger text-center my-4'>Error al cargar los procesos.</p>";
+    } finally {
+      isCargandoUnidad = false;
+    }
+  };
+
+  // Para evitar re-binds si este bloque se ejecutara dos veces por alguna razón:
+  if (!btnSocio?.dataset.bound) {
+    btnSocio?.addEventListener("click", () => handleUnidadClick(btnSocio, cargarSociodemograficas));
+    if (btnSocio) btnSocio.dataset.bound = "1";
+  }
+  if (!btnEco?.dataset.bound) {
+    btnEco?.addEventListener("click", () => handleUnidadClick(btnEco, cargarEconomicas));
+    if (btnEco) btnEco.dataset.bound = "1";
   }
 
-  if (btnEco && seccionProcesos && container) {
-    btnEco.addEventListener("click", async function () {
-      setActiveUnidadCard(this);   // <<< pinta la card en azul
-      try {
-        prepararSeccion();
-        await cargarEconomicas({ container });
-      } catch (err) {
-        console.error("Error cargando económicas", err);
-        container.innerHTML = "<p class='text-danger'>Error al cargar los procesos (Económicas).</p>";
-      }
-    });
-  }
+  document.querySelectorAll('.mostrarGrupoBtn').forEach(card => {
+    if (card.id === "btnDireccionSociodemograficas" || card.id === "btnDireccionEconomicas") return;
+    if (!card.dataset.bound) {
+      card.addEventListener('click', function () {
+        alert("Información no disponible");
+      });
+      card.dataset.bound = "1";
+    }
+  });
 
-  function prepararSeccion() {
+  
+    function prepararSeccion() {
+    const seccionProcesos = document.getElementById("procesosSection");
+    const container = document.getElementById("procesosContainer");
     if (!seccionProcesos) return;
+
     seccionProcesos.hidden = false;
     seccionProcesos.scrollIntoView({ behavior: 'smooth' });
-    // Limpia contenedor y contador de procesos
+
     if (container) container.innerHTML = "";
+
     const counter = document.getElementById("procesosCounter");
     if (counter) counter.textContent = "0";
-    // Limpia selects por si cambia la fuente
-    document.getElementById("filtrarPeriodicidad").innerHTML = `<option value="">Filtrar por periodicidad...</option>`;
-    // Limpia el contador de variables ambientales
+
+    const selPer = document.getElementById("filtrarPeriodicidad");
+    if (selPer) selPer.innerHTML = `<option value="">Filtrar por periodicidad...</option>`;
+
     const contadorUnidad = document.getElementById("contadorVariablesUnidad");
     if (contadorUnidad) contadorUnidad.textContent = "0";
-  }
 
-  if (btnSocio && seccionProcesos && container) {
-    btnSocio.addEventListener("click", async () => {
-      try {
-        prepararSeccion();
-        await cargarSociodemograficas({ container });
-      } catch (err) {
-        console.error("Error cargando sociodemográficas", err);
-        container.innerHTML = "<p class='text-danger'>Error al cargar los procesos.</p>";
-      }
-    });
-    
-  }
-
-  if (btnEco && seccionProcesos && container) {
-    btnEco.addEventListener("click", async () => {
-      try {
-        prepararSeccion();
-        await cargarEconomicas({ container });
-      } catch (err) {
-        console.error("Error cargando económicas", err);
-        container.innerHTML = "<p class='text-danger'>Error al cargar los procesos (Económicas).</p>";
-      }
-    });
+    if (contadorAnimFrame) cancelAnimationFrame(contadorAnimFrame);
+    if (contadorTimeoutId) clearTimeout(contadorTimeoutId);
+    contadorAnimFrame = null;
+    contadorTimeoutId = null;
   }
 
   // Cards genéricas que aún no están disponibles
