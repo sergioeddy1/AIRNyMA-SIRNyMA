@@ -101,8 +101,6 @@ function rebuildClasifIndex() {
   // ==== PARCHE: helpers faltantes usados más abajo ====
 
 
-
-
   function filterByUnidad(data) {
     if (!Array.isArray(data)) return [];
     if (unidadFiltro === 'todas') return data;
@@ -140,6 +138,31 @@ function rebuildClasifIndex() {
             .filter(c => c && c.trim() !== "")
         : [];
 
+          const tieneDatosAbiertos = (v.datosabiertos === true || v.datosAbiertos === true);
+          const datosAbiertosList =
+          Array.isArray(v.datosAbiertosList) ? v.datosAbiertosList : [];
+          
+        // --- MICRODATOS: detectar lista embebida aunque v.microdatos sea false ---
+        var microList = Array.isArray(v.microdatosList) ? v.microdatosList : [];
+
+        var hasMicroEmbedded = false;
+        for (var i = 0; i < microList.length; i++) {
+          var m = microList[i] || {};
+          var tabla = (m.tabla ? String(m.tabla).trim() : '');
+          var campo = (m.campo ? String(m.campo).trim() : '');
+          var urlAcc = !!m.urlAcceso;
+          var urlDesc = !!m.urlDescriptor;
+          var descr = !!m.descriptor;
+
+          if (tabla !== '' || campo !== '' || urlAcc || urlDesc || descr) {
+            hasMicroEmbedded = true;
+            break;
+          }
+        }
+
+        // si v.microdatos es true O hay lista embebida válida → actívalo
+        var relMicroCalc = (v.microdatos === true) || hasMicroEmbedded ? "Sí" : "No";
+
     return {
       idVar: v.idS || v.idA || (v.acronimo ? `${v.acronimo}-SD` : "SD"),
       idPp: v.acronimo || "SD",
@@ -156,9 +179,9 @@ function rebuildClasifIndex() {
       defVar: v.definicion || "-",
       fuente: v.fuente || "-",
       metodoCal: v.metodologia || "-",
-
+      relAbiertos: tieneDatosAbiertos ? "Sí" : "No",
       relTab: v.tabulados ? "Sí" : "No",
-      relMicro: v.microdatos ? "Sí" : "No",
+      relMicro: relMicroCalc,
       alinMdea: v.mdea ? "Sí" : "No",
       alinOds: v.ods ? "Sí" : "No",
       comentVar: v.comentarioA || v.comentarioS || "-",
@@ -168,11 +191,11 @@ function rebuildClasifIndex() {
 
       _source: "economicas-ultima",
 
-      _microdatosList: Array.isArray(v.microdatosList) ? v.microdatosList : [],
+      _microdatosList: microList,
       _tabuladosList: Array.isArray(v.tabuladosList) ? v.tabuladosList : [],
       _mdeasList: Array.isArray(v.mdeasList) ? v.mdeasList : [],
       _odsList: Array.isArray(v.odsList) ? v.odsList : [],
-
+      _datosAbiertosList: datosAbiertosList,
       // 👇 NUEVO: incluir las clasificaciones para usarlas como en /api/clasificaciones
       _clasificacionesList: clasificaciones,
       _eventosList: Array.isArray(eventosList) ? eventosList : [], // [{evento: 2023}, ...]
@@ -346,7 +369,29 @@ function filtrarProcessSelectPorTema(selectedTema) {
   applyFilters();
 }
 
+function hasMicrodatos(variable) {
+  if (!variable) return false;
+  if (variable.relMicro === 'Sí') return true;
+  // Económicas con lista embebida
+  if (variable._source === 'economicas-ultima' &&
+      Array.isArray(variable._microdatosList) &&
+      variable._microdatosList.length > 0) {
+    return true;
+  }
+  return false;
+}
 
+function hasDatosAbiertos(variable) {
+  if (!variable) return false;
+  // Económicas: requiere bandera + lista embebida con elementos
+  if (variable._source === 'economicas-ultima') {
+    return variable.relAbiertos === 'Sí' &&
+           Array.isArray(variable._datosAbiertosList) &&
+           variable._datosAbiertosList.length > 0;
+  }
+  // Socio: usa bandera relAbiertos si existe
+  return variable.relAbiertos === 'Sí';
+}
 
   // ==== FIN HELPERS /indicadores/ultima ====
 
@@ -428,10 +473,182 @@ function filtrarProcessSelectPorTema(selectedTema) {
   }
 
 
+  // Helperrs de ODS
+// === util de extracción (1..17) ===
+function getOdsObjectiveNumber(val) {
+  if (val == null) return null;
+  if (typeof val === 'object' && val.objetivo != null) return getOdsObjectiveNumber(val.objetivo);
+  const m = String(val).match(/(\d{1,2})/);
+  if (!m) return null;
+  const n = parseInt(m[1], 10);
+  return (Number.isFinite(n) && n >= 1 && n <= 17) ? n : null;
+}
+
+// Objetivo: nunca insertar puntos. "12" => "12"
+function formatOdsObjetivo(val) {
+  const n = getOdsObjectiveNumber(val);
+  return (n != null) ? String(n) : (val ?? "-");
+}
+
+// Meta/Indicador: si ya trae puntos, respetar; si no, forzar OO.x(.y...)
+function formatOdsComposite(val) {
+  if (val == null) return "-";
+  const s = String(val).trim();
+  if (s.includes(".")) return s;                 // ya viene formateado (p. ej. "12.2", "12.1.1")
+  const digits = s.replace(/\D/g, "");           // "122" -> "122"
+  if (digits.length <= 2) return String(parseInt(digits || "0", 10) || "-"); // "12" -> "12"
+  const obj = String(parseInt(digits.slice(0, 2), 10)); // "12"
+  const rest = digits.slice(2).split("").join(".");     // "2" -> "2", "11" -> "1.1"
+  return `${obj}.${rest}`;                       // "122" -> "12.2", "1211" -> "12.1.1"
+}
+
+// === util de asset (ODS0010_es.jpg, ..., ODS0170_es.jpg) ===
+function odsAssetPath(objNum) {
+  const code = String(objNum * 10).padStart(4, "0");
+  return `/assets/ODS${code}_es.jpg`; // servido desde src/main/resources/static/assets
+}
+
+// === genera las miniaturas con data-ods ===
+function buildOdsThumbsImgs(idVar, objNums) {
+  return objNums.map(n => `
+    <img
+      src="${odsAssetPath(n)}"
+      alt="ODS ${n}"
+      class="ods-thumb badge-ods"
+      data-idvar="${idVar}"
+      data-ods="${n}"
+      data-type="ods"
+      data-bs-toggle="modal"
+      data-bs-target="#infoModal"
+      loading="lazy"
+      title="ODS ${n}"
+    >
+  `).join("");
+}
+
+function cleanUnderscores(text) {
+  if (text == null) return "-";
+  return String(text).replace(/_/g, " ").trim();
+}
+
+let __odsCache__ = null;
+async function fetchOdsOnce() {
+  if (__odsCache__) return __odsCache__;
+  const res = await fetch('/api/ods');
+  const data = await res.json();
+  __odsCache__ = Array.isArray(data) ? data : (data ? [data] : []);
+  return __odsCache__;
+}
+
+
+// Helpers de MDEA //
+
+// Nombre estándar por componente MDEA (1..6)
+const MDEA_COMPONENTS = {
+  1: "Condiciones y calidad ambiental",
+  2: "Recursos ambientales y su uso",
+  3: "Residuos y actividades humanas relacionadas",
+  4: "Eventos extremos y desastres",
+  5: "Asentamientos humanos y salud ambiental",
+  6: "Protección ambiental y participación ciudadana"
+};
+
+// Quita número al final: "… salud ambiental 5" -> "… salud ambiental"
+function stripTrailingNumber(text) {
+  if (text == null) return "-";
+  return String(text).replace(/\s*\b\d+\b\s*$/, "").trim();
+}
+
+// "253b1 Fertilizantes naturales" -> { code:"253b1", name:"Fertilizantes naturales" }
+function splitCodeAndName(text) {
+  const s = String(text || "").trim();
+  if (!s) return { code: "", name: "" };
+  const m = s.match(/^([0-9A-Za-z]+)\s*(.*)$/);
+  return m ? { code: m[1], name: m[2] } : { code: "", name: s };
+}
+
+// Convierte códigos MDEA a formato punteado:
+// Convierte a formato punteado (solo para ECONÓMICAS):
+// "25"->"2.5", "253"->"2.5.3", "253b"->"2.5.3.b", "253b1"->"2.5.3.b.1"
+function dotifyMdeaCode(code) {
+  const raw = String(code || "").trim();
+  if (!raw) return "-";
+  const parts = [];
+  for (const ch of raw) {
+    if (/\d/.test(ch)) parts.push(ch);
+    else if (/[A-Za-z]/.test(ch)) parts.push(ch.toLowerCase());
+  }
+  return parts.length ? parts.join(".") : raw;
+}
+
+// Detecta número de componente (1..6) en varios formatos/campos
+function getMdeaComponentNumber(val) {
+  if (val == null) return null;
+  if (typeof val === 'object' && val.componente != null) return getMdeaComponentNumber(val.componente);
+  const m = String(val).match(/(\d{1,2})\b/);
+  const n = m ? parseInt(m[1], 10) : null;
+  return Number.isFinite(n) ? n : null;
+}
+
+// Devuelve "N. Nombre estandarizado" o "Componente N" si no está en el mapa
+// Etiqueta estándar del componente "N. Nombre"
+function getMdeaComponentLabel(num) {
+  const MDEA_COMPONENTS = {
+    1: "Condiciones y calidad ambiental",
+    2: "Recursos ambientales y su uso",
+    3: "Residuos y actividades humanas relacionadas",
+    4: "Eventos extremos y desastres",
+    5: "Asentamientos humanos y salud ambiental",
+    6: "Protección ambiental y participación ciudadana"
+  };
+  return (MDEA_COMPONENTS[num] ? `${num}. ${MDEA_COMPONENTS[num]}` : `Componente ${num}`);
+}
+
+// Intenta obtener un nombre legible del componente (eco: viene en componenteNombre;
+// socio: puede venir algo tipo "Residuos 3", entonces quitamos el número final)
+function getMdeaComponentName(source) {
+  if (!source) return "-";
+  if (typeof source === 'object' && source.componenteNombre) return String(source.componenteNombre).trim();
+  const s = String(source).trim();
+  // "Residuos 3" -> "Residuos"
+  const name = s.replace(/\b\d+\b\s*$/,'').trim();
+  return name || s;
+}
+
+// Construye el HTML de chips MDEA
+function buildMdeaChips(idVar, compArray) {
+  // compArray = [{ num:2, name:"lo que venga..."}, ...]  (name ya no se usa para la etiqueta)
+  const seen = new Set();
+  const ordered = [];
+  compArray.forEach(c => {
+    if (!c || c.num == null) return;
+    if (!seen.has(c.num)) { seen.add(c.num); ordered.push(c); }
+  });
+  if (!ordered.length) {
+    return `<span class="badge bg-secondary disabled badge-mdea" style="pointer-events:none;cursor:default;">Sin MDEA</span>`;
+  }
+
+  // orden ascendente por número de componente
+  ordered.sort((a,b) => a.num - b.num);
+
+  return ordered.map(c => `
+    <button type="button"
+            class="btn mdea-chip mdea-chip--${c.num}"
+            data-idvar="${idVar}"
+            data-mdea-comp="${c.num}"
+            data-bs-toggle="modal"
+            data-bs-target="#infoModal"
+            title="Componente ${c.num}">
+      ${getMdeaComponentLabel(c.num)}
+    </button>
+  `).join("");
+}
+// ==== FIN HELPERS MDEA/ODS ====
 
     // Referencias a los checkboxes
 const relTabCheckbox = document.getElementById("relTabCheckbox");
 const relMicroCheckbox = document.getElementById("relMicroCheckbox");
+const chkRelAbiertos  = document.getElementById("chkRelAbiertos"); // ← NUEVO
 
 // Script para el navbar
 document.addEventListener("DOMContentLoaded", function () {
@@ -533,12 +750,13 @@ function filterByRelation() {
 
 
     // Filtro de relación temática
-    if (relTabCheckbox?.checked || relMicroCheckbox?.checked) {
-        filtered = filtered.filter(variable => {
-            const matchRelTab = relTabCheckbox?.checked ? variable.relTab === "Sí" : true;
-            const matchRelMicro = relMicroCheckbox?.checked ? variable.relMicro === "Sí" : true;
-            return matchRelTab && matchRelMicro;
-        });
+    if (relTabCheckbox?.checked || relMicroCheckbox?.checked || chkRelAbiertos?.checked) {
+      filtered = filtered.filter(variable => {
+        const matchRelTab    = relTabCheckbox?.checked   ? variable.relTab === "Sí" : true;
+        const matchRelMicro  = relMicroCheckbox?.checked ? hasMicrodatos(variable)  : true;
+        const matchAbiertos  = chkRelAbiertos?.checked   ? hasDatosAbiertos(variable) : true;
+        return matchRelTab && matchRelMicro && matchAbiertos;
+      });
     }
 
     // Filtro de alineación con MDEA y ODS
@@ -560,6 +778,7 @@ function filterByRelation() {
 // Escuchar cambios en TODOS los checkboxes
 relTabCheckbox?.addEventListener("change", filterByRelation);
 relMicroCheckbox?.addEventListener("change", filterByRelation);
+chkRelAbiertos?.addEventListener("change", filterByRelation);
 alinMdeaCheckbox?.addEventListener("change", filterByRelation);
 alinOdsCheckbox?.addEventListener("change", filterByRelation);
 
@@ -902,6 +1121,7 @@ clearFiltersBtn.addEventListener("click", function () {
   // 4) Checkboxes
   relTabCheckbox.checked = false;
   relMicroCheckbox.checked = false;
+  chkRelAbiertos.checked = false; // ← NUEVO
   alinMdeaCheckbox.checked = false;
   alinOdsCheckbox.checked = false;
 
@@ -1353,7 +1573,47 @@ function renderPage(data, page) {
     const proceso = procesosGlobal.find(proc => proc.idPp === variable.idPp);
 
     // Badge de proceso: acrónimo si es económicas; idPp si es sociodemográficas
+    // dentro de renderPage, donde defines los badges:
+   // ya tienes esEco calculado arriba
     const esEco = (getUnidadDeVariable(variable) === 'eco');
+    const esSocio = !esEco;
+
+    const badgeAbiertosHTML = (() => {
+      if (esSocio) {
+        // SOCIO: abre modal y la lógica del listener pintará "En proceso de captura"
+        return `
+          <span class="badge bg-secondary badge-datosabiertos"
+                style="cursor:pointer"
+                data-idvar="${variable.idVar}"
+                data-bs-toggle="modal"
+                data-bs-target="#infoModal">
+            Datos Abiertos
+          </span>`;
+      }
+
+      // ECO con datos embebidos
+      if (variable.relAbiertos === 'Sí' &&
+          Array.isArray(variable._datosAbiertosList) &&
+          variable._datosAbiertosList.length) {
+        return `
+          <span class="badge bg-success badge-datosabiertos"
+                style="cursor:pointer"
+                data-idvar="${variable.idVar}"
+                data-bs-toggle="modal"
+                data-bs-target="#infoModal">
+            Datos Abiertos
+          </span>`;
+      }
+
+      // ECO sin datos: badge gris que NO abre modal
+      return `
+      <span class="badge bg-danger badge-datosabiertos disabled"
+            style="cursor:default; pointer-events:none;">
+        Sin Datos Abiertos
+      </span>`;
+    })();
+
+
     const textoProc = esEco ? (proceso?.idPp || variable.idPp || '—') : (variable.idPp || '—');
     const badgeProcHTML = textoProc
       ? `<span class="badge ms-2 bg-secondary" title="${proceso?.pp || textoProc}">${textoProc}</span>`
@@ -1454,40 +1714,84 @@ function renderPage(data, page) {
                                <i class="bi bi-link-45deg me-1"></i>Relación con Tabulados o Microdatos
                              </span>
                              <div class="ps-3 d-flex flex-wrap gap-2">
-                               <span class="badge bg-${variable.relTab === 'Sí' ? 'success badge-tabulado' : 'danger'}"
-                                     style="cursor:pointer"
-                                     data-idvar="${variable.idVar}"
-                                     ${variable.relTab === 'Sí' ? 'data-bs-toggle="modal" data-bs-target="#infoModal" data-type="tabulado"' : ''}>
-                                 ${variable.relTab === 'Sí' ? 'Tabulados' : 'Sin Tabulados'}
-                               </span>
+                                <span class="badge bg-${variable.relTab === 'Sí' ? 'success badge-tabulado' : 'danger disabled'}"
+                                    style="
+                                        cursor:${variable.relTab === 'Sí' ? 'pointer' : 'default'};
+                                        ${variable.relTab !== 'Sí' ? 'pointer-events:none;' : ''}
+                                      "
+                                      data-idvar="${variable.idVar}"
+                                      ${variable.relTab === 'Sí'
+                                        ? 'data-bs-toggle="modal" data-bs-target="#infoModal" data-type="tabulado"'
+                                        : ''}>
+                                  ${variable.relTab === 'Sí' ? 'Tabulados' : 'Sin Tabulados'}
+                                </span>
 
-                               <span class="badge bg-${variable.relMicro === 'Sí' ? 'success badge-microdatos' : 'danger'}"
-                                     style="cursor:pointer"
-                                     data-idvar="${variable.idVar}"
-                                     ${variable.relMicro === 'Sí' ? 'data-bs-toggle="modal" data-bs-target="#infoModal" data-type="microdatos"' : ''}>
-                                 ${variable.relMicro === 'Sí' ? 'Microdatos' : 'Sin Microdatos'}
-                               </span>
+                                ${(() => {
+                                    const active = hasMicrodatos(variable);
+                                    return `
+                                      <span class="badge ${active ? 'bg-success badge-microdatos' : 'bg-danger disabled'}"
+                                            style="cursor:${active ? 'pointer' : 'default'};${!active ? 'pointer-events:none;' : ''}"
+                                            data-idvar="${variable.idVar}"
+                                            ${active ? 'data-bs-toggle="modal" data-bs-target="#infoModal" data-type="microdatos"' : ''}>
+                                        ${active ? 'Microdatos' : 'Sin Microdatos'}
+                                      </span>
+                                    `;
+                                  })()}
+                                ${badgeAbiertosHTML} <!-- 👈 NUEVO -->
                              </div>
 
-                             <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left"
-                                   data-bs-title="Verifica si la variable seleccionada está alineada con la estructura del MDEA o con los ODS.">
-                               <i class="bi bi-link-45deg me-1"></i>Alineación con MDEA y ODS
-                             </span>
-                             <div class="ps-3 d-flex flex-wrap gap-2">
-                               <span class="badge ${variable.alinMdea === 'Sí' ? 'bg-primary badge-mdea' : 'bg-secondary'}"
-                                     style="cursor:${variable.alinMdea === 'Sí' ? 'pointer' : 'default'}"
-                                     data-idvar="${variable.idVar}"
-                                     ${variable.alinMdea === 'Sí' ? 'data-bs-toggle="modal" data-bs-target="#infoModal" data-type="mdea"' : ''}>
-                                 ${variable.alinMdea === 'Sí' ? 'MDEA' : 'Sin MDEA'}
-                               </span>
+                           <!-- 🔹 Bloque ODS -->
+                            <span class="fw-semibold text-secondary mt-2"
+                                  data-bs-toggle="tooltip" data-bs-placement="left"
+                                  data-bs-title="Verifica si la variable está alineada con los Objetivos de Desarrollo Sostenible (ODS).">
+                              <i class="bi bi-globe me-1"></i>Alineación con ODS
+                            </span>
+                            <div class="ps-3 d-flex flex-wrap gap-2 ods-thumbs-wrap">
+                            ${
+                              (variable.alinOds !== 'Sí')
+                                ? `<span class="badge bg-secondary disabled badge-ods" style="pointer-events:none;cursor:default;">Sin ODS</span>`
+                                : (() => {
+                                    // Económicas con lista embebida:
+                                    if (Array.isArray(variable._odsList) && variable._odsList.length) {
+                                      const set = new Set(
+                                        variable._odsList
+                                          .map(o => getOdsObjectiveNumber(o?.objetivo))
+                                          .filter(n => n != null)
+                                      );
+                                      return set.size
+                                        ? buildOdsThumbsImgs(variable.idVar, [...set])
+                                        : `<span class="badge bg-secondary disabled badge-ods" style="pointer-events:none;cursor:default;">Sin ODS</span>`;
+                                    }
+                                    // Sociodemográficas (o casos sin _odsList): contenedor para carga perezosa
+                                    return `<div class="ods-thumbs" data-idvar="${variable.idVar}"></div>`;
+                                  })()
+                            }
+                          </div>
 
-                               <span class="badge ${variable.alinOds === 'Sí' ? 'bg-primary badge-ods' : 'bg-secondary'}"
-                                     style="cursor:${variable.alinOds === 'Sí' ? 'pointer' : 'default'}"
-                                     data-idvar="${variable.idVar}"
-                                     ${variable.alinOds === 'Sí' ? 'data-bs-toggle="modal" data-bs-target="#infoModal" data-type="ods"' : ''}>
-                                 ${variable.alinOds === 'Sí' ? 'ODS' : 'Sin ODS'}
-                               </span>
-                             </div>
+                            <!-- 🔹 Bloque MDEA -->
+                              <span class="fw-semibold text-secondary"
+                                    data-bs-toggle="tooltip" data-bs-placement="left"
+                                    data-bs-title="Verifica el componente MDEA con el que se alinea la variable.">
+                                <i class="bi bi-diagram-3 me-1"></i>Alineación con MDEA
+                              </span>
+                              <div class="ps-3 d-flex flex-wrap gap-2 mdea-chips-wrap">
+                                ${
+                                  (variable.alinMdea !== 'Sí')
+                                    ? `<span class="badge bg-secondary disabled badge-mdea" style="pointer-events:none;cursor:default;">Sin MDEA</span>`
+                                    : (() => {
+                                        // ECONÓMICAS con lista embebida
+                                        if (Array.isArray(variable._mdeasList) && variable._mdeasList.length) {
+                                         const comps = (variable._mdeasList || [])
+                                          .map(m => ({ num: getMdeaComponentNumber(m.componente) }))
+                                          .filter(x => x.num != null);
+                                        return buildMdeaChips(variable.idVar, comps);
+                                        }
+                                        // SOCIO u otros: contenedor para carga perezosa
+                                        return `<div class="mdea-chips" data-idvar="${variable.idVar}"></div>`;
+                                      })()
+                                }
+                              </div>
+
                        ${renderComentarios(variable.comentVar)}
                     </div>
                 </div>
@@ -1500,9 +1804,91 @@ function renderPage(data, page) {
     // Inicializar tooltips
     const tooltips = card.querySelectorAll('[data-bs-toggle="tooltip"]');
     tooltips.forEach(el => new bootstrap.Tooltip(el));
+
+    // Inicializar de MDEA perezoso
+    // Carga perezosa de chips MDEA cuando no vienen embebidos
+      let __mdeaCache__ = null;
+      async function fetchMdeaOnce() {
+        if (__mdeaCache__ != null) return __mdeaCache__;
+        const res = await fetch('/api/mdea');
+        const data = await res.json();
+        // el endpoint a veces regresa 1 registro o arreglo
+        __mdeaCache__ = Array.isArray(data) ? data : (data ? [data] : []);
+        return __mdeaCache__;
+      }
+
+      const lazyMdea = card.querySelectorAll('.mdea-chips');
+      lazyMdea.forEach(async (box) => {
+        const idVar = box.getAttribute('data-idvar');
+        const paintEmpty = () => {
+          box.outerHTML = `<span class="badge bg-secondary disabled badge-mdea"
+                                style="pointer-events:none;cursor:default;">Sin MDEA</span>`;
+        };
+        try {
+          const all = await fetchMdeaOnce();
+          // para socio, muchas veces hay UN registro por variable
+          const registros = all.filter(r => String(r.idVar) === String(idVar));
+          if (!registros.length) return paintEmpty();
+
+          // Construye lista de componentes detectados
+          const comps = [];
+            registros.forEach(r => {
+              const num = getMdeaComponentNumber(r.componente ?? r.compo ?? r.componenteNombre ?? r.componenteId ?? r.componenteCodigo);
+              if (num != null) comps.push({ num });
+            });
+            box.outerHTML = `<div class="d-flex flex-wrap gap-2">
+              ${buildMdeaChips(idVar, comps)}
+            </div>`;
+        } catch (err) {
+          console.error('MDEA lazy error:', err);
+          paintEmpty();
+        }
+      });
+
+
+    // Cargar thumbs ODS por variable (sólo cuando no vienen embebidos)
+   // Poblar thumbnails ODS cuando no vienen embebidos (socio, etc.)
+            const lazyThumbs = card.querySelectorAll('.ods-thumbs');
+      lazyThumbs.forEach(async (box) => {
+        const idVar = box.getAttribute('data-idvar');
+
+        // Helper para pintar “Sin ODS”
+        const paintEmpty = () => {
+          box.outerHTML = `<span class="badge bg-secondary disabled badge-ods"
+                                style="pointer-events:none;cursor:default;">Sin ODS</span>`;
+        };
+
+        try {
+          const all = await fetchOdsOnce(); // usa caché
+          // Filtra registros de esta variable (acepta objeto único o array)
+          const registros = all.filter(ods => String(ods.idVar) === String(idVar));
+
+          if (!registros.length) return paintEmpty();
+
+          // Extrae objetivo 1..17 desde campos 'ods' o 'objetivo'
+          const set = new Set(
+            registros
+              .map(o => getOdsObjectiveNumber(o?.ods ?? o?.objetivo))
+              .filter(n => n != null)
+          );
+
+          if (set.size === 0) return paintEmpty();
+
+          // Ordena ascendente y pinta
+          const ordered = [...set].sort((a, b) => a - b);
+
+          box.outerHTML = `<div class="d-flex flex-wrap gap-2">
+            ${buildOdsThumbsImgs(idVar, ordered)}
+          </div>`;
+        } catch (err) {
+          console.error('ODS lazy error:', err);
+          paintEmpty();
+        }
+      });
   });
 }
 
+    
 
 
     // Función para configurar el paginador
@@ -1729,11 +2115,12 @@ function renderPage(data, page) {
     filteredData = filteredData.filter(v => selectedProcesses.includes(v.idPp));
   }
   // 4) Checkboxes
-  if (relTabCheckbox.checked || relMicroCheckbox.checked) {
+  if (relTabCheckbox.checked || relMicroCheckbox.checked || chkRelAbiertos.checked) {
     filteredData = filteredData.filter(v => {
-      const okTab   = relTabCheckbox.checked  ? v.relTab   === "Sí" : true;
-      const okMicro = relMicroCheckbox.checked? v.relMicro === "Sí" : true;
-      return okTab && okMicro;
+      const okTab     = relTabCheckbox.checked   ? v.relTab === "Sí" : true;
+      const okMicro   = relMicroCheckbox.checked ? hasMicrodatos(v)  : true;
+      const okAbiertos= chkRelAbiertos.checked   ? hasDatosAbiertos(v) : true;
+      return okTab && okMicro && okAbiertos;
     });
   }
   if (alinMdeaCheckbox.checked || alinOdsCheckbox.checked) {
@@ -1802,6 +2189,7 @@ temaSelect.addEventListener("change", function () {
 
 relTabCheckbox.addEventListener("change", applyFilters);
 relMicroCheckbox.addEventListener("change", applyFilters);
+chkRelAbiertos.addEventListener("change", applyFilters);
 alinMdeaCheckbox.addEventListener("change", applyFilters);
 alinOdsCheckbox.addEventListener("change", applyFilters);
 document.getElementById("periodInic").addEventListener("change", applyFilters);
@@ -1928,18 +2316,37 @@ document.addEventListener("click", async function (e) {
       const variable = getVariableByIdVar(idVar);
 
       // 1) Si viene de Económicas y trae microdatos embebidos, úsalo
-      if (variable && variable._source === "economicas-ultima" && Array.isArray(variable._microdatosList) && variable._microdatosList.length) {
-        const html = variable._microdatosList.map(m => `
-          <div class="mb-2 border-bottom pb-2">
-            ${m.urlAcceso ? `<div><strong>Acceso:</strong> <a href="${m.urlAcceso}" target="_blank" style="word-break: break-all;">${m.urlAcceso}</a></div>` : ""}
-            ${m.urlDescriptor ? `<div><strong>Descriptor:</strong> <a href="${m.urlDescriptor}" target="_blank" style="word-break: break-all;">${m.urlDescriptor}</a></div>` : ""}
-            ${(m.tabla || m.campo) ? `<div><strong>Ubicación:</strong> ${m.tabla || "-"} / ${m.campo || "-"}</div>` : ""}
-            ${m.descriptor ? `<div class="small text-muted">${m.descriptor}</div>` : ""}
-          </div>
-        `).join("");
-        modalBody.innerHTML = html || "<div class='text-danger'>No hay microdatos disponibles.</div>";
-        return;
-      }
+    // ECONÓMICAS con microdatos embebidos
+           if (variable && variable._source === "economicas-ultima" &&
+              Array.isArray(variable._microdatosList) && variable._microdatosList.length) {
+
+            const html = variable._microdatosList.map(m => {
+              const comentario = String(m.comentarioA || "").trim();
+              const showLabMsg =
+                comentario.includes("Datos disponibles en el laboratorio de microdatos") ||
+                comentario.includes("Microdatos disponibles en el laboratorio de microdatos");
+
+              // mensaje resaltado con estilo INEGI
+              const labMsgHTML = showLabMsg
+                ? `<div class="microdatos-lab-msg mt-3">
+                    ${comentario.match(/(Datos disponibles en el laboratorio de microdatos|Microdatos disponibles en el laboratorio de microdatos)/)[0]}
+                  </div>`
+                : "";
+
+                 return `
+                  <div class="mb-3 border-bottom pb-2">
+                    ${m.urlAcceso ? `<div><strong>Acceso:</strong> <a href="${m.urlAcceso}" target="_blank" style="word-break: break-all;">${m.urlAcceso}</a></div>` : ""}
+                    ${m.urlDescriptor ? `<div><strong>Descriptor:</strong> <a href="${m.urlDescriptor}" target="_blank" style="word-break: break-all;">${m.urlDescriptor}</a></div>` : ""}
+                    ${(m.tabla || m.campo) ? `<div><strong>Ubicación:</strong> ${m.tabla || "-"} / ${m.campo || "-"}</div>` : ""}
+                    ${m.descriptor ? `<div class="small text-muted">${m.descriptor}</div>` : ""}
+                    ${labMsgHTML || (comentario && comentario !== "-" ? `<div class="small text-muted mt-1">${comentario}</div>` : "")}
+                  </div>
+                `;
+              }).join("");
+
+              modalBody.innerHTML = html || "<div class='text-danger'>No hay microdatos disponibles.</div>";
+              return;
+            }
 
       // 2) Fallback a /api/microdatos
       const res = await fetch(`/api/microdatos`);
@@ -1974,121 +2381,340 @@ document.addEventListener("click", async function (e) {
     }
   }
 
-  // ============ MDEA ============
-  if (e.target.classList.contains("badge-mdea")) {
-    document.getElementById("infoModalLabel").textContent = "Alineación de la variable con el MDEA";
-    const idVar = e.target.getAttribute("data-idvar");
-    const modalBody = document.getElementById("infoModalBody");
-    modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
+  // ============ DATOS ABIERTOS ============
+  if (e.target.classList.contains("badge-datosabiertos")) {
+  if (e.target.classList.contains("disabled")) return; // ← evita abrir modal
 
-    const fmt = (s) => (s || "-").toString().replace(/_/g, " ").replace(/\s+/g, " ").trim();
+    const labelEl = document.getElementById("infoModalLabel");
+    const bodyEl  = document.getElementById("infoModalBody");
+
+    // Limpieza inmediata para evitar "arrastres"
+    if (labelEl) labelEl.textContent = "Detalle de la Relación con Datos Abiertos";
+    if (bodyEl)  bodyEl.innerHTML = "<div class='text-center'>Cargando...</div>";
+
+    const idVar  = e.target.getAttribute("data-idvar");
+    // Utilidad como en tus otros bloques
+    function getVariableByIdVar(id) {
+      return (Array.isArray(allData) ? allData : []).find(v => String(v.idVar) === String(id));
+    }
 
     try {
       const variable = getVariableByIdVar(idVar);
+      const unidad   = getUnidadDeVariable(variable);
 
-      // 1) Económicas con mdeas embebidos
-      if (variable && variable._source === "economicas-ultima" && Array.isArray(variable._mdeasList) && variable._mdeasList.length) {
-        modalBody.innerHTML = variable._mdeasList.map(m => `
-          <div class="mb-2 border-bottom pb-2">
-            <div><strong>Componente:</strong> ${formatIdWithDots(m.componente)} ${fmt(m.componenteNombre)}</div>
-            <div><strong>Subcomponente:</strong> ${formatIdWithDots(m.subcomponente)} ${fmt(m.subcomponenteNombre)}</div>
-            <div><strong>Tema:</strong> ${formatIdWithDots(m.tema)} ${fmt(m.temaNombre)}</div>
-            <div><strong>Estadística 1:</strong> ${formatIdWithDots(m.estadistica1)} ${fmt(m.estadistica1Nombre)}</div>
-            ${m.estadistica2 ? `<div><strong>Estadística 2:</strong> ${formatIdWithDots(m.estadistica2)} ${fmt(m.estadistica2Nombre)}</div>` : ""}
-          </div>
-        `).join("");
+      // SOCIO: mostrar leyenda dentro del modal
+      if (unidad === 'socio') {
+        if (bodyEl) {
+          bodyEl.innerHTML = `
+            <div class="alert alert-info mb-0">En proceso de captura</div>`;
+        }
         return;
       }
 
-      // 2) Fallback a /api/mdea (tu lógica original – uno por idVar)
-      const res = await fetch(`/api/mdea`);
-      const data = await res.json();
-      const info = Array.isArray(data)
-        ? data.find(mdea => String(mdea.idVar) === String(idVar))
-        : (data && data.idVar === idVar ? data : null);
+      // ECO con datos embebidos correctamente
+      if (variable &&
+          variable.relAbiertos === 'Sí' &&
+          Array.isArray(variable._datosAbiertosList) &&
+          variable._datosAbiertosList.length) {
 
-      if (info) {
-        modalBody.innerHTML = `
-          <div class="mb-2"><strong>Componente:</strong><br>${fmt(info.compo)}${fmt(info.componenteNombre)}</div>
-          <div class="mb-2"><strong>Subcomponente:</strong><br>${fmt(info.subcompo)}</div>
-          <div class="mb-2"><strong>Tópico:</strong><br>${fmt(info.topico)}</div>
-          <div class="mb-2"><strong>Variable del MDEA:</strong><br>${fmt(info.estAmbiental)}</div>
-          <div class="mb-2"><strong>Estadístico del MDEA:</strong><br>${(info.estadMdea ?? "No disponible")}</div>
-        `;
-      } else {
-        modalBody.innerHTML = "<div class='text-danger'>No hay información del MDEA para esta variable.</div>";
+        const contenido = variable._datosAbiertosList.map(r => `
+          <div class="mb-3 border-bottom pb-2">
+            ${r.urlAcceso ? `
+              <div class="mb-1">
+                <strong>Acceso:</strong><br>
+                <a href="${r.urlAcceso}" target="_blank" style="word-break: break-all;">${r.urlAcceso}</a>
+              </div>` : ""}
+
+            ${r.urlDescarga ? `
+              <div class="mb-1">
+                <strong>Descarga:</strong><br>
+                <a href="${r.urlDescarga}" target="_blank" style="word-break: break-all;">${r.urlDescarga}</a>
+              </div>` : ""}
+
+            ${(r.tabla || r.campo) ? `
+              <div class="mb-1">
+                <strong>Ubicación:</strong><br>
+                ${r.tabla || "No disponible"} / ${r.campo || "No disponible"}
+              </div>` : ""}
+
+            ${r.descriptor ? `
+              <div class="mb-1">
+                <strong>Descriptor:</strong><br>${r.descriptor}
+              </div>` : ""}
+
+            ${r.comentarioA && r.comentarioA !== "-" ? `
+              <div class="small text-muted">${r.comentarioA}</div>` : ""}
+          </div>
+        `).join("");
+
+        if (bodyEl) bodyEl.innerHTML = contenido || "<div class='text-danger'>No hay información disponible.</div>";
+        return;
       }
+
+      // ECO sin lista (si por alguna razón llegara aquí)
+      if (bodyEl) {
+        bodyEl.innerHTML = "<div class='alert alert-warning mb-0'>No se encontraron registros de Datos Abiertos para esta variable.</div>";
+      }
+    } catch (err) {
+      console.error(err);
+      if (bodyEl) bodyEl.innerHTML = "<div class='text-danger'>Error al cargar Datos Abiertos.</div>";
+    }
+  }
+
+
+  // ============ MDEA (chips) ============
+if (e.target.closest(".mdea-chip")) {
+  const trigger = e.target.closest(".mdea-chip");
+  const idVar   = trigger.getAttribute("data-idvar");
+  const compNum = parseInt(trigger.getAttribute("data-mdea-comp"), 10);
+
+  const modalTitle = document.getElementById("infoModalLabel");
+  const modalBody  = document.getElementById("infoModalBody");
+  if (modalTitle) modalTitle.textContent = `Alineación con MDEA (Componente ${compNum})`;
+  if (modalBody)  modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
+
+  const fmt = (s) => (s || "-").toString().replace(/_/g, " ").replace(/\s+/g, " ").trim();
+
+  function getVariableByIdVar(id) {
+    return (Array.isArray(allData) ? allData : []).find(v => String(v.idVar) === String(id));
+  }
+
+  (async () => {
+    try {
+      const variable = getVariableByIdVar(idVar);
+
+     // 1) ECONÓMICAS con lista embebida
+          if (variable && variable._source === "economicas-ultima" &&
+              Array.isArray(variable._mdeasList) && variable._mdeasList.length) {
+
+            const lista = variable._mdeasList.filter(m => getMdeaComponentNumber(m.componente) === compNum);
+            if (!lista.length) {
+              modalBody.innerHTML = "<div class='text-danger'>No hay información MDEA para ese componente.</div>";
+              return;
+            }
+
+            // ✅ Mostrar: CÓDIGO (punteado) + NOMBRE. Sin guiones si no hay nombre.
+            modalBody.innerHTML = lista.map(m => {
+              // Preferimos los campos *Nombre* del endpoint
+              const scName = (m.subcomponenteNombre || "").trim();
+              const tName  = (m.temaNombre || "").trim();
+              const e1Name = (m.estadistica1Nombre || "").trim();
+              const e2Name = (m.estadistica2Nombre || "").trim();
+
+              // Códigos crudos
+              const scCode = (m.subcomponente || "").trim();
+              const tCode  = (m.tema || "").trim();
+              const e1Code = (m.estadistica1 || "").trim();
+              const e2Code = (m.estadistica2 || "").trim();
+
+              // Código punteado (25→2.5, 253b1→2.5.3.b.1)
+              const scDot = scCode ? dotifyMdeaCode(scCode) : "";
+              const tDot  = tCode  ? dotifyMdeaCode(tCode)  : "";
+              const e1Dot = e1Code ? dotifyMdeaCode(e1Code) : "";
+              const e2Dot = e2Code ? dotifyMdeaCode(e2Code) : "";
+
+              // Línea helper: muestra "COD NOMBRE" si hay nombre; si no, solo COD; si no hay nada, no imprime
+              const line = (label, codeDot, name) => {
+                if (!codeDot && !name) return "";
+                const text = name ? `${codeDot} ${name}` : codeDot;
+                return `<div><strong>${label}:</strong> ${text}</div>`;
+              };
+
+              const lineComponente = `<div><strong>Componente:</strong> ${compNum} ${fmt(m.componenteNombre)}</div>`;
+              const lineSubcomp    = line("Subcomponente", scDot, scName);
+              const lineTema       = line("Tema",          tDot,  tName);
+              const lineE1         = line("Estadística 1", e1Dot, e1Name);
+              const lineE2         = line("Estadística 2", e2Dot, e2Name);
+
+              return `
+                <div class="mb-2 border-bottom pb-2">
+                  ${lineComponente}
+                  ${lineSubcomp}
+                  ${lineTema}
+                  ${lineE1}
+                  ${lineE2}
+                  <!-- contribución/comentario ocultos a petición -->
+                </div>
+              `;
+            }).join("");
+            return;
+}
+
+
+      // 2) SOCIO (fallback /api/mdea). Puede venir 1 registro; filtramos por compNum si posible
+      const all = await fetch('/api/mdea').then(r => r.json()).then(d => Array.isArray(d) ? d : (d ? [d] : []));
+      let registros = all.filter(r => String(r.idVar) === String(idVar));
+
+      if (!registros.length) {
+        modalBody.innerHTML = "<div class='text-danger'>No hay información del MDEA para esta variable.</div>";
+        return;
+      }
+
+      // Si hay varios, intenta filtrar por componente numérico detectado en campos comunes
+      const byComp = registros.filter(r => {
+        const n = getMdeaComponentNumber(r.componente ?? r.compo ?? r.componenteNombre ?? r.componenteId ?? r.componenteCodigo);
+        return n === compNum;
+      });
+      if (byComp.length) registros = byComp;
+
+      // Render (mantén tu formato original, pero encabezando con el componente)
+     modalBody.innerHTML = registros.map(info => {
+        const num  = getMdeaComponentNumber(
+          info.componente ?? info.compo ?? info.componenteNombre ?? info.componenteId ?? info.componenteCodigo
+        ) ?? compNum;
+
+        // 👇 elimina el número repetido al final (ej. “...salud ambiental 5” → “...salud ambiental”)
+        const compNameRaw = (info.componenteNombre ?? info.componente ?? info.compo ?? "");
+        const compNameNoEdges = String(compNameRaw)
+        .replace(/^\s*\d+\s*[.\-:]?\s*/, "")   // inicio
+        .replace(/\s*\b\d+\b\s*$/, "")         // final
+        .trim();
+
+       const lineComponente = `<div><strong>Componente:</strong> ${fmt(compNameNoEdges)}</div>`;
+
+        const lineSubcomp = (info.subcompo || info.subcomponente)
+          ? `<div><strong>Subcomponente:</strong> ${fmt(info.subcompo ?? info.subcomponente)}</div>` : "";
+        const lineTema = (info.topico || info.tema)
+          ? `<div><strong>Tema/Tópico:</strong> ${fmt(info.topico ?? info.tema)}</div>` : "";
+        const lineE1 = (info.estAmbiental || info.estadistica1)
+          ? `<div><strong>Estadística 1:</strong> ${fmt(info.estAmbiental ?? info.estadistica1)}</div>` : "";
+        const lineE2 = (info.estadistica2)
+          ? `<div><strong>Estadística 2:</strong> ${fmt(info.estadistica2)}</div>` : "";
+
+        return `
+          <div class="mb-2 border-bottom pb-2">
+            ${lineComponente}
+            ${lineSubcomp}
+            ${lineTema}
+            ${lineE1}
+            ${lineE2}
+          </div>
+        `;
+      }).join("");
+
     } catch (err) {
       console.error(err);
       modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información del MDEA.</div>";
     }
-  }
+  })();
+}
+
 
   // ============ ODS ============
-  if (e.target.classList.contains("badge-ods")) {
-    document.getElementById("infoModalLabel").textContent = "Alineación de la variable con los ODS";
-    const idVar = e.target.getAttribute("data-idvar");
-    const modalBody = document.getElementById("infoModalBody");
-    modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
+if (e.target.closest(".badge-ods")) {
+  const trigger = e.target.closest(".badge-ods");  // <- asegura capturar el elemento correcto
+  if (trigger.classList.contains("disabled")) return;
 
-    const fmt = (s) => (s || "-").toString().replace(/_/g, " ").replace(/\s+/g, " ").trim();
+  const clickedOds = trigger.getAttribute("data-ods"); // 1..17 o null
+  const idVar      = trigger.getAttribute("data-idvar");
 
-    try {
-      const variable = getVariableByIdVar(idVar);
+  const modalTitle = document.getElementById("infoModalLabel");
+  const modalBody  = document.getElementById("infoModalBody");
 
-      // 1) Económicas con ods embebidos
-      if (variable && variable._source === "economicas-ultima" && Array.isArray(variable._odsList) && variable._odsList.length) {
-        modalBody.innerHTML = `
-          <div class="mb-2"><strong>ODS Relacionados:</strong></div>
+  if (modalTitle) {
+    modalTitle.textContent = clickedOds
+      ? `Alineación de la variable con los ODS (ODS ${clickedOds})`
+      : "Alineación de la variable con los ODS";
+  }
+  if (modalBody) modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
+
+  const fmt = (s) => (s || "-").toString().replace(/_/g, " ").replace(/\s+/g, " ").trim();
+
+  try {
+    function getVariableByIdVar(id) {
+      return (Array.isArray(allData) ? allData : []).find(v => String(v.idVar) === String(id));
+    }
+    const variable = getVariableByIdVar(idVar);
+
+    // 1) Económicas con _odsList embebido
+    if (variable && variable._source === "economicas-ultima" &&
+        Array.isArray(variable._odsList) && variable._odsList.length) {
+
+      let lista = variable._odsList;
+      if (clickedOds) {
+        const target = parseInt(clickedOds, 10);
+        lista = lista.filter(o => getOdsObjectiveNumber(o?.objetivo) === target);
+      }
+
+      if (!lista.length) {
+        modalBody.innerHTML = "<div class='text-danger'>No hay información de ODS para ese objetivo.</div>";
+        return;
+      }
+
+          modalBody.innerHTML = `
+          <div class="mb-2"><strong>${fmt(variable.varAsig || idVar)}</strong></div>
           <div class="list-group">
-            ${variable._odsList.map(o => `
-              <div class="list-group-item">
-                <div class="d-flex w-100 justify-content-between align-items-start">
-                  <h6 class="mb-1">ODS: ${formatIdWithDots(o.objetivo)} ${fmt(o.objetivoNombre)}</h6>
+            ${lista.map(o => {
+              const objNum = formatOdsObjetivo(o.objetivo);  // ✅ 12 (no "1.2")
+              const objNom = fmt(o.objetivoNombre);          // "Producción y consumo responsables"
+              const meta   = formatOdsComposite(o.meta);     // ✅ "12.2"
+              const ind    = formatOdsComposite(o.indicador);// ✅ "12.2.1" o "-"
+
+              return `
+                <div class="list-group-item">
+                  <div class="d-flex w-100 justify-content-between align-items-start">
+                    <h6 class="mb-1">ODS: ${objNum} ${objNom}</h6>
+                  </div>
+                  <div class="small mb-1"><strong>Meta ODS detectada:</strong> ${meta}</div>
+                  <div class="small mb-1"><strong>Indicador ODS:</strong> ${ind}</div>
                 </div>
-                <div class="small mb-1"><strong>Meta:</strong> ${formatIdWithDots(o.meta)} ${fmt(o.metaNombre)}</div>
-                <div class="small mb-1"><strong>Indicador:</strong> ${formatIdWithDots(o.indicador)} ${fmt(o.indicadorNombre)}</div>
-              </div>
-            `).join("")}
+              `;
+            }).join("")}
+          </div>
+      `;
+      return;
+    }
+
+    // 2) Fallback a /api/ods (sociodemo, etc.)
+    const res = await fetch(`/api/ods`);
+    const data = await res.json();
+    let registros = Array.isArray(data)
+      ? data.filter(ods => String(ods.idVar) === String(idVar))
+      : (data && String(data.idVar) === String(idVar) ? [data] : []);
+
+    if (clickedOds) {
+      const target = parseInt(clickedOds, 10);
+      registros = registros.filter(r => getOdsObjectiveNumber(r?.ods ?? r?.objetivo) === target);
+    }
+
+    if (!registros.length) {
+      modalBody.innerHTML = "<div class='text-danger'>No hay información de ODS para ese objetivo.</div>";
+      return;
+    }
+
+    const varTitle = fmt((variable?.varAsig) || idVar);
+       modalBody.innerHTML = `
+          <div class="mb-2"><strong>${varTitle}</strong></div>
+          <div class="list-group">
+            ${registros.map(info => {
+              const objNum = formatOdsObjetivo(info.ods ?? info.objetivo);
+              const objNom = fmt(info.odsNombre || info.objetivoNombre || info.ods);
+              // 👇 limpiamos guiones y mantenemos formato 12.2 / 12.2.1
+              const meta = cleanUnderscores(formatOdsComposite(info.meta));
+              const ind  = cleanUnderscores(formatOdsComposite(info.indicador));
+
+              return `
+                <div class="list-group-item">
+                  <div class="d-flex w-100 justify-content-between align-items-start">
+                    <h6 class="mb-1">ODS: ${objNum} ${objNom}</h6>
+                  </div>
+                  <div class="small mb-1"><strong>Meta ODS detectada:</strong> ${meta}</div>
+                  <div class="small mb-1"><strong>Indicador ODS:</strong> ${ind}</div>
+                  ${info.comentOds && info.comentOds.trim() !== "-" ? `<div class="small text-muted">${cleanUnderscores(info.comentOds)}</div>` : ""}
+                </div>
+              `;
+            }).join("")}
           </div>
         `;
-        return;
-      }
 
-      // 2) Fallback a /api/ods (pueden ser varias relaciones por variable)
-      const res = await fetch(`/api/ods`);
-      const data = await res.json();
-      const registros = Array.isArray(data)
-        ? data.filter(ods => String(ods.idVar) === String(idVar))
-        : (data && data.idVar === idVar ? [data] : []);
 
-      if (!registros.length) {
-        modalBody.innerHTML = "<div class='text-danger'>No hay información de ODS para esta variable.</div>";
-        return;
-      }
-
-      const varTitle = fmt((getVariableByIdVar(idVar)?.varAsig) || idVar);
-      const contenido = `
-        <div class="mb-2"><strong>${varTitle}</strong></div>
-        <div class="list-group">
-          ${registros.map(info => `
-            <div class="list-group-item">
-              <div class="d-flex w-100 justify-content-between align-items-start">
-                <h6 class="mb-1">ODS: ${fmt(info.ods)}</h6>
-              </div>
-              <div class="small mb-1"><strong>Meta ODS detectada:</strong> ${fmt(info.meta)}</div>
-              <div class="small mb-1"><strong>Indicador ODS:</strong> ${fmt(info.indicador)}</div>
-              ${info.comentOds && info.comentOds.trim() !== "-" ? `<div class="small text-muted">${info.comentOds}</div>` : ""}
-            </div>
-          `).join("")}
-        </div>
-      `;
-      modalBody.innerHTML = contenido;
-    } catch (err) {
-      console.error(err);
-      modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información de ODS.</div>";
-    }
+  } catch (err) {
+    console.error(err);
+    modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información de ODS.</div>";
   }
+}
+
+
 });
 });
 

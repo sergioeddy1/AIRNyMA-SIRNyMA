@@ -165,19 +165,79 @@
         </div>
     </div>
 
+    <!-- ==== Counters resumen (siempre visibles) ==== -->
+<div class="container mt-5 mb-5" id="summaryCounters">
+  <div class="row g-3">
+
+    <!-- Unidades Administrativas (global) -->
+    <div class="col-6 col-md-3">
+      <div class="scard d-flex align-items-center gap-3 p-3 rounded-3">
+        <div class="scard-icon scard-lilac">
+          <i class="bi bi-building"></i>
+        </div>
+        <div>
+          <div class="scard-num" id="scUnidades">0</div>
+          <div class="scard-label">Unidades Administrativas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Procesos de Producción (totales de la unidad seleccionada) -->
+    <div class="col-6 col-md-3">
+      <div class="scard d-flex align-items-center gap-3 p-3 rounded-3">
+        <div class="scard-icon scard-blue">
+          <i class="bi bi-gear"></i>
+        </div>
+        <div>
+          <div class="scard-num" id="scProcesosTotales">0</div>
+          <div class="scard-label">Procesos de Producción</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Procesos con variables ambientales (reutiliza tu lógica) -->
+    <div class="col-6 col-md-3">
+      <div class="scard d-flex align-items-center gap-3 p-3 rounded-3">
+        <div class="scard-icon scard-orange">
+          <i class="bi bi-gear-wide-connected"></i>
+        </div>
+        <div>
+          <div class="scard-num" id="scProcesosAmbientales">0</div>
+          <div class="scard-label">Procesos de Producción con variables ambientales</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Variables ambientales (reutiliza tu contador por unidad) -->
+    <div class="col-6 col-md-3">
+      <div class="scard d-flex align-items-center gap-3 p-3 rounded-3">
+        <div class="scard-icon scard-green">
+          <i class="bi bi-leaf"></i>
+        </div>
+        <div>
+          <div class="scard-num" id="scVariablesAmbientales">0</div>
+          <div class="scard-label">Variables ambientales</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
     <!-- Contenedor donde se mostrarán los procesos -->
 <div class="container mt-5" id="procesosSection" hidden>
-  <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
-    <h2 class="mb-2 mb-lg-0">Procesos de Producción</h2>
-  </div>
+    <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+        <h2 class="mb-2 mb-lg-0" id="procesosTitle">Procesos de Producción</h2>
+    </div>
 
   <hr>
   <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-3">
-    <div>
+    <div hidden>
       <strong>Total de procesos con variables ambientales: <span id="procesosCounter" style="font-family: 'Monaco', monospace; font-weight: bold;">0</span></strong>
     </div>
-    <div>
-      <strong>Total de variables ambientales dentro de esta unidad: <span id="contadorVariablesUnidad" style="font-family: 'Monaco', monospace; font-weight: bold;">0</span></strong>
+    <div hidden>
+      <strong >Total de variables ambientales dentro de esta unidad: <span id="contadorVariablesUnidad" style="font-family: 'Monaco', monospace; font-weight: bold;">0</span></strong>
     </div>
 
     <div class="d-flex flex-wrap align-items-center gap-2">
@@ -207,13 +267,14 @@
       <!-- Checkbox IIN -->
       <div class="form-check ms-2">
         <input class="form-check-input" type="checkbox" id="iinCheck">
-        <label class="form-check-label fw-bold" for="iinCheck">Información de Interés Nacional</label>
+        <label class="form-check-label fw-bold" for="iinCheck">Información de Interés Nacional (IIN)</label>
       </div>
 
       <!-- Botón reset -->
       <button id="resetFiltrosBtn" class="btn btn-outline-danger" title="Restablecer filtros">
         <i class="bi bi-trash"></i>
       </button>
+      
     </div>
   </div>
 

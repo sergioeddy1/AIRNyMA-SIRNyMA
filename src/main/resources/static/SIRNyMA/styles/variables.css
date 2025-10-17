@@ -688,3 +688,84 @@ padding-bottom: 6px;
   color: #111827;
   box-shadow: none;
 }
+
+
+/* Opcional: un efecto sutil para que se vean más apagados */
+.badge-tabulado.disabled:hover,
+.badge-microdatos.disabled:hover,
+.badge-datosabiertos.disabled:hover {
+  opacity: 0.8;
+  transform: none;
+}
+
+/* Si quieres enfatizar que están inactivos con un color fijo, puedes añadir: */
+.badge-tabulado.disabled,
+.badge-microdatos.disabled {
+  background-color: #dc3545 !important; /* rojo Bootstrap danger */
+  color: #fff !important;
+}
+
+/* Estilos para los thumbs de ODS  */
+.ods-thumb {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  border-radius: .25rem;
+  box-shadow: 0 0 .15rem rgba(0,0,0,.2);
+  cursor: pointer;
+  transition: transform .08s ease-in-out, box-shadow .08s ease-in-out;
+}
+.ods-thumb:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 2px .35rem rgba(0,0,0,.25);
+}
+
+/* Estilos para los chips de MDEA */
+/* Base chip */
+.mdea-chip {
+  --bg: #6c757d;
+  --fg: #fff;
+  --bd: var(--bg);
+  border-radius: .6rem;
+  padding: .15rem .5rem;      /* antes: .25rem .6rem */
+  font-size: .9rem;           /* ~0.1rem menos si base era 1rem */
+  font-weight: 600;
+  border: 1px solid var(--bd);
+  background-color: var(--bg);
+  color: var(--fg);
+  transition: transform .08s ease-in-out, box-shadow .08s ease-in-out, opacity .08s;
+  box-shadow: 0 1px .25rem rgba(0,0,0,.12);
+}
+.mdea-chip:hover { transform: translateY(-1px); box-shadow: 0 3px .5rem rgba(0,0,0,.18); }
+.mdea-chip:active { transform: translateY(0); box-shadow: 0 1px .25rem rgba(0,0,0,.12); }
+
+/* Paleta por componente (aprox a la rueda de colores del gráfico) */
+.mdea-chip--1 { --bg: #2cb0d9; } /* cian/azul claro */
+.mdea-chip--2 { --bg: #f39c12; } /* naranja */
+.mdea-chip--3 { --bg: #c0392b; } /* rojo */
+.mdea-chip--4 { --bg: #2980b9; } /* azul */
+.mdea-chip--5 { --bg: #27ae60; } /* verde */
+.mdea-chip--6 { --bg: #a3c521; } /* amarillo-verdoso */
+
+/* Accesibilidad/hover */
+.mdea-chip--1:hover { filter: brightness(0.95); }
+.mdea-chip--2:hover { filter: brightness(0.95); }
+.mdea-chip--3:hover { filter: brightness(0.95); }
+.mdea-chip--4:hover { filter: brightness(0.95); }
+.mdea-chip--5:hover { filter: brightness(0.95); }
+.mdea-chip--6:hover { filter: brightness(0.95); }
+
+
+/* Datos disponibles en laboratorio  */
+.microdatos-lab-msg {
+  background-color: #005fa3;     /* Azul institucional INEGI */
+  color: #fff;
+  font-weight: 600;
+  text-align: center;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  letter-spacing: 0.3px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
