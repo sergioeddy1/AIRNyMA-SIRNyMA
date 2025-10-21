@@ -1,3 +1,5 @@
+// procesos.js
+
 // ---- Estado global para sincronizar cargas y contador ----
 let isCargandoUnidad = false;         // evita cargas en paralelo
 let contadorAnimFrame = null;         // requestAnimationFrame activo
@@ -12,6 +14,14 @@ const GLOBAL_DEFAULTS = {
   variablesAmbientales: 1165 + 554 // 1719
 };
 
+// === Formatea números con espacio cada 3 dígitos ===
+function formatNumberWithSpace(num) {
+  // Acepta número o texto numerico; devuelve string formateado
+  const n = Number(String(num).replace(/\s+/g, '').replace(/,/g, ''));
+  if (!Number.isFinite(n)) return String(num);
+  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
+
 // Pinta los 4 contadores con esos valores (sin spinner)
 function setSummaryDefaults() {
   animateCountTo('#scUnidades', GLOBAL_DEFAULTS.unidades, 0);
@@ -22,7 +32,7 @@ function setSummaryDefaults() {
 
 // --- Abre variables.html en otra pestaña ---
 function handleVariableClick(idPp) {
-  window.open(`variables.html?idPp=${idPp}`, '_blank');
+  window.open(`variables.html?idPp=${encodeURIComponent(idPp)}`, '_blank');
 }
 
 // --- Helpers generales ---
@@ -43,18 +53,25 @@ function getStatusClass(status) {
 
 // ======== Resumen: helpers de animación y actualización ========
 
-// contador con animación suave
+// contador con animación suave (ahora formatea con espacios)
 function animateCountTo(elOrSelector, toValue, ms = 350) {
   const el = (typeof elOrSelector === 'string') ? document.querySelector(elOrSelector) : elOrSelector;
   if (!el) return;
-  const from = parseInt(String(el.textContent).replace(/\D/g,'')) || 0;
-  const to = Math.max(0, Number(toValue)||0);
-  if (ms <= 0 || from === to) { el.textContent = String(to); return; }
+
+  const from = parseInt(String(el.textContent || '').replace(/\D/g,'')) || 0;
+  const to = Math.max(0, Number(toValue) || 0);
+
+  if (ms <= 0 || from === to) {
+    el.textContent = formatNumberWithSpace(to);
+    return;
+  }
+
   const start = performance.now();
 
   const step = (now) => {
     const t = Math.min(1, (now - start) / ms);
-    el.textContent = String(Math.round(from + (to - from) * t));
+    const value = Math.round(from + (to - from) * t);
+    el.textContent = formatNumberWithSpace(value);
     if (t < 1) requestAnimationFrame(step);
   };
   requestAnimationFrame(step);
@@ -67,7 +84,7 @@ function initSummaryStaticCounters() {
     '.card-unidad, .card.disabled[data-grupo]'
   ).length || 5;
   const el = document.getElementById('scUnidades');
-  if (el) el.textContent = String(totalUnidades);
+  if (el) el.textContent = formatNumberWithSpace(totalUnidades);
 }
 
 // Actualiza los 3 counters dinámicos de la unidad seleccionada
@@ -95,7 +112,7 @@ function showCounterSpinner(id){
   const el = document.getElementById(id);
   if (!el) return;
   if (el.dataset.spinning === '1') return;
-  el.dataset.prev = el.textContent;      // guarda el valor previo
+  el.dataset.prev = el.textContent;      // guarda el valor previo (con formato)
   el.dataset.spinning = '1';
   el.innerHTML = '<div class="spinner-border" role="status" aria-hidden="true"></div>';
 }
@@ -105,7 +122,8 @@ function hideCounterSpinner(id){
   if (!el) return;
   if (el.dataset.spinning !== '1') return;
   el.dataset.spinning = '0';
-  el.innerHTML = el.dataset.prev ?? '0';
+  // restaura lo anterior, si no existe muestra 0 formateado
+  el.innerHTML = el.dataset.prev ?? formatNumberWithSpace(0);
   delete el.dataset.prev;
 }
 
@@ -162,8 +180,8 @@ function mapEconomicasToLocal(item) {
     perioProd: null,
     vigInicial: item.inicio ? String(item.inicio).slice(0, 4) : null, // Solo los primeros 4 dígitos
     vigFinal: item.fin 
-  ? (/^\d{4}/.test(String(item.fin)) ? String(item.fin).slice(0, 4) : String(item.fin)) 
-  : null, 
+      ? (/^\d{4}/.test(String(item.fin)) ? String(item.fin).slice(0, 4) : String(item.fin)) 
+      : null, 
     metGenInf: item.metodo || null,
     gradoMadur: grado,
     perPubResul: perPub || "No disponible",
@@ -179,7 +197,7 @@ function mapEconomicasToLocal(item) {
 // --- Render de tarjetas  ---
 function renderProcesos(procesos, conteo, container) {
   const counter = document.getElementById("procesosCounter");
-  if (counter) counter.textContent = procesos.length;
+  if (counter) counter.textContent = formatNumberWithSpace(procesos.length);
   container.innerHTML = "";
 
   if (!procesos.length) {
@@ -188,9 +206,8 @@ function renderProcesos(procesos, conteo, container) {
   }
 
   procesos.forEach(proceso => {
-   let iconoHTML = "";
+    let iconoHTML = "";
 
-  
     // Comportamiento normal para las demás unidades
     let extension = "png";
 
@@ -205,16 +222,17 @@ function renderProcesos(procesos, conteo, container) {
             alt="Icono ${proceso.idPp}" 
             style="max-height: 80px; object-fit: contain; ${proceso.idPp === "CPV" ? "filter: invert(1);" : ""}"
             onerror="
-            if (this.src.includes('.png') && !this.src.includes('.PNG')) {
+              if (this.src.includes('.png') && !this.src.includes('.PNG')) {
                 this.onerror = null;
                 this.src = '${iconoRutaMay}';
-            } else {
+              } else {
                 this.onerror = null;
                 this.src = '${iconoFallback}';
-            }
+              }
             ">
     `;
     
+    const totalVars = conteo[proceso.idPp] || 0;
 
     const card = `
       <div class="col-md-4 mb-4">
@@ -244,10 +262,10 @@ function renderProcesos(procesos, conteo, container) {
                   ${mostrarVigencia(proceso.vigInicial, proceso.vigFinal)}
                 </p>
                 <p class="card-text mb-0">
-                  <strong style="font-size: 0.85rem">Total Variables Ambientales:</strong>
+                  <strong style="font-size: 0.85rem">Total de variables ambientales:</strong>
                   <span style="color: #08739c; font-family: 'Monaco', monospace; font-weight: bold; font-size: 1.2rem; text-decoration: underline; cursor: pointer;"
                         onclick="handleVariableClick('${proceso.idPp}')">
-                    ${conteo[proceso.idPp] || 0}
+                    ${formatNumberWithSpace(totalVars)}
                   </span>
                 </p>
               </div>
@@ -469,7 +487,7 @@ function renderContadorVariablesUnidad(conteoGlobal, { animateMs = 350 } = {}) {
 
     const t = Math.min(1, (now - start) / animateMs);
     const value = Math.round(from + (to - from) * t);
-    el.textContent = String(value);
+    el.textContent = formatNumberWithSpace(value);
 
     if (t < 1) {
       contadorAnimFrame = requestAnimationFrame(step);
@@ -480,10 +498,10 @@ function renderContadorVariablesUnidad(conteoGlobal, { animateMs = 350 } = {}) {
 
   // Si no quieres animación, pon animateMs = 0
   if (animateMs > 0) {
-    el.textContent = "0";
+    el.textContent = formatNumberWithSpace(0);
     contadorAnimFrame = requestAnimationFrame(step);
   } else {
-    el.textContent = String(total);
+    el.textContent = formatNumberWithSpace(total);
   }
 }
 
@@ -535,7 +553,7 @@ async function cargarEconomicas({ container }) {
         No hay procesos de la Unidad de Estadísticas Económicas con variables ambientales (&gt; 0).
       </div>`;
       const counter = document.getElementById("procesosCounter");
-      if (counter) counter.textContent = "0";
+      if (counter) counter.textContent = formatNumberWithSpace(0);
       return;
     }
 
@@ -622,13 +640,13 @@ document.addEventListener("DOMContentLoaded", function () {
     if (container) container.innerHTML = "";
 
     const counter = document.getElementById("procesosCounter");
-    if (counter) counter.textContent = "0";
+    if (counter) counter.textContent = formatNumberWithSpace(0);
 
     const selPer = document.getElementById("filtrarPeriodicidad");
     if (selPer) selPer.innerHTML = `<option value="">Filtrar por periodicidad...</option>`;
 
     const contadorUnidad = document.getElementById("contadorVariablesUnidad");
-    if (contadorUnidad) contadorUnidad.textContent = "0";
+    if (contadorUnidad) contadorUnidad.textContent = formatNumberWithSpace(0);
 
     if (contadorAnimFrame) cancelAnimationFrame(contadorAnimFrame);
     if (contadorTimeoutId) clearTimeout(contadorTimeoutId);
