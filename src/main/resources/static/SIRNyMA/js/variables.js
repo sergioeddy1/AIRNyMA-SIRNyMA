@@ -1673,8 +1673,8 @@ function renderPage(data, page) {
                             <p>${hPregLit}
                           </div>
 
-                          <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Ordenamiento de todas y cada una de las modalidades cualitativas o intervalos numéricos admitidos por una variable">
-                            <i class="bi bi-question-circle me-1"></i>Clasificación de la variable correspondiente a la pregunta:</span>
+                          <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Respuestas posibles de la pregunta de captación. Si la pregunta es abierta, este campo puede no aplicarse">
+                            <i class="bi bi-question-circle me-1"></i>Clasificación:</span>
                           <div class="ps-3">
                             ${getClasificacionesPorVariableHighlighted(variable.idVar, term)} <!-- 👈 (ver paso 4) -->
                           </div>
@@ -1691,9 +1691,16 @@ function renderPage(data, page) {
                             <i class="bi bi-tag me-1"></i>Variable Fuente<sup>1</sup>:</span>
                           <span class="text-dark ms-1 fw-normal">${hNomVar}</span> <!-- 👈 -->
                         </div>
-                        <p "small"> <sup>1</sup>Fuente:Origen de identificación de la variable proporcionada por:
                       <br>
-                      la iniciativa de Documentación de Datos(DDI), el Descriptor de archivos (FD), 
+                      <br>
+                      <br>
+                      <br>
+                      <br>
+                      <br>
+                      <br>
+                        <p style="font-size: 9px;"> <sup>1</sup>Fuente:Origen de identificación de la variable proporcionada por:
+                      <br>
+                      la Iniciativa de Documentación de Datos(DDI), el Descriptor de archivos (FD), 
                       <br>
                       Cuestionario o Esquema conceptual.</p>
                       </div>
@@ -1701,7 +1708,7 @@ function renderPage(data, page) {
 
                       <div class="col-md-6">
                         <div class="mb-2">
-                          <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Conjunto objeto de cuantificación y caracterización para fines de estudio">
+                          <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Cnjunto de personas, elementos o unidades que se estudian y cuanrifican por la variable">
                             <i class="bi bi-diagram-3 me-1"></i>Categoría:</span>
                           <span class="text-dark ms-1 fw-normal">${hCategoria}</span> <!-- 👈 -->
                         </div>
