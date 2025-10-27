@@ -28,6 +28,19 @@ function setSummaryDefaults() {
   animateCountTo('#scProcesosTotales', GLOBAL_DEFAULTS.procesosTotales, 0);
   animateCountTo('#scProcesosAmbientales', GLOBAL_DEFAULTS.procesosAmbientales, 0);
   animateCountTo('#scVariablesAmbientales', GLOBAL_DEFAULTS.variablesAmbientales, 0);
+
+setTimeout(() => {
+  const contador=document.querySelector("#scUnidades");
+  const etiqueta=contador?.nextElementSibling;
+  const valor=parseInt(contador?.textContent || "0", 10);
+  if(etiqueta)
+  {
+    etiqueta.textContent =
+    valor === 1
+    ? "Unidad Administrativa"
+    : "Unidades Administrativas";
+  }
+},1650);
 }
 
 // --- Abre variables.html en otra pestaña ---

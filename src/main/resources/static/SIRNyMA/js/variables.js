@@ -1183,28 +1183,34 @@ function searchVariables(term) {
 // Actualizar el número total de variables mostradas
 function updateVariableCounter(count) {
     const totalVariablesElement = document.getElementById('totalVariables');
-    const current = parseInt(totalVariablesElement.textContent.replace(/,/g, '')) || 0;
-    const duration = 1000; // Duración de la animación en ms
-    const frameRate = 100;
-    const totalFrames = Math.round(duration / (2000 / frameRate));
-    let frame = 0;
+    if (!totalVariablesElement) return;
 
-    if (current === count) return;
+    // Lee valor actual, acepta comas o espacios
+    const raw = String(totalVariablesElement.textContent || '').replace(/[^0-9]/g, '');
+    const current = parseInt(raw, 10) || 0;
+    const to = Math.max(0, Number(count) || 0);
 
-    const step = (count - current) / totalFrames;
-
-    function animate() {
-        frame++;
-        const value = Math.round(current + step * frame);
-        // Mostrar el número con separador de miles
-        totalVariablesElement.textContent = value.toLocaleString('en-US');
-        if (frame < totalFrames) {
-            requestAnimationFrame(animate);
-        } else {
-            totalVariablesElement.textContent = count.toLocaleString('en-US');
-        }
+    // Formateador con espacio como separador de miles: 1719 -> "1 719"
+    function formatWithSpace(n) {
+      return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
     }
-    animate();
+
+    if (current === to) {
+      totalVariablesElement.textContent = formatWithSpace(to);
+      return;
+    }
+
+    const duration = 600; // ms de animación
+    const start = performance.now();
+    const from = current;
+
+    function step(now) {
+      const t = Math.min(1, (now - start) / duration);
+      const value = Math.round(from + (to - from) * t);
+      totalVariablesElement.textContent = formatWithSpace(value);
+      if (t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
 }
 
 // Ordenar variables alfabéticamente por varAsig al cargar y al aplicar filtros
@@ -1302,7 +1308,6 @@ Promise.all([
     updateVariableCounter(allData.length);
     initialPaintDone = true;
   }
-
   hideProcessSkeleton();
   hideVariablesSkeleton();
   hideCounterSpinner();
@@ -1472,7 +1477,6 @@ function construirLineaDeTiempoVariable(variable, eventosRelacionados) {
       years.push(hitYear);
       years.sort((a,b)=>a-b);
     }
-
     // 🔹 Construcción de los nodos del timeline
     const items = years.map(y => {
       const isHit   = (hitYear === y);
@@ -1504,15 +1508,15 @@ function construirLineaDeTiempoVariable(variable, eventosRelacionados) {
         <div class="d-flex justify-content-center flex-wrap gap-4">
           <div class="d-flex align-items-center gap-2">
             <span class="legend-box legend-neutral"></span>
-            <span>Periodo del proceso al que pertenece la variable</span>
+            <span>Año del Proceso de Producción sin información disponible de la variable</span>
           </div>
           <div class="d-flex align-items-center gap-2">
             <span class="legend-box legend-green"></span>
-            <span>Periodo en el que ha sido capturada la variable</span>
+            <span>Año del Proceso de Produccióm con información disponible de la varible</span>
           </div>
           <div class="d-flex align-items-center gap-2">
             <span class="legend-box legend-yellow"></span>
-            <span>Periodo en el que se referencia esta variable</span>
+            <span>Año de la información presentada</span>
           </div>
         </div>
       </div>
@@ -1663,7 +1667,7 @@ function renderPage(data, page) {
                     <div class="row g-3">
                       <div class="col-md-6">
                         <div class="mb-2">
-                          <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Pregunta elaborada cuyo objetivo es obtener una respuesta directa y explícita basada en información específica y detallada proporcionada por un informante">
+                          <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Pregunta utilizada para recolectar esta variable en el cuestionario">
                             <i class="bi bi-question-circle me-1"></i>Pregunta:</span>
                           <div class="ps-3">
                             <p>${hPregLit}
@@ -1677,17 +1681,23 @@ function renderPage(data, page) {
                         </div>
 
                         <div class="mb-2">
-                          <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Concepto o termino que incluya sus aspectos principales brindando un contexto de la variable">
+                          <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Descripción detallada de la variable tal como aparece en la Fuente<sup>1</sup>">
                             <i class="bi bi-info-circle me-1"></i>Definición:</span>
                           <div class="ps-3">${hDefVar}</div> <!-- 👈 -->
                         </div>
 
                         <div class="mb-2">
-                          <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Nombre de la variable seleccionada, tal y como aparece en la fuente del evento en mención">
-                            <i class="bi bi-tag me-1"></i>Variable Fuente:</span>
+                          <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Denominación de la variable proporcionada por la Fuente<sup>1</sup>">
+                            <i class="bi bi-tag me-1"></i>Variable Fuente<sup>1</sup>:</span>
                           <span class="text-dark ms-1 fw-normal">${hNomVar}</span> <!-- 👈 -->
                         </div>
+                        <p "small"> <sup>1</sup>Fuente:Origen de identificación de la variable proporcionada por:
+                      <br>
+                      la iniciativa de Documentación de Datos(DDI), el Descriptor de archivos (FD), 
+                      <br>
+                      Cuestionario o Esquema conceptual.</p>
                       </div>
+                      
 
                       <div class="col-md-6">
                         <div class="mb-2">
@@ -1697,8 +1707,8 @@ function renderPage(data, page) {
                         </div>
 
                         <div class="mb-2">
-                          <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Son enunciados genéricos referentes a campos específicos de interés y cuyo estudio constituye la justificación del proyecto estadístico">
-                            <i class="bi bi-layers me-1"></i>Clasificación Temática:</span>
+                          <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Tema al que se relaciona la variable">
+                            <i class="bi bi-layers me-1"></i>Temática:</span>
                           <div class="ps-3">
                             <span>Tema y Subtema 1:</span>
                             <span class="text-dark mb-1 fw-normal">${hTema}</span> / 
@@ -1710,8 +1720,8 @@ function renderPage(data, page) {
                         </div>
                           <div class="mb-2">
                              <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left"
-                                   data-bs-title="Verifica si la variable seleccionada cuenta con información disponible en relación a tabulados publicados o en microdatos">
-                               <i class="bi bi-link-45deg me-1"></i>Relación con Tabulados o Microdatos
+                                   data-bs-title="Disponibilidad de los datos de la variable según los productos de información: tabulados, microdatos o datos abiertos">
+                               <i class="bi bi-link-45deg me-1"></i>Disponibilidad en:
                              </span>
                              <div class="ps-3 d-flex flex-wrap gap-2">
                                 <span class="badge bg-${variable.relTab === 'Sí' ? 'success badge-tabulado' : 'danger disabled'}"
@@ -1743,8 +1753,8 @@ function renderPage(data, page) {
                            <!-- 🔹 Bloque ODS -->
                             <span class="fw-semibold text-secondary mt-2"
                                   data-bs-toggle="tooltip" data-bs-placement="left"
-                                  data-bs-title="Verifica si la variable está alineada con los Objetivos de Desarrollo Sostenible (ODS).">
-                              <i class="bi bi-globe me-1"></i>Alineación con ODS
+                                  data-bs-title="Objetivos del Desarrollo Sostenible (ODS) a los que contribuye la variable">
+                              <i class="bi bi-globe me-1"></i>Alineación con los ODS
                             </span>
                             <div class="ps-3 d-flex flex-wrap gap-2 ods-thumbs-wrap">
                             ${
@@ -1772,7 +1782,7 @@ function renderPage(data, page) {
                               <span class="fw-semibold text-secondary"
                                     data-bs-toggle="tooltip" data-bs-placement="left"
                                     data-bs-title="Verifica el componente MDEA con el que se alinea la variable.">
-                                <i class="bi bi-diagram-3 me-1"></i>Alineación con MDEA
+                                <i class="bi bi-diagram-3 me-1"></i>Alineación con el MDEA
                               </span>
                               <div class="ps-3 d-flex flex-wrap gap-2 mdea-chips-wrap">
                                 ${
@@ -1801,9 +1811,62 @@ function renderPage(data, page) {
 
     container.appendChild(card);
 
-    // Inicializar tooltips
-    const tooltips = card.querySelectorAll('[data-bs-toggle="tooltip"]');
-    tooltips.forEach(el => new bootstrap.Tooltip(el));
+  // === Inicializar tooltips (robusto, compatible con <sup>) ===
+const tooltips = card.querySelectorAll('[data-bs-toggle="tooltip"]');
+if (tooltips.length) {
+  const initTooltips = () => {
+    try {
+      // Detectar versión de Bootstrap
+      const bsVersion = bootstrap?.Tooltip?.VERSION || '5.x';
+
+      // --- Caso Bootstrap 5.0 a 5.2 ---
+      if (parseFloat(bsVersion) < 5.3) {
+        const allowListWithSup = {
+          ...bootstrap.Tooltip.Default.allowList,
+          sup: [] // permitir <sup> sin atributos
+        };
+
+        const cfg = {
+          html: true,
+          sanitize: true,
+          allowList: allowListWithSup,
+          container: 'body'
+        };
+
+        tooltips.forEach(el => new bootstrap.Tooltip(el, cfg));
+      }
+
+      // --- Caso Bootstrap 5.3 o superior ---
+      else {
+        // Usa DOMPurify si está disponible (recomendado)
+        const sanitizeFn = (content) =>
+          window.DOMPurify
+            ? DOMPurify.sanitize(content, { ALLOWED_TAGS: ['b', 'i', 'u', 'em', 'strong', 'sup', 'sub', 'span'] })
+            : content;
+
+        const cfg = {
+          html: true,
+          sanitizeFn,
+          container: 'body'
+        };
+
+        tooltips.forEach(el => new bootstrap.Tooltip(el, cfg));
+      }
+
+    } catch (err) {
+      console.warn('Error inicializando tooltips con HTML, intentando fallback:', err);
+      // Fallback sin HTML
+      try {
+        tooltips.forEach(el => new bootstrap.Tooltip(el));
+      } catch (e) {
+        console.error('Error en fallback de tooltips:', e);
+      }
+    }
+  };
+
+  // Ejecutar inicialización
+  initTooltips();
+}
 
     // Inicializar de MDEA perezoso
     // Carga perezosa de chips MDEA cuando no vienen embebidos
@@ -2223,7 +2286,6 @@ searchForm.addEventListener("submit", function (e) {
         }, 100);
     }
     });
-
     // Evento delegado para mostrar información de tabulados y microdatos en el modal
  // === REEMPLAZA COMPLETO TU LISTENER ACTUAL POR ESTE ===
 document.addEventListener("click", async function (e) {
@@ -2262,7 +2324,6 @@ document.addEventListener("click", async function (e) {
         modalBody.innerHTML = html || "<div class='text-danger'>No hay tabulados disponibles.</div>";
         return;
       }
-
       // 2) Fallback a tus endpoints locales
       const resVarTab = await fetch('/api/var-tab');
       const dataVarTab = await resVarTab.json();
@@ -2734,6 +2795,29 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 // Cargar clasificaciones antes de renderizar variables
+
+// ---- Nota de fuente al final de la página (texto pequeño, no altera layout) ----
+(function appendFuenteNota(){
+  try {
+    const footerNoteId = 'variables-footer-fuente';
+    if (document.getElementById(footerNoteId)) return; // idempotente
+
+    const note = document.createElement('div');
+    note.id = footerNoteId;
+    // pequeño, muted y con margen superior leve. No debe interferir con posicionamiento.
+    note.className = 'small text-muted mt-3';
+    note.style.margin = '0.25rem 0 1rem 0';
+    note.style.lineHeight = '1.1';
+    note.style.fontSize = '0.75rem';
+    note.textContent = 'Fuente: Origen de identificación de la variable proporcionado por: la Iniciativa de Documentación de Datos (DDI), el Descriptor de archivos (FD), Cuestionario o Esquema conceptual.';
+
+    // Insertar al final del body para que quede al final de la página sin mover otros elementos
+    (document.body || document.documentElement).appendChild(note);
+  } catch (err) {
+    // no interrumpir la ejecución si falla
+    console.warn('No se pudo insertar la nota de fuente:', err);
+  }
+})();
 // Si decides conservar ese bloque, ajústalo así:
 fetch('/api/clasificaciones')
   .then(res => res.json())
@@ -2828,5 +2912,3 @@ function highlightTerm(text, term) {
   const regex = new RegExp(`(${escaped})`, 'gi');
   return text.replace(regex, '<mark class="custom-highlight">$1</mark>');
 }
-
-
