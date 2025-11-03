@@ -1365,6 +1365,46 @@ const SPECIAL_RULES = {
   ENCO: { lastYearOverride: 2021 }, // resaltar 2021 en amarillo
 };
 
+// Regla global: el nodo destacado (amarillo) no tiene link
+const DISABLE_LINKS_ON_HIT = false;
+
+// Lista de respaldo de procesos que consideramos Sociodemográficos.
+// (Si tu backend ya expone proc.unidad === 'Sociodemográficas', esto es solo fallback.)
+const SOCIODEMOG_PP = new Set([
+  'CPV','ENADID','ENIGH','ENUT','ENOE','ENASIC','ENBIARE','ENILEMS','ENTI','ENIF','ENCO'
+]);
+
+function isSociodemografica(variable, proc) {
+  const uVar  = (variable?._unidad || '').toLowerCase();
+  const uProc = (proc?.unidad || '').toLowerCase();
+  const idpp  = normIdPp(proc?.idPp || variable?.idPp || '');
+  return (
+    uVar.includes('sociodemogr') ||
+    uProc.includes('sociodemogr') ||
+    SOCIODEMOG_PP.has(idpp)
+  );
+}
+
+// Construye un mapa { año:number -> url:string } usando fuenteIden
+function mapEnlacesPorAnio(eventos, idVar) {
+  const map = new Map();
+  if (!Array.isArray(eventos)) return map;
+  for (const ev of eventos) {
+    if ((ev?.idVar || '').trim() !== String(idVar).trim()) continue;
+    const y = parseInt(String(ev?.evento ?? ev?.anioEvento ?? '').trim(), 10);
+    const url = (ev?.fuenteIden || '').trim();
+    if (Number.isFinite(y) && url && !map.has(y)) {
+      map.set(y, url);
+    }
+  }
+  return map;
+}
+
+// Envuelve el año como enlace (target _blank) cuando hay URL
+function wrapYearWithLink(y, url) {
+  const safe = encodeURI(url);
+  return `<a class="tl-link" href="${safe}" target="_blank" rel="noopener noreferrer" aria-label="Abrir fuente del ${y}">${y}</a>`;
+}
 
 
 function normIdPp(id) {
@@ -1461,11 +1501,11 @@ function construirLineaDeTiempoVariable(variable, eventosRelacionados) {
     let years = getProcessYearSeries(proc);
     if (!years.length) return construirLineaDeTiempo(eventosRelacionados);
 
-    // VERDES: años con evento
+    // Años con evento (para colorear en verde)
     const eventYears = getEventYearsForVar(variable.idVar, eventosRelacionados, variable);
     const greenYearsSet = new Set(eventYears);
 
-    // AMARILLO: año de referencia (económicas) o último evento
+    // Determinar año "hit" (amarillo)
     const rule = SPECIAL_RULES[normIdPp(proc.idPp)];
     let hitYear = null;
 
@@ -1478,12 +1518,16 @@ function construirLineaDeTiempoVariable(variable, eventosRelacionados) {
     if (!hitYear && eventYears.length) {
       hitYear = eventYears[eventYears.length - 1];
     }
-
     if (hitYear && !years.includes(hitYear)) {
       years.push(hitYear);
       years.sort((a,b)=>a-b);
     }
-    // 🔹 Construcción de los nodos del timeline
+
+    // Enlaces por año SOLO si la variable/proceso es Sociodemográfica
+    const sociodemo = isSociodemografica(variable, proc);
+    const enlacesPorAnio = sociodemo ? mapEnlacesPorAnio(eventosRelacionados, variable.idVar) : new Map();
+
+    // Construcción de nodos
     const items = years.map(y => {
       const isHit   = (hitYear === y);
       const isGreen = !isHit && greenYearsSet.has(y);
@@ -1496,19 +1540,25 @@ function construirLineaDeTiempoVariable(variable, eventosRelacionados) {
             ? `data-bs-toggle="tooltip" data-bs-placement="top" title="Año en el que se capturó la variable"`
             : `data-bs-toggle="tooltip" data-bs-placement="top" title="Año del periodo del proceso"`);
 
-      const inner = `<span class="tl-year" ${tooltipAttr}>${y}</span>`;
-
+      // Si es hit (amarillo), NO poner enlace jamás (regla global)
+      // Si no es hit y hay fuenteIden para ese año, envolver en <a>
+     // Permitir enlaces incluso en años hit (amarillo)
+      let yearHtml = `<span class="tl-year" ${tooltipAttr}>${y}</span>`;
+      if (enlacesPorAnio.has(y)) {
+        const url = enlacesPorAnio.get(y);
+        yearHtml = `<span class="tl-year" ${tooltipAttr}>${wrapYearWithLink(y, url)}</span>`;
+      }
       return `
         <li class="li ${liClass} d-flex flex-column align-items-center">
           <div class="timestamp mb-2">
-            <span class="date mb-2">${inner}</span>
+            <span class="date mb-2">${yearHtml}</span>
           </div>
           <div class="status text-center"></div>
         </li>
       `;
     }).join('');
 
-    // 🟡🟢⚪️ Leyenda textual
+    // Leyenda textual
     const legend = `
       <div class="timeline-legend mt-2 text-center small">
         <div class="d-flex justify-content-center flex-wrap gap-4">
@@ -1518,7 +1568,7 @@ function construirLineaDeTiempoVariable(variable, eventosRelacionados) {
           </div>
           <div class="d-flex align-items-center gap-2">
             <span class="legend-box legend-green"></span>
-            <span>Año del Proceso de Produccióm con información disponible de la varible</span>
+            <span>Año del Proceso de Producción con información disponible de la variable</span>
           </div>
           <div class="d-flex align-items-center gap-2">
             <span class="legend-box legend-yellow"></span>
@@ -1552,9 +1602,46 @@ function collectTematicas(baseData) {
 
 function renderPage(data, page) {
   container.innerHTML = "";
+  data = Array.isArray(data) ? data : [];
+  const total = data.length;
+
+  // Siempre actualizar contador (para que muestre 0 cuando corresponde)
+  updateVariableCounter(total);
+
+  // Si no hay elementos tras aplicar filtros/búsqueda -> mostrar mensaje amable
+  if (total === 0) {
+    paginationContainer.innerHTML = "";
+
+    // Si ya hay datos cargados en el sistema pero el filtrado devolvió 0,
+    // mostramos el mensaje específico solicitado.
+    if (Array.isArray(allData) && allData.length > 0) {
+      container.innerHTML = `<div class="alert alert-warning text-center">No se encontraron elementos relacionados con la busqueda</div>`;
+    } else {
+      // Si no existe ningún dato cargado (carga inicial vacía), mostrar card vacía con spinners
+      container.innerHTML = `
+        <div class="card shadow-sm border-0">
+          <div class="card-body text-center py-5">
+            <h5 class="card-title mb-2">No hay variables disponibles</h5>
+            <p class="card-text text-muted mb-4">Aún no se ha cargado información para mostrar.</p>
+            <div class="d-flex justify-content-center gap-3">
+              <div class="spinner-grow text-secondary" role="status" style="width:1.25rem; height:1.25rem;">
+                <span class="visually-hidden">Cargando...</span>
+              </div>
+              <div class="spinner-grow text-secondary" role="status" style="width:1.25rem; height:1.25rem;">
+                <span class="visually-hidden">Cargando...</span>
+              </div>
+              <div class="spinner-grow text-secondary" role="status" style="width:1.25rem; height:1.25rem;">
+                <span class="visually-hidden">Cargando...</span>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }
+    return;
+  }
+
   const startIndex = (page - 1) * itemsPerPage;
   const paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
- 
 
   updateVariableCounter(data.length);
 
@@ -2517,7 +2604,7 @@ document.addEventListener("click", async function (e) {
               </div>` : ""}
 
             ${r.comentarioA && r.comentarioA !== "-" ? `
-              <div class="small text-muted">${r.comentarioA}</div>` : ""}
+              <div class="small text-muted mt-1">${r.comentarioA}</div>` : ""}
           </div>
         `).join("");
 
@@ -2807,30 +2894,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 });
+
 // Cargar clasificaciones antes de renderizar variables
 
 // ---- Nota de fuente al final de la página (texto pequeño, no altera layout) ----
-(function appendFuenteNota(){
-  try {
-    const footerNoteId = 'variables-footer-fuente';
-    if (document.getElementById(footerNoteId)) return; // idempotente
 
-    const note = document.createElement('div');
-    note.id = footerNoteId;
-    // pequeño, muted y con margen superior leve. No debe interferir con posicionamiento.
-    note.className = 'small text-muted mt-3';
-    note.style.margin = '0.25rem 0 1rem 0';
-    note.style.lineHeight = '1.1';
-    note.style.fontSize = '0.75rem';
-    note.textContent = 'Fuente: Origen de identificación de la variable proporcionado por: la Iniciativa de Documentación de Datos (DDI), el Descriptor de archivos (FD), Cuestionario o Esquema conceptual.';
 
-    // Insertar al final del body para que quede al final de la página sin mover otros elementos
-    (document.body || document.documentElement).appendChild(note);
-  } catch (err) {
-    // no interrumpir la ejecución si falla
-    console.warn('No se pudo insertar la nota de fuente:', err);
-  }
-})();
 // Si decides conservar ese bloque, ajústalo así:
 fetch('/api/clasificaciones')
   .then(res => res.json())
@@ -2881,7 +2950,6 @@ function getClasificacionesPorVariableHighlighted(idVar, term) {
     .join('');
   return `<ul class="mb-0 ps-3">${html}</ul>`;
 }
-
 
 // Nueva función para renderizar comentarios
 function renderComentarios(comentario) {
