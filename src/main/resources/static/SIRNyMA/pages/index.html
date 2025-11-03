@@ -17,34 +17,50 @@
 </head>
 <body>
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #003057;">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="#">
-            <img src="/assets/INEGI_g.png" alt="Logo INEGI" style="width: 9rem; filter: invert(1) brightness(2) contrast(1.5);">
+          <!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #003057;">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="index.html">
+      <img src="/assets/INEGI_g.png" alt="Logo INEGI"
+           style="width: 9rem; filter: invert(1) brightness(2) contrast(1.5);">
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+
+      <!-- 🔹 Menú de navegación -->
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0" style="gap: 0.5rem;"> <!-- 👈 espacio entre botones -->
+        <li class="nav-item">
+          <a class="nav-link"
+             href="procesos.html"
+             style="font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 6px; transition: background-color 0.2s;">
+            Procesos de Producción
           </a>
-      
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-      
-          <div class="collapse navbar-collapse justify-content-between" id="navbarNavDropdown" >
-            <ul class="navbar-nav mx-auto gap-3">
-              
-              <li class="nav-item">
-                <a class="nav-link" href="procesos.html">Procesos de Producción</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="variables.html">Inventario de variables ambientales</a>
-              </li>
-              <!-- <li class="nav-item">
-                <a class="nav-link" href="ods.html">ODS</a>
-              </li> -->
-              <li class="nav-item">
-                <a class="nav-link" href="indicadores.html">Indicadores existentes</a>
-              </li>
-            </ul>
-      
+        </li>
+        <li class="nav-item">
+          <a class="nav-link"
+             href="variables.html"
+             style="font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 6px; transition: background-color 0.2s;">
+            Inventario de variables ambientales
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link"
+             aria-current="page"
+             href="indicadores.html"
+             style="font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 6px; transition: background-color 0.2s;">
+            Indicadores existentes
+          </a>
+        </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</nav>
           <!-- <form id="navbarSearchForm" class="d-flex" role="search">
               <input id="searchInput" class="form-control me-2 rounded-pill" type="search" name="search" placeholder="Buscar..." aria-label="Buscar">
               <button class="btn btn-outline-light rounded-pill" type="submit">Buscar</button>
