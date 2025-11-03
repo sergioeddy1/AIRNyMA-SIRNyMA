@@ -15,8 +15,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Variables globales
   const params = new URLSearchParams(window.location.search);
-  let itemsPerPage = parseInt(itemsPerPageSelect.value, 15);
+  let itemsPerPage = parseInt(15);
   let currentPage = 1;
+
+  itemsPerPageSelect.addEventListener("change", () => {
+    itemsPerPage = Number(10);
+    currentPage= 1;
+    applyFilters();
+  })
  
   let allData = [];
   let currentFilteredData = [];
@@ -1074,7 +1080,7 @@ function renderSelectedTags(selectedOptions) {
       const selectedValue = this.value;
       checkMostrarUnidadSection()
       if (!selectedValue || selectedValue === "Seleccione una temática") {
-          renderPage(allData, 1);
+          //renderPage(allData, 1);
           setupPagination(allData);
           return;
       }
@@ -2107,7 +2113,7 @@ if (tooltips.length) {
 
     // Manejar el evento de cambio en el selector de elementos por página
     itemsPerPageSelect.addEventListener("change", function () {
-      itemsPerPage = parseInt(this.value, 15);
+      itemsPerPage = parseInt(this.value, 10);
       currentPage = 1;
       const base = (currentFilteredData && currentFilteredData.length) ? currentFilteredData : filterByUnidad(allData);
       renderPage(base, currentPage);
