@@ -1620,7 +1620,7 @@ function renderPage(data, page) {
         <div class="card shadow-sm border-0">
           <div class="card-body text-center py-5">
             <h5 class="card-title mb-2">Cargando...</h5>
-            <p class="card-text text-muted mb-4">Aún no se ha cargado información para mostrar.</p>
+            <p class="card-text text-muted mb-4">Desplegando el listado de variables.</p>
             <div class="d-flex justify-content-center gap-3">
               <div class="spinner-grow text-secondary" role="status" style="width:1.25rem; height:1.25rem;">
                 <span class="visually-hidden">Cargando...</span>
