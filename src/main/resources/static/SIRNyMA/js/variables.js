@@ -39,8 +39,8 @@ document.addEventListener("DOMContentLoaded", function () {
       collapseEl.addEventListener('hidden.bs.collapse', () => { labelEl.textContent = 'Mostrar'; });
     }
  
-let renderLocked        = false;  // evita renders mientras aplicamos URL
-let initialPaintDone    = false;  // ya hicimos el primer render “válido”
+window.renderLocked     = false;  // evita renders mientras aplicamos URL
+window.initialPaintDone = false;  // ya hicimos el primer render “válido”
 
 
   // ==== PARCHE: globals seguros (evita "is not defined") ====
@@ -1009,10 +1009,8 @@ function aplicarFiltroDesdeURL() {
 
     // ✅ aplicar una única vez
     filtroURLAplicado = true;
-    initialPaintDone  = true;
-
-    // 🔓 suelta el candado
-    renderLocked = false;
+    window.initialPaintDone = true;
+  window.renderLocked = false;
   };
 
   // esperamos a que select + datos estén listos
@@ -1308,11 +1306,11 @@ Promise.all([
   // 12) Primer render si aún no se pintó
   currentFilteredData = [...allData];
   currentPage = 1;
-  if (!initialPaintDone && !renderLocked) {
+  if (!window.initialPaintDone && !window.renderLocked) {
     renderPage(currentFilteredData, currentPage);
     setupPagination(currentFilteredData);
     updateVariableCounter(allData.length);
-    initialPaintDone = true;
+    window.initialPaintDone = true;
   }
   hideProcessSkeleton();
   hideVariablesSkeleton();
@@ -1621,7 +1619,7 @@ function renderPage(data, page) {
       container.innerHTML = `
         <div class="card shadow-sm border-0">
           <div class="card-body text-center py-5">
-            <h5 class="card-title mb-2">No hay variables disponibles</h5>
+            <h5 class="card-title mb-2">Cargando...</h5>
             <p class="card-text text-muted mb-4">Aún no se ha cargado información para mostrar.</p>
             <div class="d-flex justify-content-center gap-3">
               <div class="spinner-grow text-secondary" role="status" style="width:1.25rem; height:1.25rem;">
@@ -2806,10 +2804,10 @@ if (e.target.closest(".badge-ods")) {
           <div class="mb-2"><strong>${fmt(variable.varAsig || idVar)}</strong></div>
           <div class="list-group">
             ${lista.map(o => {
-              const objNum = formatOdsObjetivo(o.objetivo);  // ✅ 12 (no "1.2")
-              const objNom = fmt(o.objetivoNombre);          // "Producción y consumo responsables"
-              const meta   = formatOdsComposite(o.meta);     // ✅ "12.2"
-              const ind    = formatOdsComposite(o.indicador);// ✅ "12.2.1" o "-"
+              const objNum = formatOdsObjetivo(o.objetivo); 
+              const objNom = fmt(o.objetivoNombre);         
+              const meta   = formatOdsComposite(o.meta);    
+              const ind    = formatOdsComposite(o.indicador)
 
               return `
                 <div class="list-group-item">
@@ -2910,7 +2908,7 @@ fetch('/api/clasificaciones')
   .then(eventos => {
     eventosGlobal = eventos;
     // Solo re-render si ya hicimos el primer pintado y SIN romper filtros
-    if (initialPaintDone && !renderLocked) {
+    if (window.initialPaintDone && !window.renderLocked) { 
       const base = (currentFilteredData && currentFilteredData.length) ? currentFilteredData : allData;
       renderPage(base, currentPage);
       setupPagination(base);

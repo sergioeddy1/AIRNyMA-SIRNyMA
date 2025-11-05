@@ -29,18 +29,33 @@ function setSummaryDefaults() {
   animateCountTo('#scProcesosAmbientales', GLOBAL_DEFAULTS.procesosAmbientales, 0);
   animateCountTo('#scVariablesAmbientales', GLOBAL_DEFAULTS.variablesAmbientales, 0);
 
-setTimeout(() => {
-  const contador=document.querySelector("#scUnidades");
-  const etiqueta=contador?.nextElementSibling;
-  const valor=parseInt(contador?.textContent || "0", 10);
-  if(etiqueta)
-  {
-    etiqueta.textContent =
-    valor === 1
-    ? "Unidad Administrativa"
-    : "Unidades Administrativas";
+  // 🔹 Ajuste del texto del contador
+  setTimeout(actualizarEtiquetaUnidades, 200);
+}
+
+// === Actualiza el texto del contador de unidades según su valor ===
+function actualizarEtiquetaUnidades() {
+  const contador = document.querySelector("#scUnidades");
+  if (!contador) return;
+
+  // Intentamos encontrar la etiqueta (puede ser el siguiente <div> o <span>)
+  let etiqueta = contador.nextElementSibling;
+  if (!etiqueta || !etiqueta.textContent.includes("Unidad")) {
+    // búsqueda más robusta si el HTML cambia
+    etiqueta = document.querySelector(".scard-label");
   }
-},1650);
+  if (!etiqueta) return;
+
+  // Obtener valor numérico limpio (soporta formato "1 234")
+  const valorTexto = contador.textContent.replace(/\s+/g, '');
+  const valor = parseInt(valorTexto || "0", 10);
+
+  // Cambiar texto según singular o plural
+  if (valor === 1) {
+    etiqueta.textContent = "Unidad Administrativa";
+  } else {
+    etiqueta.textContent = "Unidades Administrativas";
+  }
 }
 
 // --- Abre variables.html en otra pestaña ---
@@ -456,6 +471,7 @@ async function cargarSociodemograficas({ container }) {
     // 🔹 Actualiza contadores al terminar
     hideAllSummarySpinners();                 // quita spinners primero
     animateCountTo('#scUnidades', 1, 0);      // Unidades = 1 (inmediato)
+    actualizarEtiquetaUnidades();
     updateSummaryCounters({
       procesosTotales,                        // fijo 45
       procesosAmbientales,
@@ -552,7 +568,8 @@ async function cargarEconomicas({ container }) {
 
     // 🔹 Actualiza contadores individuales
     hideAllSummarySpinners();
-    animateCountTo('#scUnidades', 1, 0);  
+    animateCountTo('#scUnidades', 1, 0);
+    actualizarEtiquetaUnidades();
     updateSummaryCounters({
       procesosTotales,
       procesosAmbientales: procesosFiltrados.length,
@@ -580,7 +597,27 @@ async function cargarEconomicas({ container }) {
   }
 }
 
+function resetToGlobalView() {
+  unidadSeleccionada = null;
+  setProcesosTitle(null);
+  setActiveUnidadCard(null);
 
+  const seccion = document.getElementById("procesosSection");
+  const container = document.getElementById("procesosContainer");
+  if (container) container.innerHTML = "";
+  if (seccion) seccion.hidden = true;
+
+  hideAllSummarySpinners();
+
+  // 🔹 Restaurar los valores globales de entrada
+  animateCountTo('#scUnidades', GLOBAL_DEFAULTS.unidades, 0);
+  animateCountTo('#scProcesosTotales', GLOBAL_DEFAULTS.procesosTotales, 0);
+  animateCountTo('#scProcesosAmbientales', GLOBAL_DEFAULTS.procesosAmbientales, 0);
+  animateCountTo('#scVariablesAmbientales', GLOBAL_DEFAULTS.variablesAmbientales, 0);
+
+  // 🔹 Actualizar el texto del contador (singular/plural)
+  actualizarEtiquetaUnidades();
+}
 
 // --- Arranque DOM ---
 document.addEventListener("DOMContentLoaded", function () {
@@ -599,29 +636,43 @@ document.addEventListener("DOMContentLoaded", function () {
    initSummaryStaticCounters(); // fija "Unidades Administrativas"
 
   // Handler común con candado + token
-  const handleUnidadClick = async (btnEl, loaderFn, claveUnidad) => {
-    if (isCargandoUnidad) return;
-    isCargandoUnidad = true;
-    unidadToken++;
+ const handleUnidadClick = async (btnEl, loaderFn, claveUnidad) => {
+  if (isCargandoUnidad) return;
 
-    setActiveUnidadCard?.(btnEl);
-    setProcesosTitle(claveUnidad);     // <-- actualiza el título aquí
+  // ¿segundo clic sobre la misma card? => deseleccionar (volver a global)
+  const yaSeleccionada = btnEl.classList.contains('card-selected')
+                      && unidadSeleccionada === claveUnidad;
+  if (yaSeleccionada) {
+    resetToGlobalView();   // vuelve a los 4 contadores globales y oculta la sección
+    return;
+  }
 
-    showAllSummarySpinners();
-    try {
-      prepararSeccion();
-      await loaderFn({ container });
-    } catch (err) {
-      console.error("Error cargando unidad", err);
-      container.innerHTML = "<p class='text-danger text-center my-4'>Error al cargar los procesos.</p>";
-      hideAllSummarySpinners();
-    } finally {
-      isCargandoUnidad = false;
-    }
-  };
+  // Seleccionar (o cambiar de unidad)
+  isCargandoUnidad = true;
+  unidadToken++;
+  unidadSeleccionada = claveUnidad;
+
+  // UI inmediata
+  setActiveUnidadCard(btnEl);
+  setProcesosTitle(claveUnidad);
+  showAllSummarySpinners();
+  prepararSeccion();                 // <- asegura seccion visible y limpia contenedor
+
+  try {
+    // IMPORTANTE: usa el 'container' ya tomado arriba (no lo busques de nuevo)
+    await loaderFn({ container });
+  } catch (err) {
+    console.error("Error cargando unidad", err);
+    container.innerHTML = "<p class='text-danger text-center my-4'>Error al cargar los procesos.</p>";
+    hideAllSummarySpinners();
+  } finally {
+    isCargandoUnidad = false;
+  }
+};
+
 
   // Para evitar re-binds si este bloque se ejecutara dos veces por alguna razón:
-  if (!btnSocio?.dataset.bound) {
+ if (!btnSocio?.dataset.bound) {
     btnSocio.addEventListener("click", () => handleUnidadClick(btnSocio, cargarSociodemograficas, 'socio'));
     btnSocio.dataset.bound = "1";
   }
@@ -629,6 +680,7 @@ document.addEventListener("DOMContentLoaded", function () {
     btnEco.addEventListener("click", () => handleUnidadClick(btnEco, cargarEconomicas, 'eco'));
     btnEco.dataset.bound = "1";
   }
+
 
 
   document.querySelectorAll('.mostrarGrupoBtn').forEach(card => {

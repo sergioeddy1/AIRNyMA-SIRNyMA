@@ -32,7 +32,7 @@
     <div class="collapse navbar-collapse" id="navbarNav">
 
       <!-- 🔹 Menú de navegación -->
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0" style="gap: 0.5rem;"> <!-- 👈 espacio entre botones -->
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0" style="gap: 0.5rem;"> <!-- espacio entre botones -->
         <li class="nav-item">
           <a class="nav-link"
              href="procesos.html"
@@ -73,7 +73,7 @@
     
     
 <!-- Carrusel con texto a la izquierda e imagen a la derecha -->
-<div id="myCarousel" class="carousel slide carousel-dark mb-5" data-bs-ride="carousel">
+<div id="myCarousel" class="carousel slide carousel-white mb-5" data-bs-ride="carousel">
 
   <!-- Posicionamiento de los botones en la parte interna del carousel de navegación -->
   <div class="carousel-indicators">
@@ -84,38 +84,45 @@
   </div>
 
   <div class="carousel-inner">
-    <!-- Slide 1 -->
-    <div class="carousel-item active" style="background-color: white;">
-      <div class="d-flex align-items-start" style="height: 500px;">
-        <!-- Texto -->
-  <div class="col-md-6 ps-5 pe-3 d-flex flex-column justify-content-start h-100">
-          <h2 class="fw-bold" style="font-family: Helvetica, Sans-Serif; color: #003057;">Procesos de Producción</h2>
-          <p>Explora los programas estadísticos y registros administrativos relacionados con el medio ambiente.</p>
-        </div>
-        <!-- Imagen -->
-        <div class="col-md-6 h-100">
-          <img id="imgProcesosInegi" src="/assets/inegislider.png"
-              class="img-fluid h-100 w-100 carousel-img"
-              alt="Procesos de Producción">
-        </div>
-      </div>
+      <!-- Slide 1 -->
+    <div class="carousel-item active"
+     style="background-image: url('/assets/inegislider.png');
+            background-size: 100%;
+            background-position: center 83%;
+            background-repeat: no-repeat;
+            height: 520px;">
+  <div style="position: relative; height: 100%;">
+    <img class="overlay-brand-top" src="/assets/INEGI_c-modified.png" alt="INEGI">
+    <!-- Caja de texto semi-transparente -->
+    <div class="overlay-box">
+      <h2 class="fw-bold" style="font-family: Helvetica, Sans-Serif; color: #ffffff; margin: 0 0 0.5rem;">
+        Procesos de Producción
+      </h2>
+      <p style="color: #ffffff; margin: 0;">
+        Descubre los procesos de producción del INEGI que integran información sobre el medio ambiente y los recursos naturales, organizados por Unidad Administrativa.
+      </p>
     </div>
+  </div>
+</div>
 
 
-    <!-- Slide 2 -->
-    <div class="carousel-item" style="background-color: white;">
-      <div class="d-flex align-items-start" style="height: 500px;">
-          <!-- Texto -->
-        <div class="col-md-6 ps-5 pe-3 d-flex flex-column justify-content-start h-100" >
-          <h2 class="fw-bold" style="font-family: Helvetica, Sans-Serif; color: #003057;">Inventario de variables ambientales</h2>
-          <p>Consulta las variables de el ambiente por procesos, temas y fuentes de información.</p>
-        </div>
-         <!-- Imagen -->
-        <div class="col-md-6 h-100 mb-5">
-          <img id="imgVariables" src="/assets/variablesslider.png" class="img-fluid h-100 w-100 carousel-img" style="object-fit: contain;" alt="Variables">
-        </div>
-      </div>
+<!-- Slide 2 -->
+<div class="carousel-item">
+  <div class="slide-hero">
+    <img class="overlay-brand-top" src="/assets/INEGI_c-modified.png" alt="INEGI">
+
+    <video class="bg-media" autoplay muted loop playsinline preload="auto">
+      <source src="/assets/slider2.mp4" type="video/mp4">
+    </video>
+
+    <div class="overlay-box">
+      <h2 class="fw-bold" style="font-family: Helvetica, Sans-Serif;">Inventario de variables ambientales</h2>
+      <p>Consulta el inventario de variables relacionadas con temáticas ambientales y de recursos naturales por procesos de producción, temáticas y fuentes de información.
+</p>
     </div>
+  </div>
+</div>
+
 
     <!-- Slide 3 -->
     <!-- <div class="carousel-item" style="background-color: white;">
@@ -132,20 +139,21 @@
       </div>
     </div>  -->
 
-    <!-- Slide 4 -->
-    <div class="carousel-item" style="background-color: white;">
-      <div class="d-flex align-items-start" style="height: 500px;">
-        <!-- Texto -->
-        <div class="col-md-6 ps-5 pe-3 d-flex flex-column justify-content-start h-100" style="margin-left: 20px; margin-bottom: 120px;">
-          <h2 class="fw-bold" style="font-family: Helvetica, Sans-Serif; color: #003057;">Indicadores Existentes</h2>
-          <p>Consulta el compendio de indicadores ambientales existentes que permiten medir y monitorear los cambios en el entorno.</p>
-        </div>
-        <!-- Imagen -->
-        <div class="col-md-6 h-100 ">
-          <img  src="/assets/indicadoresslide.png" class="img-fluid h-100 w-100 carousel-img" style="object-fit: contain; filter: brightness(1.1);" alt="Indicadores">
-        </div>
-      </div>
+<!-- Slide 4 -->
+<div class="carousel-item">
+  <div class="slide-hero">
+    <img class="overlay-brand-top" src="/assets/INEGI_c-modified.png" alt="INEGI">
+
+    <video class="bg-media" autoplay muted loop playsinline preload="auto">
+      <source src="/assets/slider4.mp4" type="video/mp4">
+    </video>
+
+    <div class="overlay-box">
+      <h2 class="fw-bold" style="font-family: Helvetica, Sans-Serif;">Indicadores Existentes</h2>
+      <p>Consulta el listado de indicadores elaborados, relacionados con el medio ambiente y los recursos naturales. Estos indicadores reflejan los resultados del trabajo técnico y metodológico desarrollado al interior del área para fortalecer el análisis y la integración de información ambiental.</p>
     </div>
+  </div>
+</div>
 
   </div>
 
@@ -303,7 +311,7 @@
           <hr>
         </div>
       <!-- Mision y Vision -->
-        <div class="container">
+        <div class="container mb-4" >
            <!-- Columna Misión -->
             <div class="row align-items-stretch">
               <!-- Tipografías y Material Symbols de Misión-->
@@ -359,13 +367,12 @@
 
           
  <!-- Apartado Menu de Temas de Interes -->
-        <div class="container mt-5 mb-5">
+        <!-- <div class="container mt-5 mb-5">
           <h1 class="mb-4">Temas de interés</h1>
           <div class="tab-wrapper">
             <div class="tab-menu">
               <div class="tab-item active" data-target="inegi">Procesos de Producción</div>
               <div class="tab-item" data-target="ods">Variables</div>
-              <!--<div class="tab-item" data-target="ind">Objetivos de Desarrollo Sostenible</div> -->
               <div class="tab-item" data-target="geonode">Indicadores</div> 
             </div>
             <div class="tab-content">
@@ -402,10 +409,9 @@
               </div>
             </div>
           </div>
-        </div>
-  
-        
-<script src="../js/index.js"></script>
+        </div>  -->
+
+         <script src="../js/index.js"></script>
 
         <!--! FOOTER -->
 <div class="container-fluid" style="background-color: #5d5d5d">
@@ -446,8 +452,6 @@
                     style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">SIODS</a></li>
                 <li class="nav-item mb-2"><a href="https://www.gob.mx/semarnat/acciones-y-programas/sistema-nacional-de-informacion-ambiental-y-de-recursos-naturales" target="_blank" class="nav-link p-0 text"
                     style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">SNIARN</a></li>
-                <li class="nav-item mb-2"><a href="#" [routerLink]="['/dg/new']" target="_blank"
-                  class="nav-link p-0 text" style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">Ver más...</a></li>
               </ul>
             </div>
           </div>

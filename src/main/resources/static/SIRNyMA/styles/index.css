@@ -614,3 +614,125 @@
 body, html {
     font-family: Helvetica, Sans-Serif !important;
 }
+
+.slide-hero {
+  position: relative;
+  width: 100%;
+  height: 520px;         /* antes 500px */
+  overflow: hidden;
+}
+
+  /* Capa de media (video/iframe) ocupando todo */
+ .slide-hero video.bg-media {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100vw;     /* <-- fuerza ancho total real */
+  height: 150%;     /* <-- llena vertical */
+  object-fit: fill;
+  transform: translate(-50%, -50%);
+}
+
+/* enviar overlay-box un nivel por debajo de los controles del carousel */
+.overlay-box {
+  position: absolute;
+  top: 18%;
+  left: 3%;               /* movido un poco más a la izquierda */
+  max-width: 42%;         /* algo más pequeño */
+  background: rgba(93, 223, 255, 0.733);
+  padding: 1rem 1.1rem;   /* reducir padding */
+  border-radius: 8px;
+  color: #fff;
+  z-index: 1; /* bajar para que los controles queden encima */
+}
+
+/* asegurar que el video/medio de fondo quede por detrás */
+.slide-hero .bg-media,
+.slide-hero video.bg-media {
+  z-index: 0;
+}
+
+/* forzar controles por encima */
+.carousel-control-prev,
+.carousel-control-next {
+  z-index: 12; /* mayor que .overlay-box (1) */
+}
+
+/* indicadores (opcional) encima también */
+.carousel-indicators {
+  z-index: 11;
+}
+
+/* Caja de texto igual que Slide 1 */
+.overlay-box {
+  position: absolute;
+  top: 16%;
+  left: 3%;               /* movido un poco más a la izquierda */
+  max-width: 40%;         /* algo más pequeño */
+  background: rgba(81, 192, 219, 0.733);
+  padding: 1rem 1.1rem;   /* reducir padding */
+  border-radius: 8px;
+  color: #fff;
+  z-index: 1; /* bajar para que los controles queden encima */
+}
+  .slide-hero .overlay-box h2,
+  .slide-hero .overlay-box p {
+    color: #fff !important;
+    margin: 0 0 .5rem;
+  }
+  /* Evita click sobre el video si no te interesa interacción */
+  .slide-hero .bg-media {
+    pointer-events: none; /* quítalo si quieres permitir pausar o abrir el player */
+  }
+
+  /* Opcional: transiciones suaves al cambiar de slide */
+ .carousel-item,
+.slide-hero,
+.slide-hero .bg-media,
+.slide-hero video.bg-media {
+  background-color: #000;
+}
+
+/* Quita el fade que causaba el flash blanco */
+.carousel .carousel-item .bg-media {
+  opacity: 1;            /* antes 0 con transición */
+  transition: none;      /* sin animación de opacidad */
+}
+  .carousel .carousel-item.active .bg-media {
+    opacity: 1;
+  }
+
+  /* Logo encima del recuadro del slider */
+.overlay-brand-top {
+  position: absolute;
+  z-index: 3;
+  top: 3%;
+  left: 3%;                                      /* movido a la izquierda */
+  /* tamaño reducido: valores de clamp menores para hacer la imagen un poco más pequeña */
+  width: calc(clamp(100px, 16vw, 260px) - 2px);  /* ligeramente más pequeño */
+  height: auto;
+  pointer-events: none;
+}
+
+/* ajustes responsivos */
+@media (max-width: 992px){
+  .overlay-brand-top{ top: 5%; left: 4%; width: clamp(100px, 30vw, 220px); }
+}
+@media (max-width: 576px){
+  .overlay-brand-top{ top: 4%; left: 5%; width: clamp(90px, 40vw, 200px); }
+  .overlay-box{ max-width: 86%; left: 5%; padding: 0.9rem 1rem; }
+}
+
+/* Justificar textos principales */
+.container p,
+.container .accordion-body p,
+.container .card-content p,
+.overlay-box p {
+  text-align: justify;
+  text-justify: inter-word;
+}
+/* opcional: evitar viudas/rentas cortas */
+.container p {
+  widows: 2;
+  orphans: 2;
+}
