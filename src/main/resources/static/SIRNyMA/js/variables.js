@@ -1343,14 +1343,14 @@ const SPECIAL_RULES = {
     noLinks: true, // además de DISABLE_LINKS_ON_HIT global, forzamos en CPV
   },
   EIC:   { periodicityOverride: 5, capYear: 2020 },
-  ENIGH: { capYear: 2024, greenFromYear: 2016 },
+  ENIGH: { capYear: 2022, greenFromYear: 2016 },
   ENADID: {
   seriesOverride: [1992, 1997, 2006, 2009, 2014, 2018],
   capYear: 2023,
-  lastYearOverride: 2018
+  lastYearOverride: 2023
   },
   ENBIARE: { seriesOverride: [2021], capYear: 2021 },
-  EM: { capYear: 2024 },
+  EM: { capYear: 2023 },
   ENUT: { seriesOverride: [2002, 2009, 2014, 2019], capYear: 2019 },
   ENILEMS: {
     seriesOverride: [2012, 2016, 2019],
@@ -1361,7 +1361,7 @@ const SPECIAL_RULES = {
   EFL: { capYear: 2019 },
   ENTI: { periodicityOverride: 3, capYear: 2022 },
   ENASIC: { seriesOverride: [2022], capYear: 2022 },
-  ENCO: { lastYearOverride: 2021 }, // resaltar 2021 en amarillo
+  ENCO: { lastYearOverride: 2021, capYear: 2021 }, // resaltar 2021 en amarillo
     ENA: {
     seriesOverride: [2012, 2014, 2017, 2019],
     capYear: 2019
@@ -1409,6 +1409,20 @@ function isSociodemografica(variable, proc) {
     uVar.includes('sociodemogr') ||
     uProc.includes('sociodemogr') ||
     SOCIODEMOG_PP.has(idpp)
+  );
+}
+
+const ECON_PP = new Set(Object.keys(ECON_CAPS)); // o declara explícitamente los idPp económicos
+
+function isEconomica(variable, proc) {
+  const uVar  = (variable?._unidad || '').toLowerCase();
+  const uProc = (proc?.unidad || '').toLowerCase();
+  const idpp  = normIdPp(proc?.idPp || variable?.idPp || '');
+  return (
+    (variable?._source === 'economicas-ultima') ||
+    uVar.includes('económ') ||
+    uProc.includes('económ') ||
+    ECON_PP.has(idpp)
   );
 }
 
@@ -1533,22 +1547,37 @@ function construirLineaDeTiempoVariable(variable, eventosRelacionados) {
     const greenYearsSet = new Set(eventYears);
 
     // Determinar año "hit" (amarillo)
+    
     const rule = SPECIAL_RULES[normIdPp(proc.idPp)];
+    const esEco = isEconomica(variable, proc);
     let hitYear = null;
 
-    if (variable._source === 'economicas-ultima' && Number.isFinite(variable._anioReferencia)) {
-      hitYear = variable._anioReferencia;
+    // 1) ECONÓMICAS: usar SIEMPRE el año más reciente con evento
+    if (esEco && eventYears.length) {
+      hitYear = eventYears[eventYears.length - 1]; // max (eventYears viene ascendente)
     }
+
+    // 2) Si no es Económica (o no hay eventos), respeta overrides por proceso
     if (!hitYear && rule && rule.lastYearOverride) {
       hitYear = rule.lastYearOverride;
     }
+
+    // 3) SOCIODEMOGRÁFICAS u otros: si hay eventos, usar el más reciente
     if (!hitYear && eventYears.length) {
       hitYear = eventYears[eventYears.length - 1];
     }
+
+    // 4) ÚLTIMO recurso (solo si NO es económica): permitir _anioReferencia
+    if (!hitYear && variable._source !== 'economicas-ultima' && Number.isFinite(variable._anioReferencia)) {
+      hitYear = variable._anioReferencia;
+    }
+
+    // Asegura que el HIT se vea aunque quede fuera del rango/override
     if (hitYear && !years.includes(hitYear)) {
       years.push(hitYear);
       years.sort((a,b)=>a-b);
     }
+
 
     // Enlaces por año SOLO si la variable/proceso es Sociodemográfica
     const sociodemo = isSociodemografica(variable, proc);

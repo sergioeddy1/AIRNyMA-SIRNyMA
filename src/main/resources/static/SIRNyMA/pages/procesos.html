@@ -111,7 +111,68 @@
     </div>
 </div>
 
-    <div class="container mt-4 mb-3">
+    <!-- ==== Counters resumen (siempre visibles) ==== -->
+<div class="container mt-3 mb-2" id="summaryCounters">
+  <div class="row g-3">
+
+    <!-- Unidades Administrativas (global) -->
+    <div class="col-6 col-md-3">
+      <div class="scard d-flex align-items-center gap-3 p-3 rounded-3">
+        <div class="scard-icon scard-lilac">
+          <i class="bi bi-building"></i>
+        </div>
+        <div>
+          <div class="scard-num" id="scUnidades">0</div>
+          <div class="scard-label">Unidades Administrativas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Procesos de Producción (totales de la unidad seleccionada) -->
+    <div class="col-6 col-md-3">
+      <div class="scard d-flex align-items-center gap-3 p-3 rounded-3">
+        <div class="scard-icon scard-blue">
+          <i class="bi bi-gear"></i>
+        </div>
+        <div>
+          <div class="scard-num" id="scProcesosTotales">0</div>
+          <div class="scard-label">Procesos de Producción</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Procesos con variables ambientales (reutiliza tu lógica) -->
+    <div class="col-6 col-md-3">
+      <div class="scard d-flex align-items-center gap-3 p-3 rounded-3">
+        <div class="scard-icon scard-orange">
+          <i class="bi bi-gear-wide-connected"></i>
+        </div>
+        <div>
+          <div class="scard-num" id="scProcesosAmbientales">0</div>
+          <div class="scard-label">Procesos de Producción con variables ambientales</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Variables ambientales (reutiliza tu contador por unidad) -->
+    <div class="col-6 col-md-3">
+      <div class="scard d-flex align-items-center gap-3 p-3 rounded-3">
+        <div class="scard-icon scard-green">
+          <i class="bi bi-leaf"></i>
+        </div>
+        <div>
+          <div class="scard-num" id="scVariablesAmbientales">0</div>
+          <div class="scard-label">Variables ambientales</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+    <!-- ==== Selección de Unidad Administrativa ==== -->
+
+    <div class="container mt-4 mb-5">
         <h2 class="mb-2">Unidades Administrativas</h2>
         <hr>
 
@@ -177,64 +238,6 @@
         </div>
     </div>
 
-    <!-- ==== Counters resumen (siempre visibles) ==== -->
-<div class="container mt-5 mb-5" id="summaryCounters">
-  <div class="row g-3">
-
-    <!-- Unidades Administrativas (global) -->
-    <div class="col-6 col-md-3">
-      <div class="scard d-flex align-items-center gap-3 p-3 rounded-3">
-        <div class="scard-icon scard-lilac">
-          <i class="bi bi-building"></i>
-        </div>
-        <div>
-          <div class="scard-num" id="scUnidades">0</div>
-          <div class="scard-label">Unidades Administrativas</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Procesos de Producción (totales de la unidad seleccionada) -->
-    <div class="col-6 col-md-3">
-      <div class="scard d-flex align-items-center gap-3 p-3 rounded-3">
-        <div class="scard-icon scard-blue">
-          <i class="bi bi-gear"></i>
-        </div>
-        <div>
-          <div class="scard-num" id="scProcesosTotales">0</div>
-          <div class="scard-label">Procesos de Producción</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Procesos con variables ambientales (reutiliza tu lógica) -->
-    <div class="col-6 col-md-3">
-      <div class="scard d-flex align-items-center gap-3 p-3 rounded-3">
-        <div class="scard-icon scard-orange">
-          <i class="bi bi-gear-wide-connected"></i>
-        </div>
-        <div>
-          <div class="scard-num" id="scProcesosAmbientales">0</div>
-          <div class="scard-label">Procesos de Producción con variables ambientales</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Variables ambientales (reutiliza tu contador por unidad) -->
-    <div class="col-6 col-md-3">
-      <div class="scard d-flex align-items-center gap-3 p-3 rounded-3">
-        <div class="scard-icon scard-green">
-          <i class="bi bi-leaf"></i>
-        </div>
-        <div>
-          <div class="scard-num" id="scVariablesAmbientales">0</div>
-          <div class="scard-label">Variables ambientales</div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</div>
 
 
     <!-- Contenedor donde se mostrarán los procesos -->
