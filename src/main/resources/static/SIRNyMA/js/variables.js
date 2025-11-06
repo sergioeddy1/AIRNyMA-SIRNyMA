@@ -1335,6 +1335,7 @@ const DEFAULT_END_YEAR_CAP = 2025;
 
 // Reglas por proceso (idPp)
 const SPECIAL_RULES = {
+  
   CPV: {
     seriesOverride: [1895,1900,1910,1921,1930,1940,1950,1960,1970,1980,1990,1995,2000,2005,2010,2020],
     capYear: 2020,
@@ -1361,7 +1362,35 @@ const SPECIAL_RULES = {
   ENTI: { periodicityOverride: 3, capYear: 2022 },
   ENASIC: { seriesOverride: [2022], capYear: 2022 },
   ENCO: { lastYearOverride: 2021 }, // resaltar 2021 en amarillo
+    ENA: {
+    seriesOverride: [2012, 2014, 2017, 2019],
+    capYear: 2019
+  },
 };
+
+const ECON_CAPS = {
+  ATUS:   2023,
+  BCMM:   2024,
+  EAC:    2024,
+  EAEC:   2024,
+  EAIM:   2024,
+  EAT:    2024,
+  EFIPEM: 2023,
+  EIMM:   2024,
+  EMIM:   2024,
+  ENA:    2019,
+  ENAF:   2020,
+  ESGRM:  2024,
+  ETUP:   2024,
+  IMMEX:  2025,
+  RAECIS: 2023,
+  RENEM:  2024,
+};
+
+// Fusiona ECON_CAPS dentro de SPECIAL_RULES como capYear (sin pisar otras reglas)
+for (const [idPp, cap] of Object.entries(ECON_CAPS)) {
+  SPECIAL_RULES[idPp] = { ...(SPECIAL_RULES[idPp] || {}), capYear: cap };
+}
 
 // Regla global: el nodo destacado (amarillo) no tiene link
 const DISABLE_LINKS_ON_HIT = false;

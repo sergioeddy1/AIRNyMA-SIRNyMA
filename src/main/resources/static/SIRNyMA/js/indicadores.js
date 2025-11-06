@@ -94,8 +94,6 @@ document.addEventListener("DOMContentLoaded", function () {
   .then(res => res.json())
   .then(data => {
     indicadoresData = data;
-    initTablaIndicadoresControles();         // ← inicializa listeners
-    renderListaIndicadores(indicadoresData); // ← primer render de la tabla
   });
 
 

@@ -312,13 +312,12 @@ function renderProcesos(procesos, conteo, container) {
 // --- Filtros y orden: reusables para cualquier lista de procesos ---
 function wireFiltrosYOrden({ procesosGlobal, conteoGlobal, container }) {
   const selectPerio = document.getElementById("filtrarPeriodicidad");
+  const ordenarSel  = document.getElementById("ordenarProcesos");
 
-  // Llenar periodicidades únicas
+  // Llenar periodicidades únicas...
   selectPerio.innerHTML = `<option value="">Filtrar por periodicidad...</option>`;
   const periodicidadesUnicas = [...new Set(
-    procesosGlobal
-      .map(p => p.perPubResul)
-      .filter(Boolean)
+    procesosGlobal.map(p => p.perPubResul).filter(Boolean)
   )].sort();
   periodicidadesUnicas.forEach(periodo => {
     const option = document.createElement("option");
@@ -327,13 +326,19 @@ function wireFiltrosYOrden({ procesosGlobal, conteoGlobal, container }) {
     selectPerio.appendChild(option);
   });
 
+  // ✅ Establece el orden por defecto a A-Z la primera vez
+  if (!ordenarSel.dataset.init) {
+    ordenarSel.value = "az";
+    ordenarSel.dataset.init = "1";
+  }
+
   function aplicarFiltrosYOrden() {
     let filtrados = [...procesosGlobal];
 
-    const estatus = document.getElementById("filtrarEstatus").value;
+    const estatus      = document.getElementById("filtrarEstatus").value;
     const periodicidad = document.getElementById("filtrarPeriodicidad").value;
-    const soloIIN = document.getElementById("iinCheck").checked;
-    const orden = document.getElementById("ordenarProcesos").value;
+    const soloIIN      = document.getElementById("iinCheck").checked;
+    let   orden        = document.getElementById("ordenarProcesos").value;
 
     if (estatus) {
       filtrados = filtrados.filter(p => (p.estatus || "").toLowerCase() === estatus.toLowerCase());
@@ -344,6 +349,9 @@ function wireFiltrosYOrden({ procesosGlobal, conteoGlobal, container }) {
     if (soloIIN) {
       filtrados = filtrados.filter(p => (p.gradoMadur || "").toLowerCase() === "información de interés nacional");
     }
+
+    // ✅ Si por alguna razón no hay valor, fuerza 'az'
+    if (!orden) orden = "az";
 
     if (orden === "az" || orden === "za") {
       filtrados.sort((a, b) => {
@@ -362,24 +370,16 @@ function wireFiltrosYOrden({ procesosGlobal, conteoGlobal, container }) {
     renderProcesos(filtrados, conteoGlobal, container);
   }
 
-  // Eventos
+  // Eventos...
   document.getElementById("filtrarEstatus").addEventListener("change", aplicarFiltrosYOrden);
   document.getElementById("filtrarPeriodicidad").addEventListener("change", aplicarFiltrosYOrden);
   document.getElementById("iinCheck").addEventListener("change", aplicarFiltrosYOrden);
   document.getElementById("ordenarProcesos").addEventListener("change", aplicarFiltrosYOrden);
 
-  // Botón reset
-  document.getElementById("resetFiltrosBtn").addEventListener("click", () => {
-    document.getElementById("ordenarProcesos").selectedIndex = 0;
-    document.getElementById("filtrarEstatus").selectedIndex = 0;
-    document.getElementById("filtrarPeriodicidad").selectedIndex = 0;
-    document.getElementById("iinCheck").checked = false;
-    aplicarFiltrosYOrden();
-  });
-
   // Primera pintada
   aplicarFiltrosYOrden();
 }
+
 
 // -- HELPERS para conteo y filtrado --
 
