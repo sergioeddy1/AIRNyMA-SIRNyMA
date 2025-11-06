@@ -1331,7 +1331,7 @@ Promise.all([
 // Deshabilitar anchors en el nodo destacado (amarillo) a nivel global:
 
 // Tope general si vigFinal == "A la fecha" (cuando no haya override específico)
-const DEFAULT_END_YEAR_CAP = 2025;
+const DEFAULT_END_YEAR_CAP = 2024;
 
 // Reglas por proceso (idPp)
 const SPECIAL_RULES = {
@@ -1357,6 +1357,8 @@ const SPECIAL_RULES = {
     capYear: 2019,
     lastYearOverride: 2019   // ⬅️ Fuerza el nodo amarillo en 2019 para todas las variables
   },
+  ENASEM: {  capYear: 2021,
+    lastYearOverride: 2021 },
   ENIF: { seriesOverride: [2012, 2015, 2018, 2021], capYear: 2021, lastYearOverride: 2021},
   EFL: { capYear: 2019 },
   ENTI: { periodicityOverride: 3, capYear: 2022 },
