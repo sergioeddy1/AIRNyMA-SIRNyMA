@@ -1879,7 +1879,7 @@ function renderPage(data, page) {
                           <div class="mb-2">
                              <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left"
                                    data-bs-title="Disponibilidad de los datos de la variable según los productos de información: tabulados, microdatos o datos abiertos">
-                               <i class="bi bi-link-45deg me-1"></i>Disponibilidad en:
+                               <i class="bi bi-link-45deg me-1"></i>Consulta de datos en:
                              </span>
                              <div class="ps-3 d-flex flex-wrap gap-2">
                                 <span class="badge bg-${variable.relTab === 'Sí' ? 'success badge-tabulado' : 'danger disabled'}"
@@ -1959,8 +1959,6 @@ function renderPage(data, page) {
                                       })()
                                 }
                               </div>
-
-                       ${renderComentarios(variable.comentVar)}
                     </div>
                 </div>
             </div>
@@ -2476,7 +2474,7 @@ document.addEventListener("click", async function (e) {
                 ${t.urlDescarga ? `<strong>Descarga:</strong> <a href="${t.urlDescarga}" target="_blank" style="word-break: break-all;">Descargar</a>` : ""}
               </div>
             </div>
-            ${t.comentarioA ? `<div class="small mt-1">${t.comentarioA}</div>` : ""}
+            // ${t.comentarioA ? `<div class="small mt-1">${t.comentarioA}</div>` : ""}
           </div>
         `).join("");
         modalBody.innerHTML = html || "<div class='text-danger'>No hay tabulados disponibles.</div>";
@@ -2588,8 +2586,6 @@ document.addEventListener("click", async function (e) {
             <div class="mb-2"><strong>Ubicación:</strong><br>
               ${info.nomTabla || "No disponible"} / ${info.nomCampo || "No disponible"}
             </div>` : ""}
-
-          <div class="mb-2">${renderComentarios(info.comentMicro || "-")}</div>
         `;
       } else {
         modalBody.innerHTML = "<div class='text-danger'>No hay información de microdatos disponible.</div>";
