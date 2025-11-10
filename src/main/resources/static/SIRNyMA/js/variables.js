@@ -818,11 +818,19 @@ function filterByRelation() {
 }
 
 // Escuchar cambios en TODOS los checkboxes
-relTabCheckbox?.addEventListener("change", filterByRelation);
-relMicroCheckbox?.addEventListener("change", filterByRelation);
-chkRelAbiertos?.addEventListener("change", filterByRelation);
-alinMdeaCheckbox?.addEventListener("change", filterByRelation);
-alinOdsCheckbox?.addEventListener("change", filterByRelation);
+// Quitamos llamadas directas a filterByRelation y usamos SIEMPRE applyFilters()
+relTabCheckbox?.removeEventListener?.("change", filterByRelation);
+relMicroCheckbox?.removeEventListener?.("change", filterByRelation);
+chkRelAbiertos?.removeEventListener?.("change", filterByRelation);
+alinMdeaCheckbox?.removeEventListener?.("change", filterByRelation);
+alinOdsCheckbox?.removeEventListener?.("change", filterByRelation);
+
+relTabCheckbox?.addEventListener("change", () => applyFilters());
+relMicroCheckbox?.addEventListener("change", () => applyFilters());
+chkRelAbiertos?.addEventListener("change", () => applyFilters());
+alinMdeaCheckbox?.addEventListener("change", () => applyFilters());
+alinOdsCheckbox?.addEventListener("change", () => applyFilters());
+
 
 
 if (unidadSection) unidadSection.style.display = "block";
