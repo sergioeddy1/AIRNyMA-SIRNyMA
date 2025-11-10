@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const params = new URLSearchParams(window.location.search);
   let itemsPerPage = parseInt(15);
   let currentPage = 1;
+  let lastSubmittedTerm = null; 
 
   itemsPerPageSelect.addEventListener("change", () => {
     itemsPerPage = Number(10);
@@ -262,36 +263,41 @@ function mergeClasificacionesEconomicas(variablesUltima) {
 function getBaseParaTemas() {
   let base = Array.isArray(allData) ? allData : [];
 
-  // 1) Filtrar por unidad (usa tu getUnidadDeVariable)
+  // 1) Filtrar por UNIDAD
   if (unidadFiltro === 'socio') {
     base = base.filter(v => getUnidadDeVariable(v) === 'socio');
   } else if (unidadFiltro === 'eco') {
     base = base.filter(v => getUnidadDeVariable(v) === 'eco');
   }
 
-   // 2) (Opcional) Filtrar por procesos actualmente seleccionados
+  // 2) (Opcional) Filtrar por PROCESOS seleccionados
   const selectedProcesses = Array.from(processSelect?.selectedOptions || []).map(o => o.value);
   if (selectedProcesses.length) {
     base = base.filter(v => selectedProcesses.includes(v.idPp));
   }
 
+  // ❌ No filtrar por currentSearchTerm aquí
   return base;
 }
+
 
 function repoblarTematicas() {
   if (!temaSelect) return;
 
-  const prev = temaSelect.value; // guarda selección anterior
-  const base = getBaseParaTemas();
-  let temas = collectTematicas(base);
+  const prev = temaSelect.value;
+  const baseUnidadTemaTerm = (allData || []).filter(v => {
+    // Unidad
+    if (unidadFiltro !== 'todas' && getUnidadDeVariable(v) !== unidadFiltro) return false;
+    // Búsqueda
+    const nterm = (currentSearchTerm || "").trim();
+    if (nterm && !matchesSearchTerm(v, nterm)) return false;
+    return true;
+  });
 
-  // 🧹 Filtra vacíos, nulos o con solo guiones
+  let temas = collectTematicas(baseUnidadTemaTerm);
   temas = temas.filter(t => t && t.trim() !== "" && t.trim() !== "-");
-
-  // Elimina duplicados y ordena alfabéticamente
   temas = [...new Set(temas)].sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
 
-  // Reconstruye opciones
   temaSelect.innerHTML = "";
   const placeholder = document.createElement('option');
   placeholder.value = "";
@@ -305,11 +311,10 @@ function repoblarTematicas() {
     temaSelect.appendChild(opt);
   });
 
-  // Restaura selección si aún existe
   if (prev && temas.includes(prev)) {
     temaSelect.value = prev;
   } else {
-    temaSelect.value = ""; // vuelve al placeholder
+    temaSelect.value = "";
   }
 }
 
@@ -345,35 +350,66 @@ function procesosParaTema(selectedTema) {
   return pps;
 }
 
+function procesosParaUnidadTemaYBusqueda({ unidad = 'todas', tema = "", term = "" }) {
+  const pps = new Set();
+  const nterm = (term || "").trim().toLowerCase();
+
+  (allData || []).forEach(v => {
+    // Unidad
+    if (unidad !== 'todas' && getUnidadDeVariable(v) !== unidad) return;
+
+    // Temática (si la hay)
+    if (tema) {
+      const matchTema = (v.tema && v.tema === tema) || (v.tema2 && v.tema2 === tema);
+      if (!matchTema) return;
+    }
+
+    // Término de búsqueda (si lo hay)
+    if (nterm && !matchesSearchTerm(v, nterm)) return;
+
+    if (v.idPp) pps.add(v.idPp);
+  });
+
+  return pps;
+}
+
+
 function filtrarProcessSelectPorTema(selectedTema) {
-  // Si no hay tema, mostrar procesos según la unidad; si hay tema, mostrar sólo los que lo tienen
-  const targetSet = selectedTema
-    ? procesosParaTema(selectedTema)
-    : allowedPpsPorUnidad();
+  // Toma el término activo (persistente)
+  const term = (currentSearchTerm || "").trim();
+  // Usa la unidad vigente
+  const unidad = unidadFiltro; // 'todas' | 'socio' | 'eco'
+
+  // Conjunto de procesos permitido por unidad+tema+search
+  const targetSet = procesosParaUnidadTemaYBusqueda({
+    unidad,
+    tema: (selectedTema && selectedTema !== "Seleccione una temática") ? selectedTema : "",
+    term
+  });
 
   // Mostrar/ocultar opciones del select y quitar selecciones que ya no apliquen
   Array.from(processSelect.options).forEach(opt => {
-    const permitido = targetSet.size === 0 ? true : targetSet.has(opt.value);
+    const permitido = targetSet.size === 0 ? false : targetSet.has(opt.value);
     opt.hidden = !permitido;
     if (!permitido && opt.selected) opt.selected = false;
   });
 
-  // Series de años:
-  // - Si quedan procesos seleccionados válidos → esos
-  // - Si no hay nada seleccionado, pero hay un targetSet → usar todos los permitidos
+  // Serie de años: si hay selección válida, usa esa; si no, usa todos los permitidos
   const stillSelected = Array.from(processSelect.selectedOptions).map(o => o.value);
   if (stillSelected.length > 0) {
     populatePeriodFilters(stillSelected);
   } else if (targetSet && targetSet.size) {
     populatePeriodFilters(Array.from(targetSet));
   } else {
-    populatePeriodFilters([]); // fallback: todos
+    // si no hay nada permitido, limpia periodos
+    populatePeriodFilters([]);
   }
 
-  // Actualiza los chips y aplica filtros
+  // Actualiza chips y aplica filtros
   renderSelectedTags(Array.from(processSelect.selectedOptions));
   applyFilters();
 }
+
 
 function hasMicrodatos(variable) {
   if (!variable) return false;
@@ -788,11 +824,6 @@ chkRelAbiertos?.addEventListener("change", filterByRelation);
 alinMdeaCheckbox?.addEventListener("change", filterByRelation);
 alinOdsCheckbox?.addEventListener("change", filterByRelation);
 
-// Si tienes un formulario de búsqueda también, combínalo con este filtrado
-searchForm?.addEventListener("submit", function (e) {
-    e.preventDefault();
-    filterByRelation(); // Aquí podrías combinar también texto de búsqueda
-});
 
 if (unidadSection) unidadSection.style.display = "block";
 
@@ -904,52 +935,90 @@ if (!listenersWired) {
 
 
 
-function onUnidadChange() {
+function onUnidadChange({ preserveSearch = true, preserveTema = true } = {}) {
+  // 0) Snapshot del estado actual (solo para preservar)
+  const prevTerm = (searchInput.value || "").trim();
+  const prevTema = temaSelect.value || "";
+
+  // 1) Nueva unidad
   unidadFiltro = radioSocio.checked ? 'socio' : (radioEco.checked ? 'eco' : 'todas');
 
-  // Si los sets aún no se han poblado, deriva el allowedSet desde procesosGlobal
+  // 2) idPp permitidos por unidad
   let allowedSet = null;
   if (unidadFiltro === 'socio') {
-    allowedSet = socioSet && socioSet.size ? socioSet
-      : new Set((procesosGlobal || []).filter(p => getUnidadDeVariable({ idPp: p.idPp }) === 'socio').map(p => p.idPp));
+    allowedSet = (socioSet && socioSet.size)
+      ? socioSet
+      : new Set((procesosGlobal || [])
+          .filter(p => getUnidadDeVariable({ idPp: p.idPp }) === 'socio')
+          .map(p => p.idPp));
   } else if (unidadFiltro === 'eco') {
-    allowedSet = ecoSet && ecoSet.size ? ecoSet
-      : new Set((procesosGlobal || []).filter(p => p._source === 'economicas').map(p => p.idPp));
+    allowedSet = (ecoSet && ecoSet.size)
+      ? ecoSet
+      : new Set((procesosGlobal || [])
+          .filter(p => p._source === 'economicas')
+          .map(p => p.idPp));
   }
 
-  // 1) Mostrar/ocultar opciones del select y quitar selecciones inválidas
+  // 3) Mostrar/ocultar opciones del select de procesos y limpiar selecciones inválidas
   Array.from(processSelect.options).forEach(opt => {
     const allowed = (unidadFiltro === 'todas') ? true : (allowedSet ? allowedSet.has(opt.value) : true);
     opt.hidden = !allowed;
     if (!allowed && opt.selected) opt.selected = false;
   });
 
-  // 2) Repoblar años:
+  // 4) Series de años
   const stillSelected = Array.from(processSelect.selectedOptions).map(o => o.value);
   if (stillSelected.length > 0) {
     populatePeriodFilters(stillSelected);
   } else if (unidadFiltro !== 'todas' && allowedSet && allowedSet.size) {
     populatePeriodFilters(Array.from(allowedSet));
   } else {
-    populatePeriodFilters([]); // todas las unidades
+    populatePeriodFilters([]); // todas
   }
 
-  // (Opcional) limpia búsqueda/tema para evitar intersecciones imposibles
-  searchInput.value = "";
-  temaSelect.selectedIndex = 0;
+  // 5) Mantener o no el término de búsqueda (NO afecta las temáticas)
+  if (!preserveSearch) {
+    searchInput.value = "";
+    currentSearchTerm = "";
+    if (typeof lastSubmittedTerm !== "undefined") lastSubmittedTerm = null;
+  } else {
+    searchInput.value = prevTerm;
+    currentSearchTerm = prevTerm; // <-- esto hará que applyFilters combine UNIDAD + SEARCH
+  }
 
-  // En tu onUnidadChange (al final)
-  repoblarTematicas();   // <- actualiza el select
-  // 3) Aplicar filtros con la nueva base por unidad
+  // 6) Repoblar temáticas por UNIDAD (+ procesos). No uses el término de búsqueda aquí.
+  repoblarTematicas();
+
+  // 7) Si el tema previo sigue existiendo en el nuevo catálogo, conservarlo
+  if (preserveTema && prevTema && Array.from(temaSelect.options).some(o => o.value === prevTema)) {
+    temaSelect.value = prevTema;
+  } else if (!preserveTema) {
+    temaSelect.selectedIndex = 0;
+  }
+
+  // 8) Refiltrar el select de procesos según la temática vigente (unidad + tema)
+  const temaActual = (temaSelect.value && temaSelect.value !== "Seleccione una temática") ? temaSelect.value : "";
+  filtrarProcessSelectPorTema(temaActual);
+
+  // 9) Chips de procesos
+  renderSelectedTags(Array.from(processSelect.selectedOptions));
+
+  // 10) Aplicar filtros (unifica: UNIDAD + TEMA + PROCESO + CHECKS + BÚSQUEDA)
   applyFilters();
-    
 
-  // 4) Asegurar visible
+  // 11) UI visible
   if (unidadSection) unidadSection.style.display = "block";
 }
 
-radioSocio.addEventListener('change', onUnidadChange);
-radioEco.addEventListener('change', onUnidadChange);
+
+// 👇 Reemplaza TODOS los listeners previos de unidad por estos dos:
+radioSocio.addEventListener('change', () =>
+  onUnidadChange({ preserveSearch: true, preserveTema: true })
+);
+radioEco.addEventListener('change', () =>
+  onUnidadChange({ preserveSearch: true, preserveTema: true })
+);
+
 
 
 // Tras cargar procesos/variables:
@@ -1106,7 +1175,7 @@ clearFiltersBtn.addEventListener("click", function () {
   // 0) Romper el highlight
   currentSearchTerm = "";                 // ⬅️ quita el término global
   searchInput.value = "";                 // limpia el input
-
+  lastSubmittedTerm = null;
   // 1) Campos/selects
   temaSelect.selectedIndex = 0;           // o "" si tu placeholder es opción vacía
   itemsPerPageSelect.selectedIndex = 0;
@@ -1655,7 +1724,27 @@ function collectTematicas(baseData) {
   return Array.from(set).sort((a,b) => a.localeCompare(b));
 }
 
+function matchesSearchTerm(v, needle) {
+  if (!needle) return true;
+  const n = needle.toLowerCase();
 
+  const f =
+    (v.categoria && v.categoria.toLowerCase().includes(n)) ||
+    (v.tema      && v.tema.toLowerCase().includes(n)) ||
+    (v.tema2     && v.tema2.toLowerCase().includes(n)) ||
+    (v.subtema   && v.subtema.toLowerCase().includes(n)) ||
+    (v.subtema2  && v.subtema2.toLowerCase().includes(n)) ||
+    (v.pregLit   && v.pregLit.toLowerCase().includes(n)) ||
+    (v.nomVar    && v.nomVar.toLowerCase().includes(n)) ||
+    (v.defVar    && v.defVar.toLowerCase().includes(n)) ||
+    (v.varAsig   && v.varAsig.toLowerCase().includes(n));
+
+  if (f) return true;
+
+  // Clasificaciones
+  const list = clasifIndex.get(String(v.idVar)) || [];
+  return list.some(c => (c || "").toLowerCase().includes(n));
+}
 
 
 function renderPage(data, page) {
@@ -2265,13 +2354,24 @@ if (tooltips.length) {
 
 
     // Manejar el evento de envío del formulario
-   searchForm.addEventListener("submit", function (e) {
+      //  ÚNICO submit del formulario de búsqueda, con guard anti-duplicado
+    searchForm.addEventListener("submit", function (e) {
       e.preventDefault();
-      const searchTerm = searchInput.value.trim();
-      currentSearchTerm = searchTerm;  // ⬅️ clave
+      const term = (searchInput.value || "").trim();
+
+      // Si no cambió el término, no hacemos nada
+      if (term === lastSubmittedTerm) return;
+
+      lastSubmittedTerm = term;
+      currentSearchTerm = term;   // término activo usado por applyFilters() y highlight
       currentPage = 1;
-      searchVariables(searchTerm);
+
+       const temaActual = (temaSelect.value && temaSelect.value !== "Seleccione una temática") ? temaSelect.value : "";
+    filtrarProcessSelectPorTema(temaActual);
+
+      applyFilters();             // filtra y actualiza contador de forma consistente
     });
+
     //Listener para los periodo de tiempo. 
     document.getElementById("periodInic").addEventListener("change", filterByRelation);
     document.getElementById("periodFin").addEventListener("change", filterByRelation);
