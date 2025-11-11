@@ -41,20 +41,13 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Apartado de Unidad Administrativa colapsable
-const toggleUnidad = document.querySelector('[data-bs-target="#unidadCollapse"]');
-const unidadEl = document.getElementById('unidadCollapse');
-const labelUnidad = toggleUnidad?.querySelector('.collapse-label-unidad');
-
-if (unidadEl && toggleUnidad && labelUnidad) {
-
-  // Forzamos inicio colapsado al cargar (igual que procesos)
-  const unidadCollapse = bootstrap.Collapse.getOrCreateInstance(unidadEl, { toggle: false });
-  unidadCollapse.hide();
-
-  unidadEl.addEventListener('shown.bs.collapse', () => { labelUnidad.textContent = 'Ocultar'; });
-  unidadEl.addEventListener('hidden.bs.collapse', () => { labelUnidad.textContent = 'Mostrar'; });
-}
-
+      const toggleUnidadBtn = document.querySelector('[data-bs-target="#unidadCollapse"]');
+      const unidadCollapseEl = document.getElementById('unidadCollapse');
+      const unidadLabel = toggleUnidadBtn?.querySelector('.collapse-label-unidad');
+      if (unidadCollapseEl && unidadLabel){
+        unidadCollapseEl.addEventListener('shown.bs.collapse',  () => unidadLabel.textContent = 'Ocultar');
+        unidadCollapseEl.addEventListener('hidden.bs.collapse', () => unidadLabel.textContent = 'Mostrar');
+      }
  
 window.renderLocked     = false;  // evita renders mientras aplicamos URL
 window.initialPaintDone = false;  // ya hicimos el primer render “válido”
