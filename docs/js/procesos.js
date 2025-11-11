@@ -1,6 +1,66 @@
+// procesos.js
+
+// ---- Estado global para sincronizar cargas y contador ----
+let isCargandoUnidad = false;         // evita cargas en paralelo
+let contadorAnimFrame = null;         // requestAnimationFrame activo
+let contadorTimeoutId = null;         // fallback si usas setTimeout (ya no lo usaremos)
+let unidadToken = 0;                  // versión de carga; invalida renders viejos
+
+// === Valores iniciales (roll-up global al entrar) ===
+const GLOBAL_DEFAULTS = {
+  unidades: 5,                 // siempre 5
+  procesosTotales: 45 + 64,    // 109
+  procesosAmbientales: 31 + 16,// 47
+  variablesAmbientales: 1165 + 554 // 1719
+};
+
+// === Formatea números con espacio cada 3 dígitos ===
+function formatNumberWithSpace(num) {
+  // Acepta número o texto numerico; devuelve string formateado
+  const n = Number(String(num).replace(/\s+/g, '').replace(/,/g, ''));
+  if (!Number.isFinite(n)) return String(num);
+  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
+
+// Pinta los 4 contadores con esos valores (sin spinner)
+function setSummaryDefaults() {
+  animateCountTo('#scUnidades', GLOBAL_DEFAULTS.unidades, 0);
+  animateCountTo('#scProcesosTotales', GLOBAL_DEFAULTS.procesosTotales, 0);
+  animateCountTo('#scProcesosAmbientales', GLOBAL_DEFAULTS.procesosAmbientales, 0);
+  animateCountTo('#scVariablesAmbientales', GLOBAL_DEFAULTS.variablesAmbientales, 0);
+
+  // 🔹 Ajuste del texto del contador
+  setTimeout(actualizarEtiquetaUnidades, 200);
+}
+
+// === Actualiza el texto del contador de unidades según su valor ===
+function actualizarEtiquetaUnidades() {
+  const contador = document.querySelector("#scUnidades");
+  if (!contador) return;
+
+  // Intentamos encontrar la etiqueta (puede ser el siguiente <div> o <span>)
+  let etiqueta = contador.nextElementSibling;
+  if (!etiqueta || !etiqueta.textContent.includes("Unidad")) {
+    // búsqueda más robusta si el HTML cambia
+    etiqueta = document.querySelector(".scard-label");
+  }
+  if (!etiqueta) return;
+
+  // Obtener valor numérico limpio (soporta formato "1 234")
+  const valorTexto = contador.textContent.replace(/\s+/g, '');
+  const valor = parseInt(valorTexto || "0", 10);
+
+  // Cambiar texto según singular o plural
+  if (valor === 1) {
+    etiqueta.textContent = "Unidad Administrativa";
+  } else {
+    etiqueta.textContent = "Unidades Administrativas";
+  }
+}
+
 // --- Abre variables.html en otra pestaña ---
 function handleVariableClick(idPp) {
-  window.open(`variables.html?idPp=${idPp}`, '_blank');
+  window.open(`variables.html?idPp=${encodeURIComponent(idPp)}`, '_blank');
 }
 
 // --- Helpers generales ---
@@ -17,6 +77,112 @@ function getStatusClass(status) {
     case "pendiente": return "bg-warning text-dark";
     default: return "bg-secondary";
   }
+}
+
+// ======== Resumen: helpers de animación y actualización ========
+
+// contador con animación suave (ahora formatea con espacios)
+function animateCountTo(elOrSelector, toValue, ms = 350) {
+  const el = (typeof elOrSelector === 'string') ? document.querySelector(elOrSelector) : elOrSelector;
+  if (!el) return;
+
+  const from = parseInt(String(el.textContent || '').replace(/\D/g,'')) || 0;
+  const to = Math.max(0, Number(toValue) || 0);
+
+  if (ms <= 0 || from === to) {
+    el.textContent = formatNumberWithSpace(to);
+    return;
+  }
+
+  const start = performance.now();
+
+  const step = (now) => {
+    const t = Math.min(1, (now - start) / ms);
+    const value = Math.round(from + (to - from) * t);
+    el.textContent = formatNumberWithSpace(value);
+    if (t < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+// fija "Unidades Administrativas" una sola vez (o calcula del DOM si prefieres)
+function initSummaryStaticCounters() {
+  setSummaryDefaults();
+  const totalUnidades = document.querySelectorAll(
+    '.card-unidad, .card.disabled[data-grupo]'
+  ).length || 5;
+  const el = document.getElementById('scUnidades');
+  if (el) el.textContent = formatNumberWithSpace(totalUnidades);
+}
+
+// Actualiza los 3 counters dinámicos de la unidad seleccionada
+// - procesosTotales: todos los procesos de la unidad (sin filtrar por variables)
+// - procesosAmbientales: solo procesos con >0 variables
+// - totalVariables: suma de variables de los procesos de la unidad
+function updateSummaryCounters({ procesosTotales, procesosAmbientales, totalVariables }) {
+  animateCountTo('#scProcesosTotales', procesosTotales);
+  animateCountTo('#scProcesosAmbientales', procesosAmbientales);
+  animateCountTo('#scVariablesAmbientales', totalVariables);
+}
+
+// Utilidad: suma variables solo de los procesos dados
+function sumVariablesForProcesos(procesos, conteoGlobal) {
+  const ids = new Set((procesos||[]).map(p => p.idPp));
+  let sum = 0;
+  ids.forEach(id => { sum += (conteoGlobal[id] || 0); });
+  return sum;
+}
+
+// ===== Spinners individuales por contador =====
+const COUNTER_IDS = ['scUnidades','scProcesosTotales','scProcesosAmbientales','scVariablesAmbientales'];
+
+function showCounterSpinner(id){
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (el.dataset.spinning === '1') return;
+  el.dataset.prev = el.textContent;      // guarda el valor previo (con formato)
+  el.dataset.spinning = '1';
+  el.innerHTML = '<div class="spinner-border" role="status" aria-hidden="true"></div>';
+}
+
+function hideCounterSpinner(id){
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (el.dataset.spinning !== '1') return;
+  el.dataset.spinning = '0';
+  // restaura lo anterior, si no existe muestra 0 formateado
+  el.innerHTML = el.dataset.prev ?? formatNumberWithSpace(0);
+  delete el.dataset.prev;
+}
+
+// helpers para todos
+function showAllSummarySpinners(){
+  COUNTER_IDS.forEach(showCounterSpinner);
+}
+function hideAllSummarySpinners(){
+  COUNTER_IDS.forEach(hideCounterSpinner);
+}
+
+
+// ======== Estado de unidad seleccionada y spinner global ========
+let unidadSeleccionada = null; // 'socio' | 'eco' | null
+
+
+// --- Título dinámico "Procesos de Producción ..." ---
+function setProcesosTitle(unidad) {
+  const el = document.getElementById('procesosTitle');
+  if (!el) return;
+
+  const base = 'Procesos de Producción';
+  let sufijo = '';
+
+  if (unidad === 'socio') {
+    sufijo = ' de la Unidad de Estadísticas Sociodemográficas';
+  } else if (unidad === 'eco') {
+    sufijo = ' de la Unidad de Estadísticas Económicas';
+  } // si es null/otro, sin sufijo
+
+  el.textContent = base + sufijo;
 }
 
 // --- Normalizador: ECONÓMICAS → shape local (sociodemograficas) ---
@@ -40,8 +206,10 @@ function mapEconomicasToLocal(item) {
     pp: item.proceso || "No disponible",
     dgaRespPp: null,
     perioProd: null,
-    vigInicial: item.inicio || null,
-    vigFinal: item.fin || null,
+    vigInicial: item.inicio ? String(item.inicio).slice(0, 4) : null, // Solo los primeros 4 dígitos
+    vigFinal: item.fin 
+      ? (/^\d{4}/.test(String(item.fin)) ? String(item.fin).slice(0, 4) : String(item.fin)) 
+      : null, 
     metGenInf: item.metodo || null,
     gradoMadur: grado,
     perPubResul: perPub || "No disponible",
@@ -57,7 +225,7 @@ function mapEconomicasToLocal(item) {
 // --- Render de tarjetas  ---
 function renderProcesos(procesos, conteo, container) {
   const counter = document.getElementById("procesosCounter");
-  if (counter) counter.textContent = procesos.length;
+  if (counter) counter.textContent = formatNumberWithSpace(procesos.length);
   container.innerHTML = "";
 
   if (!procesos.length) {
@@ -66,13 +234,10 @@ function renderProcesos(procesos, conteo, container) {
   }
 
   procesos.forEach(proceso => {
-   let iconoHTML = "";
+    let iconoHTML = "";
 
-  
     // Comportamiento normal para las demás unidades
     let extension = "png";
-    const extensionesGif = ["ENADID", "ENIGH", "CAAS", "ENCEVI", "MSM", "ESMNG"];
-    if (extensionesGif.includes(proceso.idPp)) extension = "gif";
 
     const baseName = `img/${proceso.idPp}`;
     const iconoFallback = `img/no_disponible.png`;
@@ -85,16 +250,17 @@ function renderProcesos(procesos, conteo, container) {
             alt="Icono ${proceso.idPp}" 
             style="max-height: 80px; object-fit: contain; ${proceso.idPp === "CPV" ? "filter: invert(1);" : ""}"
             onerror="
-            if (this.src.includes('.png') && !this.src.includes('.PNG')) {
+              if (this.src.includes('.png') && !this.src.includes('.PNG')) {
                 this.onerror = null;
                 this.src = '${iconoRutaMay}';
-            } else {
+              } else {
                 this.onerror = null;
                 this.src = '${iconoFallback}';
-            }
+              }
             ">
     `;
     
+    const totalVars = conteo[proceso.idPp] || 0;
 
     const card = `
       <div class="col-md-4 mb-4">
@@ -117,17 +283,17 @@ function renderProcesos(procesos, conteo, container) {
                 </p>
                 <p class="card-text mb-1" style="font-size: 0.85rem">
                   <strong style="font-size: 0.85rem">Periodicidad:</strong>
-                  ${proceso.perPubResul || "No disponible"}
+                  ${proceso.perioProd || "No disponible"}
                 </p>
                 <p class="card-text mb-1" style="font-size: 0.85rem">
                   <strong style="font-size: 0.85rem">Vigencia:</strong>
                   ${mostrarVigencia(proceso.vigInicial, proceso.vigFinal)}
                 </p>
                 <p class="card-text mb-0">
-                  <strong style="font-size: 0.85rem">Total Variables Ambientales:</strong>
+                  <strong style="font-size: 0.85rem">Total de variables ambientales:</strong>
                   <span style="color: #08739c; font-family: 'Monaco', monospace; font-weight: bold; font-size: 1.2rem; text-decoration: underline; cursor: pointer;"
                         onclick="handleVariableClick('${proceso.idPp}')">
-                    ${conteo[proceso.idPp] || 0}
+                    ${formatNumberWithSpace(totalVars)}
                   </span>
                 </p>
               </div>
@@ -146,13 +312,12 @@ function renderProcesos(procesos, conteo, container) {
 // --- Filtros y orden: reusables para cualquier lista de procesos ---
 function wireFiltrosYOrden({ procesosGlobal, conteoGlobal, container }) {
   const selectPerio = document.getElementById("filtrarPeriodicidad");
+  const ordenarSel  = document.getElementById("ordenarProcesos");
 
-  // Llenar periodicidades únicas
+  // Llenar periodicidades únicas...
   selectPerio.innerHTML = `<option value="">Filtrar por periodicidad...</option>`;
   const periodicidadesUnicas = [...new Set(
-    procesosGlobal
-      .map(p => p.perPubResul)
-      .filter(Boolean)
+    procesosGlobal.map(p => p.perPubResul).filter(Boolean)
   )].sort();
   periodicidadesUnicas.forEach(periodo => {
     const option = document.createElement("option");
@@ -161,13 +326,19 @@ function wireFiltrosYOrden({ procesosGlobal, conteoGlobal, container }) {
     selectPerio.appendChild(option);
   });
 
+  // ✅ Establece el orden por defecto a A-Z la primera vez
+  if (!ordenarSel.dataset.init) {
+    ordenarSel.value = "az";
+    ordenarSel.dataset.init = "1";
+  }
+
   function aplicarFiltrosYOrden() {
     let filtrados = [...procesosGlobal];
 
-    const estatus = document.getElementById("filtrarEstatus").value;
+    const estatus      = document.getElementById("filtrarEstatus").value;
     const periodicidad = document.getElementById("filtrarPeriodicidad").value;
-    const soloIIN = document.getElementById("iinCheck").checked;
-    const orden = document.getElementById("ordenarProcesos").value;
+    const soloIIN      = document.getElementById("iinCheck").checked;
+    let   orden        = document.getElementById("ordenarProcesos").value;
 
     if (estatus) {
       filtrados = filtrados.filter(p => (p.estatus || "").toLowerCase() === estatus.toLowerCase());
@@ -178,6 +349,9 @@ function wireFiltrosYOrden({ procesosGlobal, conteoGlobal, container }) {
     if (soloIIN) {
       filtrados = filtrados.filter(p => (p.gradoMadur || "").toLowerCase() === "información de interés nacional");
     }
+
+    // ✅ Si por alguna razón no hay valor, fuerza 'az'
+    if (!orden) orden = "az";
 
     if (orden === "az" || orden === "za") {
       filtrados.sort((a, b) => {
@@ -196,24 +370,16 @@ function wireFiltrosYOrden({ procesosGlobal, conteoGlobal, container }) {
     renderProcesos(filtrados, conteoGlobal, container);
   }
 
-  // Eventos
+  // Eventos...
   document.getElementById("filtrarEstatus").addEventListener("change", aplicarFiltrosYOrden);
   document.getElementById("filtrarPeriodicidad").addEventListener("change", aplicarFiltrosYOrden);
   document.getElementById("iinCheck").addEventListener("change", aplicarFiltrosYOrden);
   document.getElementById("ordenarProcesos").addEventListener("change", aplicarFiltrosYOrden);
 
-  // Botón reset
-  document.getElementById("resetFiltrosBtn").addEventListener("click", () => {
-    document.getElementById("ordenarProcesos").selectedIndex = 0;
-    document.getElementById("filtrarEstatus").selectedIndex = 0;
-    document.getElementById("filtrarPeriodicidad").selectedIndex = 0;
-    document.getElementById("iinCheck").checked = false;
-    aplicarFiltrosYOrden();
-  });
-
   // Primera pintada
   aplicarFiltrosYOrden();
 }
+
 
 // -- HELPERS para conteo y filtrado --
 
@@ -288,47 +454,94 @@ function filtrarEconomicasSinVariables(procesos, conteo) {
 async function cargarSociodemograficas({ container }) {
   renderLoader(container, "Cargando procesos (Sociodemográficas)...");
   try {
-    const procesos  = await fetch("https://till-attitude-tires-vault.trycloudflare.com/api/proceso").then(res => res.json());
-    const variables = await fetch("https://till-attitude-tires-vault.trycloudflare.com/api/variables").then(res => res.json());
+    const procesos  = await fetch("https://emperor-sydney-capability-youth.trycloudflare.com/api/proceso").then(res => res.json());
+    const variables = await fetch("https://emperor-sydney-capability-youth.trycloudflare.com/api/variables").then(res => res.json());
 
     const conteoGlobal = buildConteoPorIdPp(variables);
     procesos.forEach(p => { if (!(p.idPp in conteoGlobal)) conteoGlobal[p.idPp] = 0; });
 
-    // Nuevo: Renderiza contador de variables ambientales por unidad
-    renderContadorVariablesUnidad(conteoGlobal, "Sociodemográficas");
+    // Calcula los totales (pero procesosTotales fijo = 45)
+    const procesosTotales = 45; // fijo para esta unidad
+    const procesosAmbientales = procesos.filter(p => (conteoGlobal[p.idPp] || 0) > 0).length;
+    const totalVariables = sumVariablesForProcesos(procesos, conteoGlobal);
 
+    // Oculta loader del listado y pinta tarjetas
     wireFiltrosYOrden({ procesosGlobal: procesos, conteoGlobal, container });
+
+    // 🔹 Actualiza contadores al terminar
+    hideAllSummarySpinners();                 // quita spinners primero
+    animateCountTo('#scUnidades', 1, 0);      // Unidades = 1 (inmediato)
+    actualizarEtiquetaUnidades();
+    updateSummaryCounters({
+      procesosTotales,                        // fijo 45
+      procesosAmbientales,
+      totalVariables
+    });
+    renderContadorVariablesUnidad(conteoGlobal, { animateMs: 350 });
+
   } catch (err) {
+    hideAllSummarySpinners();
     removeLoader();
     console.error("Error cargando sociodemográficas", err);
     container.innerHTML = "<p class='text-danger text-center my-4'>Error al cargar los procesos.</p>";
   }
 }
 
+
 // --- Nuevo: Renderiza contador de variables ambientales por unidad ---
-function renderContadorVariablesUnidad(conteoGlobal) {
-  const contadorUnidad = document.getElementById("contadorVariablesUnidad");
-  if (contadorUnidad) {
-    // Muestra 0 mientras se carga la nueva unidad
-    contadorUnidad.textContent = "0";
-    // Calcula el total después de un breve tiempo (simula espera de servidor)
-    setTimeout(() => {
-      const totalVariables = Object.entries(conteoGlobal)
-        .filter(([_, count]) => typeof count === "number" && count > 0)
-        .reduce((acc, [, count]) => acc + count, 0);
-      contadorUnidad.textContent = `${totalVariables}`;
-    }, 300); // Puedes ajustar el tiempo si lo deseas
+// --- Contador de variables por unidad (sin re-inicializaciones tardías) ---
+function renderContadorVariablesUnidad(conteoGlobal, { animateMs = 350 } = {}) {
+  const el = document.getElementById("contadorVariablesUnidad");
+  if (!el) return;
+
+  // Cancela animaciones/tiempos previos
+  if (contadorAnimFrame) cancelAnimationFrame(contadorAnimFrame);
+  if (contadorTimeoutId) clearTimeout(contadorTimeoutId);
+  contadorAnimFrame = null;
+  contadorTimeoutId = null;
+
+  const total = Object.entries(conteoGlobal)
+    .filter(([_, count]) => typeof count === "number" && count > 0)
+    .reduce((acc, [, count]) => acc + count, 0);
+
+  // Animación simple 0 -> total (opcional)
+  const start = performance.now();
+  const from = 0;
+  const to = total;
+  const myToken = unidadToken; // captura la versión actual
+
+  const step = (now) => {
+    // si cambió la versión (nueva carga), aborta esta animación
+    if (myToken !== unidadToken) return;
+
+    const t = Math.min(1, (now - start) / animateMs);
+    const value = Math.round(from + (to - from) * t);
+    el.textContent = formatNumberWithSpace(value);
+
+    if (t < 1) {
+      contadorAnimFrame = requestAnimationFrame(step);
+    } else {
+      contadorAnimFrame = null;
+    }
+  };
+
+  // Si no quieres animación, pon animateMs = 0
+  if (animateMs > 0) {
+    el.textContent = formatNumberWithSpace(0);
+    contadorAnimFrame = requestAnimationFrame(step);
+  } else {
+    el.textContent = formatNumberWithSpace(total);
   }
 }
+
 
 
 // --- Carga ECONÓMICAS (Base de datos nueva) ---
 async function cargarEconomicas({ container }) {
   renderLoader(container, "Cargando procesos (Económicas)...");
-
-  const urlProcesos = "https://reid-stuffed-staying-luther.trycloudflare.com/api/procesos/buscar?unidad=" +
+  const urlProcesos = "https://vegas-sussex-release-tagged.trycloudflare.com/api/procesos/buscar?unidad=" +
                       encodeURIComponent("Unidad de Estadísticas Económicas");
-  const urlVariablesEco = "https://reid-stuffed-staying-luther.trycloudflare.com/api/indicadores/ultima";
+  const urlVariablesEco = "https://vegas-sussex-release-tagged.trycloudflare.com/api/indicadores/ultima";
 
   try {
     const economicasRaw = await fetch(urlProcesos).then(r => r.json());
@@ -340,21 +553,29 @@ async function cargarEconomicas({ container }) {
       conteoGlobal = buildConteoPorIdPpDesdeUltima(payloadUltima);
     } catch (e) {
       try {
-        const variablesLocal = await fetch("https://till-attitude-tires-vault.trycloudflare.com/api/variables").then(r => r.json());
+        const variablesLocal = await fetch("https://emperor-sydney-capability-youth.trycloudflare.com/api/variables").then(r => r.json());
         conteoGlobal = buildConteoPorIdPp(variablesLocal);
       } catch (e2) {
         conteoGlobal = {};
       }
     }
 
-    procesos.forEach(p => {
-      if (!(p.idPp in conteoGlobal)) conteoGlobal[p.idPp] = 0;
-    });
+    procesos.forEach(p => { if (!(p.idPp in conteoGlobal)) conteoGlobal[p.idPp] = 0; });
 
-    // Nuevo: Renderiza contador de variables ambientales por unidad
-    renderContadorVariablesUnidad(conteoGlobal, "Económicas");
-
+    const procesosTotales = procesos.length;
     const procesosFiltrados = filtrarEconomicasSinVariables(procesos, conteoGlobal);
+    const totalVariables = sumVariablesForProcesos(procesosFiltrados, conteoGlobal);
+
+    // 🔹 Actualiza contadores individuales
+    hideAllSummarySpinners();
+    animateCountTo('#scUnidades', 1, 0);
+    actualizarEtiquetaUnidades();
+    updateSummaryCounters({
+      procesosTotales,
+      procesosAmbientales: procesosFiltrados.length,
+      totalVariables
+    });
+    renderContadorVariablesUnidad(conteoGlobal, { animateMs: 350 });
 
     if (procesosFiltrados.length === 0) {
       removeLoader();
@@ -362,21 +583,44 @@ async function cargarEconomicas({ container }) {
         No hay procesos de la Unidad de Estadísticas Económicas con variables ambientales (&gt; 0).
       </div>`;
       const counter = document.getElementById("procesosCounter");
-      if (counter) counter.textContent = "0";
+      if (counter) counter.textContent = formatNumberWithSpace(0);
       return;
     }
 
     wireFiltrosYOrden({ procesosGlobal: procesosFiltrados, conteoGlobal, container });
+
   } catch (err) {
+    hideAllSummarySpinners();
     removeLoader();
+    console.error("Error cargando Económicas", err);
     container.innerHTML = "<p class='text-danger text-center my-4'>Error al cargar los procesos (Económicas).</p>";
   }
 }
 
+function resetToGlobalView() {
+  unidadSeleccionada = null;
+  setProcesosTitle(null);
+  setActiveUnidadCard(null);
+
+  const seccion = document.getElementById("procesosSection");
+  const container = document.getElementById("procesosContainer");
+  if (container) container.innerHTML = "";
+  if (seccion) seccion.hidden = true;
+
+  hideAllSummarySpinners();
+
+  // 🔹 Restaurar los valores globales de entrada
+  animateCountTo('#scUnidades', GLOBAL_DEFAULTS.unidades, 0);
+  animateCountTo('#scProcesosTotales', GLOBAL_DEFAULTS.procesosTotales, 0);
+  animateCountTo('#scProcesosAmbientales', GLOBAL_DEFAULTS.procesosAmbientales, 0);
+  animateCountTo('#scVariablesAmbientales', GLOBAL_DEFAULTS.variablesAmbientales, 0);
+
+  // 🔹 Actualizar el texto del contador (singular/plural)
+  actualizarEtiquetaUnidades();
+}
 
 // --- Arranque DOM ---
-document.addEventListener("DOMContentLoaded", async function () {
-  // Nav activo
+document.addEventListener("DOMContentLoaded", function () {
   const currentPath = window.location.pathname.split("/").pop();
   document.querySelectorAll(".navbar-nav .nav-link").forEach(link => {
     const href = link.getAttribute("href");
@@ -385,48 +629,94 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   const seccionProcesos = document.getElementById("procesosSection");
   const container = document.getElementById("procesosContainer");
-
-  // Botones de las unidades (usa estos IDs en tus cards)
   const btnSocio = document.getElementById("btnDireccionSociodemograficas");
-  const btnEco   = document.getElementById("btnDireccionEconomicas"); // <- agrega este botón en tu HTML
+  const btnEco   = document.getElementById("btnDireccionEconomicas");
 
-  function prepararSeccion() {
+  // Inicializa contadores globales dinamicos
+   initSummaryStaticCounters(); // fija "Unidades Administrativas"
+
+  // Handler común con candado + token
+ const handleUnidadClick = async (btnEl, loaderFn, claveUnidad) => {
+  if (isCargandoUnidad) return;
+
+  // ¿segundo clic sobre la misma card? => deseleccionar (volver a global)
+  const yaSeleccionada = btnEl.classList.contains('card-selected')
+                      && unidadSeleccionada === claveUnidad;
+  if (yaSeleccionada) {
+    resetToGlobalView();   // vuelve a los 4 contadores globales y oculta la sección
+    return;
+  }
+
+  // Seleccionar (o cambiar de unidad)
+  isCargandoUnidad = true;
+  unidadToken++;
+  unidadSeleccionada = claveUnidad;
+
+  // UI inmediata
+  setActiveUnidadCard(btnEl);
+  setProcesosTitle(claveUnidad);
+  showAllSummarySpinners();
+  prepararSeccion();                 // <- asegura seccion visible y limpia contenedor
+
+  try {
+    // IMPORTANTE: usa el 'container' ya tomado arriba (no lo busques de nuevo)
+    await loaderFn({ container });
+  } catch (err) {
+    console.error("Error cargando unidad", err);
+    container.innerHTML = "<p class='text-danger text-center my-4'>Error al cargar los procesos.</p>";
+    hideAllSummarySpinners();
+  } finally {
+    isCargandoUnidad = false;
+  }
+};
+
+
+  // Para evitar re-binds si este bloque se ejecutara dos veces por alguna razón:
+ if (!btnSocio?.dataset.bound) {
+    btnSocio.addEventListener("click", () => handleUnidadClick(btnSocio, cargarSociodemograficas, 'socio'));
+    btnSocio.dataset.bound = "1";
+  }
+  if (!btnEco?.dataset.bound) {
+    btnEco.addEventListener("click", () => handleUnidadClick(btnEco, cargarEconomicas, 'eco'));
+    btnEco.dataset.bound = "1";
+  }
+
+
+
+  document.querySelectorAll('.mostrarGrupoBtn').forEach(card => {
+    if (card.id === "btnDireccionSociodemograficas" || card.id === "btnDireccionEconomicas") return;
+    if (!card.dataset.bound) {
+      card.addEventListener('click', function () {
+        alert("Información no disponible");
+      });
+      card.dataset.bound = "1";
+    }
+  });
+
+  
+    function prepararSeccion() {
+    const seccionProcesos = document.getElementById("procesosSection");
+    const container = document.getElementById("procesosContainer");
     if (!seccionProcesos) return;
+
     seccionProcesos.hidden = false;
     seccionProcesos.scrollIntoView({ behavior: 'smooth' });
-    // Limpia contenedor y contador de procesos
+
     if (container) container.innerHTML = "";
+
     const counter = document.getElementById("procesosCounter");
-    if (counter) counter.textContent = "0";
-    // Limpia selects por si cambia la fuente
-    document.getElementById("filtrarPeriodicidad").innerHTML = `<option value="">Filtrar por periodicidad...</option>`;
-    // Limpia el contador de variables ambientales
+    if (counter) counter.textContent = formatNumberWithSpace(0);
+
+    const selPer = document.getElementById("filtrarPeriodicidad");
+    if (selPer) selPer.innerHTML = `<option value="">Filtrar por periodicidad...</option>`;
+
     const contadorUnidad = document.getElementById("contadorVariablesUnidad");
-    if (contadorUnidad) contadorUnidad.textContent = "0";
-  }
+    if (contadorUnidad) contadorUnidad.textContent = formatNumberWithSpace(0);
 
-  if (btnSocio && seccionProcesos && container) {
-    btnSocio.addEventListener("click", async () => {
-      try {
-        prepararSeccion();
-        await cargarSociodemograficas({ container });
-      } catch (err) {
-        console.error("Error cargando sociodemográficas", err);
-        container.innerHTML = "<p class='text-danger'>Error al cargar los procesos.</p>";
-      }
-    });
-  }
-
-  if (btnEco && seccionProcesos && container) {
-    btnEco.addEventListener("click", async () => {
-      try {
-        prepararSeccion();
-        await cargarEconomicas({ container });
-      } catch (err) {
-        console.error("Error cargando económicas", err);
-        container.innerHTML = "<p class='text-danger'>Error al cargar los procesos (Económicas).</p>";
-      }
-    });
+    if (contadorAnimFrame) cancelAnimationFrame(contadorAnimFrame);
+    if (contadorTimeoutId) clearTimeout(contadorTimeoutId);
+    contadorAnimFrame = null;
+    contadorTimeoutId = null;
   }
 
   // Cards genéricas que aún no están disponibles
@@ -439,3 +729,31 @@ document.addEventListener("DOMContentLoaded", async function () {
   });
 });
 
+// --- Selección visual de cards de Unidad ---
+function setActiveUnidadCard(cardEl, persist = false) {
+  document.querySelectorAll('.card-unidad.card-selected').forEach(el => {
+    el.classList.remove('card-selected');
+    el.setAttribute('aria-pressed', 'false');
+  });
+
+  if (cardEl) {
+    cardEl.classList.add('card-selected');
+    cardEl.setAttribute('aria-pressed', 'true');
+    if (persist && cardEl.id) {
+      try { localStorage.setItem('unidadActiva', cardEl.id); } catch (e) {}
+    }
+  }
+}
+
+
+// Restaura selección si existiera (opcional)
+function restoreUnidadCardSelection() {
+  try {
+    const saved = localStorage.getItem('unidadActiva');
+    if (!saved) return;
+    const el = document.getElementById(saved);
+    if (el && el.classList.contains('card-unidad')) {
+      setActiveUnidadCard(el, /*persist*/false);
+    }
+  } catch (e) {}
+}

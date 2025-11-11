@@ -17,36 +17,50 @@
 </head>
 <body>
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #003057;">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="#">
-            <img src="img/INEGI_g.png" alt="Logo INEGI" style="width: 9rem; filter: invert(1) brightness(2) contrast(1.5);">
+          <!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #003057;">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="index.html">
+      <img src="img/INEGI_g.png" alt="Logo INEGI"
+           style="width: 9rem; filter: invert(1) brightness(2) contrast(1.5);">
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+
+      <!-- 🔹 Menú de navegación -->
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0" style="gap: 0.5rem;"> <!-- espacio entre botones -->
+        <li class="nav-item">
+          <a class="nav-link"
+             href="procesos.html"
+             style="font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 6px; transition: background-color 0.2s;">
+            Procesos de Producción
           </a>
-      
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-      
-          <div class="collapse navbar-collapse justify-content-between" id="navbarNavDropdown" >
-            <ul class="navbar-nav mx-auto gap-3">
-              <li class="nav-item">
-                <a class="nav-link ctive fw-bold text-decoration-underline" aria-current="page" href="index.html">Inicio</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="procesos.html">Procesos</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="variables.html">Variables</a>
-              </li>
-              <!-- <li class="nav-item">
-                <a class="nav-link" href="ods.html">ODS</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="indicadores.html">Indicadores existentes</a>
-              </li> -->
-            </ul>
-      
+        </li>
+        <li class="nav-item">
+          <a class="nav-link"
+             href="variables.html"
+             style="font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 6px; transition: background-color 0.2s;">
+            Inventario de variables ambientales
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link"
+             aria-current="page"
+             href="indicadores.html"
+             style="font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 6px; transition: background-color 0.2s;">
+            Indicadores existentes
+          </a>
+        </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</nav>
           <!-- <form id="navbarSearchForm" class="d-flex" role="search">
               <input id="searchInput" class="form-control me-2 rounded-pill" type="search" name="search" placeholder="Buscar..." aria-label="Buscar">
               <button class="btn btn-outline-light rounded-pill" type="submit">Buscar</button>
@@ -59,79 +73,87 @@
     
     
 <!-- Carrusel con texto a la izquierda e imagen a la derecha -->
-<div id="myCarousel" class="carousel slide carousel-dark mb-5" data-bs-ride="carousel">
+<div id="myCarousel" class="carousel slide carousel-white mb-5" data-bs-ride="carousel">
 
   <!-- Posicionamiento de los botones en la parte interna del carousel de navegación -->
   <div class="carousel-indicators">
     <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="0" class="active" aria-label="Slide 1"></button>
     <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
-    <!-- <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
-    <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="3" aria-label="Slide 4"></button> -->
+    <!--<button type="button" data-bs-target="#myCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>-->
+    <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
   </div>
 
   <div class="carousel-inner">
-    <!-- Slide 1 -->
-    <div class="carousel-item active" style="background-color: white;">
-      <div class="d-flex align-items-center" style="height: 500px;">
-        <!-- Texto -->
-        <div class="col-md-6 ps-5 pe-3">
-          <h2 class="fw-bold" style="font-family: Helvetica, Sans-Serif; color: #003057;">Procesos de Producción</h2>
-          <p>Explora los programas estadísticos y registros administrativos relacionados con el medio ambiente.</p>
-        </div>
-        <!-- Imagen -->
-        <div class="col-md-6 h-100">
-          <img id="imgProcesosInegi" src="img/inegislider.png"
-              class="img-fluid h-100 w-100 carousel-img"
-              alt="Procesos de Producción">
-        </div>
-      </div>
+      <!-- Slide 1 -->
+    <div class="carousel-item active"
+     style="background-image: url('img/inegislider.png');
+            background-size: 100%;
+            background-position: center 83%;
+            background-repeat: no-repeat;
+            height: 520px;">
+  <div style="position: relative; height: 100%;">
+    <img class="overlay-brand-top" src="img/INEGI_c-modified.png" alt="INEGI">
+    <!-- Caja de texto semi-transparente -->
+    <div class="overlay-box">
+      <h2 class="fw-bold" style="font-family: Helvetica, Sans-Serif; color: #ffffff; margin: 0 0 0.5rem;">
+        Procesos de Producción
+      </h2>
+      <p style="color: #ffffff; margin: 0;">
+        Descubre los procesos de producción del INEGI que integran información sobre el medio ambiente y los recursos naturales, organizados por Unidad Administrativa.
+      </p>
     </div>
+  </div>
+</div>
 
 
-    <!-- Slide 2 -->
-    <div class="carousel-item" style="background-color: white;">
-      <div class="d-flex align-items-center" style="height: 500px;">
-          <!-- Texto -->
-        <div class="col-md-6 ps-5 pe-3" >
-          <h2 class="fw-bold" style="font-family: Helvetica, Sans-Serif; color: #003057;">Variables</h2>
-          <p>Consulta las variables ambientales agrupadas por procesos, temas y fuentes de información.</p>
-        </div>
-         <!-- Imagen -->
-        <div class="col-md-6 h-100 mb-5">
-          <img id="imgVariables" src="img/variablesslider.png" class="img-fluid h-100 w-100 carousel-img" style="object-fit: contain;" alt="Variables">
-        </div>
-      </div>
+<!-- Slide 2 -->
+<div class="carousel-item">
+  <div class="slide-hero">
+    <img class="overlay-brand-top" src="img/INEGI_c-modified.png" alt="INEGI">
+
+    <video class="bg-media" autoplay muted loop playsinline preload="auto">
+      <source src="img/slider2.mp4" type="video/mp4">
+    </video>
+
+    <div class="overlay-box">
+      <h2 class="fw-bold" style="font-family: Helvetica, Sans-Serif;">Inventario de variables ambientales</h2>
+      <p>Consulta el inventario de variables relacionadas con temáticas ambientales y de recursos naturales por procesos de producción, temáticas y fuentes de información.
+</p>
     </div>
+  </div>
+</div>
+
 
     <!-- Slide 3 -->
     <!-- <div class="carousel-item" style="background-color: white;">
-      <div class="d-flex align-items-center" style="height: 500px;"> -->
-        <!-- Texto -->
-        <!-- <div class="col-md-6 ps-5 pe-3" style="margin-left: 25px; margin-bottom: 120px;">
+     <div class="d-flex align-items-start" style="height: 500px;"> -->
+       <!-- Texto -->
+        <!-- <div class="col-md-6 ps-5 pe-3 d-flex flex-column justify-content-start h-100" style="margin-left: 25px; margin-bottom: 120px;">
           <h2 class="fw-bold" style="font-family: Helvetica, Sans-Serif; color: #003057;">ODS</h2>
           <p>Visualiza las variables alineadas con los Objetivos de Desarrollo Sostenible y su relación con los indicadores existentes.</p>
-        </div> -->
+        </div> --> 
         <!-- Imagen -->
         <!-- <div class="col-md-6 h-100 ">
           <img id="imgODS" src="img/SLIDERODS.png" class="img-fluid h-100 w-100 carousel-img" style="object-fit: contain;" alt="ODS">
         </div>
       </div>
-    </div> -->
+    </div>  -->
 
-    <!-- Slide 4 -->
-    <!-- <div class="carousel-item" style="background-color: white;"> -->
-      <!-- <div class="d-flex align-items-center" style="height: 500px;"> -->
-        <!-- Texto -->
-        <!-- <div class="col-md-6 ps-5 pe-3" style="margin-left: 20px; margin-bottom: 120px;">
-          <h2 class="fw-bold" style="font-family: Helvetica, Sans-Serif; color: #003057;">Indicadores Existentes</h2>
-          <p>Consulta el compendio de indicadores ambientales existentes que permiten medir y monitorear los cambios en el entorno.</p>
-        </div> -->
-        <!-- Imagen -->
-        <!-- <div class="col-md-6 h-100 ">
-          <img  src="img/indicadoresslide.png" class="img-fluid h-100 w-100 carousel-img" style="object-fit: contain; filter: brightness(1.1);" alt="Indicadores">
-        </div>
-      </div> -->
-    <!-- </div> -->
+<!-- Slide 4 -->
+<div class="carousel-item">
+  <div class="slide-hero">
+    <img class="overlay-brand-top" src="img/INEGI_c-modified.png" alt="INEGI">
+
+    <video class="bg-media" autoplay muted loop playsinline preload="auto">
+      <source src="img/slider4.mp4" type="video/mp4">
+    </video>
+
+    <div class="overlay-box">
+      <h2 class="fw-bold" style="font-family: Helvetica, Sans-Serif;">Indicadores Existentes</h2>
+      <p>Consulta el listado de indicadores elaborados, relacionados con el medio ambiente y los recursos naturales. Estos indicadores reflejan los resultados del trabajo técnico y metodológico desarrollado al interior del área para fortalecer el análisis y la integración de información ambiental.</p>
+    </div>
+  </div>
+</div>
 
   </div>
 
@@ -162,37 +184,166 @@
                     padding: 1.2rem 1.5rem;
                     margin-bottom: 2rem;
                     color: #2b2b2b;
+                    text-align: justify;
                     ">
-                  <strong style="color: #009edb;">Objetivo del portal:</strong>
-                  Este portal integra y facilita el acceso a información clave sobre procesos, variables, Objetivos de Desarrollo Sostenible (ODS) e indicadores ambientales generados por el INEGI. Su propósito es ofrecer una herramienta centralizada y transparente para la consulta, análisis y aprovechamiento de datos ambientales, apoyando la toma de decisiones informadas y el cumplimiento de compromisos nacionales e internacionales en materia de desarrollo sostenible.
+                 <p>
+                  Este portal es una herramienta de consulta que permite explorar la información
+                  estadística y geográfica relacionada con el<strong style="color: #009edb;"> medio ambiente y los recursos
+                  naturales</strong>, a partir de los <strong style="color: #009edb;">Procesos de Producción del Instituto Nacional de Estadística y Geografía (INEGI) </strong> 
+                   y las <strong style="color: #009edb;">variables ambientales</strong> que estos captan.
+                  </p> 
+                  <p>
+                  Su contenido se alimenta del <strong style="color: #009edb;">inventario de variables ambientales del Sistema Integrado de Inventario y Encuestas sobre Recursos Naturales y Medio Ambiente (SIIERNMA)</strong>, lo que garantiza la coherencia conceptual y la trazabilidad de las fuentes de información ambiental.
+                  A través de esta plataforma es posible identificar aquellos procesos de producción que
+                  incorporan variables relacionadas con el medio ambiente y los recursos naturales, conocer sus principales características y 
+                  consultar de manera estructurada los elementos que contribuyen al desarrollo de
+                  indicadores ambientales.
+                  </p>
+                  <p>
+                  Con ello, el portal busca fortalecer la <strong style="color: #009edb;">transparencia, accesibilidad y comprensión</strong> de la información ambiental generada por el INEGI, facilitando su
+                  aprovechamiento para el análisis, la investigación y la toma de decisiones.
+                </p>
                 </div>
+                <hr>
                 <!-- Normatividad -->
                 <h3> Normatividad </h3>
-                <p>
-                    En cumplimiento con las disposiciones legales y reglamentarias que rigen nuestras actividades, se establece la siguiente normatividad aplicable:
-                </p>
-                <p>
-                    <strong><a>Reglamento interior del INEGI</a></strong>
-                </p>
-                <ul>
-                    <li>Articulo 24, fracción XXXII</li>
-                    <li>Articulo 26, fracciones IV, XIV, XVII y XIX</li>
-                </ul>
-                <p>
-                    <strong><a>Ley del Sistema Nacional de Informacion Estadística y Geografica</a></strong>
-                </p>
-                <ul>
-                    <li>Articulo 27</li>
-                    <li>Articulo 28</li>
-                </ul>
-                <p>Este marco noramtivo nos compromete a actuar con integridad, transparencia, y responsabilidad en la gestion de la información, 
-                    garantizando asi el fortalecimiento del sistema de información que beneficia a la socieda en su conjunto. 
-                </p>
-            </div>
-        </div>
+                  <p>
+                      En cumplimiento con las disposiciones legales y reglamentarias que rigen nuestras actividades, se establece la siguiente normatividad aplicable:
+                  </p>
+                  <p>
+                    <strong><a target="_blank" href="https://sc.inegi.org.mx/repositorioNormateca/RIINEGI31725.pdf">Reglamento interior del INEGI</a></strong>
+                  </p>
 
+                <!-- Artículo 31 -->
+                <h4 style="color: #009edb;">Artículo 31</h4>                
+                <div class="accordion" id="accordionFracciones31">
+                 
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingFraccion31I">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFraccion31I" aria-expanded="false" aria-controls="collapseFraccion31I">
+                        Fracción I
+                      </button>
+                    </h2>
+                    <div id="collapseFraccion31I" class="accordion-collapse collapse" aria-labelledby="headingFraccion31I" data-bs-parent="#accordionFracciones31">
+                      <div class="accordion-body">
+                        <p style=" text-align: justify; font-style: italic;">Coordinar los procesos de diseño, captación, producción, actualización, organización, procesamiento, integración y compilación de la información geográfica y del medio ambiente y coadyuvar en la publicación y
+                          difusión de dicha información con Dirección General de Comunicación, Servicio Público de Información y Relaciones Institucionales y conservarla en los términos que al efecto determine la Dirección General de Coordinación
+                           del Sistema Nacional de Información Estadística y Geográfica </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingFraccion31XIV">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFraccion31XIV" aria-expanded="false" aria-controls="collapseFraccion31XIV">
+                        Fracción XIV
+                      </button>
+                    </h2>
+                    <div id="collapseFraccion31XIV" class="accordion-collapse collapse" aria-labelledby="headingFraccion31XIV" data-bs-parent="#accordionFracciones31">
+                      <div class="accordion-body">
+                        <p style="text-align: justify; font-style: italic;">Asignar, controlar y determinar el marco conceptual y normativo del Subsistema Nacional de Información Geográfica, Medio Ambiente, Ordenamiento Territorial y Urbano, coordinando la elaboración e implementación de la normatividad
+                           para la integración de los datos geográficos, para producir, distribuir, homogeneizar, intercambiar y brindar acceso a la información geográfica que requieren los usuarios del Sistema en todos los sectores, para la toma de decisiones 
+                           en el ámbito federal, estatal y municipal </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingFraccion31XXII">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFraccion31XXII" aria-expanded="false" aria-controls="collapseFraccion31XXII">
+                         Fracción XXII 
+                      </button>
+                    </h2>
+                    <div id="collapseFraccion31XXII" class="accordion-collapse collapse" aria-labelledby="headingFraccion31XXII" data-bs-parent="#accordionFracciones31">
+                      <div class="accordion-body">
+                        <p style="text-align: justify; font-style: italic;">Coordinar la conformación de un sistema integrado de inventarios y encuestas sobre recursos 
+                          naturales y medio ambiente  </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                </div>
+                <br>
+                <!-- Artículo 33 -->
+                <h4 style="color: #009edb;">Artículo 33</h4>
+                <div class="accordion" id="accordionFracciones33">
+                  
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingFraccion33XIV">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFraccion33XIV" aria-expanded="false" aria-controls="collapseFraccion33XIV">
+                        Fracción XIV
+                      </button>
+                    </h2>
+                    <div id="collapseFraccion33XIV" class="accordion-collapse collapse" aria-labelledby="headingFraccion33XIV" data-bs-parent="#accordionFracciones33">
+                      <div class="accordion-body">
+                        <p style="text-align: justify; font-style: italic;">Propiciar la homogeneidad y congruencia de las estadísticas sobre el medio ambiente y productos generados en el Instituto, garantizando la comparabilidad con las producidas por otras instituciones nacionales e internacionales, así como, 
+                          promocionar los avances institucionales, en el ámbito de su competencia </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingFraccion33XIX">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFraccion33XIX" aria-expanded="false" aria-controls="collapseFraccion33XIX">
+                        Fracción  XIX
+                      </button>
+                    </h2>
+                    <div id="collapseFraccion33XIX" class="accordion-collapse collapse" aria-labelledby="headingFraccion33XIX" data-bs-parent="#accordionFracciones33">
+                      <div class="accordion-body">
+                        <p style="text-align: justify; font-style: italic;">Integrar, con la colaboración de las Unidades del Estado, un sistema de inventarios y encuestas sobre recursos naturales y medio ambiente, cuya información permita la elaboración de indicadores, como mínimo, sobre los siguientes temas: recursos naturales y clima, así como atmosfera, agua, suelo, flora, fauna, residuos peligrosos y residuos sólidos </p>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+                  <br>
+                  <!-- Ley del SNIEG -->
+              <strong><a target="_blank" href="https://sc.inegi.org.mx/repositorioNormateca/Lmj2_SNIEG.pdf">Ley del Sistema Nacional de Información Estadística y Geográfica</a></strong>
+              </p>
+              <div class="accordion" id="accordionArticulosSNIEG">
+                <div class="accordion-item">
+                  <h2 class="accordion-header" id="headingArticulo27">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseArticulo27" aria-expanded="false" aria-controls="collapseArticulo27">
+                      Artículo 27
+                    </button>
+                  </h2>
+                  <div id="collapseArticulo27" class="accordion-collapse collapse" aria-labelledby="headingArticulo27" data-bs-parent="#accordionArticulosSNIEG">
+                    <div class="accordion-body">
+                      <p style="text-align: justify; font-style: italic;">El Subsistema Nacional de Información Geográfica y del Medio Ambiente, en su componente del medio ambiente, procurará describir el estado y las tendencias del medio ambiente,
+                         considerando los medios naturales, las especies de plantas y animales, y otros organismos que se encuentran dentro de estos medios. 
+                         El Subsistema referido en el párrafo anterior, deberá generar, como mínimo, indicadores sobre los siguientes temas: atmósfera, agua, suelo, flora, fauna, residuos peligrosos y residuos sólidos. </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <h2 class="accordion-header" id="headingArticulo28">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseArticulo28" aria-expanded="false" aria-controls="collapseArticulo28">
+                      Artículo 28
+                    </button>
+                  </h2>
+                  <div id="collapseArticulo28" class="accordion-collapse collapse" aria-labelledby="headingArticulo28" data-bs-parent="#accordionArticulosSNIEG">
+                    <div class="accordion-body">
+                      <p style="text-align: justify; font-style: italic;">El Instituto elaborará, con la colaboración de las Unidades, los indicadores a que se refieren los dos artículos anteriores a partir de la información básica proveniente de:  
+                       <ul>
+                          <p style="text-align: justify; font-style: italic;"><strong style="color: #000000;">I.  </strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;El Sistema Nacional de Información Ambiental y de Recursos Naturales;  </p>
+                          <p style="text-align: justify; font-style: italic;"><strong style="color: #000000;">II. </strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Un sistema integrado de inventarios y encuestas sobre recursos naturales y medio ambiente, y </p>
+                          <p style="text-align: justify; font-style: italic;"><strong style="color: #000000;">III.</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Los registros administrativos que permitan obtener Información en la materia. </p>
+                       </ul>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <br>
+              <p>
+                Este marco normativo nos compromete a actuar con integridad, transparencia y responsabilidad en la gestión de la información, 
+                garantizando así el fortalecimiento del sistema de información que beneficia a la sociedad en su conjunto.
+              </p>
+          </div>
+          <hr>
+        </div>
       <!-- Mision y Vision -->
-        <div class="container">
+        <div class="container mb-4" >
            <!-- Columna Misión -->
             <div class="row align-items-stretch">
               <!-- Tipografías y Material Symbols de Misión-->
@@ -203,7 +354,7 @@
 
               <!-- Card de Misión -->
                 <div class="mision-card col-6 d-flex flex-column" style="font-family: 'Roboto', sans-serif;">
-                  <img src="img/CardMisionInegi.png" alt="Misión" style="width:100%; height:200px; object-fit: cover; border-radius: 12px 12px 0 0;">
+                  <img src="img/CardMisionInegi.png" alt="Misión" style="width:100%; height:50px; object-fit: cover; border-radius: 12px 12px 0 0;">
                     <div class="card-content" style="padding: 1.5rem; background-color: rgba(216, 206, 255, 0.85); border-radius: 0 0 12px 12px;">
                         <h3 style="margin-top: 0; color: #2b2b2b; display: flex; justify-content: space-between; align-items: center;">
                         Misión
@@ -212,12 +363,8 @@
                         </span>
                         </h3>
                         <p style="color: #5f5f5f; text-align: justify;">
-                        Proporcionar un espacio accesible y colaborativo que recabe, analice y difunda información relevante sobre los productos
-                        generados por el Instituto Nacional de Estadística y Geografía (INEGI) en temas relacionados con los recursos naturales
-                        y el medio ambiente, enfocándose en el desarrollo de indicadores en la materia. Nuestro objetivo es contribuir al
-                        cumplimiento de los Objetivos de Desarrollo Sostenible (ODS) de la Organización de las Naciones Unidas (ONU), al Marco
-                        para el Desarrollo de Estadísticas Ambientales (MDEA) de la CEPAL y los indicadores clave del país, promoviendo la toma
-                        de decisiones informadas y la sostenibilidad en las políticas públicas.
+                        Facilitar el acceso y consulta de las variables captadas en los Procesos de Producción del INEGI que contienen información ambiental, promoviendo su uso 
+                        para la construcción y análisis de indicadores que fortalezcan el conocimiento sobre el medio ambiente y los recursos naturales del país. 
                         </p>
                     </div>
                 </div>
@@ -231,7 +378,7 @@
                 
                <!-- Card de Misión -->
                 <div class="card-vision col-6 d-flex flex-column" style="font-family: 'Roboto', sans-serif; ">
-                  <img src="img/CardVisionInegi.png" alt="Visión" style="width:100%; height:200px; object-fit: cover; border-radius: 12px 12px 0 0;">
+                  <img src="img/CardVisionInegi.png" alt="Visión" style="width:100%; height:50px; object-fit: cover; border-radius: 12px 12px 0 0;">
                   <div class="card-content h-100" style="padding: 1.5rem; background-color: rgba(191, 239, 236, 0.85); border-radius: 0 0 12px 12px;">
                       <h3>
                          <span class="d-flex align-items-center justify-content-between" style="color: #0a1c2c;">
@@ -240,9 +387,8 @@
                          </span>
                       </h3>
                     <p style="color: #5f5f5f; text-align: justify;">
-                      Ser el referente institucional en la generación y promoción de indicadores ambientales, impulsando propuestas innovadoras y 
-                      garantizando el acceso a datos precisos, confiables y actualizados. Aspiramos a fomentar una cultura de transparencia y
-                      colaboración entre unidades administrativas, impulsando un desarrollo sostenible integral que beneficie a la sociedad.
+                      Consolidarse como una plataforma institucional de referencia que integre y difunda información ambiental de manera estructurada, contribuyendo al desarrollo 
+                      de indicadores confiables y comparables que respalden la planeación, evaluación y toma de decisiones en materia ambiental. 
                     </p>
                   </div>
                 </div>
@@ -253,14 +399,13 @@
 
           
  <!-- Apartado Menu de Temas de Interes -->
-        <div class="container mt-5 mb-5">
+        <!-- <div class="container mt-5 mb-5">
           <h1 class="mb-4">Temas de interés</h1>
           <div class="tab-wrapper">
             <div class="tab-menu">
               <div class="tab-item active" data-target="inegi">Procesos de Producción</div>
               <div class="tab-item" data-target="ods">Variables</div>
-              <div class="tab-item" data-target="ind">Objetivos de Desarrollo Sostenible</div>
-              <div class="tab-item" data-target="geonode">Indicadores</div>
+              <div class="tab-item" data-target="geonode">Indicadores</div> 
             </div>
             <div class="tab-content">
               <div id="inegi" class="content-section active">
@@ -278,7 +423,7 @@
                   Su organización facilita la consulta y el aprovechamiento de la información disponible.
                 </p>
               </div>
-              <!-- <div id="ind" class="content-section">
+              <div id="ind" class="content-section">
                 <h2>Objetivos de Desarrollo Sostenible</h2>
                 <p>
                   Los Objetivos de Desarrollo Sostenible (ODS), adoptados por las Naciones Unidas en 2015, establecen una agenda global para erradicar la pobreza, proteger el planeta y garantizar el bienestar de todas las personas hacia 2030.
@@ -293,13 +438,12 @@
                   Estos indicadores se construyen a partir de datos confiables provenientes de diversas fuentes, incluidos los procesos de producción del inventario SIIERNMA,
                   y son fundamentales para evaluar el desempeño ambiental, apoyar la formulación de políticas públicas y dar seguimiento a compromisos nacionales e internacionales en materia ambiental.
                 </p>
-              </div> -->
+              </div>
             </div>
           </div>
-        </div>
-  
-        
-<script src="js/index.js"></script>
+        </div>  -->
+
+         <script src="js/index.js"></script>
 
         <!--! FOOTER -->
 <div class="container-fluid" style="background-color: #5d5d5d">
@@ -340,8 +484,6 @@
                     style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">SIODS</a></li>
                 <li class="nav-item mb-2"><a href="https://www.gob.mx/semarnat/acciones-y-programas/sistema-nacional-de-informacion-ambiental-y-de-recursos-naturales" target="_blank" class="nav-link p-0 text"
                     style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">SNIARN</a></li>
-                <li class="nav-item mb-2"><a href="#" [routerLink]="['/dg/new']" target="_blank"
-                  class="nav-link p-0 text" style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">Ver más...</a></li>
               </ul>
             </div>
           </div>

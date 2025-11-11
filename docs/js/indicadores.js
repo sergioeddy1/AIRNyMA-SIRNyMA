@@ -20,6 +20,7 @@ function parseTablaDatos(raw) {
 function humanizeKey(key) {
   const map = {
     anio: 'Año',
+    porcentaje: 'Porcentaje (%)', 
     area_urbana: 'Área urbana (km²)',
     vat: 'Vol. agua tratada (hm³)',
     vate: 'Tratada externamente (hm³)',
@@ -89,12 +90,70 @@ function buildTableHTML(rows) {
 // --- Fin Utils ---
 
 document.addEventListener("DOMContentLoaded", function () {
-  // Cargar datos de la API
-  fetch('https://invision-comparing-cheap-construct.trycloudflare.com/api/indicadores_ambientales')
-    .then(res => res.json())
-    .then(data => {
-      indicadoresData = data;
+ fetch('https://emperor-sydney-capability-youth.trycloudflare.com/api/indicadores_ambientales')
+  .then(res => res.json())
+  .then(data => {
+    indicadoresData = data;
+  });
+
+
+  
+ const tbody         = document.querySelector('.tabla-indicadores tbody');
+  if (!tbody) return;
+
+  const filtroAnio    = document.getElementById('filtroAnio');
+  const ordenNombre   = document.getElementById('ordenNombre');
+  const ordenAnio     = document.getElementById('ordenAnio');
+  const buscaIndicador= document.getElementById('buscaIndicador');
+
+  // Guardamos las filas originales
+  const allRows = Array.from(tbody.querySelectorAll('tr.indicador-row'));
+
+  function apply() {
+    const year = filtroAnio?.value || '';
+    const term = (buscaIndicador?.value || '').trim().toLowerCase();
+
+    // 1) Filtrar por año y por texto del indicador (1a celda)
+    let rows = allRows.filter(tr => {
+      const okYear = !year || tr.dataset.anio === year;
+      const name   = tr.cells[0]?.textContent?.toLowerCase() || '';
+      const okTerm = !term || name.includes(term);
+      return okYear && okTerm;
     });
+
+    // 2) Ordenar por nombre (si procede)
+    if (ordenNombre && ordenNombre.value) {
+      const dir = ordenNombre.value === 'asc' ? 1 : -1;
+      rows.sort((a, b) => {
+        const na = a.cells[0].textContent.trim().toLowerCase();
+        const nb = b.cells[0].textContent.trim().toLowerCase();
+        return na < nb ? -1*dir : na > nb ? 1*dir : 0;
+      });
+    }
+
+    // 3) Ordenar por año (si procede)
+    if (ordenAnio && ordenAnio.value) {
+      const dir = ordenAnio.value === 'asc' ? 1 : -1;
+      rows.sort((a, b) => {
+        const ya = parseInt(a.dataset.anio || '0', 10);
+        const yb = parseInt(b.dataset.anio || '0', 10);
+        return (ya - yb) * dir;
+      });
+    }
+
+    // 4) Pintar
+    tbody.innerHTML = '';
+    rows.forEach(tr => tbody.appendChild(tr));
+  }
+
+  // Listeners
+  filtroAnio?.addEventListener('change', apply);
+  ordenNombre?.addEventListener('change', apply);
+  ordenAnio?.addEventListener('change', apply);
+  buscaIndicador?.addEventListener('input', apply);
+
+  // Primer render
+  apply();
 
   // Script para el navbar
   const currentPath = window.location.pathname.split("/").pop();
@@ -110,6 +169,7 @@ document.addEventListener("DOMContentLoaded", function () {
  document.querySelectorAll('.indicador-row').forEach(row => {
   row.style.cursor = 'pointer';
   row.addEventListener('click', function () {
+    
     const indicadorNombre = this.getAttribute('data-indicador');
     const indicador = indicadoresData.find(i => i.nombreIndicador === indicadorNombre);
 
@@ -122,6 +182,22 @@ document.addEventListener("DOMContentLoaded", function () {
         // Parseo y tabla HTML
         const filasTabla = parseTablaDatos(indicador.tablaDatos);
         const tablaHTML = buildTableHTML(filasTabla);
+
+      // ¿Este indicador es el 23? (usa la propiedad real que traes: id, idIndicador, etc.)
+      const isGraficoImagen = Number(indicador.id) === 23;
+
+      // HTML del bloque de “Gráfico / tendencia”
+      const graficoHTML = isGraficoImagen
+        ? `
+          <div class="ratio ratio-16x9 d-flex align-items-center justify-content-center">
+            <img src="/assets/graficoid_23.png"
+                alt="Gráfico indicador 23"
+                class="img-fluid rounded border">
+          </div>`
+        : `
+          <div class="ratio ratio-16x9">
+            <canvas id="indicadorChart"></canvas>
+          </div>`;
 
  document.getElementById('indicadorModalBody').innerHTML = `
    <div class="container">
@@ -175,15 +251,16 @@ document.addEventListener("DOMContentLoaded", function () {
       <div class="col-md-8 bg-light border rounded p-2">${indicador.relevancia || ''}</div>
     </div>
 
-    <!-- Gráfico -->
+      <!-- Gráfico -->
     <div class="row align-items-start mb-3">
-      <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Gráfico / tendencia</div></div>
+      <div class="col-md-4">
+        <div class="fw-semibold small text-muted bg-light border rounded p-2">Gráfico / tendencia</div>
+      </div>
       <div class="col-md-8 bg-light border rounded p-2">
-        <div class="ratio ratio-16x9">
-          <canvas id="indicadorChart"></canvas>
-        </div>
+        ${graficoHTML}
       </div>
     </div>
+
 
     <!-- Frase / Notas -->
     <div class="row align-items-start mb-3">
@@ -254,10 +331,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   `;
     const onShown = () => {
-        renderIndicadorChart('indicadorChart', indicador.tablaDatos || indicador.tablaGraficos);
-        modalEl.removeEventListener('shown.bs.modal', onShown);
-      };
-      modalEl.addEventListener('shown.bs.modal', onShown);
+      if (!isGraficoImagen) {
+        renderIndicadorChart('indicadorChart', indicador.tablaGraficos);
+      }
+      modalEl.removeEventListener('shown.bs.modal', onShown);
+    };
+    modalEl.addEventListener('shown.bs.modal', onShown);
 
     } else {
       document.getElementById('indicadorModalLabel').textContent = indicadorNombre;
@@ -273,8 +352,8 @@ document.addEventListener("DOMContentLoaded", function () {
 // Script para el grafico de los indicadores
 let indicadorChartInstance = null;
 
-function getSerie(rawTablaDatos) {
-  const data = typeof rawTablaDatos === 'string' ? JSON.parse(rawTablaDatos) : rawTablaDatos;
+function getSerie(rawTablaGraficos) {
+  const data = typeof rawTablaGraficos === 'string' ? JSON.parse(rawTablaGraficos) : rawTablaGraficos;
   return Array.isArray(data) ? data : (Array.isArray(data?.serie) ? data.serie : []);
 }
 
@@ -286,6 +365,15 @@ function inferDatasets(serie) {
 
   // Posibles métricas conocidas (ajusta y amplía si quieres)
   const known = [
+    { key: 'puntos',  label: 'Número de puntos' }, // id=24
+    { key: 'calida',   label: 'Región cálida (%)' },
+    { key: 'tropical', label: 'Región tropical (%)' },
+    { key: 'templada', label: 'Región templada (%)' },
+    { key: 'mineria_pct',  label: 'Minería (%)' }, // id = 17
+    { key: 'indmanu_pct',  label: 'Industrias manufactureras (%)' }, // id = 17
+    { key: 'variacion_pct', label: 'Variación porcentual (%)' }, // id=2
+    { key: 'tasa_cambio',   label: 'Tasa de cambio' },            // id=5
+    { key: 'porcentaje', label: 'Porcentaje (%)' },
     { key: 'vat_hm3', label: 'Agua tratada (hm³)' },
     { key: 'vad_hm3', label: 'Descarga de agua residual (hm³)' },
     { key: 'vate',    label: 'Tratada externamente (hm³)' },
@@ -337,8 +425,8 @@ function inferDatasets(serie) {
   return { labels, datasets };
 }
 
-function renderIndicadorChart(canvasId, tablaDatos) {
-  const serie = getSerie(tablaDatos);
+function renderIndicadorChart(canvasId, tablaGraficos) {
+  const serie = getSerie(tablaGraficos);
   const { labels, datasets } = inferDatasets(serie);
   const ctx = document.getElementById(canvasId);
 
@@ -348,21 +436,62 @@ function renderIndicadorChart(canvasId, tablaDatos) {
   }
   if (!labels.length || !datasets.length) return;
 
+  // Detectar el eje X
+  const sample = serie[0] || {};
+  const labelKey = Object.keys(sample).find(k =>
+    k.toLowerCase() === 'anio' || k.toLowerCase() === 'año' || k === 'periodo'
+  ) || 'anio';
+  let axisTitleX = (labelKey === 'periodo') ? 'Periodo' : 'Año';
+
+  // Título Y por defecto
+  let axisTitleY = 'Porcentaje (%)';
+  if (serie.some(r => r.variacion_pct != null)) axisTitleY = 'Variación porcentual (%)';
+  if (serie.some(r => r.tasa_cambio   != null)) axisTitleY = 'Tasa de cambio';
+
+  // Caso id=24 (puntos): barras + título de eje Y numérico
+  const isPuntosOnly =
+    serie.some(r => r.puntos != null) &&
+    !serie.some(r =>
+      r.porcentaje != null || r.variacion_pct != null || r.tasa_cambio != null ||
+      r.Mdi != null || r.mdi != null || r.Msap != null || r.msap != null ||
+      r.vat_hm3 != null || r.vad_hm3 != null
+    );
+
+  const chartType = isPuntosOnly ? 'bar' : 'line';
+  if (isPuntosOnly) axisTitleY = 'Número de puntos';
+
+  // Ocultar y2 si no se usa
+  const usaY2 = datasets.some(ds => ds.yAxisID === 'y2');
+
   indicadorChartInstance = new Chart(ctx, {
-    type: 'line',
+    type: chartType,
     data: { labels, datasets },
     options: {
       responsive: true,
       maintainAspectRatio: true,
       scales: {
-        y: { beginAtZero: true, title: { display: true, text: 'Valores' } },
-        y2: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Porcentaje (%)' } },
-        x: { title: { display: true, text: 'Año' } }
+        y:  { beginAtZero: true, title: { display: true, text: axisTitleY } },
+        y2: { display: usaY2, beginAtZero: true, position: 'right',
+              grid: { drawOnChartArea: false },
+              title: { display: usaY2, text: 'Porcentaje (%)' } },
+        x:  { title: { display: true, text: axisTitleX } }
       },
       plugins: {
         legend: { position: 'bottom' },
-        tooltip: { mode: 'index', intersect: false }
-      }
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          callbacks: isPuntosOnly ? {
+            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString('es-MX')}`
+          } : {}
+        }
+      },
+      // Mejoras visuales para barras (sólo aplica si es bar)
+      ...(isPuntosOnly ? {
+        datasets: {
+          bar: { borderWidth: 0 }
+        }
+      } : {})
     }
   });
 }
