@@ -105,8 +105,18 @@ body, html {
                       <hr class="my-3">
 
                       <!-- Unidad Administrativa -->
-                      <h6 class="section-title">Unidad Administrativa</h6>
-                      <div id="unidadAdministrativaSection" class="mb-3">
+                     <div class="section-sticky">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <h6 class="section-title mb-0">Unidad Administrativa</h6>
+                          <button class="btn btn-link btn-sm text-decoration-none" type="button"
+                                  data-bs-toggle="collapse" data-bs-target="#unidadCollapse"
+                                  aria-expanded="false" aria-controls="unidadCollapse">
+                            <span class="collapse-label-unidad">Mostrar</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div id="unidadCollapse" class="collapse">
                         <div class="form-check">
                           <input type="radio" value="DGA1" id="infoDemografica" name="inlineRadioOptions" class="form-check-input">
                           <label for="infoDemografica" class="form-check-label">Unidad de Estadísticas Sociodemográficas</label>
@@ -142,14 +152,14 @@ body, html {
                         <div class="section-sticky">
                           <div class="d-flex justify-content-between align-items-center">
                             <h6 class="section-title mb-0">Procesos de Producción</h6>
-                            <button class="btn btn-link btn-sm text-decoration-none" type="button"
+                           <button class="btn btn-link btn-sm text-decoration-none" type="button"
                                     data-bs-toggle="collapse" data-bs-target="#procCollapse"
-                                    aria-expanded="true" aria-controls="procCollapse">
-                              <span class="collapse-label">Ocultar</span>
+                                    aria-expanded="false" aria-controls="procCollapse">
+                              <span class="collapse-label">Mostrar</span>
                             </button>
                           </div>
                         </div>
-                        <div id="procCollapse" class="collapse show">
+                        <div id="procCollapse" class="collapse">
                           <select id="processSelect" class="form-select mt-2" multiple size="6" aria-label="Procesos estadísticos"></select>
                           <div id="processSelectContainer" class="d-flex flex-wrap gap-1 mt-2"></div>
                         </div>

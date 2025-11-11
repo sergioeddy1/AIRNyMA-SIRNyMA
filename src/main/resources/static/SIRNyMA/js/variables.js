@@ -39,6 +39,22 @@ document.addEventListener("DOMContentLoaded", function () {
       collapseEl.addEventListener('shown.bs.collapse', () => { labelEl.textContent = 'Ocultar'; });
       collapseEl.addEventListener('hidden.bs.collapse', () => { labelEl.textContent = 'Mostrar'; });
     }
+
+    // Apartado de Unidad Administrativa colapsable
+const toggleUnidad = document.querySelector('[data-bs-target="#unidadCollapse"]');
+const unidadEl = document.getElementById('unidadCollapse');
+const labelUnidad = toggleUnidad?.querySelector('.collapse-label-unidad');
+
+if (unidadEl && toggleUnidad && labelUnidad) {
+
+  // Forzamos inicio colapsado al cargar (igual que procesos)
+  const unidadCollapse = bootstrap.Collapse.getOrCreateInstance(unidadEl, { toggle: false });
+  unidadCollapse.hide();
+
+  unidadEl.addEventListener('shown.bs.collapse', () => { labelUnidad.textContent = 'Ocultar'; });
+  unidadEl.addEventListener('hidden.bs.collapse', () => { labelUnidad.textContent = 'Mostrar'; });
+}
+
  
 window.renderLocked     = false;  // evita renders mientras aplicamos URL
 window.initialPaintDone = false;  // ya hicimos el primer render “válido”
@@ -212,7 +228,7 @@ function rebuildClasifIndex() {
 
 
   async function fetchVariablesDesdeUltima() {
-    const urlUltima = "http://10.109.1.13:3002/api/indicadores/ultima";
+    const urlUltima = "http://10.109.1.13:1024/api/indicadores/ultima";
     const res = await fetch(urlUltima);
     if (!res.ok) throw new Error(`ultima respondió ${res.status}`);
     const payload = await res.json();
@@ -439,7 +455,7 @@ function hasDatosAbiertos(variable) {
 
   // trae y aplana /indicadores/ultima → array de variables en shape local
   async function fetchVariablesDesdeUltima() {
-    const urlUltima = "http://10.109.1.13:3002/api/indicadores/ultima";
+    const urlUltima = "http://10.109.1.13:1024/api/indicadores/ultima";
     const res = await fetch(urlUltima);
     if (!res.ok) throw new Error(`ultima respondió ${res.status}`);
     const payload = await res.json();
@@ -497,7 +513,7 @@ function hasDatosAbiertos(variable) {
   }
 
   async function fetchProcesosEconomicas() {
-    const urlProcesosEco = "http://10.109.1.13:3002/api/procesos/buscar?unidad=" +
+    const urlProcesosEco = "http://10.109.1.13:1024/api/procesos/buscar?unidad=" +
                            encodeURIComponent("Unidad de Estadísticas Económicas");
     const res = await fetch(urlProcesosEco);
     if (!res.ok) throw new Error("procesos Económicas respondió " + res.status);
@@ -2582,7 +2598,6 @@ document.addEventListener("click", async function (e) {
                 ${t.urlDescarga ? `<strong>Descarga:</strong> <a href="${t.urlDescarga}" target="_blank" style="word-break: break-all;">Descargar</a>` : ""}
               </div>
             </div>
-            // ${t.comentarioA ? `<div class="small mt-1">${t.comentarioA}</div>` : ""}
           </div>
         `).join("");
         modalBody.innerHTML = html || "<div class='text-danger'>No hay tabulados disponibles.</div>";

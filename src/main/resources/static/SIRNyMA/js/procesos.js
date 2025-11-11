@@ -539,9 +539,9 @@ function renderContadorVariablesUnidad(conteoGlobal, { animateMs = 350 } = {}) {
 // --- Carga ECONÓMICAS (Base de datos nueva) ---
 async function cargarEconomicas({ container }) {
   renderLoader(container, "Cargando procesos (Económicas)...");
-  const urlProcesos = "http://10.109.1.13:3002/api/procesos/buscar?unidad=" +
+  const urlProcesos = "http://10.109.1.13:1024/api/procesos/buscar?unidad=" +
                       encodeURIComponent("Unidad de Estadísticas Económicas");
-  const urlVariablesEco = "http://10.109.1.13:3002/api/indicadores/ultima";
+  const urlVariablesEco = "http://10.109.1.13:1024/api/indicadores/ultima";
 
   try {
     const economicasRaw = await fetch(urlProcesos).then(r => r.json());
