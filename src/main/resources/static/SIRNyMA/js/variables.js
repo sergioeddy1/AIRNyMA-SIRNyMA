@@ -2569,75 +2569,161 @@ document.addEventListener("click", async function (e) {
   }
 
   // ============ TABULADOS ============
-  if (e.target.classList.contains("badge-tabulado")) {
-    document.getElementById("infoModalLabel").textContent = "Detalle de la Relación con Tabulados";
-    const idVar = e.target.getAttribute("data-idvar");
-    const modalBody = document.getElementById("infoModalBody");
-    modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
+ if (e.target.classList.contains("badge-tabulado")) {
+  document.getElementById("infoModalLabel").textContent = "Detalle de la Relación con Tabulados";
+  const idVar = e.target.getAttribute("data-idvar");
+  const modalBody = document.getElementById("infoModalBody");
+  modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
 
-    try {
-      const variable = getVariableByIdVar(idVar);
+  const isExcelLike = v =>
+    typeof v === "string" && (v.toLowerCase().includes("xls") || v.toLowerCase().includes("xlsx"));
 
-      // 1) Si la variable viene de Económicas y trae tabulados embebidos, úsalo
-      if (variable && variable._source === "economicas-ultima" && Array.isArray(variable._tabuladosList) && variable._tabuladosList.length) {
-        const html = variable._tabuladosList.map(t => `
-          <div class="mb-3 border-bottom pb-2">
-            <strong>${t.tabulado || "Tabulado"}</strong><br>
-            ${t.tipo ? `<span class="small text-muted">${t.tipo}</span><br>` : ""}
-            <div class="row">
-              <div class="col-6">
-                ${t.urlAcceso ? `<strong>Acceso:</strong> <a href="${t.urlAcceso}" target="_blank" style="word-break: break-all;">Abrir</a>` : ""}
-              </div>
-              <div class="col-6">
-                ${t.urlDescarga ? `<strong>Descarga:</strong> <a href="${t.urlDescarga}" target="_blank" style="word-break: break-all;">Descargar</a>` : ""}
-              </div>
-            </div>
-          </div>
-        `).join("");
-        modalBody.innerHTML = html || "<div class='text-danger'>No hay tabulados disponibles.</div>";
-        return;
-      }
-      // 2) Fallback a tus endpoints locales
-      const resVarTab = await fetch('/api/var-tab');
-      const dataVarTab = await resVarTab.json();
-      const relaciones = Array.isArray(dataVarTab) ? dataVarTab.filter(rel => rel.idVar === idVar) : [];
+  const isInteractivo = v =>
+    typeof v === "string" && v.toLowerCase().includes("interactivo");
 
-      if (!relaciones.length) {
-        modalBody.innerHTML = "<div class='text-danger'>No hay tabulados relacionados con esta variable.</div>";
-        return;
-      }
+  const isVistaWeb = v =>
+    typeof v === "string" && v.toLowerCase().includes("vista web");
 
-      const resTabulados = await fetch('/api/tabulado');
-      const tabulados = await resTabulados.json();
+  try {
+    const variable = getVariableByIdVar(idVar);
 
-      const contenido = relaciones.map(rel => {
-        const tabulado = Array.isArray(tabulados) ? tabulados.find(tab => tab.idTab === rel.idTab) : null;
-        if (!tabulado) return "";
+    // Caso 1: Económicas con tabulados embebidos en la variable
+    if (variable && variable._source === "economicas-ultima" &&
+        Array.isArray(variable._tabuladosList) && variable._tabuladosList.length) {
+
+      const html = variable._tabuladosList.map(t => {
+        const tipo = t.tipo || "";
+        const excel = isExcelLike(tipo);
+        const inter = isInteractivo(tipo);
+        const vistaWeb = isVistaWeb(tipo);
+
+        // Meta: prioriza HOJA para económicas si existe; si no, usa numTab
+        const metaLinea =
+          (t.hoja ? `<span><i class="bi bi-file-earmark-text me-1"></i> ${t.hoja}</span>` : "") +
+          (!t.hoja && t.numTab ? `<span><i class="bi bi-file-earmark-text me-1"></i> ${t.numTab}</span>` : "");
+
+        // Botón principal de la derecha (descarga o interactivo o vista web si aplica)
+        // Nota: por requerimiento, los botones de urlDescarga se van a la DERECHA con el meta.
+        const botonDerecha = t.urlDescarga ? `
+          <a href="${t.urlDescarga}" target="_blank"
+             class="btn-download ${excel ? "btn-excel" : inter ? "btn-interactivo" : "btn-download-default"}">
+            ${excel ? `<i class="bi bi-filetype-xlsx me-1"></i> EXCEL`
+                    : inter ? `<i class="bi bi-bar-chart-line me-1"></i> Interactivo`
+                            : `<i class="bi bi-download me-1"></i> Descargar`}
+          </a>` : "";
+
+        // Acciones de la IZQUIERDA: Ver en INEGI + Vista Web (si aplica con su propia URL)
+        // Si hay un link específico de vista web, úsalo; si no, lo omitimos.
+        const botonVistaWebIzq = (vistaWeb && t.urlAcceso)
+          ? `<a href="${t.urlAcceso}" target="_blank" class="btn-web">
+               <i class="bi bi-globe2 me-1"></i> Vista web
+             </a>`
+          : "";
+
+        const botonAccesoInegiIzq = t.urlAcceso ? `
+          <a href="${t.urlAcceso}" target="_blank" class="btn-link-inegi">
+            <i class="bi bi-link-45deg me-1"></i> Ver en INEGI
+          </a>` : "";
+
         return `
-          <div class="mb-3 border-bottom pb-2">
-            ${tabulado.tituloTab ? `<strong>Título del tabulado:</strong><br><span>${tabulado.tituloTab}</span><br>` : ''}
-            <div class="row">
-              <div class="col-6">
-                ${tabulado.ligaTab ? `<strong>Liga Tabulado INEGI:</strong><br><a href="${tabulado.ligaTab}" target="_blank" style="word-break: break-all;">Tabulado</a><br>` : ''}
+          <div class="tabulado-card">
+            <div class="tabulado-title">${t.tabulado || "Tabulado"}</div>
+
+            <div class="tabulado-actions">
+              <div class="ta-left">
+                ${botonAccesoInegiIzq}
+                ${botonVistaWebIzq}
               </div>
-              <div class="col-6">
-                ${tabulado.ligaDescTab ? `<strong>Liga de Descarga:</strong><br><a href="${tabulado.ligaDescTab}" target="_blank" style="word-break: break-all;">Documento Directo</a><br>` : ''}
+              <div class="ta-right">
+                <div class="ta-right-buttons">
+                  ${botonDerecha}
+                </div>
+                <div class="tabulado-info text-end">
+                  ${metaLinea}
+                </div>
               </div>
             </div>
-            ${(tabulado.numTab || tabulado.tipoTab) ? `
-              <strong>Información adicional:</strong><br>
-              ${tabulado.numTab ? `Número: ${tabulado.numTab}<br>` : ''}
-              ${tabulado.tipoTab ? `Tipo: ${tabulado.tipoTab}<br>` : ''}` : ''}
           </div>
         `;
       }).join("");
 
-      modalBody.innerHTML = contenido || "<div class='text-danger'>No hay ligas disponibles para los tabulados relacionados.</div>";
-    } catch (error) {
-      console.error(error);
-      document.getElementById("infoModalBody").innerHTML = "<div class='text-danger'>Error al cargar la información.</div>";
+      modalBody.innerHTML = html || "<div class='text-danger'>No hay tabulados disponibles.</div>";
+      return;
     }
+
+    // Caso 2: Fallback a endpoints locales
+    const resVarTab = await fetch('/api/var-tab');
+    const dataVarTab = await resVarTab.json();
+    const relaciones = Array.isArray(dataVarTab) ? dataVarTab.filter(rel => rel.idVar === idVar) : [];
+
+    if (!relaciones.length) {
+      modalBody.innerHTML = "<div class='text-danger'>No hay tabulados relacionados con esta variable.</div>";
+      return;
+    }
+
+    const resTabulados = await fetch('/api/tabulado');
+    const tabulados = await resTabulados.json();
+
+    const contenido = relaciones.map(rel => {
+      const tabulado = Array.isArray(tabulados) ? tabulados.find(tab => tab.idTab === rel.idTab) : null;
+      if (!tabulado) return "";
+
+      const tipo = tabulado.tipoTab || "";
+      const excel = isExcelLike(tipo);
+      const inter = isInteractivo(tipo);
+      const vistaWeb = isVistaWeb(tipo);
+
+      // Meta: si existe 'hoja' úsala; si no, usa número
+      const metaLinea =
+        (tabulado.hoja ? `<span><i class="bi bi-file-earmark-text me-1"></i> ${tabulado.hoja}</span>` : "") +
+        (!tabulado.hoja && tabulado.numTab ? `<span><i class="bi bi-file-earmark-text me-1"></i> ${tabulado.numTab}</span>` : "");
+
+      const botonDerecha = tabulado.ligaDescTab ? `
+        <a href="${tabulado.ligaDescTab}" target="_blank"
+           class="btn-download ${excel ? "btn-excel" : inter ? "btn-interactivo" : "btn-download-default"}">
+          ${excel ? `<i class="bi bi-filetype-xlsx me-1"></i> EXCEL`
+                  : inter ? `<i class="bi bi-bar-chart-line me-1"></i> Interactivo`
+                          : `<i class="bi bi-download me-1"></i> Descargar`}
+        </a>` : "";
+
+      const botonVistaWebIzq = (vistaWeb && tabulado.ligaTab) ? `
+        <a href="${tabulado.ligaTab}" target="_blank" class="btn-web">
+          <i class="bi bi-globe2 me-1"></i> Vista web
+        </a>` : "";
+
+      const botonAccesoInegiIzq = tabulado.ligaTab ? `
+        <a href="${tabulado.ligaTab}" target="_blank" class="btn-link-inegi">
+          <i class="bi bi-link-45deg me-1"></i> Ver en INEGI
+        </a>` : "";
+
+      return `
+        <div class="tabulado-card">
+          ${tabulado.tituloTab ? `<div class="tabulado-title">${tabulado.tituloTab}</div>` : ""}
+
+          <div class="tabulado-actions">
+            <div class="ta-left">
+              ${botonAccesoInegiIzq}
+              ${botonVistaWebIzq}
+            </div>
+            <div class="ta-right">
+              <div class="ta-right-buttons">
+                ${botonDerecha}
+              </div>
+              <div class="tabulado-info text-end">
+                ${metaLinea}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    modalBody.innerHTML = contenido || "<div class='text-danger'>No hay ligas disponibles para los tabulados relacionados.</div>";
+  } catch (error) {
+    console.error(error);
+    modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información.</div>";
   }
+}
 
   // ============ MICRODATOS ============
   if (e.target.classList.contains("badge-microdatos")) {
