@@ -376,6 +376,37 @@ function wireFiltrosYOrden({ procesosGlobal, conteoGlobal, container }) {
   document.getElementById("iinCheck").addEventListener("change", aplicarFiltrosYOrden);
   document.getElementById("ordenarProcesos").addEventListener("change", aplicarFiltrosYOrden);
 
+  // Botón para restablecer filtros (si existe en el DOM)
+  const resetBtn = document.getElementById("resetFiltrosBtn");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      // Restaurar controles a valores por defecto
+      const estatusEl = document.getElementById("filtrarEstatus");
+      if (estatusEl) estatusEl.value = "";
+
+      if (selectPerio) selectPerio.value = "";
+
+      const iinEl = document.getElementById("iinCheck");
+      if (iinEl) iinEl.checked = false;
+
+      if (ordenarSel) {
+        ordenarSel.value = "az";
+        ordenarSel.dataset.init = "1";
+      }
+
+      // si hay un input de búsqueda, limpiar también (id ejemplo: buscarVariable)
+      const buscar = document.getElementById("buscarVariable");
+      if (buscar) buscar.value = "";
+
+      // volver a aplicar filtros y re-render
+      aplicarFiltrosYOrden();
+
+      // opcional: devolver foco a primer control
+      if (selectPerio) selectPerio.focus();
+    });
+  }
+
   // Primera pintada
   aplicarFiltrosYOrden();
 }

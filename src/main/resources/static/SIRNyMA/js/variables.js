@@ -2570,7 +2570,7 @@ document.addEventListener("click", async function (e) {
 
   // ============ TABULADOS ============
  if (e.target.classList.contains("badge-tabulado")) {
-  document.getElementById("infoModalLabel").textContent = "Detalle de la Relación con Tabulados";
+  document.getElementById("infoModalLabel").textContent = "Tabulado(s) asociado(s)";
   const idVar = e.target.getAttribute("data-idvar");
   const modalBody = document.getElementById("infoModalBody");
   modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
@@ -2725,160 +2725,273 @@ document.addEventListener("click", async function (e) {
   }
 }
 
-  // ============ MICRODATOS ============
-  if (e.target.classList.contains("badge-microdatos")) {
-    document.getElementById("infoModalLabel").textContent = "Detalle de la Relación con Microdatos";
-    const idVar = e.target.getAttribute("data-idvar");
-    const modalBody = document.getElementById("infoModalBody");
-    modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
+// ============ MICRODATOS ============
+if (e.target.classList.contains("badge-microdatos")) {
+  document.getElementById("infoModalLabel").textContent = "Microdato(s) asociado(s)";
+  const idVar = e.target.getAttribute("data-idvar");
+  const modalBody = document.getElementById("infoModalBody");
+  modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
 
-    try {
-      const variable = getVariableByIdVar(idVar);
+  // Detecta tipo de archivo por extensión
+  const getTipoDescarga = (url = "") => {
+    const low = url.toLowerCase();
+    if (low.endsWith(".xls") || low.endsWith(".xlsx")) return "excel";
+    if (low.endsWith(".pdf")) return "pdf";
+    if (low.endsWith(".zip")) return "zip";
+    return "web";
+  };
 
-      // 1) Si viene de Económicas y trae microdatos embebidos, úsalo
-    // ECONÓMICAS con microdatos embebidos
-           if (variable && variable._source === "economicas-ultima" &&
-              Array.isArray(variable._microdatosList) && variable._microdatosList.length) {
+  const buildDownloadButton = (url) => {
+    if (!url) return "";
+    const tipo = getTipoDescarga(url);
+    let cls = "";
+    let icon = "";
+    let label = "";
 
-            const html = variable._microdatosList.map(m => {
-              const comentario = String(m.comentarioA || "").trim();
-              const showLabMsg =
-                comentario.includes("Datos disponibles en el laboratorio de microdatos") ||
-                comentario.includes("Microdatos disponibles en el laboratorio de microdatos");
-
-              // mensaje resaltado con estilo INEGI
-              const labMsgHTML = showLabMsg
-                ? `<div class="microdatos-lab-msg mt-3">
-                    ${comentario.match(/(Datos disponibles en el laboratorio de microdatos|Microdatos disponibles en el laboratorio de microdatos)/)[0]}
-                  </div>`
-                : "";
-
-                 return `
-                  <div class="mb-3 border-bottom pb-2">
-                    ${m.urlAcceso ? `<div><strong>Acceso:</strong> <a href="${m.urlAcceso}" target="_blank" style="word-break: break-all;">${m.urlAcceso}</a></div>` : ""}
-                    ${m.urlDescriptor ? `<div><strong>Descriptor:</strong> <a href="${m.urlDescriptor}" target="_blank" style="word-break: break-all;">${m.urlDescriptor}</a></div>` : ""}
-                    ${(m.tabla || m.campo) ? `<div><strong>Ubicación:</strong> ${m.tabla || "-"} / ${m.campo || "-"}</div>` : ""}
-                    ${m.descriptor ? `<div class="small text-muted">${m.descriptor}</div>` : ""}
-                    ${labMsgHTML || (comentario && comentario !== "-" ? `<div class="small text-muted mt-1">${comentario}</div>` : "")}
-                  </div>
-                `;
-              }).join("");
-
-              modalBody.innerHTML = html || "<div class='text-danger'>No hay microdatos disponibles.</div>";
-              return;
-            }
-
-      // 2) Fallback a /api/microdatos
-      const res = await fetch(`/api/microdatos`);
-      const data = await res.json();
-      const info = Array.isArray(data)
-        ? data.find(micro => String(micro.idVar) === String(idVar))
-        : (data && data.idVar === idVar ? data : null);
-
-      if (info && (info.ligaMicro || info.ligaDd || info.nomTabla || info.nomCampo)) {
-        modalBody.innerHTML = `
-          ${info.ligaMicro ? `
-            <div class="mb-2"><strong>Liga Microdatos:</strong><br>
-            <a href="${info.ligaMicro}" target="_blank" style="word-break: break-all;">Página Microdatos INEGI</a></div>` : ""}
-
-          ${info.ligaDd ? `
-            <div class="mb-2"><strong>Liga de Descarga:</strong><br>
-            <a href="${info.ligaDd}" target="_blank" style="word-break: break-all;">Documento Directo</a></div>` : ""}
-
-          ${(info.nomTabla || info.nomCampo) ? `
-            <div class="mb-2"><strong>Ubicación:</strong><br>
-              ${info.nomTabla || "No disponible"} / ${info.nomCampo || "No disponible"}
-            </div>` : ""}
-        `;
-      } else {
-        modalBody.innerHTML = "<div class='text-danger'>No hay información de microdatos disponible.</div>";
-      }
-    } catch (err) {
-      console.error(err);
-      modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información.</div>";
+    switch (tipo) {
+      case "excel":
+        cls = "btn-excel";
+        icon = '<i class="bi bi-filetype-xlsx me-1"></i>';
+        label = "EXCEL";
+        break;
+      case "pdf":
+        cls = "btn-pdf";
+        icon = '<i class="bi bi-file-earmark-pdf me-1"></i>';
+        label = "PDF";
+        break;
+      case "zip":
+        cls = "btn-zip";
+        icon = '<i class="bi bi-file-earmark-zip me-1"></i>';
+        label = "ZIP";
+        break;
+      default:
+        cls = "btn-web-download";
+        icon = '<i class="bi bi-globe2 me-1"></i>';
+        label = "Web";
+        break;
     }
+
+    return `
+      <a href="${url}" target="_blank"
+         class="btn-download ${cls}">
+        ${icon} ${label}
+      </a>
+    `;
+  };
+
+  try {
+    const variable = getVariableByIdVar(idVar);
+
+    // 1) ECONÓMICAS con microdatos embebidos
+    if (variable &&
+        variable._source === "economicas-ultima" &&
+        Array.isArray(variable._microdatosList) &&
+        variable._microdatosList.length) {
+
+      const html = variable._microdatosList.map(m => {
+        const comentario = String(m.comentarioA || "").trim();
+
+        const showLabMsg =
+          comentario.includes("Datos disponibles en el laboratorio de microdatos") ||
+          comentario.includes("Microdatos disponibles en el laboratorio de microdatos");
+
+        const labMsgHTML = showLabMsg
+          ? `<div class="microdatos-lab-msg mt-3">
+               ${comentario.match(/(Datos disponibles en el laboratorio de microdatos|Microdatos disponibles en el laboratorio de microdatos)/)[0]}
+             </div>`
+          : "";
+
+        const botonDerecha = buildDownloadButton(m.urlDescriptor || m.urlAcceso);
+
+        const metaLinea = (m.tabla || m.campo)
+          ? `<span><i class="bi bi-hdd-network me-1"></i>${m.tabla || "-"} / ${m.campo || "-"}</span>`
+          : "";
+
+        return `
+          <div class="tabulado-card micro-card">
+           
+            <div class="tabulado-actions">
+              <!-- IZQUIERDA: Página Microdatos INEGI -->
+              <div class="ta-left">
+                ${m.urlAcceso ? `
+                  <a href="${m.urlAcceso}" target="_blank" class="btn-link-inegi">
+                    <i class="bi bi-link-45deg me-1"></i> Página Microdatos INEGI
+                  </a>` : ""}
+              </div>
+
+              <!-- DERECHA: botón de descarga + ubicación -->
+              <div class="ta-right">
+                <div class="ta-right-buttons">
+                  ${botonDerecha}
+                </div>
+                <div class="tabulado-info text-end">
+                  ${metaLinea}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      modalBody.innerHTML = html || "<div class='text-danger'>No hay microdatos disponibles.</div>";
+      return;
+    }
+
+    // 2) Fallback a /api/microdatos (sociodemográficas, etc.)
+    const res = await fetch(`/api/microdatos`);
+    const data = await res.json();
+    const info = Array.isArray(data)
+      ? data.find(micro => String(micro.idVar) === String(idVar))
+      : (data && data.idVar === idVar ? data : null);
+
+    if (info && (info.ligaMicro || info.ligaDd || info.nomTabla || info.nomCampo)) {
+
+      const botonDerecha = buildDownloadButton(info.ligaDd);
+
+      const metaLinea = (info.nomTabla || info.nomCampo)
+        ? `<span><i class="bi bi-hdd-network me-1"></i>${info.nomTabla || "No disponible"} / ${info.nomCampo || "No disponible"}</span>`
+        : "";
+
+      modalBody.innerHTML = `
+        <div class="tabulado-card micro-card">
+
+          <div class="tabulado-actions">
+            <!-- IZQUIERDA: Página Microdatos INEGI -->
+            <div class="ta-left">
+              ${info.ligaMicro ? `
+                <a href="${info.ligaMicro}" target="_blank" class="btn-link-inegi">
+                  <i class="bi bi-link-45deg me-1"></i> Página Microdatos INEGI
+                </a>` : ""}
+            </div>
+
+            <!-- DERECHA: botón descarga + ubicación -->
+            <div class="ta-right">
+              <div class="ta-right-buttons">
+                ${botonDerecha}
+              </div>
+              <div class="tabulado-info text-end">
+                ${metaLinea}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+      modalBody.innerHTML = "<div class='text-danger'>No hay información de microdatos disponible.</div>";
+    }
+  } catch (err) {
+    console.error(err);
+    modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información.</div>";
   }
+}
 
   // ============ DATOS ABIERTOS ============
-  if (e.target.classList.contains("badge-datosabiertos")) {
-  if (e.target.classList.contains("disabled")) return; // ← evita abrir modal
+// ============ DATOS ABIERTOS ============
+if (e.target.classList.contains("badge-datosabiertos")) {
 
-    const labelEl = document.getElementById("infoModalLabel");
-    const bodyEl  = document.getElementById("infoModalBody");
+  if (e.target.classList.contains("disabled")) return;
 
-    // Limpieza inmediata para evitar "arrastres"
-    if (labelEl) labelEl.textContent = "Detalle de la Relación con Datos Abiertos";
-    if (bodyEl)  bodyEl.innerHTML = "<div class='text-center'>Cargando...</div>";
+  const labelEl = document.getElementById("infoModalLabel");
+  const bodyEl  = document.getElementById("infoModalBody");
 
-    const idVar  = e.target.getAttribute("data-idvar");
-    // Utilidad como en tus otros bloques
-    function getVariableByIdVar(id) {
-      return (Array.isArray(allData) ? allData : []).find(v => String(v.idVar) === String(id));
-    }
+  if (labelEl) labelEl.textContent = "Datos Abiertos asociados";
+  if (bodyEl)  bodyEl.innerHTML = "<div class='text-center'>Cargando...</div>";
 
-    try {
-      const variable = getVariableByIdVar(idVar);
-      const unidad   = getUnidadDeVariable(variable);
+  const idVar  = e.target.getAttribute("data-idvar");
 
-      // SOCIO: mostrar leyenda dentro del modal
-      if (unidad === 'socio') {
-        if (bodyEl) {
-          bodyEl.innerHTML = `
-            <div class="alert alert-info mb-0">En proceso de captura</div>`;
-        }
-        return;
-      }
-
-      // ECO con datos embebidos correctamente
-      if (variable &&
-          variable.relAbiertos === 'Sí' &&
-          Array.isArray(variable._datosAbiertosList) &&
-          variable._datosAbiertosList.length) {
-
-        const contenido = variable._datosAbiertosList.map(r => `
-          <div class="mb-3 border-bottom pb-2">
-            ${r.urlAcceso ? `
-              <div class="mb-1">
-                <strong>Acceso:</strong><br>
-                <a href="${r.urlAcceso}" target="_blank" style="word-break: break-all;">${r.urlAcceso}</a>
-              </div>` : ""}
-
-            ${r.urlDescarga ? `
-              <div class="mb-1">
-                <strong>Descarga:</strong><br>
-                <a href="${r.urlDescarga}" target="_blank" style="word-break: break-all;">${r.urlDescarga}</a>
-              </div>` : ""}
-
-            ${(r.tabla || r.campo) ? `
-              <div class="mb-1">
-                <strong>Ubicación:</strong><br>
-                ${r.tabla || "No disponible"} / ${r.campo || "No disponible"}
-              </div>` : ""}
-
-            ${r.descriptor ? `
-              <div class="mb-1">
-                <strong>Descriptor:</strong><br>${r.descriptor}
-              </div>` : ""}
-
-            ${r.comentarioA && r.comentarioA !== "-" ? `
-              <div class="small text-muted mt-1">${r.comentarioA}</div>` : ""}
-          </div>
-        `).join("");
-
-        if (bodyEl) bodyEl.innerHTML = contenido || "<div class='text-danger'>No hay información disponible.</div>";
-        return;
-      }
-
-      // ECO sin lista (si por alguna razón llegara aquí)
-      if (bodyEl) {
-        bodyEl.innerHTML = "<div class='alert alert-warning mb-0'>No se encontraron registros de Datos Abiertos para esta variable.</div>";
-      }
-    } catch (err) {
-      console.error(err);
-      if (bodyEl) bodyEl.innerHTML = "<div class='text-danger'>Error al cargar Datos Abiertos.</div>";
-    }
+  function getVariableByIdVar(id) {
+    return (Array.isArray(allData) ? allData : []).find(v => String(v.idVar) === String(id));
   }
 
+  // Detectores de tipo de archivo
+  const isExcel = v => typeof v === "string" && (v.includes(".xls") || v.includes(".xlsx"));
+  const isPdf   = v => typeof v === "string" && v.includes(".pdf");
+  const isZip   = v => typeof v === "string" && v.includes(".zip");
+
+  try {
+    const variable = getVariableByIdVar(idVar);
+    const unidad   = getUnidadDeVariable(variable);
+
+    // SOCIO: en proceso de captura
+    if (unidad === 'socio') {
+      bodyEl.innerHTML = `<div class="alert alert-info mb-0">En proceso de captura</div>`;
+      return;
+    }
+
+    // ECONÓMICAS con datos embebidos
+    if (variable &&
+        variable.relAbiertos === 'Sí' &&
+        Array.isArray(variable._datosAbiertosList) &&
+        variable._datosAbiertosList.length) {
+
+      const contenido = variable._datosAbiertosList.map(r => {
+        const file = r.urlDescarga || "";
+        let btnClass = "btn-web";
+        let btnIcon  = `<i class="bi bi-globe2 me-1"></i>`;
+        let btnText  = "Ver";
+
+        if (isExcel(file)) {
+          btnClass = "btn-excel";
+          btnIcon = `<i class="bi bi-filetype-xlsx me-1"></i>`;
+          btnText = "EXCEL";
+        } else if (isPdf(file)) {
+          btnClass = "btn-pdf";
+          btnIcon = `<i class="bi bi-filetype-pdf me-1"></i>`;
+          btnText = "PDF";
+        } else if (isZip(file)) {
+          btnClass = "btn-zip";
+          btnIcon = `<i class="bi bi-file-earmark-zip me-1"></i>`;
+          btnText = "ZIP";
+        }
+
+        const botonDerecha = r.urlDescarga ? `
+          <a href="${r.urlDescarga}" target="_blank"
+             class="btn-download ${btnClass}">
+            ${btnIcon} ${btnText}
+          </a>` : "";
+
+        const ubicacion = (r.tabla || r.campo)
+          ? `<div class="tabulado-info text-end">
+               <span><i class="bi bi-file-earmark-text me-1"></i>
+               ${(r.tabla || "No disponible")} / ${(r.campo || "No disponible")}
+               </span>
+             </div>`
+          : "";
+
+        return `
+          <div class="tabulado-card">
+            
+            <div class="tabulado-actions">
+              <div class="ta-left">
+                ${r.urlAcceso ? `
+                  <a href="${r.urlAcceso}" target="_blank" class="btn-link-inegi">
+                    <i class="bi bi-link-45deg me-1"></i> Página Datos Abiertos INEGI
+                  </a>` : ""}
+              </div>
+
+              <div class="ta-right">
+                <div class="ta-right-buttons">
+                  ${botonDerecha}
+                </div>
+                ${ubicacion}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      bodyEl.innerHTML = contenido || "<div class='text-danger'>No hay información disponible.</div>";
+      return;
+    }
+
+    // Si no hay embebidos
+    bodyEl.innerHTML = "<div class='alert alert-warning mb-0'>No se encontraron registros de Datos Abiertos para esta variable.</div>";
+
+  } catch (err) {
+    console.error(err);
+    bodyEl.innerHTML = "<div class='text-danger'>Error al cargar Datos Abiertos.</div>";
+  }
+}
 
   // ============ MDEA (chips) ============
 if (e.target.closest(".mdea-chip")) {
