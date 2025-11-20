@@ -13,6 +13,28 @@ document.addEventListener("DOMContentLoaded", function () {
   const alinMdeaCheckbox = document.getElementById("alinMdeaCheckbox");
   const alinOdsCheckbox = document.getElementById("alinOdsCheckbox");
 
+  // Paleta de colores por ODS (ajústala si ya tienes otra)
+  const ODS_COLORS = {
+    "1":  "#e5243b",
+    "2":  "#dda63a",
+    "3":  "#4c9f38",
+    "4":  "#c5192d",
+    "5":  "#ff3a21",
+    "6":  "#26bde2",
+    "7":  "#fcc30b",
+    "8":  "#a21942",
+    "9":  "#fd6925",
+    "10": "#dd1367",
+    "11": "#fd9d24",
+    "12": "#bf8b2e",
+    "13": "#3f7e44",
+    "14": "#0a97d9",
+    "15": "#56c02b",
+    "16": "#00689d",
+    "17": "#19486a"
+  };
+
+
   // Variables globales
   const params = new URLSearchParams(window.location.search);
   let itemsPerPage = parseInt(15);
@@ -24,7 +46,9 @@ document.addEventListener("DOMContentLoaded", function () {
     currentPage= 1;
     applyFilters();
   })
+
  
+
   let allData = [];
   let currentFilteredData = [];
 
@@ -2560,8 +2584,54 @@ searchForm.addEventListener("submit", function (e) {
         }, 100);
     }
     });
-    // Evento delegado para mostrar información de tabulados y microdatos en el modal
- // === REEMPLAZA COMPLETO TU LISTENER ACTUAL POR ESTE ===
+
+// Aplica color de ODS al header del modal
+function setOdsModalHeaderColor(odsNumber) {
+  const modal  = document.getElementById("infoModal");
+  if (!modal) return;
+
+  const header = modal.querySelector(".modal-header");
+  if (!header) return;
+
+  const color = ODS_COLORS[String(odsNumber)] || "";
+  if (!color) return;
+
+  modal.classList.add("ods-active");
+  header.style.backgroundColor = color;
+  header.style.color = "#ffffff";
+}
+
+function resetModalHeaderColor() {
+  const modal  = document.getElementById("infoModal");
+  if (!modal) return;
+
+  modal.classList.remove("ods-active");
+
+  const header = modal.querySelector(".modal-header");
+  if (!header) return;
+
+  header.style.backgroundColor = "";
+  header.style.color = "";
+}
+
+// Reset seguro al cerrar el modal
+document.addEventListener("DOMContentLoaded", () => {
+  const modal = document.getElementById("infoModal");
+  if (!modal) return;
+
+  modal.addEventListener("hidden.bs.modal", () => {
+    modal.classList.remove("ods-active");
+    const header = modal.querySelector(".modal-header");
+    if (!header) return;
+
+    header.style.backgroundColor = "";
+    header.style.color = "";
+    resetModalHeaderColor();
+  });
+});
+
+// Evento delegado para mostrar información de tabulados y microdatos en el modal
+
 document.addEventListener("click", async function (e) {
   // Utilidad: busca la variable en allData por idVar
   function getVariableByIdVar(idVar) {
@@ -2570,6 +2640,7 @@ document.addEventListener("click", async function (e) {
 
   // ============ TABULADOS ============
  if (e.target.classList.contains("badge-tabulado")) {
+   
   document.getElementById("infoModalLabel").textContent = "Tabulado(s) asociado(s)";
   const idVar = e.target.getAttribute("data-idvar");
   const modalBody = document.getElementById("infoModalBody");
@@ -2723,10 +2794,13 @@ document.addEventListener("click", async function (e) {
     console.error(error);
     modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información.</div>";
   }
+  resetModalHeaderColor();  
 }
 
 // ============ MICRODATOS ============
+ 
 if (e.target.classList.contains("badge-microdatos")) {
+   
   document.getElementById("infoModalLabel").textContent = "Microdato(s) asociado(s)";
   const idVar = e.target.getAttribute("data-idvar");
   const modalBody = document.getElementById("infoModalBody");
@@ -2883,10 +2957,11 @@ if (e.target.classList.contains("badge-microdatos")) {
     console.error(err);
     modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información.</div>";
   }
+  resetModalHeaderColor(); 
 }
 
-  // ============ DATOS ABIERTOS ============
 // ============ DATOS ABIERTOS ============
+ 
 if (e.target.classList.contains("badge-datosabiertos")) {
 
   if (e.target.classList.contains("disabled")) return;
@@ -2991,10 +3066,12 @@ if (e.target.classList.contains("badge-datosabiertos")) {
     console.error(err);
     bodyEl.innerHTML = "<div class='text-danger'>Error al cargar Datos Abiertos.</div>";
   }
+   resetModalHeaderColor(); 
 }
 
   // ============ MDEA (chips) ============
 if (e.target.closest(".mdea-chip")) {
+    
   const trigger = e.target.closest(".mdea-chip");
   const idVar   = trigger.getAttribute("data-idvar");
   const compNum = parseInt(trigger.getAttribute("data-mdea-comp"), 10);
@@ -3128,24 +3205,30 @@ if (e.target.closest(".mdea-chip")) {
       modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información del MDEA.</div>";
     }
   })();
+  resetModalHeaderColor(); 
 }
 
 
-  // ============ ODS ============
+// ============ ODS ============
 if (e.target.closest(".badge-ods")) {
-  const trigger = e.target.closest(".badge-ods");  // <- asegura capturar el elemento correcto
+  const trigger = e.target.closest(".badge-ods");
   if (trigger.classList.contains("disabled")) return;
 
-  const clickedOds = trigger.getAttribute("data-ods"); // 1..17 o null
+  const clickedOds = trigger.getAttribute("data-ods"); // "1".."17"
   const idVar      = trigger.getAttribute("data-idvar");
 
+  const modal      = document.getElementById("infoModal");
   const modalTitle = document.getElementById("infoModalLabel");
   const modalBody  = document.getElementById("infoModalBody");
 
+  // Aplica color SOLO si viene un ODS válido
+  if (clickedOds && modal) {
+    setOdsModalHeaderColor(clickedOds);
+  }
+
+  // Título genérico de arranque (se sobreescribe con el nombre del ODS)
   if (modalTitle) {
-    modalTitle.textContent = clickedOds
-      ? `Alineación de la variable con los ODS (ODS ${clickedOds})`
-      : "Alineación de la variable con los ODS";
+    modalTitle.textContent = "Alineación de la variable con los ODS";
   }
   if (modalBody) modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
 
@@ -3172,32 +3255,37 @@ if (e.target.closest(".badge-ods")) {
         return;
       }
 
-          modalBody.innerHTML = `
-          <div class="mb-2"><strong>${fmt(variable.varAsig || idVar)}</strong></div>
-          <div class="list-group">
-            ${lista.map(o => {
-              const objNum = formatOdsObjetivo(o.objetivo); 
-              const objNom = fmt(o.objetivoNombre);         
-              const meta   = formatOdsComposite(o.meta);    
-              const ind    = formatOdsComposite(o.indicador)
+      // Usamos el PRIMER registro para construir el título del modal (ODS N. Nombre)
+      const first  = lista[0];
+      const objNum = formatOdsObjetivo(first.objetivo);
+      const objNom = fmt(first.objetivoNombre);
 
-              return `
-                <div class="list-group-item">
-                  <div class="d-flex w-100 justify-content-between align-items-start">
-                    <h6 class="mb-1">ODS: ${objNum} ${objNom}</h6>
-                  </div>
-                  <div class="small mb-1"><strong>Meta ODS detectada:</strong> ${meta}</div>
-                  <div class="small mb-1"><strong>Indicador ODS:</strong> ${ind}</div>
-                </div>
-              `;
-            }).join("")}
-          </div>
+      if (modalTitle && clickedOds) {
+        modalTitle.textContent = `ODS ${objNum}. ${objNom}`;
+      }
+
+      const varTitle = fmt(variable.varAsig || idVar);
+
+      modalBody.innerHTML = `
+        <div class="mb-2"><strong>${varTitle}</strong></div>
+        <div class="list-group">
+          ${lista.map(o => {
+            const meta = formatOdsComposite(o.meta);
+            const ind  = formatOdsComposite(o.indicador);
+            return `
+              <div class="list-group-item">
+                <div class="small mb-1"><strong>Meta ODS detectada:</strong> ${meta}</div>
+                <div class="small mb-1"><strong>Indicador ODS:</strong> ${ind}</div>
+              </div>
+            `;
+          }).join("")}
+        </div>
       `;
       return;
     }
 
     // 2) Fallback a /api/ods (sociodemo, etc.)
-    const res = await fetch(`/api/ods`);
+    const res  = await fetch(`/api/ods`);
     const data = await res.json();
     let registros = Array.isArray(data)
       ? data.filter(ods => String(ods.idVar) === String(idVar))
@@ -3213,41 +3301,43 @@ if (e.target.closest(".badge-ods")) {
       return;
     }
 
+    const first  = registros[0];
+    const objNum = formatOdsObjetivo(first.ods ?? first.objetivo);
+    const objNom = fmt(first.odsNombre || first.objetivoNombre || first.ods);
+
+    if (modalTitle && clickedOds) {
+      modalTitle.textContent = `ODS ${objNum}. ${objNom}`;
+    }
+
     const varTitle = fmt((variable?.varAsig) || idVar);
-       modalBody.innerHTML = `
-          <div class="mb-2"><strong>${varTitle}</strong></div>
-          <div class="list-group">
-            ${registros.map(info => {
-              const objNum = formatOdsObjetivo(info.ods ?? info.objetivo);
-              const objNom = fmt(info.odsNombre || info.objetivoNombre || info.ods);
-              // 👇 limpiamos guiones y mantenemos formato 12.2 / 12.2.1
-              const meta = cleanUnderscores(formatOdsComposite(info.meta));
-              const ind  = cleanUnderscores(formatOdsComposite(info.indicador));
 
-              return `
-                <div class="list-group-item">
-                  <div class="d-flex w-100 justify-content-between align-items-start">
-                    <h6 class="mb-1">ODS: ${objNum} ${objNom}</h6>
-                  </div>
-                  <div class="small mb-1"><strong>Meta ODS detectada:</strong> ${meta}</div>
-                  <div class="small mb-1"><strong>Indicador ODS:</strong> ${ind}</div>
-                  ${info.comentOds && info.comentOds.trim() !== "-" ? `<div class="small text-muted">${cleanUnderscores(info.comentOds)}</div>` : ""}
-                </div>
-              `;
-            }).join("")}
-          </div>
-        `;
-
-
+    modalBody.innerHTML = `
+      <div class="mb-2"><strong>${varTitle}</strong></div>
+      <div class="list-group">
+        ${registros.map(info => {
+          const meta   = cleanUnderscores(formatOdsComposite(info.meta));
+          const ind    = cleanUnderscores(formatOdsComposite(info.indicador));
+          const coment = info.comentOds && info.comentOds.trim() !== "-"
+            ? `<div class="small text-muted">${cleanUnderscores(info.comentOds)}</div>`
+            : "";
+          return `
+            <div class="list-group-item">
+              <div class="small mb-1"><strong>Meta ODS detectada:</strong> ${meta}</div>
+              <div class="small mb-1"><strong>Indicador ODS:</strong> ${ind}</div>
+              ${coment}
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
   } catch (err) {
     console.error(err);
     modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información de ODS.</div>";
   }
 }
 
+});
 
-});
-});
 
 // Almacenar y recuperar término de búsqueda en localStorage
 document.addEventListener("DOMContentLoaded", function () {
@@ -3289,25 +3379,6 @@ fetch('/api/clasificaciones')
   .catch(console.error);
 
 
-
-function getClasificacionesPorVariable(idVar) {
-  // Filtra las clasificaciones que correspondan a la variable y descarta vacíos, nulos o '-'
-  const clasifs = clasificacionesGlobal
-    .filter(clasif => clasif.idVar === idVar)
-    .map(clasif => clasif.clasificaciones)
-    .filter(val => val && val.trim() !== '' && val.trim() !== '-');
-
-  // Puedes mostrar como lista o como badges
-  if (clasifs.length > 0) {
-    // Como lista
-    return `<ul class="mb-0 ps-3">${clasifs.map(c => `<li>${c}</li>`).join('')}</ul>`;
-    // O como badges:
-    // return clasifs.map(c => `<span class="badge bg-secondary me-1 mb-1">${c}</span>`).join('');
-  } else {
-    return '<span class="text-muted">Sin clasificación</span>';
-  }
-}
-
 function getClasificacionesPorVariableHighlighted(idVar, term) {
   const clasifs = clasificacionesGlobal
     .filter(c => c.idVar === idVar)
@@ -3322,24 +3393,7 @@ function getClasificacionesPorVariableHighlighted(idVar, term) {
 }
 
 // Nueva función para renderizar comentarios
-function renderComentarios(comentario) {
-  if (
-    !comentario ||
-    comentario.trim() === '' ||
-    comentario.trim() === '-' ||
-    comentario.trim().toLowerCase() === 'nula' ||
-    comentario.trim().toLowerCase() === 'null' ||
-    comentario.trim().toLowerCase() === 'n/a'
-  ) {
-    return ''; // No mostrar nada
-  }
-  return `
-    <div class="mb-2 ms-1">
-      <span class="fw-semibold">Comentario:</span>
-      <div>${comentario}</div>
-    </div>
-  `;
-}
+
 
 // Espera al menos 1000ms antes de mostrar el contenido principal
 window.addEventListener("DOMContentLoaded", function() {
@@ -3349,13 +3403,6 @@ window.addEventListener("DOMContentLoaded", function() {
   }, 2000);
 });
 
-function formatIdWithDots(id) {
-  if (!id) return "";
-  const str = String(id).trim();
-  // Divide cada caracter por punto, incluyendo letras
-  return str.split("").join(".");
-}
-
 // Resaltar término de búsqueda en los resultados
 function highlightTerm(text, term) {
   if (!term) return text;
@@ -3363,3 +3410,8 @@ function highlightTerm(text, term) {
   const regex = new RegExp(`(${escaped})`, 'gi');
   return text.replace(regex, '<mark class="custom-highlight">$1</mark>');
 }
+
+// ……………………………
+// AQUÍ TERMINA TODA LA LÓGICA DE VARIABLES
+// ……………………………
+});
