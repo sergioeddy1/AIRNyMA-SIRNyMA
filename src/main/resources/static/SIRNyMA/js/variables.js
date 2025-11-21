@@ -3500,8 +3500,6 @@ if (e.target.closest(".badge-ods")) {
   }
 }
 
-
-
 }); // ← fin del addEventListener
 
 
