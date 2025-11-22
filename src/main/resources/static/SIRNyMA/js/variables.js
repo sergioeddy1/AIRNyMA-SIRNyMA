@@ -715,7 +715,13 @@ function buildMdeaChips(idVar, compArray) {
     </button>
   `).join("");
 }
+
+function cleanComponentName(name) {
+  if (!name) return "";
+  return name.replace(/_/g, " ").trim();
+}
 // ==== FIN HELPERS MDEA/ODS ====
+
 
     // Referencias a los checkboxes
 const relTabCheckbox = document.getElementById("relTabCheckbox");
@@ -2581,6 +2587,13 @@ searchForm.addEventListener("submit", function (e) {
     }
     });
 
+    // funcion para obtener el valor de una variable CSS
+function getCssVar(name) {
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue(name)
+    .trim();
+}
+
 // ==========================================
 // HELPERS PARA HEADER DEL MODAL (ODS)
 // ==========================================
@@ -2714,6 +2727,13 @@ function getIndicadorNameFromCatalog(objNum, metaRaw, indRaw, catalog) {
 document.getElementById("infoModal").addEventListener("hidden.bs.modal", () => {
   resetModalHeaderColor();
 });
+
+function safeField(str) {
+  if (!str) return "";
+  const s = String(str).trim();
+  if (s === "-" || s.toLowerCase() === "null" || s === "") return "";
+  return s;
+}
 
 
 // Evento delegado para mostrar información de tabulados y microdatos en el modal
@@ -2881,7 +2901,7 @@ document.addEventListener("click", async function (e) {
     console.error(error);
     modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información.</div>";
   }
-  resetModalHeaderColor();  
+   
 }
 
   // ============ MICRODATOS ============
@@ -3045,7 +3065,7 @@ document.addEventListener("click", async function (e) {
     console.error(err);
     modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información.</div>";
   }
-  resetModalHeaderColor(); 
+ 
 }
 
 // ============ DATOS ABIERTOS ============
@@ -3156,151 +3176,179 @@ document.addEventListener("click", async function (e) {
     console.error(err);
     bodyEl.innerHTML = "<div class='text-danger'>Error al cargar Datos Abiertos.</div>";
   }
-   resetModalHeaderColor(); 
+  
 }
 
-  // ============ MDEA (chips) ============
-  const mdeaTrigger = e.target.closest(".mdea-chip");
-  if (mdeaTrigger) {
-    resetModalHeaderColor();   // <- aquí
 
-    const idVar   = mdeaTrigger.getAttribute("data-idvar");
-    const compNum = parseInt(mdeaTrigger.getAttribute("data-mdea-comp"), 10);
+// ============ MDEA (chips) ============
+// ============ MDEA (chips) ============
+if (e.target.closest(".mdea-chip")) {
+  
+  // Limpiar header SIEMPRE antes de pintar el nuevo
+  resetModalHeaderColor();
 
-    const modalTitle = document.getElementById("infoModalLabel");
-    const modalBody  = document.getElementById("infoModalBody");
-    if (modalTitle) modalTitle.textContent = `Alineación con MDEA (Componente ${compNum})`;
-    if (modalBody)  modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
+  const trigger  = e.target.closest(".mdea-chip");
+  const idVar    = trigger.getAttribute("data-idvar");
+  const compNum  = parseInt(trigger.getAttribute("data-mdea-comp"), 10);
 
-  const fmt = (s) => (s || "-").toString().replace(/_/g, " ").replace(/\s+/g, " ").trim();
+  const modal      = document.getElementById("infoModal");
+  const modalTitle = document.getElementById("infoModalLabel");
+  const modalBody  = document.getElementById("infoModalBody");
+
+  if (modalBody) modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
+
+  const fmt = (s) =>
+    (s || "")
+      .toString()
+      .replace(/_/g, " ")
+      .replace(/-/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
 
   function getVariableByIdVar(id) {
-    return (Array.isArray(allData) ? allData : []).find(v => String(v.idVar) === String(id));
+    return (Array.isArray(allData) ? allData : []).find(
+      (v) => String(v.idVar) === String(id)
+    );
+  }
+
+  // Obtener unidad (eco/socio)
+  function getUnidadDeVariable(v) {
+    if (!v) return null;
+    if (v._source === "economicas-ultima") return "eco";
+    return "socio";
   }
 
   (async () => {
     try {
       const variable = getVariableByIdVar(idVar);
+      const unidad   = getUnidadDeVariable(variable);
 
-     // 1) ECONÓMICAS con lista embebida
-          if (variable && variable._source === "economicas-ultima" &&
-              Array.isArray(variable._mdeasList) && variable._mdeasList.length) {
+      // Pintar header según unidad
+      if (modal) {
+        if (unidad === "eco") modal.querySelector(".modal-header").style.background = "var(--eco)";
+        else modal.querySelector(".modal-header").style.background = "var(--socio)";
+        modal.querySelector(".modal-header").style.color = "white";
+      }
 
-            const lista = variable._mdeasList.filter(m => getMdeaComponentNumber(m.componente) === compNum);
-            if (!lista.length) {
-              modalBody.innerHTML = "<div class='text-danger'>No hay información MDEA para ese componente.</div>";
-              return;
-            }
+      // ========================
+      //    ECONÓMICAS MDEA
+      // ========================
+      if (
+        variable &&
+        variable._source === "economicas-ultima" &&
+        Array.isArray(variable._mdeasList) &&
+        variable._mdeasList.length
+      ) {
+        const lista = variable._mdeasList.filter(
+          (m) => getMdeaComponentNumber(m.componente) === compNum
+        );
 
-            // ✅ Mostrar: CÓDIGO (punteado) + NOMBRE. Sin guiones si no hay nombre.
-            modalBody.innerHTML = lista.map(m => {
-              // Preferimos los campos *Nombre* del endpoint
-              const scName = (m.subcomponenteNombre || "").trim();
-              const tName  = (m.temaNombre || "").trim();
-              const e1Name = (m.estadistica1Nombre || "").trim();
-              const e2Name = (m.estadistica2Nombre || "").trim();
+        if (!lista.length) {
+          modalBody.innerHTML =
+            "<div class='text-danger'>No hay información MDEA para ese componente.</div>";
+          return;
+        }
 
-              // Códigos crudos
-              const scCode = (m.subcomponente || "").trim();
-              const tCode  = (m.tema || "").trim();
-              const e1Code = (m.estadistica1 || "").trim();
-              const e2Code = (m.estadistica2 || "").trim();
+        // Obtener nombre del componente para el TÍTULO
+        const compNameRaw = lista[0].componenteNombre || "";
+        const compTitle = fmt(
+          compNameRaw
+            .replace(/^\d+\s*/, "")    // quitar número al inicio
+            .replace(/\s*\d+$/, "")    // quitar número al final
+        );
 
-              // Código punteado (25→2.5, 253b1→2.5.3.b.1)
-              const scDot = scCode ? dotifyMdeaCode(scCode) : "";
-              const tDot  = tCode  ? dotifyMdeaCode(tCode)  : "";
-              const e1Dot = e1Code ? dotifyMdeaCode(e1Code) : "";
-              const e2Dot = e2Code ? dotifyMdeaCode(e2Code) : "";
+        modalTitle.textContent = `Componente ${compNum} — ${compTitle}`;
 
-              // Línea helper: muestra "COD NOMBRE" si hay nombre; si no, solo COD; si no hay nada, no imprime
-              const line = (label, codeDot, name) => {
-                if (!codeDot && !name) return "";
-                const text = name ? `${codeDot} ${name}` : codeDot;
-                return `<div><strong>${label}:</strong> ${text}</div>`;
-              };
+        modalBody.innerHTML = lista
+          .map((m) => {
+            const scName = fmt(m.subcomponenteNombre);
+            const tName = fmt(m.temaNombre);
+            const e1Name = fmt(m.estadistica1Nombre);
+            const e2Name = fmt(m.estadistica2Nombre);
 
-              const lineComponente = `<div><strong>Componente:</strong> ${compNum} ${fmt(m.componenteNombre)}</div>`;
-              const lineSubcomp    = line("Subcomponente", scDot, scName);
-              const lineTema       = line("Tema",          tDot,  tName);
-              const lineE1         = line("Estadística 1", e1Dot, e1Name);
-              const lineE2         = line("Estadística 2", e2Dot, e2Name);
+            // NO mostrar si vienen vacíos, null o "-"
+            const line = (label, val) =>
+              val && val !== "-" ? `<div><strong>${label}:</strong> ${val}</div>` : "";
 
-              return `
-                <div class="mb-2 border-bottom pb-2">
-                  ${lineComponente}
-                  ${lineSubcomp}
-                  ${lineTema}
-                  ${lineE1}
-                  ${lineE2}
-                  <!-- contribución/comentario ocultos a petición -->
-                </div>
-              `;
-            }).join("");
-            return;
-}
+            return `
+              <div class="mb-2 border-bottom pb-2">
+                ${line("Subcomponente", scName)}
+                ${line("Tema", tName)}
+                ${line("Estadística 1", e1Name)}
+                ${line("Estadística 2", e2Name)}
+              </div>
+            `;
+          })
+          .join("");
 
-
-      // 2) SOCIO (fallback /api/mdea). Puede venir 1 registro; filtramos por compNum si posible
-      const all = await fetch('/api/mdea').then(r => r.json()).then(d => Array.isArray(d) ? d : (d ? [d] : []));
-      let registros = all.filter(r => String(r.idVar) === String(idVar));
-
-      if (!registros.length) {
-        modalBody.innerHTML = "<div class='text-danger'>No hay información del MDEA para esta variable.</div>";
         return;
       }
 
-      // Si hay varios, intenta filtrar por componente numérico detectado en campos comunes
-      const byComp = registros.filter(r => {
-        const n = getMdeaComponentNumber(r.componente ?? r.compo ?? r.componenteNombre ?? r.componenteId ?? r.componenteCodigo);
+      // ========================
+      //    SOCIODEMOGRÁFICAS
+      // ========================
+      const all = await fetch("/api/mdea")
+        .then((r) => r.json())
+        .then((d) => (Array.isArray(d) ? d : d ? [d] : []));
+
+      let registros = all.filter((r) => String(r.idVar) === String(idVar));
+
+      if (!registros.length) {
+        modalBody.innerHTML =
+          "<div class='text-danger'>No hay información del MDEA para esta variable.</div>";
+        return;
+      }
+
+      const byComp = registros.filter((r) => {
+        const n = getMdeaComponentNumber(
+          r.componente ??
+            r.compo ??
+            r.componenteNombre ??
+            r.componenteId ??
+            r.componenteCodigo
+        );
         return n === compNum;
       });
+
       if (byComp.length) registros = byComp;
 
-      // Render (mantén tu formato original, pero encabezando con el componente)
-     modalBody.innerHTML = registros.map(info => {
-        const num  = getMdeaComponentNumber(
-          info.componente ?? info.compo ?? info.componenteNombre ?? info.componenteId ?? info.componenteCodigo
-        ) ?? compNum;
+      const rawName =
+        registros[0].componenteNombre ??
+        registros[0].componente ??
+        registros[0].compo ??
+        "";
 
-        // 👇 elimina el número repetido al final (ej. “...salud ambiental 5” → “...salud ambiental”)
-        const compNameRaw = (info.componenteNombre ?? info.componente ?? info.compo ?? "");
-        const compNameNoEdges = String(compNameRaw)
-        .replace(/^\s*\d+\s*[.\-:]?\s*/, "")   // inicio
-        .replace(/\s*\b\d+\b\s*$/, "")         // final
-        .trim();
+      const compTitle = fmt(
+        rawName.replace(/^\d+\s*/, "").replace(/\s*\d+$/, "")
+      );
 
-       const lineComponente = `<div><strong>Componente:</strong> ${fmt(compNameNoEdges)}</div>`;
+      modalTitle.textContent = `Componente ${compNum} — ${compTitle}`;
 
-        const lineSubcomp = (info.subcompo || info.subcomponente)
-          ? `<div><strong>Subcomponente:</strong> ${fmt(info.subcompo ?? info.subcomponente)}</div>` : "";
-        const lineTema = (info.topico || info.tema)
-          ? `<div><strong>Tema/Tópico:</strong> ${fmt(info.topico ?? info.tema)}</div>` : "";
-        const lineE1 = (info.estAmbiental || info.estadistica1)
-          ? `<div><strong>Estadística 1:</strong> ${fmt(info.estAmbiental ?? info.estadistica1)}</div>` : "";
-        const lineE2 = (info.estadistica2)
-          ? `<div><strong>Estadística 2:</strong> ${fmt(info.estadistica2)}</div>` : "";
+      modalBody.innerHTML = registros
+        .map((info) => {
+          const line = (label, val) =>
+            val && val !== "-" ? `<div><strong>${label}:</strong> ${fmt(val)}</div>` : "";
 
-        return `
-          <div class="mb-2 border-bottom pb-2">
-            ${lineComponente}
-            ${lineSubcomp}
-            ${lineTema}
-            ${lineE1}
-            ${lineE2}
-          </div>
-        `;
-      }).join("");
-
+          return `
+            <div class="mb-2 border-bottom pb-2">
+              ${line("Subcomponente", info.subcompo || info.subcomponente)}
+              ${line("Tema/Tópico", info.topico || info.tema)}
+              ${line("Estadística 1", info.estAmbiental || info.estadistica1)}
+              ${line("Estadística 2", info.estadistica2)}
+            </div>
+          `;
+        })
+        .join("");
     } catch (err) {
       console.error(err);
-      modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información del MDEA.</div>";
+      modalBody.innerHTML =
+        "<div class='text-danger'>Error al cargar la información del MDEA.</div>";
     }
   })();
-  resetModalHeaderColor(); 
 }
 
 
-// ============ ODS ============
+
 // ============ ODS ============
 if (e.target.closest(".badge-ods")) {
   // Siempre que entro a ODS reseteo primero y luego pinto
