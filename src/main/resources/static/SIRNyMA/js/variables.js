@@ -602,6 +602,8 @@ function cleanUnderscores(str) {
   return (str || "").toString().replace(/_/g, " ").replace(/\s+/g, " ").trim();
 }
 
+
+
 let __odsCache__ = null;
 async function fetchOdsOnce() {
   if (__odsCache__) return __odsCache__;
@@ -2670,6 +2672,15 @@ function hasValidIndicador(ind) {
   return true;
 }
 
+function cleanOdsTitleName(raw) {
+  if (!raw) return "";
+
+  return String(raw)
+    .replace(/_\d+$/, "")   // ❗ borra solo los números del final
+    .replace(/_/g, " ")     // ❗ convierte guiones bajos a espacios
+    .trim();
+}
+
 // Obtiene id_meta tipo '4' a partir del código meta (14, 1.4, etc.)
 function getMetaIdFromCode(metaRaw) {
   if (metaRaw === null || metaRaw === undefined) return null;
@@ -3529,11 +3540,12 @@ if (e.target.closest(".badge-ods")) {
 
     const first  = registros[0];
     const objNum = formatOdsObjetivo(first.ods ?? first.objetivo);
-    const objNom = fmt(first.odsNombre || first.objetivoNombre || first.ods);
+    let rawName = first.odsNombre || first.objetivoNombre || first.ods;
 
-    if (modalTitle && clickedOds) {
-      modalTitle.textContent = `ODS ${objNum}. ${objNom}`;
-    }
+    // aplicar limpieza SOLO a sociodemográficas
+    const cleanName = cleanOdsTitleName(rawName);
+
+    modalTitle.textContent = `ODS ${objNum}. ${cleanName}`;
 
     const varTitle = fmt((variable?.varAsig) || idVar);
 
