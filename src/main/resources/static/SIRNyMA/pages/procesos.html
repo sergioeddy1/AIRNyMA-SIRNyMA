@@ -19,42 +19,54 @@
 
 <body>
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #003057;">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="index.html">
-                <img src="/assets/INEGI_g.png" alt="Logo INEGI" style="width: 9rem; filter: invert(1) brightness(2) contrast(1.5);">
-            </a>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #003057;">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="index.html">
+      <img src="/assets/INEGI_g.png" alt="Logo INEGI"
+           style="width: 9rem; filter: invert(1) brightness(2) contrast(1.5);">
+    </a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-            <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
-                <ul class="navbar-nav mx-auto gap-3">
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html">Inicio</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active fw-bold text-decoration-underline" aria-current="page" href="procesos.html">Procesos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="variables.html">Variables</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="ods.html">ODS</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="indicadores.html">Indicadores existentes</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <div class="collapse navbar-collapse" id="navbarNav">
+
+      <!-- 🔹 Menú de navegación -->
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0" style="gap: 0.5rem;"> <!-- 👈 espacio entre botones -->
+        <li class="nav-item">
+          <a class="nav-link"
+             href="procesos.html"
+             style="font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 6px; transition: background-color 0.2s;">
+            Procesos de Producción
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link"
+             href="variables.html"
+             style="font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 6px; transition: background-color 0.2s;">
+            Inventario de variables ambientales
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link"
+             aria-current="page"
+             href="indicadores.html"
+             style="font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 6px; transition: background-color 0.2s;">
+            Indicadores existentes
+          </a>
+        </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</nav>
 
     <!--Imagen encabezado de Procesos-->
     <div class="container-fluid p-0">
-        <div style="position: relative; width: 100%; height: 300px; overflow: hidden;">
+        <div class="header-img-container" style="position: relative; width: 100%; height: 180px; overflow: hidden;">
             <img src="/assets/encabezado_procesos.JPG" alt="Encabezado" style="width: 100%; height: 100%; object-fit: cover;">
             <div style="position: absolute; bottom: 20px; left: 40px; color: white; font-size: 2.5rem; font-weight: bold; text-shadow: 2px 2px 5px rgba(0,0,0,0.7);">
                 Procesos de Producción
@@ -66,44 +78,130 @@
 
     <div class="container mt-4">
         <div class="row">
-            <div class="col-md-12">
-                <h2 class="mb-4">Información en contexto</h2>
-                <p class="lead">La información en contexto es un conjunto de datos que permite entender y analizar un fenómeno o situación específica. En el caso de los procesos de producción, esta información es crucial para la toma de decisiones y la planificación estratégica.</p>
-                <p>En esta sección, podrás explorar los diferentes procesos de producción y las variables ambientales asociadas a cada uno de ellos. Utiliza el menú desplegable para seleccionar un proceso específico y ver sus detalles.</p>
+            <div class="col-md-12" style="text-align: justify;">
+                <!-- Procesos de Producción -->
+
+                <p> En esta sección se presentan los Procesos de Producción del INEGI que integran 
+                información relacionada con el medio ambiente y los recursos naturales. Estos
+                procesos constituyen la base de la producción institucional de datos estadísticos y 
+                geográficos del país, mediante los cuales se obtiene información que describe el
+                territorio, la población, la economía y el medio ambiente del país.</p>
+                
+                <p>Los <strong style="color: #009edb;">Procesos de Producción </strong> se definen como el conjunto de actividades técnicas, metodológicas y operativas mediante las cuales el Instituto genera
+                información estadística y geográfica, conforme a lo establecido en su <i>Modelo del Proceso Estadístico y Geográfico (MPEG)</i>. Dicho modelo comprende etapas como
+                la planeación, el diseño, la captación, el procesamiento, la difusión y el aseguramiento de la calidad de los datos,
+                provenientes de fuentes como censos, encuestas y registros administrativos.</p>
+                
+                <p>Cada proceso incluye atributos que permiten conocer su naturaleza y alcance, tales como la <strong style="color: #009edb;"> vigencia </strong>, la <strong style="color: #009edb;"> periodicidad </strong>, el <strong style="color: #009edb;"> estatus </strong> y la declaratoria de
+                <strong style="color: #009edb;"> Información de Interés Nacional (IIN) </strong>. Adicionalmente, en este portal se incorpora el número de <strong style="color: #009edb;"> variables ambientales </strong> a cada proceso,
+                con el propósito de facilitar la identificación de aquellos que contribuyen con información
+                relevante para el análisis ambiental.</p>
+                
+                <p>Para su consulta, los procesos se organizan conforme a las <strong style="color: #009edb;"> Unidades Administrativas </strong> del INEGI las cuales son: la <i>Unidad de Estadísticas Sociodemográficas</i>, la <i>Unidad de Estadísticas Económicas</i>, la <i>Unidad de Geografía y Medio Ambiente</i>, la <i>Unidad de Estadísticas de Gobierno,
+                Seguridad Pública y Justicia</i>, y la <i>Dirección General de Integración, Análisis e Investigación</i>, cada una responsable de desarrollar proyectos
+                en su respectivo ámbito temático. Esta estructura permite apreciar la diversidad de fuentes y enfoques con los que se genera la información ambiental
+                dentro del Instituto.</p>
+
+                <p>En conjunto, esta sección ambiental ofrece una visión integral de la manera en que la información ambiental se genera, organiza y consolida a través de los procesos de
+                producción estadística y geográfica del INEGI, fortaleciendo la transparencia y la comprensión sobre las fuentes que sustentan la generación de indicadores
+                ambientales.</p>
+                </p>
             </div>
         </div>
-        <p>Procesos de Producción de Información del INEGI
+    </div>
+</div>
 
-            El Instituto Nacional de Estadística y Geografía (INEGI) lleva a cabo sus procesos de producción de información estadística y geográfica bajo un riguroso marco normativo que garantiza la calidad, pertinencia, veracidad y oportunidad de los datos generados.
+    <!-- ==== Counters resumen (siempre visibles) ==== -->
+<div class="container mt-3 mb-2" id="summaryCounters">
+  <div class="row g-3">
 
-            Basado en los Principios Fundamentales de las Estadísticas Oficiales de Naciones Unidas y en su propia normativa interna, el INEGI estructura sus procesos en fases claramente definidas: documentación de necesidades, diseño, construcción, captación, procesamiento, análisis, difusión y evaluación. Cada fase asegura la generación de información comparable, accesible y alineada a estándares nacionales e internacionales.
-
-            Esta sección ofrece una visión detallada de los procesos que sustentan la producción de información estratégica, contribuyendo al fortalecimiento del Sistema Nacional de Información Estadística y Geográfica (SNIEG) y al desarrollo nacional, en apego a los más altos principios de transparencia, independencia y objetividad.</p>
+    <!-- Unidades Administrativas (global) -->
+    <div class="col-6 col-md-3">
+      <div class="scard d-flex align-items-center gap-3 p-3 rounded-3">
+        <div class="scard-icon scard-lilac">
+          <i class="bi bi-building"></i>
+        </div>
+        <div>
+          <div class="scard-num" id="scUnidades">0</div>
+          <div class="scard-label">Unidades Administrativas</div>
+        </div>
+      </div>
     </div>
 
-    <div class="container mt-4 mb-3">
+    <!-- Procesos de Producción (totales de la unidad seleccionada) -->
+    <div class="col-6 col-md-3">
+      <div class="scard d-flex align-items-center gap-3 p-3 rounded-3">
+        <div class="scard-icon scard-blue">
+          <i class="bi bi-gear"></i>
+        </div>
+        <div>
+          <div class="scard-num" id="scProcesosTotales">0</div>
+          <div class="scard-label">Procesos de Producción</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Procesos con variables ambientales (reutiliza tu lógica) -->
+    <div class="col-6 col-md-3">
+      <div class="scard d-flex align-items-center gap-3 p-3 rounded-3">
+        <div class="scard-icon scard-orange">
+          <i class="bi bi-gear-wide-connected"></i>
+        </div>
+        <div>
+          <div class="scard-num" id="scProcesosAmbientales">0</div>
+          <div class="scard-label">Procesos de Producción con variables ambientales</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Variables ambientales (reutiliza tu contador por unidad) -->
+    <div class="col-6 col-md-3">
+      <div class="scard d-flex align-items-center gap-3 p-3 rounded-3">
+        <div class="scard-icon scard-green">
+          <i class="bi bi-leaf"></i>
+        </div>
+        <div>
+          <div class="scard-num" id="scVariablesAmbientales">0</div>
+          <div class="scard-label">Variables ambientales</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+    <!-- ==== Selección de Unidad Administrativa ==== -->
+
+    <div class="container mt-4 mb-5">
         <h2 class="mb-2">Unidades Administrativas</h2>
         <hr>
 
         <div class="row row-cols-1 row-cols-md-3 g-4">
             <!-- Dirección General de Estadísticas Sociodemográficas (única habilitada) -->
             <div class="col">
-                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn" id="btnDireccionSociodemograficas" style="cursor:pointer;">
+                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn card-unidad"
+                    id="btnDireccionSociodemograficas" style="cursor:pointer;" role="button" aria-pressed="false">
                     <div class="card-body d-flex flex-column justify-content-center">
-                        <i class="bi bi-bar-chart display-4 mb-3 iconcustom"></i>
+                    <i class="bi bi-bar-chart display-4 mb-3 iconcustom"></i>
                     </div>
                     <h5 class="card-title texto-direction nameofDirection">
-                       Unidad de Estadísticas Sociodemográficas
+                    Unidad de Estadísticas Sociodemográficas
                     </h5>
                 </div>
+<<<<<<< HEAD
             </div>
+=======
+                </div>
+
+>>>>>>> master
                 <div class="col">
-                    <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn" id="btnDireccionEconomicas" style="cursor:pointer;">
+                <div class="card h-100 text-center custom-card-btn mostrarGrupoBtn card-unidad"
+                    id="btnDireccionEconomicas" style="cursor:pointer;" role="button" aria-pressed="false">
                     <div class="card-body d-flex flex-column justify-content-center">
-                        <i class="bi bi-cash-stack display-4 mb-3 iconcustom" ></i>
-                        <h5 class="card-title texto-direction nameofDirection">
-                            Unidad de Estadísticas Económicas
-                        </h5>
+                    <i class="bi bi-cash-stack display-4 mb-3 iconcustom"></i>
+                    <h5 class="card-title texto-direction nameofDirection">
+                        Unidad de Estadísticas Económicas
+                    </h5>
                     </div>
                 </div>
             </div>
@@ -144,19 +242,21 @@
         </div>
     </div>
 
+
+
     <!-- Contenedor donde se mostrarán los procesos -->
 <div class="container mt-5" id="procesosSection" hidden>
-  <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
-    <h2 class="mb-2 mb-lg-0">Procesos de Producción</h2>
-  </div>
+    <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+        <h2 class="mb-2 mb-lg-0" id="procesosTitle">Procesos de Producción</h2>
+    </div>
 
   <hr>
   <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-3">
-    <div>
+    <div hidden>
       <strong>Total de procesos con variables ambientales: <span id="procesosCounter" style="font-family: 'Monaco', monospace; font-weight: bold;">0</span></strong>
     </div>
-    <div>
-      <strong>Total de variables ambientales dentro de esta unidad: <span id="contadorVariablesUnidad" style="font-family: 'Monaco', monospace; font-weight: bold;">0</span></strong>
+    <div hidden>
+      <strong >Total de variables ambientales dentro de esta unidad: <span id="contadorVariablesUnidad" style="font-family: 'Monaco', monospace; font-weight: bold;">0</span></strong>
     </div>
 
     <div class="d-flex flex-wrap align-items-center gap-2">
@@ -186,13 +286,14 @@
       <!-- Checkbox IIN -->
       <div class="form-check ms-2">
         <input class="form-check-input" type="checkbox" id="iinCheck">
-        <label class="form-check-label fw-bold" for="iinCheck">Información de Interés Nacional</label>
+        <label class="form-check-label fw-bold" for="iinCheck">Información de Interés Nacional (IIN)</label>
       </div>
 
       <!-- Botón reset -->
       <button id="resetFiltrosBtn" class="btn btn-outline-danger" title="Restablecer filtros">
         <i class="bi bi-trash"></i>
       </button>
+      
     </div>
   </div>
 
@@ -238,7 +339,6 @@
                                 <li class="nav-item mb-2"><a href="https://www.un.org/sustainabledevelopment/es/objetivos-de-desarrollo-sostenible/" target="_blank" class="nav-link p-0 text" style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">ODS-ONU</a></li>
                                 <li class="nav-item mb-2"><a href="http://agenda2030.mx/" target="_blank" class="nav-link p-0 text" style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">SIODS</a></li>
                                 <li class="nav-item mb-2"><a href="https://www.gob.mx/semarnat/acciones-y-programas/sistema-nacional-de-informacion-ambiental-y-de-recursos-naturales" target="_blank" class="nav-link p-0 text" style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">SNIARN</a></li>
-                                <li class="nav-item mb-2"><a href="#" [routerLink]="['/dg/new']" target="_blank" class="nav-link p-0 text" style="color: white; font-size: 14px ; font-family: Helvetica, Sans-Serif;">Ver más...</a></li>
                             </ul>
                         </div>
                     </div>

@@ -1,6 +1,3 @@
-
-
-
 /*Estilos para el navbar */
 .nav-link {
     color: aliceblue !important;
@@ -74,28 +71,314 @@ body, html {
     font-family: Helvetica, Sans-Serif !important;
 }
 
-/* --- Mejoras para proyector: legibilidad y claridad en pantallas grandes --- */
-@media only screen and (min-width: 768px) and (max-width: 1024px) {
-    body, html {
-        font-size: 1.5rem;
-        background: #fff;
-        color: #222;
-    }
-    .nav-link {
-        font-size: 1.25rem;
-        padding: 1rem 2rem;
-    }
-    .iconcustom {
-        font-size: 4rem;
-    }
-    .texto-direction, .texto-numero {
-        font-size: 2rem;
-    }
-    .custom-card-btn {
-        font-size: 1.25rem;
-        padding: 24px;
-    }
-    #procesosCounter {
-        font-size: 1.5em;
-    }
+@media (max-width: 1024px) {
+  .custom-card-btn,
+  .card,
+  .iconcustom,
+  .texto-direction,
+  .texto-numero {
+    font-size: 1.1rem !important;
+    padding: 10px !important;
+  }
+  .custom-card-btn {
+    width: 100% !important;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  .iconcustom {
+    font-size: 2.2rem !important;
+  }
+  .texto-direction,
+  .texto-numero {
+    font-size: 1.3rem !important;
+  }
+  #procesosCounter {
+    font-size: 1rem !important;
+  }
 }
+
+@media (max-width: 1366px) and (max-height: 768px) {
+  .header-img-container {
+    height: 210px !important;
+  }
+}
+
+/* Estilos para seleccion de unidad  */
+/* Estado seleccionado para las cards de Unidades Administrativas */
+/* ====== Selección y responsividad SOLO para las cards de Unidades ====== */
+
+/* Base */
+.card.card-unidad{
+  transition: background-color .2s ease, color .2s ease, box-shadow .2s ease, transform .1s ease;
+}
+.card.card-unidad:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 0.35rem 1rem rgba(0,0,0,.12);
+}
+
+/* Estado seleccionado */
+.card.card-unidad.card-selected{
+  background-color: #005fa3 !important;
+  border-color: #005fa3 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0.5rem 1.25rem rgba(0, 95, 163, .35);
+}
+
+/* Fuerza blanco en TODO (texto, iconos, svg, títulos, muteds, etc.) */
+.card.card-unidad.card-selected,
+.card.card-unidad.card-selected *:not(.badge):not(.btn) {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+/* Asegura iconos Bootstrap/FontAwesome */
+.card.card-unidad.card-selected .bi,
+.card.card-unidad.card-selected i,
+.card.card-unidad.card-selected svg {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+/* Si hay .text-muted dentro, que no se vea gris */
+.card.card-unidad.card-selected .text-muted{
+  color: #ffffff !important;
+  opacity: .95 !important;
+}
+
+/* Accesibilidad: foco visible */
+.card.card-unidad:focus-visible,
+.card.card-unidad[aria-pressed="true"]:focus-visible{
+  outline: 2px solid #88c3eb;
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+
+/* ====== Responsivo SOLO para cards de Unidades ====== */
+
+/* Iconos un poco más grandes en desktop */
+.card.card-unidad .iconcustom{ font-size: 3.25rem; }
+
+/* <= 992px: compacta un poco */
+@media (max-width: 992px){
+  .card.card-unidad{ padding: 12px; }
+  .card.card-unidad .iconcustom{ font-size: 2.6rem; }
+  .card.card-unidad .nameofDirection,
+  .card.card-unidad .texto-direction{ font-size: 1.05rem; }
+}
+
+/* <= 576px: layout horizontal para que todo quepa bonito */
+@media (max-width: 576px){
+  .card.card-unidad{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+  }
+  .card.card-unidad .card-body{ padding: 0 !important; }
+  .card.card-unidad .iconcustom{ font-size: 2.2rem; }
+  .card.card-unidad .nameofDirection,
+  .card.card-unidad .texto-direction{ font-size: 1rem; line-height: 1.2; }
+}
+
+
+/* Asegurar tipografías y/o iconos en blanco dentro del estado activo */
+/* ===== Contadores (summaryCounters) — estilo mejorado ===== */
+/* ===== Corrección de alineación en los contadores del resumen ===== */
+
+/* Alinea perfectamente número y texto verticalmente */
+#summaryCounters .scard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Espaciado consistente entre número y texto */
+#summaryCounters .scard .scard-num {
+  margin-bottom: 0.25rem; /* separa un poco el número del texto */
+}
+
+/* Centra también el texto si tiene varias líneas */
+#summaryCounters .scard .scard-label {
+  text-align: center;
+  line-height: 1.3;
+  display: block;
+  max-width: 200px; /* evita que el texto se expanda demasiado */
+}
+
+/* En pantallas pequeñas, ajusta proporciones */
+@media (max-width: 768px) {
+  #summaryCounters .scard {
+    flex-direction: column;
+    align-items: center;
+  }
+  #summaryCounters .scard .scard-label {
+    font-size: 0.9rem;
+    max-width: 160px;
+  }
+}
+
+#summaryCounters .scard .scard-icon{
+  /* icono más grande */
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  font-size: 1.85rem; /* tamaño del ícono */
+  /* tonos suaves por tipo */
+}
+#summaryCounters .scard .scard-lilac { background:#efe7ff; color:#6f42c1; }
+#summaryCounters .scard .scard-blue  { background:#e1f3ff; color:#0d6efd; }
+#summaryCounters .scard .scard-orange{ background:#ffe8d9; color:#e2772f; }
+#summaryCounters .scard .scard-green { background:#e7f6ed; color:#198754; }
+
+/* número: más oscuro, pesado, y centrado (también para spinner) */
+#summaryCounters .scard .scard-num{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.6rem;      /* mantiene altura estable con spinner */
+  color: #0b2239;          /* más oscuro */
+  font-weight: 800;        /* más grueso */
+  font-size: 2rem;         /* más grande */
+  font-family: 'Monaco', ui-monospace, SFMono-Regular, Menlo, monospace;
+  line-height: 1;
+}
+
+/* spinner dentro del número (tamaño) */
+#summaryCounters .scard .scard-num .spinner-border{
+  width: 1.6rem;
+  height: 1.6rem;
+}
+
+/* etiqueta */
+#summaryCounters .scard .scard-label{
+  font-size: 0.95rem;
+  color:#5b5b5b;
+  margin-top: .15rem;
+}
+
+/* separación entre icono y textos un pelín mayor */
+#summaryCounters .scard{
+  gap: 12px !important;
+}
+
+/* responsive pequeño */
+@media (max-width: 575px){
+  #summaryCounters .scard .scard-icon{
+    width: 52px; height: 52px; font-size: 1.65rem;
+  }
+  #summaryCounters .scard .scard-num{ font-size: 1.7rem; }
+  #summaryCounters .scard .scard-label{ font-size: .9rem; }
+}
+
+/* Alineación de boton borrar filtros */
+#resetFiltrosBtn {
+  margin-left: auto !important;
+}
+
+.d-flex.align-items-center.gap-2 {
+  flex-wrap: nowrap !important; /* evita que el botón baje de línea */
+  flex: 1 1 auto;
+}
+
+/* -----------------------------
+   Responsividad alineada con index.css
+   Breakpoints: 1366x768, 768-1024 (iPad), <=1024 (tablet), <=480 (móvil)
+   -----------------------------*/
+
+/* Ajustes finos para 1366x768 (proyector / laptop) */
+@media only screen and (min-width: 1340px) and (max-width: 1380px) and (min-height: 740px) and (max-height: 780px) {
+  .header-img-container { height: 210px !important; }
+
+  .custom-card-btn {
+    padding: 12px !important;
+    font-size: 1.02rem !important;
+    max-width: 96%;
+  }
+
+  .iconcustom { font-size: 2.8rem !important; }
+  .texto-direction { font-size: 1.05rem !important; }
+
+  .card.card-unidad { padding: 14px !important; }
+  .card.card-unidad .iconcustom { font-size: 3rem !important; }
+
+  #summaryCounters .scard .scard-num { font-size: 1.9rem !important; min-height: 2.4rem; }
+  #summaryCounters .scard .scard-label { max-width: 220px; }
+}
+
+/* iPad / pantallas entre 768px y 1024px (colocación similar a index.css) */
+@media only screen and (min-width: 768px) and (max-width: 1024px) {
+  .custom-card-btn,
+  .card,
+  .iconcustom,
+  .texto-direction,
+  .texto-numero {
+    font-size: 1.08rem !important;
+    padding: 10px !important;
+  }
+
+  .custom-card-btn { max-width: 460px; margin: 0 auto; }
+  .iconcustom { font-size: 2.4rem !important; }
+
+  .overlay-box, /* si se comparte entre hojas, permitir adaptación visual */
+  .card.card-unidad { transition: all .18s ease; }
+
+  .card.card-unidad { padding: 12px !important; }
+  .card.card-unidad .iconcustom { font-size: 2.6rem !important; }
+  .card.card-unidad .nameofDirection,
+  .card.card-unidad .texto-direction { font-size: 1.06rem !important; }
+
+  #summaryCounters .scard .scard-num { font-size: 1.6rem !important; }
+  #summaryCounters .scard .scard-label { font-size: 0.98rem !important; max-width: 180px; }
+}
+
+/* Tablet grande / pantallas <= 1024px: general */
+@media only screen and (max-width: 1024px) {
+  body, html { font-size: 15px; }
+
+  .overlay-brand-top { max-width: 220px; } /* si se usa aquí */
+  .header-img-container { height: auto; }
+
+  /* Filtros / cards más compactos */
+  .custom-card-btn { padding: 10px; }
+  .card.card-unidad { padding: 10px; }
+}
+
+/* Móvil pequeño (<=480px) */
+@media only screen and (max-width: 480px) {
+  .custom-card-btn,
+  .card,
+  .iconcustom,
+  .texto-direction,
+  .texto-numero {
+    font-size: 1rem !important;
+    padding: 8px !important;
+  }
+
+  .custom-card-btn { width: 100% !important; max-width: none; margin: 0; }
+  .iconcustom { font-size: 2.0rem !important; }
+  .texto-direction,
+  .texto-numero { font-size: 1rem !important; line-height: 1.15; }
+
+  /* Cards de unidades en fila horizontal para caber mejor */
+  .card.card-unidad{ display: flex; align-items:center; gap:10px; padding:10px; }
+  .card.card-unidad .card-body{ padding: 0 !important; }
+
+  /* Contadores adaptados */
+  #summaryCounters .scard .scard-icon { width: 52px; height: 52px; font-size: 1.55rem; }
+  #summaryCounters .scard .scard-num { font-size: 1.6rem; }
+  #summaryCounters .scard .scard-label { font-size: 0.92rem; max-width:140px; }
+}
+
+/* Transiciones y suavizado global para cambios de tamaño */
+.custom-card-btn,
+.card.card-unidad,
+#summaryCounters .scard,
+.iconcustom {
+  transition: all .16s ease-in-out;
+}
+
+/* Fin del bloque responsivo */
