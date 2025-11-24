@@ -3481,16 +3481,11 @@ if (e.target.closest(".badge-ods")) {
                 ${indName ? `<div class="small mb-1">${indName}</div>` : ""}`;
             }
 
-            const coment =
-              o.comentarioS && o.comentarioS.trim() !== "-"
-                ? `<div class="small text-muted">${cleanUnderscores(o.comentarioS)}</div>`
-                : "";
-
             return `
               <div class="list-group-item">
                 ${metaBlock}
                 ${indicadorBlock}
-                ${coment}
+               
               </div>
             `;
           }).join("")}
@@ -3587,16 +3582,11 @@ if (e.target.closest(".badge-ods")) {
               ${nameIndic ? `<div class="small mb-1">${nameIndic}</div>` : ""}`;
           }
 
-          const coment =
-            info.comentOds && info.comentOds.trim() !== "-"
-              ? `<div class="small text-muted">${cleanUnderscores(info.comentOds)}</div>`
-              : "";
-
           return `
             <div class="list-group-item">
               ${metaBlock}
               ${indicadorBlock}
-              ${coment}
+              
             </div>
           `;
         }).join("")}
