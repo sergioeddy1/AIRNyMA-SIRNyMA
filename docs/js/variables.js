@@ -575,7 +575,7 @@ function formatOdsComposite(val) {
 // === util de asset (ODS0010_es.jpg, ..., ODS0170_es.jpg) ===
 function odsAssetPath(objNum) {
   const code = String(objNum * 10).padStart(4, "0");
-  return `/assets/ODS${code}_es.jpg`; // servido desde src/main/resources/static/assets
+  return `img/ODS${code}_es.jpg`; // servido desde src/main/resources/static/assets
 }
 
 // === genera las miniaturas con data-ods ===
