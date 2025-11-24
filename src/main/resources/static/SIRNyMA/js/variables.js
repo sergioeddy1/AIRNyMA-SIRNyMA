@@ -598,9 +598,8 @@ function buildOdsThumbsImgs(idVar, objNums) {
   `).join("");
 }
 
-function cleanUnderscores(text) {
-  if (text == null) return "-";
-  return String(text).replace(/_/g, " ").trim();
+function cleanUnderscores(str) {
+  return (str || "").toString().replace(/_/g, " ").replace(/\s+/g, " ").trim();
 }
 
 let __odsCache__ = null;
@@ -2664,11 +2663,10 @@ document.addEventListener("DOMContentLoaded", () => {
 // ==========================================
 
 // true si el campo de indicador trae algo válido
-function hasValidIndicador(raw) {
-  if (raw === undefined || raw === null) return false;
-  const s = String(raw).trim();
-  if (!s) return false;
-  if (s === "-" || s.toLowerCase() === "null") return false;
+function hasValidIndicador(ind) {
+  if (ind === undefined || ind === null) return false;
+  const v = String(ind).trim();
+  if (!v || v === "-" || v.toLowerCase() === "null") return false;
   return true;
 }
 
@@ -2708,19 +2706,55 @@ function getIndicadorIdFromCode(indRaw) {
 }
 
 // Busca name_indicador en el catálogo /api/ods_indicadores
-function getIndicadorNameFromCatalog(objNum, metaRaw, indRaw, catalog) {
-  const metaId = getMetaIdFromCode(metaRaw);
-  const indId  = getIndicadorIdFromCode(indRaw);
+function getIndicadorNameFromCatalog(odsNumber, metaRaw, indicadorRaw, catalog) {
+  if (!Array.isArray(catalog) || !catalog.length) return "";
 
-  if (!metaId || !indId) return "";
+  // Normalizamos el código del indicador: "Indicador_1.4.1" -> "1.4.1"
+  const indCodeClean = cleanUnderscores(formatOdsComposite(indicadorRaw || ""));
+  const match = indCodeClean.match(/(\d+)\.(\w+)\.(\d+)/); // obj.meta.ind
+  if (!match) return "";
 
-  const found = (Array.isArray(catalog) ? catalog : []).find(item =>
-    String(item.id_objetivo)  === String(objNum) &&
-    String(item.id_meta)      === String(metaId) &&
-    String(item.id_indicador) === String(indId)
+  const [, objStr, metaStr, indStr] = match;
+  const obj   = Number(objStr);
+  const meta  = String(metaStr);
+  const indId = Number(indStr);
+
+  // Si por alguna razón obj no viene, usamos el odsNumber detectado
+  const targetObj = odsNumber || obj;
+
+  const found = catalog.find(c =>
+    Number(c.id_objetivo) === targetObj &&
+    String(c.id_meta)     === meta &&
+    Number(c.id_indicador) === indId
   );
 
-  return found ? cleanUnderscores(found.name_indicador || "") : "";
+  return found ? found.name_indicador : "";
+}
+
+/**
+ * Busca el texto de la meta en /api/meta_ods
+ * meta_ods: [{ id_objetivo, id_meta, name_meta }, ...]
+ * metaRaw viene como "Meta_11.b" ⇒ queremos objetivo 11, meta "b"
+ */
+function getMetaNameFromCatalog(odsNumber, metaRaw, catalogMeta) {
+  if (!Array.isArray(catalogMeta) || !catalogMeta.length) return "";
+
+  // Normalizamos: "Meta_11.b" -> "Meta 11.b" -> "11.b"
+  const metaClean = cleanUnderscores(formatOdsComposite(metaRaw || ""));
+  const normalized = metaClean.replace(/^Meta\s*/i, "").trim(); // "11.b" o "1.4"
+
+  const match = normalized.match(/^(\d+)\.(\w+)/);
+  if (!match) return "";
+
+  // En tu catálogo, id_meta es "b" o "4"
+  const metaId = match[2];
+
+  const found = catalogMeta.find(m =>
+    Number(m.id_objetivo) === Number(odsNumber) &&
+    String(m.id_meta)     === String(metaId)
+  );
+
+  return found ? found.name_meta : "";
 }
 
 // Siempre que se cierre completamente el modal, resetea
@@ -3179,8 +3213,6 @@ document.addEventListener("click", async function (e) {
   
 }
 
-
-// ============ MDEA (chips) ============
 // ============ MDEA (chips) ============
 if (e.target.closest(".mdea-chip")) {
   
@@ -3351,7 +3383,7 @@ if (e.target.closest(".mdea-chip")) {
 
 // ============ ODS ============
 if (e.target.closest(".badge-ods")) {
-  // Siempre que entro a ODS reseteo primero y luego pinto
+  // Siempre que entro a ODS reseteo primero y luego pinto color
   resetModalHeaderColor();
 
   const trigger = e.target.closest(".badge-ods");
@@ -3378,7 +3410,7 @@ if (e.target.closest(".badge-ods")) {
   const fmt = (s) => (s || "-").toString().replace(/_/g, " ").replace(/\s+/g, " ").trim();
 
   try {
-    // uso el helper global que ya tienes arriba del listener
+    // helper local basado en tu allData
     function getVariableByIdVar(id) {
       return (Array.isArray(allData) ? allData : []).find(v => String(v.idVar) === String(id));
     }
@@ -3417,7 +3449,7 @@ if (e.target.closest(".badge-ods")) {
         <div class="mb-2"><strong>${varTitle}</strong></div>
         <div class="list-group">
           ${lista.map(o => {
-            // META
+            // META: código + nombre desde metaNombre (económicas ya lo trae)
             const metaCode  = cleanUnderscores(formatOdsComposite(o.meta));
             const metaName  = cleanUnderscores(o.metaNombre || "");
             const showMeta  = metaCode && metaCode !== "-";
@@ -3427,7 +3459,7 @@ if (e.target.closest(".badge-ods")) {
               ${metaName ? `<div class="small mb-1">${metaName}</div>` : ""}`
             : "";
 
-            // INDICADOR (solo si es válido)
+            // INDICADOR: solo si es válido, con indicadorNombre
             let indicadorBlock = "";
             if (hasValidIndicador(o.indicador)) {
               const indCode = cleanUnderscores(formatOdsComposite(o.indicador));
@@ -3456,11 +3488,12 @@ if (e.target.closest(".badge-ods")) {
     }
 
     // ------------------------------------------------------------------
-    // 2) SOCIODEMOGRÁFICAS (fallback /api/ods + /api/ods_indicadores)
+    // 2) SOCIODEMOGRÁFICAS (fallback /api/ods + /api/ods_indicadores + /api/meta_ods)
     // ------------------------------------------------------------------
-    const [resOds, resCatalog] = await Promise.all([
+    const [resOds, resIndic, resMeta] = await Promise.all([
       fetch(`/api/ods`),
-      fetch(`/api/ods_indicadores`)  // <-- tu catálogo de indicadores ODS
+      fetch(`/api/ods_indicadores`), // catálogo indicadores
+      fetch(`/api/meta_ods`)         // catálogo metas
     ]);
 
     const data = await resOds.json();
@@ -3478,13 +3511,20 @@ if (e.target.closest(".badge-ods")) {
       return;
     }
 
-    // cat de indicadores
-    let catalog = [];
+    // Catálogos
+    let catalogIndic = [];
+    let catalogMeta  = [];
     try {
-      const rawCat = await resCatalog.json();
-      catalog = Array.isArray(rawCat) ? rawCat : (rawCat ? [rawCat] : []);
+      const rawIndic = await resIndic.json();
+      catalogIndic = Array.isArray(rawIndic) ? rawIndic : (rawIndic ? [rawIndic] : []);
     } catch (e) {
-      catalog = [];
+      catalogIndic = [];
+    }
+    try {
+      const rawMeta = await resMeta.json();
+      catalogMeta = Array.isArray(rawMeta) ? rawMeta : (rawMeta ? [rawMeta] : []);
+    } catch (e) {
+      catalogMeta = [];
     }
 
     const first  = registros[0];
@@ -3501,23 +3541,32 @@ if (e.target.closest(".badge-ods")) {
       <div class="mb-2"><strong>${varTitle}</strong></div>
       <div class="list-group">
         ${registros.map(info => {
-          // META
+          const odsNumber = getOdsObjectiveNumber(info.ods ?? info.objetivo);
+
+          // META: código + nombre desde catálogo meta_ods
           const metaCode = cleanUnderscores(formatOdsComposite(info.meta));
           const showMeta = metaCode && metaCode !== "-";
 
-          const metaBlock = showMeta
-            ? `<div class="small mb-1"><strong>Meta ODS detectada:</strong> ${metaCode}</div>`
-            : "";
+          const metaNameFromCat = getMetaNameFromCatalog(
+            odsNumber,
+            info.meta,
+            catalogMeta
+          );
 
-          // INDICADOR (solo si es válido)
+          const metaBlock = showMeta ? `
+            <div class="small mb-1"><strong>Meta ODS detectada:</strong> ${metaCode}</div>
+            ${metaNameFromCat ? `<div class="small mb-1">${metaNameFromCat}</div>` : ""}`
+          : "";
+
+          // INDICADOR: solo si es válido, con nombre desde catálogo ods_indicadores
           let indicadorBlock = "";
           if (hasValidIndicador(info.indicador)) {
             const indCode   = cleanUnderscores(formatOdsComposite(info.indicador));
             const nameIndic = getIndicadorNameFromCatalog(
-              getOdsObjectiveNumber(info.ods ?? info.objetivo),
+              odsNumber,
               info.meta,
               info.indicador,
-              catalog
+              catalogIndic
             );
 
             indicadorBlock = `
