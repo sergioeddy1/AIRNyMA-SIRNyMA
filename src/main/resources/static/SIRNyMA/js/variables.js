@@ -25,8 +25,6 @@ document.addEventListener("DOMContentLoaded", function () {
     applyFilters();
   })
 
- 
-
   let allData = [];
   let currentFilteredData = [];
 
@@ -3119,8 +3117,6 @@ document.addEventListener("click", async function (e) {
   if (datosTrigger) {
     if (datosTrigger.classList.contains("disabled")) return;
 
-    resetModalHeaderColor();   // <- aquí
-
     const labelEl = document.getElementById("infoModalLabel");
     const bodyEl  = document.getElementById("infoModalBody");
 
@@ -3138,15 +3134,20 @@ document.addEventListener("click", async function (e) {
   const isPdf   = v => typeof v === "string" && v.includes(".pdf");
   const isZip   = v => typeof v === "string" && v.includes(".zip");
 
-  try {
-    const variable = getVariableByIdVar(idVar);
-    const unidad   = getUnidadDeVariable(variable);
+ try {
+  const variable = getVariableByIdVar(idVar);
 
-    // SOCIO: en proceso de captura
-    if (unidad === 'socio') {
-      bodyEl.innerHTML = `<div class="alert alert-info mb-0">En proceso de captura</div>`;
-      return;
-    }
+  // HOTFIX: evitar que truene si la función no existe
+  let unidad = null;
+  if (typeof getUnidadDeVariable === "function") {
+    unidad = getUnidadDeVariable(variable);
+  }
+
+  // SOCIO: en proceso de captura
+  if (unidad === 'socio') {
+    bodyEl.innerHTML = `<div class="alert alert-info mb-0">En proceso de captura</div>`;
+    return;
+  }
 
     // ECONÓMICAS con datos embebidos
     if (variable &&
@@ -3215,7 +3216,7 @@ document.addEventListener("click", async function (e) {
     }
 
     // Si no hay embebidos
-    bodyEl.innerHTML = "<div class='alert alert-warning mb-0'>No se encontraron registros de Datos Abiertos para esta variable.</div>";
+    bodyEl.innerHTML = "<div class='alert alert-info mb-0'>En proceso de captura.</div>";
 
   } catch (err) {
     console.error(err);
@@ -3632,7 +3633,6 @@ document.addEventListener("DOMContentLoaded", function () {
 // Cargar clasificaciones antes de renderizar variables
 
 // ---- Nota de fuente al final de la página (texto pequeño, no altera layout) ----
-
 
 // Si decides conservar ese bloque, ajústalo así:
 fetch('/api/clasificaciones')
