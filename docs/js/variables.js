@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", function () {
     currentPage= 1;
     applyFilters();
   })
- 
+
   let allData = [];
   let currentFilteredData = [];
 
@@ -48,6 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
         unidadCollapseEl.addEventListener('shown.bs.collapse',  () => unidadLabel.textContent = 'Ocultar');
         unidadCollapseEl.addEventListener('hidden.bs.collapse', () => unidadLabel.textContent = 'Mostrar');
       }
+
  
 window.renderLocked     = false;  // evita renders mientras aplicamos URL
 window.initialPaintDone = false;  // ya hicimos el primer render “válido”
@@ -219,9 +220,27 @@ function rebuildClasifIndex() {
     };
   }
 
+  // 🌐 Catálogo de indicadores ODS (pull_indicadores_ods)
+let odsIndicadoresCatalog = null;
+
+async function getOdsIndicadoresCatalog() {
+  if (odsIndicadoresCatalog) return odsIndicadoresCatalog;
+
+  try {
+    const res  = await fetch('https://cho-ata-basket-galleries.trycloudflare.com/api/ods_indicadores');   // <- tu API
+    const data = await res.json();
+    odsIndicadoresCatalog = Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.error('Error cargando /api/ods_indicadores:', err);
+    odsIndicadoresCatalog = [];
+  }
+
+  return odsIndicadoresCatalog;
+}
+
 
   async function fetchVariablesDesdeUltima() {
-    const urlUltima = "https://vegas-sussex-release-tagged.trycloudflare.com/api/indicadores/ultima";
+    const urlUltima = "https://movement-comparable-demonstrated-qualification.trycloudflare.com/api/indicadores/ultima";
     const res = await fetch(urlUltima);
     if (!res.ok) throw new Error(`ultima respondió ${res.status}`);
     const payload = await res.json();
@@ -448,7 +467,7 @@ function hasDatosAbiertos(variable) {
 
   // trae y aplana /indicadores/ultima → array de variables en shape local
   async function fetchVariablesDesdeUltima() {
-    const urlUltima = "https://vegas-sussex-release-tagged.trycloudflare.com/api/indicadores/ultima";
+    const urlUltima = "https://movement-comparable-demonstrated-qualification.trycloudflare.com/api/indicadores/ultima";
     const res = await fetch(urlUltima);
     if (!res.ok) throw new Error(`ultima respondió ${res.status}`);
     const payload = await res.json();
@@ -506,7 +525,7 @@ function hasDatosAbiertos(variable) {
   }
 
   async function fetchProcesosEconomicas() {
-    const urlProcesosEco = "https://vegas-sussex-release-tagged.trycloudflare.com/api/procesos/buscar?unidad=" +
+    const urlProcesosEco = "https://movement-comparable-demonstrated-qualification.trycloudflare.com/api/procesos/buscar?unidad=" +
                            encodeURIComponent("Unidad de Estadísticas Económicas");
     const res = await fetch(urlProcesosEco);
     if (!res.ok) throw new Error("procesos Económicas respondió " + res.status);
@@ -556,7 +575,7 @@ function formatOdsComposite(val) {
 // === util de asset (ODS0010_es.jpg, ..., ODS0170_es.jpg) ===
 function odsAssetPath(objNum) {
   const code = String(objNum * 10).padStart(4, "0");
-  return `img/ODS${code}_es.jpg`; // servido desde src/main/resources/static/assets
+  return `/assets/ODS${code}_es.jpg`; // servido desde src/main/resources/static/assets
 }
 
 // === genera las miniaturas con data-ods ===
@@ -577,15 +596,16 @@ function buildOdsThumbsImgs(idVar, objNums) {
   `).join("");
 }
 
-function cleanUnderscores(text) {
-  if (text == null) return "-";
-  return String(text).replace(/_/g, " ").trim();
+function cleanUnderscores(str) {
+  return (str || "").toString().replace(/_/g, " ").replace(/\s+/g, " ").trim();
 }
+
+
 
 let __odsCache__ = null;
 async function fetchOdsOnce() {
   if (__odsCache__) return __odsCache__;
-  const res = await fetch('https://emperor-sydney-capability-youth.trycloudflare.com/api/ods');
+  const res = await fetch('https://cho-ata-basket-galleries.trycloudflare.com/api/ods');
   const data = await res.json();
   __odsCache__ = Array.isArray(data) ? data : (data ? [data] : []);
   return __odsCache__;
@@ -694,7 +714,13 @@ function buildMdeaChips(idVar, compArray) {
     </button>
   `).join("");
 }
+
+function cleanComponentName(name) {
+  if (!name) return "";
+  return name.replace(/_/g, " ").trim();
+}
 // ==== FIN HELPERS MDEA/ODS ====
+
 
     // Referencias a los checkboxes
 const relTabCheckbox = document.getElementById("relTabCheckbox");
@@ -1321,12 +1347,12 @@ showCounterSpinner();
 showListSpinner();
 
 Promise.all([
-  fetch("https://emperor-sydney-capability-youth.trycloudflare.com/api/proceso").then(r => r.json()),
+  fetch("https://cho-ata-basket-galleries.trycloudflare.com/api/proceso").then(r => r.json()),
   fetchProcesosEconomicas(),                 // procesosEco
-  fetch("https://emperor-sydney-capability-youth.trycloudflare.com/api/variables").then(r => r.json()),
+  fetch("https://cho-ata-basket-galleries.trycloudflare.com/api/variables").then(r => r.json()),
   fetchVariablesDesdeUltima(),               // ← variablesUltima (económicas mapeadas)
-  fetch("https://emperor-sydney-capability-youth.trycloudflare.com/api/eventos").then(r => r.json()),
-  fetch("https://emperor-sydney-capability-youth.trycloudflare.com/api/clasificaciones").then(r => r.json())
+  fetch("https://cho-ata-basket-galleries.trycloudflare.com/api/eventos").then(r => r.json()),
+  fetch("https://cho-ata-basket-galleries.trycloudflare.com/api/clasificaciones").then(r => r.json())
 ])
 .then(([procesosLocal, procesosEco, variablesLocal, variablesUltima, eventos, clasificaciones]) => {
   // 1) Procesos (merge locales + eco)
@@ -2135,7 +2161,7 @@ if (tooltips.length) {
       let __mdeaCache__ = null;
       async function fetchMdeaOnce() {
         if (__mdeaCache__ != null) return __mdeaCache__;
-        const res = await fetch('https://emperor-sydney-capability-youth.trycloudflare.com/api/mdea');
+        const res = await fetch('https://cho-ata-basket-galleries.trycloudflare.com/api/mdea');
         const data = await res.json();
         // el endpoint a veces regresa 1 registro o arreglo
         __mdeaCache__ = Array.isArray(data) ? data : (data ? [data] : []);
@@ -2559,405 +2585,853 @@ searchForm.addEventListener("submit", function (e) {
         }, 100);
     }
     });
-    // Evento delegado para mostrar información de tabulados y microdatos en el modal
- // === REEMPLAZA COMPLETO TU LISTENER ACTUAL POR ESTE ===
+
+    // funcion para obtener el valor de una variable CSS
+function getCssVar(name) {
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue(name)
+    .trim();
+}
+
+// ==========================================
+// HELPERS PARA HEADER DEL MODAL (ODS)
+// ==========================================
+
+// Mapa de colores por ODS (ajusta si ya lo tienes)
+const ODS_COLORS = {
+  "1":  "#e5243b",
+  "2":  "#dda63a",
+  "3":  "#4c9f38",
+  "4":  "#c5192d",
+  "5":  "#ff3a21",
+  "6":  "#26bde2",
+  "7":  "#fcc30b",
+  "8":  "#a21942",
+  "9":  "#fd6925",
+  "10": "#dd1367",
+  "11": "#fd9d24",
+  "12": "#bf8b2e",
+  "13": "#3f7e44",
+  "14": "#0a97d9",
+  "15": "#56c02b",
+  "16": "#00689d",
+  "17": "#19486a"
+};
+
+// Limpia el header del modal (modo "normal")
+function resetModalHeaderColor() {
+  const modal  = document.getElementById("infoModal");
+  if (!modal) return;
+
+  modal.classList.remove("ods-active");
+
+  const header = modal.querySelector(".modal-header");
+  if (!header) return;
+
+  header.style.backgroundColor = "";
+  header.style.color = "";
+}
+
+// Aplica color de ODS al header
+function setOdsModalHeaderColor(odsNumber) {
+  const modal  = document.getElementById("infoModal");
+  if (!modal) return;
+
+  const header = modal.querySelector(".modal-header");
+  if (!header) return;
+
+  const color = ODS_COLORS[String(odsNumber)] || "";
+  if (!color) return;
+
+  modal.classList.add("ods-active");
+  header.style.backgroundColor = color;
+  header.style.color = "#ffffff";
+}
+
+// Resetea siempre que se cierre el modal
+document.addEventListener("DOMContentLoaded", () => {
+  const modal = document.getElementById("infoModal");
+  if (!modal) return;
+
+  modal.addEventListener("hidden.bs.modal", () => {
+    resetModalHeaderColor();
+  });
+});
+
+// ==========================================
+// HELPERS PARA INDICADOR ODS
+// ==========================================
+
+// true si el campo de indicador trae algo válido
+function hasValidIndicador(ind) {
+  if (ind === undefined || ind === null) return false;
+  const v = String(ind).trim();
+  if (!v || v === "-" || v.toLowerCase() === "null") return false;
+  return true;
+}
+
+function cleanOdsTitleName(raw) {
+  if (!raw) return "";
+
+  return String(raw)
+    .replace(/_\d+$/, "")   // ❗ borra solo los números del final
+    .replace(/_/g, " ")     // ❗ convierte guiones bajos a espacios
+    .trim();
+}
+
+// Obtiene id_meta tipo '4' a partir del código meta (14, 1.4, etc.)
+function getMetaIdFromCode(metaRaw) {
+  if (metaRaw === null || metaRaw === undefined) return null;
+  const clean = cleanUnderscores(String(metaRaw))
+    .replace(/[^\d.]/g, "");  // solo dígitos y puntos
+
+  if (!clean) return null;
+
+  const parts = clean.split(".").filter(Boolean);
+  if (parts.length >= 2) {
+    // 1.4 -> meta "4"
+    return parts[1];
+  }
+  // Si viene como "14" nos quedamos con el último dígito -> "4"
+  if (clean.length >= 2) return clean.slice(-1);
+  return clean;
+}
+
+// Obtiene id_indicador tipo '1' a partir del código (1.4.1, 141, etc.)
+function getIndicadorIdFromCode(indRaw) {
+  if (indRaw === null || indRaw === undefined) return null;
+  const clean = cleanUnderscores(String(indRaw))
+    .replace(/[^\d.]/g, "");
+
+  if (!clean) return null;
+
+  const parts = clean.split(".").filter(Boolean);
+  if (parts.length >= 1) {
+    // 1.4.1 -> "1" (último segmento)
+    return parts[parts.length - 1];
+  }
+  // 141 -> "1" (último dígito)
+  return clean.slice(-1);
+}
+
+// Busca name_indicador en el catálogo /api/ods_indicadores
+function getIndicadorNameFromCatalog(odsNumber, metaRaw, indicadorRaw, catalog) {
+  if (!Array.isArray(catalog) || !catalog.length) return "";
+
+  // Normalizamos el código del indicador: "Indicador_1.4.1" -> "1.4.1"
+  const indCodeClean = cleanUnderscores(formatOdsComposite(indicadorRaw || ""));
+  const match = indCodeClean.match(/(\d+)\.(\w+)\.(\d+)/); // obj.meta.ind
+  if (!match) return "";
+
+  const [, objStr, metaStr, indStr] = match;
+  const obj   = Number(objStr);
+  const meta  = String(metaStr);
+  const indId = Number(indStr);
+
+  // Si por alguna razón obj no viene, usamos el odsNumber detectado
+  const targetObj = odsNumber || obj;
+
+  const found = catalog.find(c =>
+    Number(c.id_objetivo) === targetObj &&
+    String(c.id_meta)     === meta &&
+    Number(c.id_indicador) === indId
+  );
+
+  return found ? found.name_indicador : "";
+}
+
+/**
+ * Busca el texto de la meta en /api/meta_ods
+ * meta_ods: [{ id_objetivo, id_meta, name_meta }, ...]
+ * metaRaw viene como "Meta_11.b" ⇒ queremos objetivo 11, meta "b"
+ */
+function getMetaNameFromCatalog(odsNumber, metaRaw, catalogMeta) {
+  if (!Array.isArray(catalogMeta) || !catalogMeta.length) return "";
+
+  // Normalizamos: "Meta_11.b" -> "Meta 11.b" -> "11.b"
+  const metaClean = cleanUnderscores(formatOdsComposite(metaRaw || ""));
+  const normalized = metaClean.replace(/^Meta\s*/i, "").trim(); // "11.b" o "1.4"
+
+  const match = normalized.match(/^(\d+)\.(\w+)/);
+  if (!match) return "";
+
+  // En tu catálogo, id_meta es "b" o "4"
+  const metaId = match[2];
+
+  const found = catalogMeta.find(m =>
+    Number(m.id_objetivo) === Number(odsNumber) &&
+    String(m.id_meta)     === String(metaId)
+  );
+
+  return found ? found.name_meta : "";
+}
+
+// Siempre que se cierre completamente el modal, resetea
+document.getElementById("infoModal").addEventListener("hidden.bs.modal", () => {
+  resetModalHeaderColor();
+});
+
+function safeField(str) {
+  if (!str) return "";
+  const s = String(str).trim();
+  if (s === "-" || s.toLowerCase() === "null" || s === "") return "";
+  return s;
+}
+
+
+// Evento delegado para mostrar información de tabulados y microdatos en el modal
 document.addEventListener("click", async function (e) {
-  // Utilidad: busca la variable en allData por idVar
+  // Helper global
   function getVariableByIdVar(idVar) {
     return (Array.isArray(allData) ? allData : []).find(v => String(v.idVar) === String(idVar));
   }
 
   // ============ TABULADOS ============
-  if (e.target.classList.contains("badge-tabulado")) {
-    document.getElementById("infoModalLabel").textContent = "Detalle de la Relación con Tabulados";
-    const idVar = e.target.getAttribute("data-idvar");
+  const tabTrigger = e.target.closest(".badge-tabulado");
+  if (tabTrigger) {
+    resetModalHeaderColor();   // <- siempre que NO sea ODS
+
+    document.getElementById("infoModalLabel").textContent = "Tabulado(s) asociado(s)";
+    const idVar    = tabTrigger.getAttribute("data-idvar");
     const modalBody = document.getElementById("infoModalBody");
     modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
 
-    try {
-      const variable = getVariableByIdVar(idVar);
+  const isExcelLike = v =>
+    typeof v === "string" && (v.toLowerCase().includes("xls") || v.toLowerCase().includes("xlsx"));
 
-      // 1) Si la variable viene de Económicas y trae tabulados embebidos, úsalo
-      if (variable && variable._source === "economicas-ultima" && Array.isArray(variable._tabuladosList) && variable._tabuladosList.length) {
-        const html = variable._tabuladosList.map(t => `
-          <div class="mb-3 border-bottom pb-2">
-            <strong>${t.tabulado || "Tabulado"}</strong><br>
-            ${t.tipo ? `<span class="small text-muted">${t.tipo}</span><br>` : ""}
-            <div class="row">
-              <div class="col-6">
-                ${t.urlAcceso ? `<strong>Acceso:</strong> <a href="${t.urlAcceso}" target="_blank" style="word-break: break-all;">Abrir</a>` : ""}
-              </div>
-              <div class="col-6">
-                ${t.urlDescarga ? `<strong>Descarga:</strong> <a href="${t.urlDescarga}" target="_blank" style="word-break: break-all;">Descargar</a>` : ""}
-              </div>
-            </div>
-          </div>
-        `).join("");
-        modalBody.innerHTML = html || "<div class='text-danger'>No hay tabulados disponibles.</div>";
-        return;
-      }
-      // 2) Fallback a tus endpoints locales
-      const resVarTab = await fetch('https://emperor-sydney-capability-youth.trycloudflare.com/api/var-tab');
-      const dataVarTab = await resVarTab.json();
-      const relaciones = Array.isArray(dataVarTab) ? dataVarTab.filter(rel => rel.idVar === idVar) : [];
+  const isInteractivo = v =>
+    typeof v === "string" && v.toLowerCase().includes("interactivo");
 
-      if (!relaciones.length) {
-        modalBody.innerHTML = "<div class='text-danger'>No hay tabulados relacionados con esta variable.</div>";
-        return;
-      }
+  const isVistaWeb = v =>
+    typeof v === "string" && v.toLowerCase().includes("vista web");
 
-      const resTabulados = await fetch('https://emperor-sydney-capability-youth.trycloudflare.com/api/tabulado');
-      const tabulados = await resTabulados.json();
+  try {
+    const variable = getVariableByIdVar(idVar);
 
-      const contenido = relaciones.map(rel => {
-        const tabulado = Array.isArray(tabulados) ? tabulados.find(tab => tab.idTab === rel.idTab) : null;
-        if (!tabulado) return "";
+    // Caso 1: Económicas con tabulados embebidos en la variable
+    if (variable && variable._source === "economicas-ultima" &&
+        Array.isArray(variable._tabuladosList) && variable._tabuladosList.length) {
+
+      const html = variable._tabuladosList.map(t => {
+        const tipo = t.tipo || "";
+        const excel = isExcelLike(tipo);
+        const inter = isInteractivo(tipo);
+        const vistaWeb = isVistaWeb(tipo);
+
+        // Meta: prioriza HOJA para económicas si existe; si no, usa numTab
+        const metaLinea =
+          (t.hoja ? `<span><i class="bi bi-file-earmark-text me-1"></i> ${t.hoja}</span>` : "") +
+          (!t.hoja && t.numTab ? `<span><i class="bi bi-file-earmark-text me-1"></i> ${t.numTab}</span>` : "");
+
+        // Botón principal de la derecha (descarga o interactivo o vista web si aplica)
+        // Nota: por requerimiento, los botones de urlDescarga se van a la DERECHA con el meta.
+        const botonDerecha = t.urlDescarga ? `
+          <a href="${t.urlDescarga}" target="_blank"
+             class="btn-download ${excel ? "btn-excel" : inter ? "btn-interactivo" : "btn-download-default"}">
+            ${excel ? `<i class="bi bi-filetype-xlsx me-1"></i> EXCEL`
+                    : inter ? `<i class="bi bi-bar-chart-line me-1"></i> Interactivo`
+                            : `<i class="bi bi-download me-1"></i> Descargar`}
+          </a>` : "";
+
+        // Acciones de la IZQUIERDA: Ver en INEGI + Vista Web (si aplica con su propia URL)
+        // Si hay un link específico de vista web, úsalo; si no, lo omitimos.
+        const botonVistaWebIzq = (vistaWeb && t.urlAcceso)
+          ? `<a href="${t.urlAcceso}" target="_blank" class="btn-web">
+               <i class="bi bi-globe2 me-1"></i> Vista web
+             </a>`
+          : "";
+
+        const botonAccesoInegiIzq = t.urlAcceso ? `
+          <a href="${t.urlAcceso}" target="_blank" class="btn-link-inegi">
+            <i class="bi bi-link-45deg me-1"></i> Ver en INEGI
+          </a>` : "";
+
         return `
-          <div class="mb-3 border-bottom pb-2">
-            ${tabulado.tituloTab ? `<strong>Título del tabulado:</strong><br><span>${tabulado.tituloTab}</span><br>` : ''}
-            <div class="row">
-              <div class="col-6">
-                ${tabulado.ligaTab ? `<strong>Liga Tabulado INEGI:</strong><br><a href="${tabulado.ligaTab}" target="_blank" style="word-break: break-all;">Tabulado</a><br>` : ''}
+          <div class="tabulado-card">
+            <div class="tabulado-title">${t.tabulado || "Tabulado"}</div>
+
+            <div class="tabulado-actions">
+              <div class="ta-left">
+                ${botonAccesoInegiIzq}
+                ${botonVistaWebIzq}
               </div>
-              <div class="col-6">
-                ${tabulado.ligaDescTab ? `<strong>Liga de Descarga:</strong><br><a href="${tabulado.ligaDescTab}" target="_blank" style="word-break: break-all;">Documento Directo</a><br>` : ''}
+              <div class="ta-right">
+                <div class="ta-right-buttons">
+                  ${botonDerecha}
+                </div>
+                <div class="tabulado-info text-end">
+                  ${metaLinea}
+                </div>
               </div>
             </div>
-            ${(tabulado.numTab || tabulado.tipoTab) ? `
-              <strong>Información adicional:</strong><br>
-              ${tabulado.numTab ? `Número: ${tabulado.numTab}<br>` : ''}
-              ${tabulado.tipoTab ? `Tipo: ${tabulado.tipoTab}<br>` : ''}` : ''}
           </div>
         `;
       }).join("");
 
-      modalBody.innerHTML = contenido || "<div class='text-danger'>No hay ligas disponibles para los tabulados relacionados.</div>";
-    } catch (error) {
-      console.error(error);
-      document.getElementById("infoModalBody").innerHTML = "<div class='text-danger'>Error al cargar la información.</div>";
+      modalBody.innerHTML = html || "<div class='text-danger'>No hay tabulados disponibles.</div>";
+      return;
     }
+
+    // Caso 2: Fallback a endpoints locales
+    const resVarTab = await fetch('https://cho-ata-basket-galleries.trycloudflare.com/api/var-tab');
+    const dataVarTab = await resVarTab.json();
+    const relaciones = Array.isArray(dataVarTab) ? dataVarTab.filter(rel => rel.idVar === idVar) : [];
+
+    if (!relaciones.length) {
+      modalBody.innerHTML = "<div class='text-danger'>No hay tabulados relacionados con esta variable.</div>";
+      return;
+    }
+
+    const resTabulados = await fetch('https://cho-ata-basket-galleries.trycloudflare.com/api/tabulado');
+    const tabulados = await resTabulados.json();
+
+    const contenido = relaciones.map(rel => {
+      const tabulado = Array.isArray(tabulados) ? tabulados.find(tab => tab.idTab === rel.idTab) : null;
+      if (!tabulado) return "";
+
+      const tipo = tabulado.tipoTab || "";
+      const excel = isExcelLike(tipo);
+      const inter = isInteractivo(tipo);
+      const vistaWeb = isVistaWeb(tipo);
+
+      // Meta: si existe 'hoja' úsala; si no, usa número
+      const metaLinea =
+        (tabulado.hoja ? `<span><i class="bi bi-file-earmark-text me-1"></i> ${tabulado.hoja}</span>` : "") +
+        (!tabulado.hoja && tabulado.numTab ? `<span><i class="bi bi-file-earmark-text me-1"></i> ${tabulado.numTab}</span>` : "");
+
+      const botonDerecha = tabulado.ligaDescTab ? `
+        <a href="${tabulado.ligaDescTab}" target="_blank"
+           class="btn-download ${excel ? "btn-excel" : inter ? "btn-interactivo" : "btn-download-default"}">
+          ${excel ? `<i class="bi bi-filetype-xlsx me-1"></i> EXCEL`
+                  : inter ? `<i class="bi bi-bar-chart-line me-1"></i> Interactivo`
+                          : `<i class="bi bi-download me-1"></i> Descargar`}
+        </a>` : "";
+
+      const botonVistaWebIzq = (vistaWeb && tabulado.ligaTab) ? `
+        <a href="${tabulado.ligaTab}" target="_blank" class="btn-web">
+          <i class="bi bi-globe2 me-1"></i> Vista web
+        </a>` : "";
+
+      const botonAccesoInegiIzq = tabulado.ligaTab ? `
+        <a href="${tabulado.ligaTab}" target="_blank" class="btn-link-inegi">
+          <i class="bi bi-link-45deg me-1"></i> Ver en INEGI
+        </a>` : "";
+
+      return `
+        <div class="tabulado-card">
+          ${tabulado.tituloTab ? `<div class="tabulado-title">${tabulado.tituloTab}</div>` : ""}
+
+          <div class="tabulado-actions">
+            <div class="ta-left">
+              ${botonAccesoInegiIzq}
+              ${botonVistaWebIzq}
+            </div>
+            <div class="ta-right">
+              <div class="ta-right-buttons">
+                ${botonDerecha}
+              </div>
+              <div class="tabulado-info text-end">
+                ${metaLinea}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    modalBody.innerHTML = contenido || "<div class='text-danger'>No hay ligas disponibles para los tabulados relacionados.</div>";
+  } catch (error) {
+    console.error(error);
+    modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información.</div>";
   }
+   
+}
 
   // ============ MICRODATOS ============
-  if (e.target.classList.contains("badge-microdatos")) {
-    document.getElementById("infoModalLabel").textContent = "Detalle de la Relación con Microdatos";
-    const idVar = e.target.getAttribute("data-idvar");
+  const microTrigger = e.target.closest(".badge-microdatos");
+  if (microTrigger) {
+    resetModalHeaderColor();   // <- aquí
+
+    document.getElementById("infoModalLabel").textContent = "Microdato(s) asociado(s)";
+    const idVar     = microTrigger.getAttribute("data-idvar");
     const modalBody = document.getElementById("infoModalBody");
     modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
 
-    try {
-      const variable = getVariableByIdVar(idVar);
+  // Detecta tipo de archivo por extensión
+  const getTipoDescarga = (url = "") => {
+    const low = url.toLowerCase();
+    if (low.endsWith(".xls") || low.endsWith(".xlsx")) return "excel";
+    if (low.endsWith(".pdf")) return "pdf";
+    if (low.endsWith(".zip")) return "zip";
+    return "web";
+  };
 
-      // 1) Si viene de Económicas y trae microdatos embebidos, úsalo
-    // ECONÓMICAS con microdatos embebidos
-           if (variable && variable._source === "economicas-ultima" &&
-              Array.isArray(variable._microdatosList) && variable._microdatosList.length) {
+  const buildDownloadButton = (url) => {
+    if (!url) return "";
+    const tipo = getTipoDescarga(url);
+    let cls = "";
+    let icon = "";
+    let label = "";
 
-            const html = variable._microdatosList.map(m => {
-              const comentario = String(m.comentarioA || "").trim();
-              const showLabMsg =
-                comentario.includes("Datos disponibles en el laboratorio de microdatos") ||
-                comentario.includes("Microdatos disponibles en el laboratorio de microdatos");
-
-              // mensaje resaltado con estilo INEGI
-              const labMsgHTML = showLabMsg
-                ? `<div class="microdatos-lab-msg mt-3">
-                    ${comentario.match(/(Datos disponibles en el laboratorio de microdatos|Microdatos disponibles en el laboratorio de microdatos)/)[0]}
-                  </div>`
-                : "";
-
-                 return `
-                  <div class="mb-3 border-bottom pb-2">
-                    ${m.urlAcceso ? `<div><strong>Acceso:</strong> <a href="${m.urlAcceso}" target="_blank" style="word-break: break-all;">${m.urlAcceso}</a></div>` : ""}
-                    ${m.urlDescriptor ? `<div><strong>Descriptor:</strong> <a href="${m.urlDescriptor}" target="_blank" style="word-break: break-all;">${m.urlDescriptor}</a></div>` : ""}
-                    ${(m.tabla || m.campo) ? `<div><strong>Ubicación:</strong> ${m.tabla || "-"} / ${m.campo || "-"}</div>` : ""}
-                    ${m.descriptor ? `<div class="small text-muted">${m.descriptor}</div>` : ""}
-                    ${labMsgHTML || (comentario && comentario !== "-" ? `<div class="small text-muted mt-1">${comentario}</div>` : "")}
-                  </div>
-                `;
-              }).join("");
-
-              modalBody.innerHTML = html || "<div class='text-danger'>No hay microdatos disponibles.</div>";
-              return;
-            }
-
-      // 2) Fallback a /api/microdatos
-      const res = await fetch(`https://emperor-sydney-capability-youth.trycloudflare.com/api/microdatos`);
-      const data = await res.json();
-      const info = Array.isArray(data)
-        ? data.find(micro => String(micro.idVar) === String(idVar))
-        : (data && data.idVar === idVar ? data : null);
-
-      if (info && (info.ligaMicro || info.ligaDd || info.nomTabla || info.nomCampo)) {
-        modalBody.innerHTML = `
-          ${info.ligaMicro ? `
-            <div class="mb-2"><strong>Liga Microdatos:</strong><br>
-            <a href="${info.ligaMicro}" target="_blank" style="word-break: break-all;">Página Microdatos INEGI</a></div>` : ""}
-
-          ${info.ligaDd ? `
-            <div class="mb-2"><strong>Liga de Descarga:</strong><br>
-            <a href="${info.ligaDd}" target="_blank" style="word-break: break-all;">Documento Directo</a></div>` : ""}
-
-          ${(info.nomTabla || info.nomCampo) ? `
-            <div class="mb-2"><strong>Ubicación:</strong><br>
-              ${info.nomTabla || "No disponible"} / ${info.nomCampo || "No disponible"}
-            </div>` : ""}
-        `;
-      } else {
-        modalBody.innerHTML = "<div class='text-danger'>No hay información de microdatos disponible.</div>";
-      }
-    } catch (err) {
-      console.error(err);
-      modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información.</div>";
+    switch (tipo) {
+      case "excel":
+        cls = "btn-excel";
+        icon = '<i class="bi bi-filetype-xlsx me-1"></i>';
+        label = "EXCEL";
+        break;
+      case "pdf":
+        cls = "btn-pdf";
+        icon = '<i class="bi bi-file-earmark-pdf me-1"></i>';
+        label = "PDF";
+        break;
+      case "zip":
+        cls = "btn-zip";
+        icon = '<i class="bi bi-file-earmark-zip me-1"></i>';
+        label = "ZIP";
+        break;
+      default:
+        cls = "btn-web-download";
+        icon = '<i class="bi bi-globe2 me-1"></i>';
+        label = "Web";
+        break;
     }
-  }
 
-  // ============ DATOS ABIERTOS ============
-  if (e.target.classList.contains("badge-datosabiertos")) {
-  if (e.target.classList.contains("disabled")) return; // ← evita abrir modal
+    return `
+      <a href="${url}" target="_blank"
+         class="btn-download ${cls}">
+        ${icon} ${label}
+      </a>
+    `;
+  };
+
+  try {
+    const variable = getVariableByIdVar(idVar);
+
+    // 1) ECONÓMICAS con microdatos embebidos
+    if (variable &&
+        variable._source === "economicas-ultima" &&
+        Array.isArray(variable._microdatosList) &&
+        variable._microdatosList.length) {
+
+      const html = variable._microdatosList.map(m => {
+        const comentario = String(m.comentarioA || "").trim();
+
+        const showLabMsg =
+          comentario.includes("Datos disponibles en el laboratorio de microdatos") ||
+          comentario.includes("Microdatos disponibles en el laboratorio de microdatos");
+
+        const labMsgHTML = showLabMsg
+          ? `<div class="microdatos-lab-msg mt-3">
+               ${comentario.match(/(Datos disponibles en el laboratorio de microdatos|Microdatos disponibles en el laboratorio de microdatos)/)[0]}
+             </div>`
+          : "";
+
+        const botonDerecha = buildDownloadButton(m.urlDescriptor || m.urlAcceso);
+
+        const metaLinea = (m.tabla || m.campo)
+          ? `<span><i class="bi bi-hdd-network me-1"></i>${m.tabla || "-"} / ${m.campo || "-"}</span>`
+          : "";
+
+        return `
+          <div class="tabulado-card micro-card">
+           
+            <div class="tabulado-actions">
+              <!-- IZQUIERDA: Página Microdatos INEGI -->
+              <div class="ta-left">
+                ${m.urlAcceso ? `
+                  <a href="${m.urlAcceso}" target="_blank" class="btn-link-inegi">
+                    <i class="bi bi-link-45deg me-1"></i> Página Microdatos INEGI
+                  </a>` : ""}
+              </div>
+
+              <!-- DERECHA: botón de descarga + ubicación -->
+              <div class="ta-right">
+                <div class="ta-right-buttons">
+                  ${botonDerecha}
+                </div>
+                <div class="tabulado-info text-end">
+                  ${metaLinea}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      modalBody.innerHTML = html || "<div class='text-danger'>No hay microdatos disponibles.</div>";
+      return;
+    }
+
+    // 2) Fallback a /api/microdatos (sociodemográficas, etc.)
+    const res = await fetch(`https://cho-ata-basket-galleries.trycloudflare.com/api/microdatos`);
+    const data = await res.json();
+    const info = Array.isArray(data)
+      ? data.find(micro => String(micro.idVar) === String(idVar))
+      : (data && data.idVar === idVar ? data : null);
+
+    if (info && (info.ligaMicro || info.ligaDd || info.nomTabla || info.nomCampo)) {
+
+      const botonDerecha = buildDownloadButton(info.ligaDd);
+
+      const metaLinea = (info.nomTabla || info.nomCampo)
+        ? `<span><i class="bi bi-hdd-network me-1"></i>${info.nomTabla || "No disponible"} / ${info.nomCampo || "No disponible"}</span>`
+        : "";
+
+      modalBody.innerHTML = `
+        <div class="tabulado-card micro-card">
+
+          <div class="tabulado-actions">
+            <!-- IZQUIERDA: Página Microdatos INEGI -->
+            <div class="ta-left">
+              ${info.ligaMicro ? `
+                <a href="${info.ligaMicro}" target="_blank" class="btn-link-inegi">
+                  <i class="bi bi-link-45deg me-1"></i> Página Microdatos INEGI
+                </a>` : ""}
+            </div>
+
+            <!-- DERECHA: botón descarga + ubicación -->
+            <div class="ta-right">
+              <div class="ta-right-buttons">
+                ${botonDerecha}
+              </div>
+              <div class="tabulado-info text-end">
+                ${metaLinea}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+      modalBody.innerHTML = "<div class='text-danger'>No hay información de microdatos disponible.</div>";
+    }
+  } catch (err) {
+    console.error(err);
+    modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información.</div>";
+  }
+ 
+}
+
+// ============ DATOS ABIERTOS ============
+ 
+  const datosTrigger = e.target.closest(".badge-datosabiertos");
+  if (datosTrigger) {
+    if (datosTrigger.classList.contains("disabled")) return;
 
     const labelEl = document.getElementById("infoModalLabel");
     const bodyEl  = document.getElementById("infoModalBody");
 
-    // Limpieza inmediata para evitar "arrastres"
-    if (labelEl) labelEl.textContent = "Detalle de la Relación con Datos Abiertos";
+    if (labelEl) labelEl.textContent = "Datos Abiertos asociados";
     if (bodyEl)  bodyEl.innerHTML = "<div class='text-center'>Cargando...</div>";
 
-    const idVar  = e.target.getAttribute("data-idvar");
-    // Utilidad como en tus otros bloques
-    function getVariableByIdVar(id) {
-      return (Array.isArray(allData) ? allData : []).find(v => String(v.idVar) === String(id));
-    }
-
-    try {
-      const variable = getVariableByIdVar(idVar);
-      const unidad   = getUnidadDeVariable(variable);
-
-      // SOCIO: mostrar leyenda dentro del modal
-      if (unidad === 'socio') {
-        if (bodyEl) {
-          bodyEl.innerHTML = `
-            <div class="alert alert-info mb-0">En proceso de captura</div>`;
-        }
-        return;
-      }
-
-      // ECO con datos embebidos correctamente
-      if (variable &&
-          variable.relAbiertos === 'Sí' &&
-          Array.isArray(variable._datosAbiertosList) &&
-          variable._datosAbiertosList.length) {
-
-        const contenido = variable._datosAbiertosList.map(r => `
-          <div class="mb-3 border-bottom pb-2">
-            ${r.urlAcceso ? `
-              <div class="mb-1">
-                <strong>Acceso:</strong><br>
-                <a href="${r.urlAcceso}" target="_blank" style="word-break: break-all;">${r.urlAcceso}</a>
-              </div>` : ""}
-
-            ${r.urlDescarga ? `
-              <div class="mb-1">
-                <strong>Descarga:</strong><br>
-                <a href="${r.urlDescarga}" target="_blank" style="word-break: break-all;">${r.urlDescarga}</a>
-              </div>` : ""}
-
-            ${(r.tabla || r.campo) ? `
-              <div class="mb-1">
-                <strong>Ubicación:</strong><br>
-                ${r.tabla || "No disponible"} / ${r.campo || "No disponible"}
-              </div>` : ""}
-
-            ${r.descriptor ? `
-              <div class="mb-1">
-                <strong>Descriptor:</strong><br>${r.descriptor}
-              </div>` : ""}
-
-            ${r.comentarioA && r.comentarioA !== "-" ? `
-              <div class="small text-muted mt-1">${r.comentarioA}</div>` : ""}
-          </div>
-        `).join("");
-
-        if (bodyEl) bodyEl.innerHTML = contenido || "<div class='text-danger'>No hay información disponible.</div>";
-        return;
-      }
-
-      // ECO sin lista (si por alguna razón llegara aquí)
-      if (bodyEl) {
-        bodyEl.innerHTML = "<div class='alert alert-warning mb-0'>No se encontraron registros de Datos Abiertos para esta variable.</div>";
-      }
-    } catch (err) {
-      console.error(err);
-      if (bodyEl) bodyEl.innerHTML = "<div class='text-danger'>Error al cargar Datos Abiertos.</div>";
-    }
-  }
-
-
-  // ============ MDEA (chips) ============
-if (e.target.closest(".mdea-chip")) {
-  const trigger = e.target.closest(".mdea-chip");
-  const idVar   = trigger.getAttribute("data-idvar");
-  const compNum = parseInt(trigger.getAttribute("data-mdea-comp"), 10);
-
-  const modalTitle = document.getElementById("infoModalLabel");
-  const modalBody  = document.getElementById("infoModalBody");
-  if (modalTitle) modalTitle.textContent = `Alineación con MDEA (Componente ${compNum})`;
-  if (modalBody)  modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
-
-  const fmt = (s) => (s || "-").toString().replace(/_/g, " ").replace(/\s+/g, " ").trim();
+    const idVar  = datosTrigger.getAttribute("data-idvar");
 
   function getVariableByIdVar(id) {
     return (Array.isArray(allData) ? allData : []).find(v => String(v.idVar) === String(id));
   }
 
-  (async () => {
-    try {
-      const variable = getVariableByIdVar(idVar);
+  // Detectores de tipo de archivo
+  const isExcel = v => typeof v === "string" && (v.includes(".xls") || v.includes(".xlsx"));
+  const isPdf   = v => typeof v === "string" && v.includes(".pdf");
+  const isZip   = v => typeof v === "string" && v.includes(".zip");
 
-     // 1) ECONÓMICAS con lista embebida
-          if (variable && variable._source === "economicas-ultima" &&
-              Array.isArray(variable._mdeasList) && variable._mdeasList.length) {
+ try {
+  const variable = getVariableByIdVar(idVar);
 
-            const lista = variable._mdeasList.filter(m => getMdeaComponentNumber(m.componente) === compNum);
-            if (!lista.length) {
-              modalBody.innerHTML = "<div class='text-danger'>No hay información MDEA para ese componente.</div>";
-              return;
-            }
+  // HOTFIX: evitar que truene si la función no existe
+  let unidad = null;
+  if (typeof getUnidadDeVariable === "function") {
+    unidad = getUnidadDeVariable(variable);
+  }
 
-            // ✅ Mostrar: CÓDIGO (punteado) + NOMBRE. Sin guiones si no hay nombre.
-            modalBody.innerHTML = lista.map(m => {
-              // Preferimos los campos *Nombre* del endpoint
-              const scName = (m.subcomponenteNombre || "").trim();
-              const tName  = (m.temaNombre || "").trim();
-              const e1Name = (m.estadistica1Nombre || "").trim();
-              const e2Name = (m.estadistica2Nombre || "").trim();
+  // SOCIO: en proceso de captura
+  if (unidad === 'socio') {
+    bodyEl.innerHTML = `<div class="alert alert-info mb-0">En proceso de captura</div>`;
+    return;
+  }
 
-              // Códigos crudos
-              const scCode = (m.subcomponente || "").trim();
-              const tCode  = (m.tema || "").trim();
-              const e1Code = (m.estadistica1 || "").trim();
-              const e2Code = (m.estadistica2 || "").trim();
+    // ECONÓMICAS con datos embebidos
+    if (variable &&
+        variable.relAbiertos === 'Sí' &&
+        Array.isArray(variable._datosAbiertosList) &&
+        variable._datosAbiertosList.length) {
 
-              // Código punteado (25→2.5, 253b1→2.5.3.b.1)
-              const scDot = scCode ? dotifyMdeaCode(scCode) : "";
-              const tDot  = tCode  ? dotifyMdeaCode(tCode)  : "";
-              const e1Dot = e1Code ? dotifyMdeaCode(e1Code) : "";
-              const e2Dot = e2Code ? dotifyMdeaCode(e2Code) : "";
+      const contenido = variable._datosAbiertosList.map(r => {
+        const file = r.urlDescarga || "";
+        let btnClass = "btn-web";
+        let btnIcon  = `<i class="bi bi-globe2 me-1"></i>`;
+        let btnText  = "Ver";
 
-              // Línea helper: muestra "COD NOMBRE" si hay nombre; si no, solo COD; si no hay nada, no imprime
-              const line = (label, codeDot, name) => {
-                if (!codeDot && !name) return "";
-                const text = name ? `${codeDot} ${name}` : codeDot;
-                return `<div><strong>${label}:</strong> ${text}</div>`;
-              };
+        if (isExcel(file)) {
+          btnClass = "btn-excel";
+          btnIcon = `<i class="bi bi-filetype-xlsx me-1"></i>`;
+          btnText = "EXCEL";
+        } else if (isPdf(file)) {
+          btnClass = "btn-pdf";
+          btnIcon = `<i class="bi bi-filetype-pdf me-1"></i>`;
+          btnText = "PDF";
+        } else if (isZip(file)) {
+          btnClass = "btn-zip";
+          btnIcon = `<i class="bi bi-file-earmark-zip me-1"></i>`;
+          btnText = "ZIP";
+        }
 
-              const lineComponente = `<div><strong>Componente:</strong> ${compNum} ${fmt(m.componenteNombre)}</div>`;
-              const lineSubcomp    = line("Subcomponente", scDot, scName);
-              const lineTema       = line("Tema",          tDot,  tName);
-              const lineE1         = line("Estadística 1", e1Dot, e1Name);
-              const lineE2         = line("Estadística 2", e2Dot, e2Name);
+        const botonDerecha = r.urlDescarga ? `
+          <a href="${r.urlDescarga}" target="_blank"
+             class="btn-download ${btnClass}">
+            ${btnIcon} ${btnText}
+          </a>` : "";
 
-              return `
-                <div class="mb-2 border-bottom pb-2">
-                  ${lineComponente}
-                  ${lineSubcomp}
-                  ${lineTema}
-                  ${lineE1}
-                  ${lineE2}
-                  <!-- contribución/comentario ocultos a petición -->
-                </div>
-              `;
-            }).join("");
-            return;
-}
-
-
-      // 2) SOCIO (fallback /api/mdea). Puede venir 1 registro; filtramos por compNum si posible
-      const all = await fetch('https://emperor-sydney-capability-youth.trycloudflare.com/api/mdea').then(r => r.json()).then(d => Array.isArray(d) ? d : (d ? [d] : []));
-      let registros = all.filter(r => String(r.idVar) === String(idVar));
-
-      if (!registros.length) {
-        modalBody.innerHTML = "<div class='text-danger'>No hay información del MDEA para esta variable.</div>";
-        return;
-      }
-
-      // Si hay varios, intenta filtrar por componente numérico detectado en campos comunes
-      const byComp = registros.filter(r => {
-        const n = getMdeaComponentNumber(r.componente ?? r.compo ?? r.componenteNombre ?? r.componenteId ?? r.componenteCodigo);
-        return n === compNum;
-      });
-      if (byComp.length) registros = byComp;
-
-      // Render (mantén tu formato original, pero encabezando con el componente)
-     modalBody.innerHTML = registros.map(info => {
-        const num  = getMdeaComponentNumber(
-          info.componente ?? info.compo ?? info.componenteNombre ?? info.componenteId ?? info.componenteCodigo
-        ) ?? compNum;
-
-        // 👇 elimina el número repetido al final (ej. “...salud ambiental 5” → “...salud ambiental”)
-        const compNameRaw = (info.componenteNombre ?? info.componente ?? info.compo ?? "");
-        const compNameNoEdges = String(compNameRaw)
-        .replace(/^\s*\d+\s*[.\-:]?\s*/, "")   // inicio
-        .replace(/\s*\b\d+\b\s*$/, "")         // final
-        .trim();
-
-       const lineComponente = `<div><strong>Componente:</strong> ${fmt(compNameNoEdges)}</div>`;
-
-        const lineSubcomp = (info.subcompo || info.subcomponente)
-          ? `<div><strong>Subcomponente:</strong> ${fmt(info.subcompo ?? info.subcomponente)}</div>` : "";
-        const lineTema = (info.topico || info.tema)
-          ? `<div><strong>Tema/Tópico:</strong> ${fmt(info.topico ?? info.tema)}</div>` : "";
-        const lineE1 = (info.estAmbiental || info.estadistica1)
-          ? `<div><strong>Estadística 1:</strong> ${fmt(info.estAmbiental ?? info.estadistica1)}</div>` : "";
-        const lineE2 = (info.estadistica2)
-          ? `<div><strong>Estadística 2:</strong> ${fmt(info.estadistica2)}</div>` : "";
+        const ubicacion = (r.tabla || r.campo)
+          ? `<div class="tabulado-info text-end">
+               <span><i class="bi bi-file-earmark-text me-1"></i>
+               ${(r.tabla || "No disponible")} / ${(r.campo || "No disponible")}
+               </span>
+             </div>`
+          : "";
 
         return `
-          <div class="mb-2 border-bottom pb-2">
-            ${lineComponente}
-            ${lineSubcomp}
-            ${lineTema}
-            ${lineE1}
-            ${lineE2}
+          <div class="tabulado-card">
+            
+            <div class="tabulado-actions">
+              <div class="ta-left">
+                ${r.urlAcceso ? `
+                  <a href="${r.urlAcceso}" target="_blank" class="btn-link-inegi">
+                    <i class="bi bi-link-45deg me-1"></i> Página Datos Abiertos INEGI
+                  </a>` : ""}
+              </div>
+
+              <div class="ta-right">
+                <div class="ta-right-buttons">
+                  ${botonDerecha}
+                </div>
+                ${ubicacion}
+              </div>
+            </div>
           </div>
         `;
       }).join("");
 
+      bodyEl.innerHTML = contenido || "<div class='text-danger'>No hay información disponible.</div>";
+      return;
+    }
+
+    // Si no hay embebidos
+    bodyEl.innerHTML = "<div class='alert alert-info mb-0'>En proceso de captura.</div>";
+
+  } catch (err) {
+    console.error(err);
+    bodyEl.innerHTML = "<div class='text-danger'>Error al cargar Datos Abiertos.</div>";
+  }
+  
+}
+
+// ============ MDEA (chips) ============
+if (e.target.closest(".mdea-chip")) {
+  
+  // Limpiar header SIEMPRE antes de pintar el nuevo
+  resetModalHeaderColor();
+
+  const trigger  = e.target.closest(".mdea-chip");
+  const idVar    = trigger.getAttribute("data-idvar");
+  const compNum  = parseInt(trigger.getAttribute("data-mdea-comp"), 10);
+
+  const modal      = document.getElementById("infoModal");
+  const modalTitle = document.getElementById("infoModalLabel");
+  const modalBody  = document.getElementById("infoModalBody");
+
+  if (modalBody) modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
+
+  const fmt = (s) =>
+    (s || "")
+      .toString()
+      .replace(/_/g, " ")
+      .replace(/-/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+  function getVariableByIdVar(id) {
+    return (Array.isArray(allData) ? allData : []).find(
+      (v) => String(v.idVar) === String(id)
+    );
+  }
+
+  // Obtener unidad (eco/socio)
+  function getUnidadDeVariable(v) {
+    if (!v) return null;
+    if (v._source === "economicas-ultima") return "eco";
+    return "socio";
+  }
+
+  (async () => {
+    try {
+      const variable = getVariableByIdVar(idVar);
+      const unidad   = getUnidadDeVariable(variable);
+
+      // Pintar header según unidad
+      if (modal) {
+        if (unidad === "eco") modal.querySelector(".modal-header").style.background = "var(--eco)";
+        else modal.querySelector(".modal-header").style.background = "var(--socio)";
+        modal.querySelector(".modal-header").style.color = "white";
+      }
+
+      // ========================
+      //    ECONÓMICAS MDEA
+      // ========================
+      if (
+        variable &&
+        variable._source === "economicas-ultima" &&
+        Array.isArray(variable._mdeasList) &&
+        variable._mdeasList.length
+      ) {
+        const lista = variable._mdeasList.filter(
+          (m) => getMdeaComponentNumber(m.componente) === compNum
+        );
+
+        if (!lista.length) {
+          modalBody.innerHTML =
+            "<div class='text-danger'>No hay información MDEA para ese componente.</div>";
+          return;
+        }
+
+        // Obtener nombre del componente para el TÍTULO
+        const compNameRaw = lista[0].componenteNombre || "";
+        const compTitle = fmt(
+          compNameRaw
+            .replace(/^\d+\s*/, "")    // quitar número al inicio
+            .replace(/\s*\d+$/, "")    // quitar número al final
+        );
+
+        modalTitle.textContent = `Componente ${compNum} — ${compTitle}`;
+
+        modalBody.innerHTML = lista
+          .map((m) => {
+            const scName = fmt(m.subcomponenteNombre);
+            const tName = fmt(m.temaNombre);
+            const e1Name = fmt(m.estadistica1Nombre);
+            const e2Name = fmt(m.estadistica2Nombre);
+
+            // NO mostrar si vienen vacíos, null o "-"
+            const line = (label, val) =>
+              val && val !== "-" ? `<div><strong>${label}:</strong> ${val}</div>` : "";
+
+            return `
+              <div class="mb-2 border-bottom pb-2">
+                ${line("Subcomponente", scName)}
+                ${line("Tema", tName)}
+                ${line("Estadística 1", e1Name)}
+                ${line("Estadística 2", e2Name)}
+              </div>
+            `;
+          })
+          .join("");
+
+        return;
+      }
+
+      // ========================
+      //    SOCIODEMOGRÁFICAS
+      // ========================
+      const all = await fetch("https://cho-ata-basket-galleries.trycloudflare.com/api/mdea")
+        .then((r) => r.json())
+        .then((d) => (Array.isArray(d) ? d : d ? [d] : []));
+
+      let registros = all.filter((r) => String(r.idVar) === String(idVar));
+
+      if (!registros.length) {
+        modalBody.innerHTML =
+          "<div class='text-danger'>No hay información del MDEA para esta variable.</div>";
+        return;
+      }
+
+      const byComp = registros.filter((r) => {
+        const n = getMdeaComponentNumber(
+          r.componente ??
+            r.compo ??
+            r.componenteNombre ??
+            r.componenteId ??
+            r.componenteCodigo
+        );
+        return n === compNum;
+      });
+
+      if (byComp.length) registros = byComp;
+
+      const rawName =
+        registros[0].componenteNombre ??
+        registros[0].componente ??
+        registros[0].compo ??
+        "";
+
+      const compTitle = fmt(
+        rawName.replace(/^\d+\s*/, "").replace(/\s*\d+$/, "")
+      );
+
+      modalTitle.textContent = `Componente ${compNum} — ${compTitle}`;
+
+      modalBody.innerHTML = registros
+        .map((info) => {
+          const line = (label, val) =>
+            val && val !== "-" ? `<div><strong>${label}:</strong> ${fmt(val)}</div>` : "";
+
+          return `
+            <div class="mb-2 border-bottom pb-2">
+              ${line("Subcomponente", info.subcompo || info.subcomponente)}
+              ${line("Tema/Tópico", info.topico || info.tema)}
+              ${line("Estadística 1", info.estAmbiental || info.estadistica1)}
+              ${line("Estadística 2", info.estadistica2)}
+            </div>
+          `;
+        })
+        .join("");
     } catch (err) {
       console.error(err);
-      modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información del MDEA.</div>";
+      modalBody.innerHTML =
+        "<div class='text-danger'>Error al cargar la información del MDEA.</div>";
     }
   })();
 }
 
 
-  // ============ ODS ============
+
+// ============ ODS ============
 if (e.target.closest(".badge-ods")) {
-  const trigger = e.target.closest(".badge-ods");  // <- asegura capturar el elemento correcto
+  // Siempre que entro a ODS reseteo primero y luego pinto color
+  resetModalHeaderColor();
+
+  const trigger = e.target.closest(".badge-ods");
   if (trigger.classList.contains("disabled")) return;
 
-  const clickedOds = trigger.getAttribute("data-ods"); // 1..17 o null
+  const clickedOds = trigger.getAttribute("data-ods"); // "1".."17"
   const idVar      = trigger.getAttribute("data-idvar");
 
+  const modal      = document.getElementById("infoModal");
   const modalTitle = document.getElementById("infoModalLabel");
   const modalBody  = document.getElementById("infoModalBody");
 
+  // Aplica color SOLO si viene un ODS válido
+  if (clickedOds && modal) {
+    setOdsModalHeaderColor(clickedOds);
+  }
+
+  // Título de arranque (se sobreescribe con "ODS N. Nombre")
   if (modalTitle) {
-    modalTitle.textContent = clickedOds
-      ? `Alineación de la variable con los ODS (ODS ${clickedOds})`
-      : "Alineación de la variable con los ODS";
+    modalTitle.textContent = "Alineación de la variable con los ODS";
   }
   if (modalBody) modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
 
   const fmt = (s) => (s || "-").toString().replace(/_/g, " ").replace(/\s+/g, " ").trim();
 
   try {
+    // helper local basado en tu allData
     function getVariableByIdVar(id) {
       return (Array.isArray(allData) ? allData : []).find(v => String(v.idVar) === String(id));
     }
+
     const variable = getVariableByIdVar(idVar);
 
-    // 1) Económicas con _odsList embebido
+    // ------------------------------------------------------------------
+    // 1) ECONÓMICAS con _odsList embebido
+    // ------------------------------------------------------------------
     if (variable && variable._source === "economicas-ultima" &&
         Array.isArray(variable._odsList) && variable._odsList.length) {
 
@@ -2972,33 +3446,69 @@ if (e.target.closest(".badge-ods")) {
         return;
       }
 
-          modalBody.innerHTML = `
-          <div class="mb-2"><strong>${fmt(variable.varAsig || idVar)}</strong></div>
-          <div class="list-group">
-            ${lista.map(o => {
-              const objNum = formatOdsObjetivo(o.objetivo); 
-              const objNom = fmt(o.objetivoNombre);         
-              const meta   = formatOdsComposite(o.meta);    
-              const ind    = formatOdsComposite(o.indicador)
+      // Usamos el PRIMER registro para construir el título del modal (ODS N. Nombre)
+      const first  = lista[0];
+      const objNum = formatOdsObjetivo(first.objetivo);
+      const objNom = fmt(first.objetivoNombre);
 
-              return `
-                <div class="list-group-item">
-                  <div class="d-flex w-100 justify-content-between align-items-start">
-                    <h6 class="mb-1">ODS: ${objNum} ${objNom}</h6>
-                  </div>
-                  <div class="small mb-1"><strong>Meta ODS detectada:</strong> ${meta}</div>
-                  <div class="small mb-1"><strong>Indicador ODS:</strong> ${ind}</div>
-                </div>
-              `;
-            }).join("")}
-          </div>
+      if (modalTitle && clickedOds) {
+        modalTitle.textContent = `ODS ${objNum}. ${objNom}`;
+      }
+
+      const varTitle = fmt(variable.varAsig || idVar);
+
+      modalBody.innerHTML = `
+        <div class="mb-2"><strong>${varTitle}</strong></div>
+        <div class="list-group">
+          ${lista.map(o => {
+            // META: código + nombre desde metaNombre (económicas ya lo trae)
+            const metaCode  = cleanUnderscores(formatOdsComposite(o.meta));
+            const metaName  = cleanUnderscores(o.metaNombre || "");
+            const showMeta  = metaCode && metaCode !== "-";
+
+            const metaBlock = showMeta ? `
+              <div class="small mb-1"><strong>Meta ODS detectada:</strong> ${metaCode}</div>
+              ${metaName ? `<div class="small mb-1">${metaName}</div>` : ""}`
+            : "";
+
+            // INDICADOR: solo si es válido, con indicadorNombre
+            let indicadorBlock = "";
+            if (hasValidIndicador(o.indicador)) {
+              const indCode = cleanUnderscores(formatOdsComposite(o.indicador));
+              const indName = cleanUnderscores(o.indicadorNombre || "");
+              indicadorBlock = `
+                <div class="small mb-1"><strong>Indicador ODS:</strong> ${indCode}</div>
+                ${indName ? `<div class="small mb-1">${indName}</div>` : ""}`;
+            }
+
+            const coment =
+              o.comentarioS && o.comentarioS.trim() !== "-"
+                ? `<div class="small text-muted">${cleanUnderscores(o.comentarioS)}</div>`
+                : "";
+
+            return `
+              <div class="list-group-item">
+                ${metaBlock}
+                ${indicadorBlock}
+                ${coment}
+              </div>
+            `;
+          }).join("")}
+        </div>
       `;
       return;
     }
 
-    // 2) Fallback a /api/ods (sociodemo, etc.)
-    const res = await fetch(`https://emperor-sydney-capability-youth.trycloudflare.com/api/ods`);
-    const data = await res.json();
+    // ------------------------------------------------------------------
+    // 2) SOCIODEMOGRÁFICAS (fallback /api/ods + /api/ods_indicadores + /api/meta_ods)
+    // ------------------------------------------------------------------
+    const [resOds, resIndic, resMeta] = await Promise.all([
+      fetch(`https://cho-ata-basket-galleries.trycloudflare.com/api/ods`),
+      fetch(`https://cho-ata-basket-galleries.trycloudflare.com/api/ods_indicadores`), // catálogo indicadores
+      fetch(`https://cho-ata-basket-galleries.trycloudflare.com/api/meta_ods`)         // catálogo metas
+    ]);
+
+    const data = await resOds.json();
     let registros = Array.isArray(data)
       ? data.filter(ods => String(ods.idVar) === String(idVar))
       : (data && String(data.idVar) === String(idVar) ? [data] : []);
@@ -3013,41 +3523,96 @@ if (e.target.closest(".badge-ods")) {
       return;
     }
 
+    // Catálogos
+    let catalogIndic = [];
+    let catalogMeta  = [];
+    try {
+      const rawIndic = await resIndic.json();
+      catalogIndic = Array.isArray(rawIndic) ? rawIndic : (rawIndic ? [rawIndic] : []);
+    } catch (e) {
+      catalogIndic = [];
+    }
+    try {
+      const rawMeta = await resMeta.json();
+      catalogMeta = Array.isArray(rawMeta) ? rawMeta : (rawMeta ? [rawMeta] : []);
+    } catch (e) {
+      catalogMeta = [];
+    }
+
+    const first  = registros[0];
+    const objNum = formatOdsObjetivo(first.ods ?? first.objetivo);
+    let rawName = first.odsNombre || first.objetivoNombre || first.ods;
+
+    // aplicar limpieza SOLO a sociodemográficas
+    const cleanName = cleanOdsTitleName(rawName);
+
+    modalTitle.textContent = `ODS ${objNum}. ${cleanName}`;
+
     const varTitle = fmt((variable?.varAsig) || idVar);
-       modalBody.innerHTML = `
-          <div class="mb-2"><strong>${varTitle}</strong></div>
-          <div class="list-group">
-            ${registros.map(info => {
-              const objNum = formatOdsObjetivo(info.ods ?? info.objetivo);
-              const objNom = fmt(info.odsNombre || info.objetivoNombre || info.ods);
-              // 👇 limpiamos guiones y mantenemos formato 12.2 / 12.2.1
-              const meta = cleanUnderscores(formatOdsComposite(info.meta));
-              const ind  = cleanUnderscores(formatOdsComposite(info.indicador));
 
-              return `
-                <div class="list-group-item">
-                  <div class="d-flex w-100 justify-content-between align-items-start">
-                    <h6 class="mb-1">ODS: ${objNum} ${objNom}</h6>
-                  </div>
-                  <div class="small mb-1"><strong>Meta ODS detectada:</strong> ${meta}</div>
-                  <div class="small mb-1"><strong>Indicador ODS:</strong> ${ind}</div>
-                  ${info.comentOds && info.comentOds.trim() !== "-" ? `<div class="small text-muted">${cleanUnderscores(info.comentOds)}</div>` : ""}
-                </div>
-              `;
-            }).join("")}
-          </div>
-        `;
+    modalBody.innerHTML = `
+      <div class="mb-2"><strong>${varTitle}</strong></div>
+      <div class="list-group">
+        ${registros.map(info => {
+          const odsNumber = getOdsObjectiveNumber(info.ods ?? info.objetivo);
 
+          // META: código + nombre desde catálogo meta_ods
+          const metaCode = cleanUnderscores(formatOdsComposite(info.meta));
+          const showMeta = metaCode && metaCode !== "-";
 
+          const metaNameFromCat = getMetaNameFromCatalog(
+            odsNumber,
+            info.meta,
+            catalogMeta
+          );
+
+          const metaBlock = showMeta ? `
+            <div class="small mb-1"><strong>Meta ODS detectada:</strong> ${metaCode}</div>
+            ${metaNameFromCat ? `<div class="small mb-1">${metaNameFromCat}</div>` : ""}`
+          : "";
+
+          // INDICADOR: solo si es válido, con nombre desde catálogo ods_indicadores
+          let indicadorBlock = "";
+          if (hasValidIndicador(info.indicador)) {
+            const indCode   = cleanUnderscores(formatOdsComposite(info.indicador));
+            const nameIndic = getIndicadorNameFromCatalog(
+              odsNumber,
+              info.meta,
+              info.indicador,
+              catalogIndic
+            );
+
+            indicadorBlock = `
+              <div class="small mb-1"><strong>Indicador ODS:</strong> ${indCode}</div>
+              ${nameIndic ? `<div class="small mb-1">${nameIndic}</div>` : ""}`;
+          }
+
+          const coment =
+            info.comentOds && info.comentOds.trim() !== "-"
+              ? `<div class="small text-muted">${cleanUnderscores(info.comentOds)}</div>`
+              : "";
+
+          return `
+            <div class="list-group-item">
+              ${metaBlock}
+              ${indicadorBlock}
+              ${coment}
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
   } catch (err) {
     console.error(err);
-    modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información de ODS.</div>";
+    if (modalBody) {
+      modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información de ODS.</div>";
+    }
   }
 }
 
+}); // ← fin del addEventListener
 
-});
-});
+
 
 // Almacenar y recuperar término de búsqueda en localStorage
 document.addEventListener("DOMContentLoaded", function () {
@@ -3069,13 +3634,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // ---- Nota de fuente al final de la página (texto pequeño, no altera layout) ----
 
-
 // Si decides conservar ese bloque, ajústalo así:
-fetch('https://emperor-sydney-capability-youth.trycloudflare.com/api/clasificaciones')
+fetch('https://cho-ata-basket-galleries.trycloudflare.com/api/clasificaciones')
   .then(res => res.json())
   .then(clasificaciones => {
     clasificacionesGlobal = clasificaciones;
-    return fetch('https://emperor-sydney-capability-youth.trycloudflare.com/api/eventos').then(res => res.json());
+    return fetch('https://cho-ata-basket-galleries.trycloudflare.com/api/eventos').then(res => res.json());
   })
   .then(eventos => {
     eventosGlobal = eventos;
@@ -3088,25 +3652,6 @@ fetch('https://emperor-sydney-capability-youth.trycloudflare.com/api/clasificaci
   })
   .catch(console.error);
 
-
-
-function getClasificacionesPorVariable(idVar) {
-  // Filtra las clasificaciones que correspondan a la variable y descarta vacíos, nulos o '-'
-  const clasifs = clasificacionesGlobal
-    .filter(clasif => clasif.idVar === idVar)
-    .map(clasif => clasif.clasificaciones)
-    .filter(val => val && val.trim() !== '' && val.trim() !== '-');
-
-  // Puedes mostrar como lista o como badges
-  if (clasifs.length > 0) {
-    // Como lista
-    return `<ul class="mb-0 ps-3">${clasifs.map(c => `<li>${c}</li>`).join('')}</ul>`;
-    // O como badges:
-    // return clasifs.map(c => `<span class="badge bg-secondary me-1 mb-1">${c}</span>`).join('');
-  } else {
-    return '<span class="text-muted">Sin clasificación</span>';
-  }
-}
 
 function getClasificacionesPorVariableHighlighted(idVar, term) {
   const clasifs = clasificacionesGlobal
@@ -3122,24 +3667,7 @@ function getClasificacionesPorVariableHighlighted(idVar, term) {
 }
 
 // Nueva función para renderizar comentarios
-function renderComentarios(comentario) {
-  if (
-    !comentario ||
-    comentario.trim() === '' ||
-    comentario.trim() === '-' ||
-    comentario.trim().toLowerCase() === 'nula' ||
-    comentario.trim().toLowerCase() === 'null' ||
-    comentario.trim().toLowerCase() === 'n/a'
-  ) {
-    return ''; // No mostrar nada
-  }
-  return `
-    <div class="mb-2 ms-1">
-      <span class="fw-semibold">Comentario:</span>
-      <div>${comentario}</div>
-    </div>
-  `;
-}
+
 
 // Espera al menos 1000ms antes de mostrar el contenido principal
 window.addEventListener("DOMContentLoaded", function() {
@@ -3149,13 +3677,6 @@ window.addEventListener("DOMContentLoaded", function() {
   }, 2000);
 });
 
-function formatIdWithDots(id) {
-  if (!id) return "";
-  const str = String(id).trim();
-  // Divide cada caracter por punto, incluyendo letras
-  return str.split("").join(".");
-}
-
 // Resaltar término de búsqueda en los resultados
 function highlightTerm(text, term) {
   if (!term) return text;
@@ -3163,3 +3684,8 @@ function highlightTerm(text, term) {
   const regex = new RegExp(`(${escaped})`, 'gi');
   return text.replace(regex, '<mark class="custom-highlight">$1</mark>');
 }
+
+// ……………………………
+// AQUÍ TERMINA TODA LA LÓGICA DE VARIABLES
+// ……………………………
+});

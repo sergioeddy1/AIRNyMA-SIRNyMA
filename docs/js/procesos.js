@@ -376,6 +376,35 @@ function wireFiltrosYOrden({ procesosGlobal, conteoGlobal, container }) {
   document.getElementById("iinCheck").addEventListener("change", aplicarFiltrosYOrden);
   document.getElementById("ordenarProcesos").addEventListener("change", aplicarFiltrosYOrden);
 
+   const resetBtn = document.getElementById("resetFiltrosBtn");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      // Restaurar controles a valores por defecto
+      const estatusEl = document.getElementById("filtrarEstatus");
+      if (estatusEl) estatusEl.value = "";
+
+      if (selectPerio) selectPerio.value = "";
+
+      const iinEl = document.getElementById("iinCheck");
+      if (iinEl) iinEl.checked = false;
+
+      if (ordenarSel) {
+        ordenarSel.value = "az";
+        ordenarSel.dataset.init = "1";
+      }
+
+      // si hay un input de búsqueda, limpiar también (id ejemplo: buscarVariable)
+      const buscar = document.getElementById("buscarVariable");
+      if (buscar) buscar.value = "";
+
+      // volver a aplicar filtros y re-render
+      aplicarFiltrosYOrden();
+
+      // opcional: devolver foco a primer control
+      if (selectPerio) selectPerio.focus();
+    });
+  }
   // Primera pintada
   aplicarFiltrosYOrden();
 }
@@ -454,8 +483,8 @@ function filtrarEconomicasSinVariables(procesos, conteo) {
 async function cargarSociodemograficas({ container }) {
   renderLoader(container, "Cargando procesos (Sociodemográficas)...");
   try {
-    const procesos  = await fetch("https://emperor-sydney-capability-youth.trycloudflare.com/api/proceso").then(res => res.json());
-    const variables = await fetch("https://emperor-sydney-capability-youth.trycloudflare.com/api/variables").then(res => res.json());
+    const procesos  = await fetch("https://cho-ata-basket-galleries.trycloudflare.com/api/proceso").then(res => res.json());
+    const variables = await fetch("https://cho-ata-basket-galleries.trycloudflare.com/api/variables").then(res => res.json());
 
     const conteoGlobal = buildConteoPorIdPp(variables);
     procesos.forEach(p => { if (!(p.idPp in conteoGlobal)) conteoGlobal[p.idPp] = 0; });
@@ -539,9 +568,9 @@ function renderContadorVariablesUnidad(conteoGlobal, { animateMs = 350 } = {}) {
 // --- Carga ECONÓMICAS (Base de datos nueva) ---
 async function cargarEconomicas({ container }) {
   renderLoader(container, "Cargando procesos (Económicas)...");
-  const urlProcesos = "https://vegas-sussex-release-tagged.trycloudflare.com/api/procesos/buscar?unidad=" +
+  const urlProcesos = "https://movement-comparable-demonstrated-qualification.trycloudflare.com/api/procesos/buscar?unidad=" +
                       encodeURIComponent("Unidad de Estadísticas Económicas");
-  const urlVariablesEco = "https://vegas-sussex-release-tagged.trycloudflare.com/api/indicadores/ultima";
+  const urlVariablesEco = "https://movement-comparable-demonstrated-qualification.trycloudflare.com/api/indicadores/ultima";
 
   try {
     const economicasRaw = await fetch(urlProcesos).then(r => r.json());
@@ -553,7 +582,7 @@ async function cargarEconomicas({ container }) {
       conteoGlobal = buildConteoPorIdPpDesdeUltima(payloadUltima);
     } catch (e) {
       try {
-        const variablesLocal = await fetch("https://emperor-sydney-capability-youth.trycloudflare.com/api/variables").then(r => r.json());
+        const variablesLocal = await fetch("https://cho-ata-basket-galleries.trycloudflare.com/api/variables").then(r => r.json());
         conteoGlobal = buildConteoPorIdPp(variablesLocal);
       } catch (e2) {
         conteoGlobal = {};

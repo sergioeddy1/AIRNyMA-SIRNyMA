@@ -90,7 +90,7 @@ function buildTableHTML(rows) {
 // --- Fin Utils ---
 
 document.addEventListener("DOMContentLoaded", function () {
- fetch('https://emperor-sydney-capability-youth.trycloudflare.com/api/indicadores_ambientales')
+ fetch('https://cho-ata-basket-galleries.trycloudflare.com/api/indicadores_ambientales')
   .then(res => res.json())
   .then(data => {
     indicadoresData = data;

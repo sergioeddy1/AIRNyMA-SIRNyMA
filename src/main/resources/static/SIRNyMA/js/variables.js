@@ -17,12 +17,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const params = new URLSearchParams(window.location.search);
   let itemsPerPage = parseInt(15);
   let currentPage = 1;
-<<<<<<< HEAD
-  let procesosGlobal = [];
-  let allData = [];
-  let currentFilteredData = [];
-
-=======
   let lastSubmittedTerm = null; 
 
   itemsPerPageSelect.addEventListener("change", () => {
@@ -728,7 +722,6 @@ function cleanComponentName(name) {
 // ==== FIN HELPERS MDEA/ODS ====
 
 
->>>>>>> master
     // Referencias a los checkboxes
 const relTabCheckbox = document.getElementById("relTabCheckbox");
 const relMicroCheckbox = document.getElementById("relMicroCheckbox");
