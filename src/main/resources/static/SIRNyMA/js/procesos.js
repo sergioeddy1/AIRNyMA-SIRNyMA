@@ -205,8 +205,12 @@ function mapEconomicasToLocal(item) {
                   ? "Información de Interés Nacional"
                   : null;
 
-  // Descripción: objetivo (+ pobjeto si existe)
-  const desc = [item.objetivo, item.pobjeto].filter(Boolean).join(" ");
+  // Guardamos objetivo por separado
+  const objetivo = (item.objetivo || '').trim() || null;
+  const pobjeto  = (item.pobjeto  || '').trim() || null;
+
+  // Para descPp usamos primero objetivo, luego pobjeto como respaldo
+  const desc = objetivo || pobjeto || null;
 
   return {
     idPp: item.acronimo || "SD",
@@ -214,7 +218,7 @@ function mapEconomicasToLocal(item) {
     pp: item.proceso || "No disponible",
     dgaRespPp: null,
     perioProd: null,
-    vigInicial: item.inicio ? String(item.inicio).slice(0, 4) : null, // Solo los primeros 4 dígitos
+    vigInicial: item.inicio ? String(item.inicio).slice(0, 4) : null,
     vigFinal: item.fin 
       ? (/^\d{4}/.test(String(item.fin)) ? String(item.fin).slice(0, 4) : String(item.fin)) 
       : null, 
@@ -222,7 +226,12 @@ function mapEconomicasToLocal(item) {
     gradoMadur: grado,
     perPubResul: perPub || "No disponible",
     estatus: item.estatus || "Activo",
+
+    // 👇 aquí va lo que usará la cara trasera
     descPp: desc || "No disponible",
+    objetivo,          // <- campo extra por si lo quieres usar directo
+    pobjeto,           // opcional
+
     comentPp: item.comentarioS || item.comentarioA || "-",
     responCaptura: null,
     _source: 'economicas',
@@ -230,6 +239,7 @@ function mapEconomicasToLocal(item) {
   };
 }
 
+// --- Render de tarjetas  ---
 // --- Render de tarjetas  ---
 function renderProcesos(procesos, conteo, container) {
   const counter = document.getElementById("procesosCounter");
@@ -241,7 +251,7 @@ function renderProcesos(procesos, conteo, container) {
     return;
   }
 
-  // Orden por defecto A-Z (seguro)
+  // Orden por defecto A-Z
   const ordenados = [...procesos].sort((a, b) => {
     const A = (a.pp || "").toLowerCase();
     const B = (b.pp || "").toLowerCase();
@@ -249,14 +259,13 @@ function renderProcesos(procesos, conteo, container) {
   });
 
   ordenados.forEach(proceso => {
-    let iconoHTML = "";
     let extension = "png";
     const baseName = `/assets/${proceso.idPp}`;
     const iconoFallback = `/assets/no_disponible.png`;
     const iconoRutaMin = `${baseName}.${extension}`;
     const iconoRutaMay = `${baseName}.${extension.toUpperCase()}`;
 
-    iconoHTML = `
+    const iconoHTML = `
       <img src="${iconoRutaMin}"
            class="img-fluid proceso-icon rounded-start"
            alt="Icono ${proceso.idPp}"
@@ -274,11 +283,22 @@ function renderProcesos(procesos, conteo, container) {
 
     const totalVars = conteo[proceso.idPp] || 0;
 
-    // Flip solo para SOCIO: en tu mapeo Económicas pones _source='economicas'
-    const isSocio = (proceso._source !== 'economicas');
-    const canFlip = isSocio && hasValidDesc(proceso.descPp);
+    // --- lógica para flip según unidad ---
+    const isEco  = (proceso._source === 'economicas');
+    const isSocio = !isEco;
 
-    // FRONT (contenido normal)
+    // Texto que se mostrará atrás
+    const backText = isEco
+      ? (proceso.objetivo || proceso.descPp || '')
+      : (proceso.descPp || '');
+
+    const canFlip = hasValidDesc(backText);
+
+    const backLabel = isEco
+      ? 'Objetivo:'
+      : 'Descripción del proceso:';
+
+    // FRONT
     const front = `
       <div class="flip-side flip-front">
         <div class="card h-100 shadow-sm rounded-3 p-2 position-relative proceso-card">
@@ -320,14 +340,17 @@ function renderProcesos(procesos, conteo, container) {
           </div>
 
           ${canFlip ? `
-          <button type="button" class="btn btn-sm btn-outline-primary btn-flip" data-flip="1" title="Ver descripción">
+          <button type="button"
+                  class="btn btn-sm btn-outline-primary btn-flip"
+                  data-flip="1"
+                  title="Ver más información">
             <i class="bi bi-arrow-repeat"></i>
           </button>` : ``}
         </div>
       </div>
     `;
 
-    // BACK (descripción) — solo si canFlip
+    // BACK (solo si hay texto válido)
     const back = canFlip ? `
       <div class="flip-side flip-back">
         <div class="card h-100 shadow-sm rounded-3 p-3 position-relative proceso-card">
@@ -335,21 +358,24 @@ function renderProcesos(procesos, conteo, container) {
             ${proceso.pp || proceso.pi || proceso.idPp || 'Proceso'}
           </h6>
           <div class="proceso-desc small text-secondary">
-            ${proceso.descPp}
+            <strong>${backLabel}</strong><br>
+            ${backText}
           </div>
 
-          <button type="button" class="btn btn-sm btn-outline-secondary btn-unflip" data-unflip="1" title="Volver">
+          <button type="button"
+                  class="btn btn-sm btn-outline-secondary btn-unflip"
+                  data-unflip="1"
+                  title="Volver">
             <i class="bi bi-arrow-90deg-left"></i>
           </button>
         </div>
       </div>
     ` : '';
 
-    // Card completa (flip o normal)
     const card = `
       <div class="col-md-4 mb-4">
         <div class="flip-wrap">
-          <div class="flip-card ${/* empieza no-flipped */''}">
+          <div class="flip-card">
             ${front}
             ${back}
           </div>
