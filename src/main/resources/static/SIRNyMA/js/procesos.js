@@ -185,6 +185,14 @@ function setProcesosTitle(unidad) {
   el.textContent = base + sufijo;
 }
 
+function hasValidDesc(desc) {
+  if (desc === undefined || desc === null) return false;
+  const s = String(desc).trim().toLowerCase();
+  if (!s) return false;
+  if (s === '-' || s === 'null' || s === 'na') return false;
+  return true;
+}
+
 // --- Normalizador: ECONÓMICAS → shape local (sociodemograficas) ---
 function mapEconomicasToLocal(item) {
   // Periodicidad de publicación preferente
@@ -233,44 +241,55 @@ function renderProcesos(procesos, conteo, container) {
     return;
   }
 
-  procesos.forEach(proceso => {
+  // Orden por defecto A-Z (seguro)
+  const ordenados = [...procesos].sort((a, b) => {
+    const A = (a.pp || "").toLowerCase();
+    const B = (b.pp || "").toLowerCase();
+    return A.localeCompare(B);
+  });
+
+  ordenados.forEach(proceso => {
     let iconoHTML = "";
-
-    // Comportamiento normal para las demás unidades
     let extension = "png";
-
     const baseName = `/assets/${proceso.idPp}`;
     const iconoFallback = `/assets/no_disponible.png`;
     const iconoRutaMin = `${baseName}.${extension}`;
     const iconoRutaMay = `${baseName}.${extension.toUpperCase()}`;
 
     iconoHTML = `
-        <img src="${iconoRutaMin}" 
-            class="img-fluid proceso-icon rounded-start" 
-            alt="Icono ${proceso.idPp}" 
-            style="max-height: 80px; object-fit: contain; ${proceso.idPp === "CPV" ? "filter: invert(1);" : ""}"
-            onerror="
-              if (this.src.includes('.png') && !this.src.includes('.PNG')) {
-                this.onerror = null;
-                this.src = '${iconoRutaMay}';
-              } else {
-                this.onerror = null;
-                this.src = '${iconoFallback}';
-              }
-            ">
+      <img src="${iconoRutaMin}"
+           class="img-fluid proceso-icon rounded-start"
+           alt="Icono ${proceso.idPp}"
+           style="max-height: 80px; object-fit: contain; ${proceso.idPp === "CPV" ? "filter: invert(1);" : ""}"
+           onerror="
+             if (this.src.includes('.png') && !this.src.includes('.PNG')) {
+               this.onerror = null;
+               this.src = '${iconoRutaMay}';
+             } else {
+               this.onerror = null;
+               this.src = '${iconoFallback}';
+             }
+           ">
     `;
-    
+
     const totalVars = conteo[proceso.idPp] || 0;
 
-    const card = `
-      <div class="col-md-4 mb-4">
-        <div class="card h-100 shadow-sm rounded-3 p-2 position-relative">
+    // Flip solo para SOCIO: en tu mapeo Económicas pones _source='economicas'
+    const isSocio = (proceso._source !== 'economicas');
+    const canFlip = isSocio && hasValidDesc(proceso.descPp);
+
+    // FRONT (contenido normal)
+    const front = `
+      <div class="flip-side flip-front">
+        <div class="card h-100 shadow-sm rounded-3 p-2 position-relative proceso-card">
+
           ${proceso.gradoMadur === "Información de Interés Nacional" ? `
             <span class="badge bg-secondary position-absolute top-0 start-0 m-2"
                   style="z-index:2; cursor: help;"
                   data-bs-toggle="tooltip"
                   data-bs-placement="right"
                   title="Información de Interés Nacional">IIN</span>` : ""}
+
           <div class="row g-0 d-flex align-items-center">
             <div class="col-4 d-flex justify-content-center">${iconoHTML}</div>
             <div class="col-8">
@@ -299,15 +318,53 @@ function renderProcesos(procesos, conteo, container) {
               </div>
             </div>
           </div>
+
+          ${canFlip ? `
+          <button type="button" class="btn btn-sm btn-outline-primary btn-flip" data-flip="1" title="Ver descripción">
+            <i class="bi bi-arrow-repeat"></i>
+          </button>` : ``}
         </div>
-      </div>`;
-    container.innerHTML += card;
+      </div>
+    `;
+
+    // BACK (descripción) — solo si canFlip
+    const back = canFlip ? `
+      <div class="flip-side flip-back">
+        <div class="card h-100 shadow-sm rounded-3 p-3 position-relative proceso-card">
+          <h6 class="fw-bold mb-2">
+            ${proceso.pp || proceso.pi || proceso.idPp || 'Proceso'}
+          </h6>
+          <div class="proceso-desc small text-secondary">
+            ${proceso.descPp}
+          </div>
+
+          <button type="button" class="btn btn-sm btn-outline-secondary btn-unflip" data-unflip="1" title="Volver">
+            <i class="bi bi-arrow-90deg-left"></i>
+          </button>
+        </div>
+      </div>
+    ` : '';
+
+    // Card completa (flip o normal)
+    const card = `
+      <div class="col-md-4 mb-4">
+        <div class="flip-wrap">
+          <div class="flip-card ${/* empieza no-flipped */''}">
+            ${front}
+            ${back}
+          </div>
+        </div>
+      </div>
+    `;
+
+    container.insertAdjacentHTML('beforeend', card);
   });
 
   // Tooltips Bootstrap
   const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
   tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
 }
+
 
 // --- Filtros y orden: reusables para cualquier lista de procesos ---
 function wireFiltrosYOrden({ procesosGlobal, conteoGlobal, container }) {
@@ -788,3 +845,20 @@ function restoreUnidadCardSelection() {
     }
   } catch (e) {}
 }
+
+// Delegación: click en botones de flip/unflip dentro del contenedor de procesos
+document.addEventListener('click', (e) => {
+  const flipBtn = e.target.closest('[data-flip]');
+  const unflipBtn = e.target.closest('[data-unflip]');
+
+  if (flipBtn || unflipBtn) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const flipCard = e.target.closest('.flip-wrap')?.querySelector('.flip-card');
+    if (!flipCard) return;
+
+    if (flipBtn)   flipCard.classList.add('flipped');
+    if (unflipBtn) flipCard.classList.remove('flipped');
+  }
+});
