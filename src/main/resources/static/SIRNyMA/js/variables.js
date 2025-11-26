@@ -3458,7 +3458,7 @@ if (e.target.closest(".badge-ods")) {
       const varTitle = fmt(variable.varAsig || idVar);
 
       modalBody.innerHTML = `
-        <div class="mb-2"><strong>${varTitle}</strong></div>
+        
         <div class="list-group">
           ${lista.map(o => {
             // META: código + nombre desde metaNombre (económicas ya lo trae)
@@ -3467,7 +3467,7 @@ if (e.target.closest(".badge-ods")) {
             const showMeta  = metaCode && metaCode !== "-";
 
             const metaBlock = showMeta ? `
-              <div class="small mb-1"><strong>Meta ODS detectada:</strong> ${metaCode}</div>
+              <div class="small mb-1"><strong>Meta ${metaCode}: </strong></div>
               ${metaName ? `<div class="small mb-1">${metaName}</div>` : ""}`
             : "";
 
@@ -3477,7 +3477,7 @@ if (e.target.closest(".badge-ods")) {
               const indCode = cleanUnderscores(formatOdsComposite(o.indicador));
               const indName = cleanUnderscores(o.indicadorNombre || "");
               indicadorBlock = `
-                <div class="small mb-1"><strong>Indicador ODS:</strong> ${indCode}</div>
+                <div class="small mb-1"><strong>Indicador ${indCode}:</strong></div>
                 ${indName ? `<div class="small mb-1">${indName}</div>` : ""}`;
             }
 
@@ -3546,7 +3546,7 @@ if (e.target.closest(".badge-ods")) {
     const varTitle = fmt((variable?.varAsig) || idVar);
 
     modalBody.innerHTML = `
-      <div class="mb-2"><strong>${varTitle}</strong></div>
+     
       <div class="list-group">
         ${registros.map(info => {
           const odsNumber = getOdsObjectiveNumber(info.ods ?? info.objetivo);
@@ -3562,7 +3562,7 @@ if (e.target.closest(".badge-ods")) {
           );
 
           const metaBlock = showMeta ? `
-            <div class="small mb-1"><strong>Meta ODS detectada:</strong> ${metaCode}</div>
+            <div class="small mb-1"><strong>${metaCode}</strong> </div>
             ${metaNameFromCat ? `<div class="small mb-1">${metaNameFromCat}</div>` : ""}`
           : "";
 
@@ -3578,7 +3578,7 @@ if (e.target.closest(".badge-ods")) {
             );
 
             indicadorBlock = `
-              <div class="small mb-1"><strong>Indicador ODS:</strong> ${indCode}</div>
+              <div class="small mb-1"><strong> ${indCode}</strong></div>
               ${nameIndic ? `<div class="small mb-1">${nameIndic}</div>` : ""}`;
           }
 

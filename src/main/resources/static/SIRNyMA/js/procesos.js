@@ -251,20 +251,13 @@ function renderProcesos(procesos, conteo, container) {
     return;
   }
 
-  // Orden por defecto A-Z
-  const ordenados = [...procesos].sort((a, b) => {
-    const A = (a.pp || "").toLowerCase();
-    const B = (b.pp || "").toLowerCase();
-    return A.localeCompare(B);
-  });
 
-  ordenados.forEach(proceso => {
+  procesos.forEach(proceso => {
     let extension = "png";
     const baseName = `/assets/${proceso.idPp}`;
     const iconoFallback = `/assets/no_disponible.png`;
     const iconoRutaMin = `${baseName}.${extension}`;
     const iconoRutaMay = `${baseName}.${extension.toUpperCase()}`;
-
     const iconoHTML = `
       <img src="${iconoRutaMin}"
            class="img-fluid proceso-icon rounded-start"
@@ -281,74 +274,82 @@ function renderProcesos(procesos, conteo, container) {
            ">
     `;
 
-    const totalVars = conteo[proceso.idPp] || 0;
+   const totalVars = conteo[proceso.idPp] || 0;
 
-    // --- lógica para flip según unidad ---
-    const isEco  = (proceso._source === 'economicas');
+    const isEco   = (proceso._source === 'economicas');
     const isSocio = !isEco;
 
-    // Texto que se mostrará atrás
     const backText = isEco
       ? (proceso.objetivo || proceso.descPp || '')
       : (proceso.descPp || '');
 
     const canFlip = hasValidDesc(backText);
-
-    const backLabel = isEco
-      ? 'Objetivo:'
-      : 'Descripción del proceso:';
+    const backLabel = isEco ? 'Objetivo:' : 'Descripción del proceso:';
 
     // FRONT
-    const front = `
-      <div class="flip-side flip-front">
-        <div class="card h-100 shadow-sm rounded-3 p-2 position-relative proceso-card">
+   const front = `
+  <div class="flip-side flip-front">
+    <div class="card h-100 shadow-sm rounded-3 position-relative proceso-card">
 
-          ${proceso.gradoMadur === "Información de Interés Nacional" ? `
-            <span class="badge bg-secondary position-absolute top-0 start-0 m-2"
-                  style="z-index:2; cursor: help;"
-                  data-bs-toggle="tooltip"
-                  data-bs-placement="right"
-                  title="Información de Interés Nacional">IIN</span>` : ""}
+      ${proceso.gradoMadur === "Información de Interés Nacional" ? `
+        <span class="badge bg-secondary position-absolute top-0 start-0 m-2"
+              style="z-index:2; cursor: help;"
+              data-bs-toggle="tooltip"
+              data-bs-placement="right"
+              title="Información de Interés Nacional">IIN</span>` : ""}
 
-          <div class="row g-0 d-flex align-items-center">
-            <div class="col-4 d-flex justify-content-center">${iconoHTML}</div>
-            <div class="col-8">
-              <div class="card-body p-2">
-                <h5 class="card-title fw-bold mb-1">${proceso.pp || "Desconocido"}</h5>
-                <p class="card-text text-muted mb-1">${proceso.idPp}</p>
-                <p class="card-text mb-1">
-                  <strong style="font-size: 0.85rem">Estatus:</strong>
-                  <span class="badge ${getStatusClass(proceso.estatus)}">${proceso.estatus}</span>
-                </p>
-                <p class="card-text mb-1" style="font-size: 0.85rem">
-                  <strong style="font-size: 0.85rem">Periodicidad:</strong>
-                  ${proceso.perioProd || "No disponible"}
-                </p>
-                <p class="card-text mb-1" style="font-size: 0.85rem">
-                  <strong style="font-size: 0.85rem">Vigencia:</strong>
-                  ${mostrarVigencia(proceso.vigInicial, proceso.vigFinal)}
-                </p>
-                <p class="card-text mb-0">
-                  <strong style="font-size: 0.85rem">Total de variables ambientales:</strong>
-                  <span style="color: #08739c; font-family: 'Monaco', monospace; font-weight: bold; font-size: 1.2rem; text-decoration: underline; cursor: pointer;"
-                        onclick="handleVariableClick('${proceso.idPp}')">
-                    ${formatNumberWithSpace(totalVars)}
-                  </span>
-                </p>
-              </div>
+      <div class="card-body proceso-body">
+        <!-- TÍTULO debajo del badge, ocupando todo el ancho -->
+        <h5 class="card-title proceso-title fw-bold mb-2">
+          ${proceso.pp || "Desconocido"}
+        </h5>
+
+        <!-- FILA: icono a la izquierda, info a la derecha -->
+        <div class="row g-0 align-items-center">
+          <div class="col-4 d-flex justify-content-center">
+            ${iconoHTML}
+          </div>
+          <div class="col-8 ps-2">
+            <div class="proceso-meta">
+              <p class="card-text text-muted mb-1 small">
+                ${proceso.idPp}
+              </p>
+              <p class="card-text mb-1 small">
+                <strong>Estatus:</strong>
+                <span class="badge ${getStatusClass(proceso.estatus)}">
+                  ${proceso.estatus}
+                </span>
+              </p>
+              <p class="card-text mb-1 small">
+                <strong>Periodicidad:</strong>
+                ${proceso.perioProd || "No disponible"}
+              </p>
+              <p class="card-text mb-1 small">
+                <strong>Vigencia:</strong>
+                ${mostrarVigencia(proceso.vigInicial, proceso.vigFinal)}
+              </p>
+              <p class="card-text mb-0 small">
+                <strong>Total de variables ambientales:</strong>
+                <span style="color: #08739c; font-family: 'Monaco', monospace; font-weight: bold; font-size: 1.1rem; text-decoration: underline; cursor: pointer;"
+                      onclick="handleVariableClick('${proceso.idPp}')">
+                  ${formatNumberWithSpace(totalVars)}
+                </span>
+              </p>
             </div>
           </div>
-
-          ${canFlip ? `
-          <button type="button"
-                  class="btn btn-sm btn-outline-primary btn-flip"
-                  data-flip="1"
-                  title="Ver más información">
-            <i class="bi bi-arrow-repeat"></i>
-          </button>` : ``}
         </div>
       </div>
-    `;
+
+      ${canFlip ? `
+      <button type="button"
+              class="btn btn-sm btn-outline-primary btn-flip"
+              data-flip="1"
+              title="Ver más información">
+        <i class="bi bi-arrow-repeat"></i>
+      </button>` : ``}
+    </div>
+  </div>
+`;
 
     // BACK (solo si hay texto válido)
     const back = canFlip ? `

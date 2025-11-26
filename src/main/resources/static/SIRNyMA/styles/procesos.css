@@ -239,7 +239,7 @@ body, html {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 2.6rem;      /* mantiene altura estable con spinner */
+  min-height: 2.6rem;      /* mantiene altura estable with spinner */
   color: #0b2239;          /* más oscuro */
   font-weight: 800;        /* más grueso */
   font-size: 2rem;         /* más grande */
@@ -386,14 +386,14 @@ body, html {
 /* === Flip cards para procesos === */
 .flip-wrap {
   perspective: 1000px;
-  height: 320px; /* reducido de 360px a 320px */
+  height: 300px; /* reducido de 310px a 300px */
   width: 100%;
 }
 
 .flip-card {
   position: relative;
   width: 100%;
-  height: 100%; /* hereda 320px del padre */
+  height: 100%; /* hereda 300px del padre */
   transition: transform 0.6s;
   transform-style: preserve-3d;
 }
@@ -428,6 +428,17 @@ body, html {
 .flip-back {
   transform: rotateY(180deg);
   z-index: 1;
+  background-color: #113250 !important; /* Azul oscuro en el back */
+}
+
+.flip-back .card {
+  background-color: #113250 !important;
+  border-color: #113250 !important;
+  color: #ffffff !important;
+}
+
+.flip-back .card * {
+  color: #ffffff !important;
 }
 
 /* Card dentro del flip: ocupar todo el alto disponible */
@@ -436,65 +447,159 @@ body, html {
   height: 100% !important;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* distribuir contenido y botón */
+  position: relative;
+  /* ↑ más padding arriba para dejar espacio al badge IIN */
+  padding: 1.35rem 3.2rem 0.75rem 0.75rem;
+}
+
+.proceso-title {
+  font-size: 1.05rem;
+  line-height: 1.25;
+  margin-top: 0.30rem;   /* empuja un poquito más hacia abajo */
+  margin-bottom: 0.4rem;
+  padding-right: 0.2rem;
+  padding-left: 0.2rem;
 }
 
 .proceso-card .card-body {
   height: auto;
   flex-grow: 1; /* expandir para llenar espacio */
   overflow-y: auto; /* scroll si el contenido es muy largo */
-  padding: 0.8rem;
+  padding: 0.6rem;
+  padding-right: 0.4rem; /* asegurar que no toque el botón */
+}
+
+.proceso-meta p {
+  font-size: 0.88rem;
+}
+
+.proceso-body {
+  flex-grow: 1;
+  padding: 0;              /* ya controlamos con .proceso-card */
 }
 
 .proceso-desc {
   flex-grow: 1;
   overflow-y: auto; /* permitir scroll en descripciones largas */
-  padding-bottom: 0.7rem;
+  padding-bottom: 0.5rem;
+  padding-right: 0.4rem; /* asegurar que no toque el botón */
 }
 
-/* Botones de flip/unflip al pie */
-.btn-flip,
+/* Botón de flip: barra lateral derecha (vertical) */
+.btn-flip {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 34px; /* si lo quieres aún menos invasivo */
+  padding: 0 !important;
+  border: none;
+  border-radius: 2;
+  background-color: #005fa3;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  margin: 0 !important;
+  z-index: 10;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+}
+
+.btn-flip:hover {
+  background-color: #003d6b;
+}
+
+.btn-flip:focus {
+  outline: 2px solid #88c3eb;
+  outline-offset: -2px;
+}
+
+/* Botón de unflip: al pie en la parte de atrás - color amarillo/dorado para destacar */
 .btn-unflip {
-  margin-top: auto; /* empujar al fondo */
   align-self: flex-end;
-  padding: 0.35rem 0.8rem;
+  margin-top: auto;
+  padding: 0.15rem 0.6rem;
   font-size: 0.85rem;
+  background-color: #2C7D68; /* Amarillo/dorado que contrasta con azul oscuro */
+  border-color: #2C7D68;
+  color: #113250; /* Texto azul oscuro para legibilidad */
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-top: .8rem;
+}
+
+.btn-unflip:hover {
+  background-color: #2C7D68; /* Más oscuro al hover */
+  transform: scale(1.05);
+}
+
+.btn-unflip:focus {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
 }
 
 /* Responsivo: ajustar altura para iPad */
 @media only screen and (min-width: 768px) and (max-width: 1024px) {
   .flip-wrap {
-    height: 300px; /* reducido de 340px a 300px */
+    height: 280px; /* reducido de 300px a 280px */
+  }
+
+  .proceso-card {
+    padding-right: 36px;
   }
 
   .proceso-card .card-body {
-    padding: 0.6rem;
+    padding: 0.4rem;
+    padding-right: 0.3rem;
     font-size: 0.86rem;
   }
 
   .proceso-desc {
     font-size: 0.80rem;
+    padding-right: 0.3rem;
+  }
+
+  .btn-flip {
+    width: 32px;
+    font-size: 0.9rem;
+  }
+
+  .btn-unflip {
+    padding: 0.12rem 0.5rem;
+    font-size: 0.8rem;
   }
 }
 
 /* Responsive: móvil */
 @media only screen and (max-width: 767px) {
   .flip-wrap {
-    height: 270px; /* reducido de 300px a 270px */
+    height: 250px; /* reducido de 270px a 250px */
+  }
+
+  .proceso-card {
+    padding-right: 32px;
   }
 
   .proceso-card .card-body {
-    padding: 0.45rem;
+    padding: 0.25rem;
+    padding-right: 0.2rem;
     font-size: 0.80rem;
   }
 
   .proceso-desc {
     font-size: 0.74rem;
+    padding-right: 0.2rem;
   }
 
-  .btn-flip,
+  .btn-flip {
+    width: 28px;
+    font-size: 0.8rem;
+  }
+
   .btn-unflip {
-    padding: 0.3rem 0.65rem;
+    padding: 0.1rem 0.45rem;
     font-size: 0.75rem;
   }
 }
