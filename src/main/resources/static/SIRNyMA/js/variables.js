@@ -117,7 +117,7 @@ function rebuildClasifIndex() {
   });
   // ==== PARCHE: helpers faltantes usados más abajo ====
 
-
+  
   function filterByUnidad(data) {
     if (!Array.isArray(data)) return [];
     if (unidadFiltro === 'todas') return data;
@@ -2778,6 +2778,18 @@ function safeField(str) {
   return s;
 }
 
+// Helper para inicializar tooltips dentro del modal
+function initTooltipsInModal() {
+  const modal = document.getElementById('infoModal');
+  if (!modal || typeof bootstrap === 'undefined') return;
+
+  const tooltipTriggerList = [].slice.call(
+    modal.querySelectorAll('[data-bs-toggle="tooltip"]')
+  );
+
+  tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+}
+
 
 // Evento delegado para mostrar información de tabulados y microdatos en el modal
 document.addEventListener("click", async function (e) {
@@ -2812,33 +2824,28 @@ document.addEventListener("click", async function (e) {
     if (variable && variable._source === "economicas-ultima" &&
         Array.isArray(variable._tabuladosList) && variable._tabuladosList.length) {
 
-      const html = variable._tabuladosList.map(t => {
+        const html = variable._tabuladosList.map(t => {
         const tipo = t.tipo || "";
         const excel = isExcelLike(tipo);
         const inter = isInteractivo(tipo);
         const vistaWeb = isVistaWeb(tipo);
 
-        // Meta: prioriza HOJA para económicas si existe; si no, usa numTab
         const metaLinea =
           (t.hoja ? `<span><i class="bi bi-file-earmark-text me-1"></i> ${t.hoja}</span>` : "") +
           (!t.hoja && t.numTab ? `<span><i class="bi bi-file-earmark-text me-1"></i> ${t.numTab}</span>` : "");
 
-        // Botón principal de la derecha (descarga o interactivo o vista web si aplica)
-        // Nota: por requerimiento, los botones de urlDescarga se van a la DERECHA con el meta.
         const botonDerecha = t.urlDescarga ? `
           <a href="${t.urlDescarga}" target="_blank"
-             class="btn-download ${excel ? "btn-excel" : inter ? "btn-interactivo" : "btn-download-default"}">
+            class="btn-download ${excel ? "btn-excel" : inter ? "btn-interactivo" : "btn-download-default"}">
             ${excel ? `<i class="bi bi-filetype-xlsx me-1"></i> EXCEL`
                     : inter ? `<i class="bi bi-bar-chart-line me-1"></i> Interactivo`
                             : `<i class="bi bi-download me-1"></i> Descargar`}
           </a>` : "";
 
-        // Acciones de la IZQUIERDA: Ver en INEGI + Vista Web (si aplica con su propia URL)
-        // Si hay un link específico de vista web, úsalo; si no, lo omitimos.
         const botonVistaWebIzq = (vistaWeb && t.urlAcceso)
           ? `<a href="${t.urlAcceso}" target="_blank" class="btn-web">
-               <i class="bi bi-globe2 me-1"></i> Vista web
-             </a>`
+              <i class="bi bi-globe2 me-1"></i> Vista web
+            </a>`
           : "";
 
         const botonAccesoInegiIzq = t.urlAcceso ? `
@@ -2859,7 +2866,11 @@ document.addEventListener("click", async function (e) {
                 <div class="ta-right-buttons">
                   ${botonDerecha}
                 </div>
-                <div class="tabulado-info text-end">
+                <div class="tabulado-info text-end"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="bottom"
+                    data-bs-container="#infoModal"
+                    title="Es el número o nombre de la hoja en la que se encuentra el tabulado, particularmente para aquellos casos donde el archivo en el que se presenta el tabulado contiene una serie de cuadros.">
                   ${metaLinea}
                 </div>
               </div>
@@ -2869,6 +2880,7 @@ document.addEventListener("click", async function (e) {
       }).join("");
 
       modalBody.innerHTML = html || "<div class='text-danger'>No hay tabulados disponibles.</div>";
+      initTooltipsInModal();
       return;
     }
 
@@ -2930,7 +2942,11 @@ document.addEventListener("click", async function (e) {
               <div class="ta-right-buttons">
                 ${botonDerecha}
               </div>
-              <div class="tabulado-info text-end">
+               <div class="tabulado-info text-end"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="bottom"
+                  data-bs-container="#infoModal"
+                  title="Es el número o nombre de la hoja en la que se encuentra el tabulado, particularmente para aquellos casos donde el archivo en el que se presenta el tabulado contiene una serie de cuadros.">
                 ${metaLinea}
               </div>
             </div>
@@ -2939,7 +2955,9 @@ document.addEventListener("click", async function (e) {
       `;
     }).join("");
 
-    modalBody.innerHTML = contenido || "<div class='text-danger'>No hay ligas disponibles para los tabulados relacionados.</div>";
+    modalBody.innerHTML = contenido || 
+    "<div class='text-danger'>No hay ligas disponibles para los tabulados relacionados.</div>";
+    initTooltipsInModal();
   } catch (error) {
     console.error(error);
     modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información.</div>";
@@ -3029,8 +3047,34 @@ document.addEventListener("click", async function (e) {
         const botonDerecha = buildDownloadButton(m.urlDescriptor || m.urlAcceso);
 
         const metaLinea = (m.tabla || m.campo)
-          ? `<span><i class="bi bi-hdd-network me-1"></i>${m.tabla || "-"} / ${m.campo || "-"}</span>`
-          : "";
+        ? `
+          <span><i class="bi bi-hdd-network me-1"></i></span>
+          ${
+            m.tabla
+              ? `<span
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="bottom"
+                  data-bs-container="#infoModal"
+                  title="Identificador único que se le asigna a una tabla para que se pueda referenciar y organizar la información dentro de la base de datos (Nombre de la tabla dentro del FD)">
+                  ${m.tabla}
+                </span>`
+              : `-`
+          }
+          /
+          ${
+            m.campo
+              ? `<span
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="bottom"
+                  data-bs-container="#infoModal"
+                  title="Técnica que ayuda a identificar de manera fácil y eficiente una variable, utilizando palabras, frases o acrónimos (Columna dentro de la tabla del FD)">
+                  ${m.campo}
+                </span>`
+              : `-`
+          }
+        `
+        : "";
+
 
         return `
           <div class="tabulado-card micro-card">
@@ -3059,7 +3103,8 @@ document.addEventListener("click", async function (e) {
       }).join("");
 
       modalBody.innerHTML = html || "<div class='text-danger'>No hay microdatos disponibles.</div>";
-      return;
+    initTooltipsInModal();
+    return;
     }
 
     // 2) Fallback a /api/microdatos (sociodemográficas, etc.)
@@ -3073,9 +3118,35 @@ document.addEventListener("click", async function (e) {
 
       const botonDerecha = buildDownloadButton(info.ligaDd);
 
-      const metaLinea = (info.nomTabla || info.nomCampo)
-        ? `<span><i class="bi bi-hdd-network me-1"></i>${info.nomTabla || "No disponible"} / ${info.nomCampo || "No disponible"}</span>`
-        : "";
+     const metaLinea = (info.nomTabla || info.nomCampo)
+      ? `
+        <span><i class="bi bi-hdd-network me-1"></i></span>
+        ${
+          info.nomTabla
+            ? `<span
+                data-bs-toggle="tooltip"
+                data-bs-placement="bottom"
+                data-bs-container="#infoModal"
+                title="Identificador único que se le asigna a una tabla para que se pueda referenciar y organizar la información dentro de la base de datos (Nombre de la tabla dentro del FD)">
+                ${info.nomTabla}
+              </span>`
+            : `No disponible`
+        }
+        /
+        ${
+          info.nomCampo
+            ? `<span
+                data-bs-toggle="tooltip"
+                data-bs-placement="bottom"
+                data-bs-container="#infoModal"
+                title="Técnica que ayuda a identificar de manera fácil y eficiente una variable, utilizando palabras, frases o acrónimos (Columna dentro de la tabla del FD)">
+                ${info.nomCampo}
+              </span>`
+            : `No disponible`
+        }
+      `
+      : "";
+
 
       modalBody.innerHTML = `
         <div class="tabulado-card micro-card">
@@ -3101,6 +3172,7 @@ document.addEventListener("click", async function (e) {
           </div>
         </div>
       `;
+      initTooltipsInModal();
     } else {
       modalBody.innerHTML = "<div class='text-danger'>No hay información de microdatos disponible.</div>";
     }
@@ -3182,12 +3254,35 @@ document.addEventListener("click", async function (e) {
           </a>` : "";
 
         const ubicacion = (r.tabla || r.campo)
-          ? `<div class="tabulado-info text-end">
-               <span><i class="bi bi-file-earmark-text me-1"></i>
-               ${(r.tabla || "No disponible")} / ${(r.campo || "No disponible")}
-               </span>
-             </div>`
-          : "";
+        ? `
+          <div class="tabulado-info text-end">
+            <span><i class="bi bi-file-earmark-text me-1"></i></span>
+            ${
+              r.tabla
+                ? `<span
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="bottom"
+                    data-bs-container="#infoModal"
+                    title="Nombre o identificador de la tabla dentro del conjunto de Datos Abiertos, que permite localizar y organizar el contenido estructurado del archivo.">
+                    ${r.tabla}
+                  </span>`
+                : `No disponible`
+            }
+            /
+            ${
+              r.campo
+                ? `<span
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="bottom"
+                    data-bs-container="#infoModal"
+                    title="Nombre del campo o columna dentro de la tabla de Datos Abiertos, que identifica de manera precisa la variable almacenada en ese conjunto de datos.">
+                    ${r.campo}
+                  </span>`
+                : `No disponible`
+            }
+          </div>
+        `
+        : "";
 
         return `
           <div class="tabulado-card">
@@ -3212,6 +3307,7 @@ document.addEventListener("click", async function (e) {
       }).join("");
 
       bodyEl.innerHTML = contenido || "<div class='text-danger'>No hay información disponible.</div>";
+      initTooltipsInModal();
       return;
     }
 
@@ -3457,21 +3553,27 @@ if (e.target.closest(".badge-ods")) {
 
       const varTitle = fmt(variable.varAsig || idVar);
 
+       // 👉 Para evitar repetir la misma meta N veces en el modal
+      const metasVistas = new Set();
+
       modalBody.innerHTML = `
-        
         <div class="list-group">
           ${lista.map(o => {
-            // META: código + nombre desde metaNombre (económicas ya lo trae)
+            // META: código + nombre
             const metaCode  = cleanUnderscores(formatOdsComposite(o.meta));
             const metaName  = cleanUnderscores(o.metaNombre || "");
             const showMeta  = metaCode && metaCode !== "-";
 
-            const metaBlock = showMeta ? `
-              <div class="small mb-1"><strong>Meta ${metaCode}: </strong></div>
-              ${metaName ? `<div class="small mb-1">${metaName}</div>` : ""}`
-            : "";
+            // Si la meta ya se mostró antes, NO volvemos a mostrar el bloque de meta
+            let metaBlock = "";
+            if (showMeta && !metasVistas.has(metaCode)) {
+              metaBlock = `
+                <div class="small mb-1"><strong>Meta ${metaCode}: </strong></div>
+                ${metaName ? `<div class="small mb-1">${metaName}</div>` : ""}`;
+              metasVistas.add(metaCode);
+            }
 
-            // INDICADOR: solo si es válido, con indicadorNombre
+            // INDICADOR: solo si es válido
             let indicadorBlock = "";
             if (hasValidIndicador(o.indicador)) {
               const indCode = cleanUnderscores(formatOdsComposite(o.indicador));
@@ -3481,11 +3583,15 @@ if (e.target.closest(".badge-ods")) {
                 ${indName ? `<div class="small mb-1">${indName}</div>` : ""}`;
             }
 
+            // Si NO hay meta (porque es duplicada) y NO hay indicador, no pintamos nada
+            if (!metaBlock && !indicadorBlock) {
+              return "";
+            }
+
             return `
               <div class="list-group-item">
                 ${metaBlock}
                 ${indicadorBlock}
-               
               </div>
             `;
           }).join("")}
@@ -3493,6 +3599,7 @@ if (e.target.closest(".badge-ods")) {
       `;
       return;
     }
+
 
     // ------------------------------------------------------------------
     // 2) SOCIODEMOGRÁFICAS (fallback /api/ods + /api/ods_indicadores + /api/meta_ods)
@@ -3537,21 +3644,20 @@ if (e.target.closest(".badge-ods")) {
     const first  = registros[0];
     const objNum = formatOdsObjetivo(first.ods ?? first.objetivo);
     let rawName = first.odsNombre || first.objetivoNombre || first.ods;
-
-    // aplicar limpieza SOLO a sociodemográficas
     const cleanName = cleanOdsTitleName(rawName);
 
     modalTitle.textContent = `ODS ${objNum}. ${cleanName}`;
 
     const varTitle = fmt((variable?.varAsig) || idVar);
 
+    // 👉 Set para saber qué metas ya se pintaron
+    const metasVistas = new Set();
+
     modalBody.innerHTML = `
-     
       <div class="list-group">
         ${registros.map(info => {
           const odsNumber = getOdsObjectiveNumber(info.ods ?? info.objetivo);
 
-          // META: código + nombre desde catálogo meta_ods
           const metaCode = cleanUnderscores(formatOdsComposite(info.meta));
           const showMeta = metaCode && metaCode !== "-";
 
@@ -3561,12 +3667,14 @@ if (e.target.closest(".badge-ods")) {
             catalogMeta
           );
 
-          const metaBlock = showMeta ? `
-            <div class="small mb-1"><strong>${metaCode}</strong> </div>
-            ${metaNameFromCat ? `<div class="small mb-1">${metaNameFromCat}</div>` : ""}`
-          : "";
+          let metaBlock = "";
+          if (showMeta && !metasVistas.has(metaCode)) {
+            metaBlock = `
+              <div class="small mb-1"><strong>${metaCode}</strong> </div>
+              ${metaNameFromCat ? `<div class="small mb-1">${metaNameFromCat}</div>` : ""}`;
+            metasVistas.add(metaCode);
+          }
 
-          // INDICADOR: solo si es válido, con nombre desde catálogo ods_indicadores
           let indicadorBlock = "";
           if (hasValidIndicador(info.indicador)) {
             const indCode   = cleanUnderscores(formatOdsComposite(info.indicador));
@@ -3578,20 +3686,25 @@ if (e.target.closest(".badge-ods")) {
             );
 
             indicadorBlock = `
-              <div class="small mb-1"><strong> ${indCode}</strong></div>
+              <div class="small mb-1"><strong>${indCode}</strong></div>
               ${nameIndic ? `<div class="small mb-1">${nameIndic}</div>` : ""}`;
+          }
+
+          // Si meta es duplicada y no hay indicador, no se pinta nada
+          if (!metaBlock && !indicadorBlock) {
+            return "";
           }
 
           return `
             <div class="list-group-item">
               ${metaBlock}
               ${indicadorBlock}
-              
             </div>
           `;
         }).join("")}
       </div>
     `;
+
   } catch (err) {
     console.error(err);
     if (modalBody) {
