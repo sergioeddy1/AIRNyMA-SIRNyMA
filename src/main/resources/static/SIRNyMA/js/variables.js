@@ -2099,7 +2099,6 @@ function renderPage(data, page) {
                             target="_blank" rel="noopener noreferrer"
                             title="Abrir generador de indicadores (pasa idVar)">
                             <i class="bi bi-box-arrow-up-right me-1"></i> Generar idea de indicador
-                            ${variable.idVar}
                           </a>
                 </div>
             </div>
