@@ -2091,7 +2091,16 @@ function renderPage(data, page) {
                                       })()
                                 }
                               </div>
+
                     </div>
+                        <!-- Botón externo: pasa idVar por query a generador -->
+                          <a class="btn btn-sm btn-gen-indicator"
+                            href="https://inegi-indicator-gen.lovable.app/?idVar=${encodeURIComponent(variable.idVar)}"
+                            target="_blank" rel="noopener noreferrer"
+                            title="Abrir generador de indicadores (pasa idVar)">
+                            <i class="bi bi-box-arrow-up-right me-1"></i> Generar idea de indicador
+                            ${variable.idVar}
+                          </a>
                 </div>
             </div>
         </div>
@@ -2803,7 +2812,7 @@ document.addEventListener("click", async function (e) {
   if (tabTrigger) {
     resetModalHeaderColor();   // <- siempre que NO sea ODS
 
-    document.getElementById("infoModalLabel").textContent = "Tabulado(s) asociado(s)";
+    document.getElementById("infoModalLabel").textContent = "Tabulado(s)";
     const idVar    = tabTrigger.getAttribute("data-idvar");
     const modalBody = document.getElementById("infoModalBody");
     modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
@@ -2831,8 +2840,8 @@ document.addEventListener("click", async function (e) {
         const vistaWeb = isVistaWeb(tipo);
 
         const metaLinea =
-          (t.hoja ? `<span><i class="bi bi-file-earmark-text me-1"></i> ${t.hoja}</span>` : "") +
-          (!t.hoja && t.numTab ? `<span><i class="bi bi-file-earmark-text me-1"></i> ${t.numTab}</span>` : "");
+          (t.hoja ? `<span><i class="bi bi-file-spreadsheet"></i> ${t.hoja}</span>` : "") +
+          (!t.hoja && t.numTab ? `<span><i class="bi bi-file-spreadsheet"></i> ${t.numTab}</span>` : "");
 
         const botonDerecha = t.urlDescarga ? `
           <a href="${t.urlDescarga}" target="_blank"
@@ -2870,7 +2879,7 @@ document.addEventListener("click", async function (e) {
                     data-bs-toggle="tooltip"
                     data-bs-placement="bottom"
                     data-bs-container="#infoModal"
-                    title="Es el número o nombre de la hoja en la que se encuentra el tabulado, particularmente para aquellos casos donde el archivo en el que se presenta el tabulado contiene una serie de cuadros.">
+                    title="Nombre de la hoja donde se encuentra el tabulado">
                   ${metaLinea}
                 </div>
               </div>
@@ -2908,8 +2917,8 @@ document.addEventListener("click", async function (e) {
 
       // Meta: si existe 'hoja' úsala; si no, usa número
       const metaLinea =
-        (tabulado.hoja ? `<span><i class="bi bi-file-earmark-text me-1"></i> ${tabulado.hoja}</span>` : "") +
-        (!tabulado.hoja && tabulado.numTab ? `<span><i class="bi bi-file-earmark-text me-1"></i> ${tabulado.numTab}</span>` : "");
+        (tabulado.hoja ? `<span><i class="bi bi-file-spreadsheet"></i>  ${tabulado.hoja}</span>` : "") +
+        (!tabulado.hoja && tabulado.numTab ? `<span><i class="bi bi-file-spreadsheet"></i>  ${tabulado.numTab}</span>` : "");
 
       const botonDerecha = tabulado.ligaDescTab ? `
         <a href="${tabulado.ligaDescTab}" target="_blank"
@@ -2946,7 +2955,7 @@ document.addEventListener("click", async function (e) {
                   data-bs-toggle="tooltip"
                   data-bs-placement="bottom"
                   data-bs-container="#infoModal"
-                  title="Es el número o nombre de la hoja en la que se encuentra el tabulado, particularmente para aquellos casos donde el archivo en el que se presenta el tabulado contiene una serie de cuadros.">
+                  title="Nombre de la hoja donde se encuentra el tabulado">
                 ${metaLinea}
               </div>
             </div>
@@ -2970,7 +2979,7 @@ document.addEventListener("click", async function (e) {
   if (microTrigger) {
     resetModalHeaderColor();   // <- aquí
 
-    document.getElementById("infoModalLabel").textContent = "Microdato(s) asociado(s)";
+    document.getElementById("infoModalLabel").textContent = "Microdatos";
     const idVar     = microTrigger.getAttribute("data-idvar");
     const modalBody = document.getElementById("infoModalBody");
     modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
@@ -3048,26 +3057,27 @@ document.addEventListener("click", async function (e) {
 
         const metaLinea = (m.tabla || m.campo)
         ? `
-          <span><i class="bi bi-hdd-network me-1"></i></span>
+          <span><i class="bi bi-table"></i></span>
           ${
             m.tabla
               ? `<span
                   data-bs-toggle="tooltip"
                   data-bs-placement="bottom"
                   data-bs-container="#infoModal"
-                  title="Identificador único que se le asigna a una tabla para que se pueda referenciar y organizar la información dentro de la base de datos (Nombre de la tabla dentro del FD)">
+                  title="Nombre de la tabla donde se encuentra la variable">
                   ${m.tabla}
                 </span>`
               : `-`
           }
           /
+          <span><i class="bi bi-hdd-network me-1"></i></span>
           ${
             m.campo
               ? `<span
                   data-bs-toggle="tooltip"
                   data-bs-placement="bottom"
                   data-bs-container="#infoModal"
-                  title="Técnica que ayuda a identificar de manera fácil y eficiente una variable, utilizando palabras, frases o acrónimos (Columna dentro de la tabla del FD)">
+                  title="Clave de identificación de la variable en la tabla">
                   ${m.campo}
                 </span>`
               : `-`
@@ -3084,7 +3094,7 @@ document.addEventListener("click", async function (e) {
               <div class="ta-left">
                 ${m.urlAcceso ? `
                   <a href="${m.urlAcceso}" target="_blank" class="btn-link-inegi">
-                    <i class="bi bi-link-45deg me-1"></i> Página Microdatos INEGI
+                    <i class="bi bi-link-45deg me-1"></i> Ver en INEGI
                   </a>` : ""}
               </div>
 
@@ -3120,26 +3130,27 @@ document.addEventListener("click", async function (e) {
 
      const metaLinea = (info.nomTabla || info.nomCampo)
       ? `
-        <span><i class="bi bi-hdd-network me-1"></i></span>
+        <span><i class="bi bi-table"></i></span>
         ${
           info.nomTabla
             ? `<span
                 data-bs-toggle="tooltip"
                 data-bs-placement="bottom"
                 data-bs-container="#infoModal"
-                title="Identificador único que se le asigna a una tabla para que se pueda referenciar y organizar la información dentro de la base de datos (Nombre de la tabla dentro del FD)">
+                title="Nombre de la tabla donde se encuentra la variable">
                 ${info.nomTabla}
               </span>`
             : `No disponible`
         }
-        /
+        / 
+        <span> <i class="bi bi-hdd-network me-1"></i></span>
         ${
           info.nomCampo
             ? `<span
                 data-bs-toggle="tooltip"
                 data-bs-placement="bottom"
                 data-bs-container="#infoModal"
-                title="Técnica que ayuda a identificar de manera fácil y eficiente una variable, utilizando palabras, frases o acrónimos (Columna dentro de la tabla del FD)">
+                title="Clave de identificación de la variable en la tabla">
                 ${info.nomCampo}
               </span>`
             : `No disponible`
@@ -3156,7 +3167,7 @@ document.addEventListener("click", async function (e) {
             <div class="ta-left">
               ${info.ligaMicro ? `
                 <a href="${info.ligaMicro}" target="_blank" class="btn-link-inegi">
-                  <i class="bi bi-link-45deg me-1"></i> Página Microdatos INEGI
+                  <i class="bi bi-link-45deg me-1"></i> Ver en INEGI
                 </a>` : ""}
             </div>
 
@@ -3192,7 +3203,7 @@ document.addEventListener("click", async function (e) {
     const labelEl = document.getElementById("infoModalLabel");
     const bodyEl  = document.getElementById("infoModalBody");
 
-    if (labelEl) labelEl.textContent = "Datos Abiertos asociados";
+    if (labelEl) labelEl.textContent = "Datos Abiertos";
     if (bodyEl)  bodyEl.innerHTML = "<div class='text-center'>Cargando...</div>";
 
     const idVar  = datosTrigger.getAttribute("data-idvar");
@@ -3256,26 +3267,27 @@ document.addEventListener("click", async function (e) {
         const ubicacion = (r.tabla || r.campo)
         ? `
           <div class="tabulado-info text-end">
-            <span><i class="bi bi-file-earmark-text me-1"></i></span>
+            <span><i class="bi bi-table"></i></span>
             ${
               r.tabla
                 ? `<span
                     data-bs-toggle="tooltip"
                     data-bs-placement="bottom"
                     data-bs-container="#infoModal"
-                    title="Nombre o identificador de la tabla dentro del conjunto de Datos Abiertos, que permite localizar y organizar el contenido estructurado del archivo.">
+                    title="Nombre de la tabla donde se encuentra la variable">
                     ${r.tabla}
                   </span>`
                 : `No disponible`
             }
             /
+             <span> <i class="bi bi-hdd-network me-1"></i></span>
             ${
               r.campo
                 ? `<span
                     data-bs-toggle="tooltip"
                     data-bs-placement="bottom"
                     data-bs-container="#infoModal"
-                    title="Nombre del campo o columna dentro de la tabla de Datos Abiertos, que identifica de manera precisa la variable almacenada en ese conjunto de datos.">
+                    title="Clave de identificación de la variable en la tabla">
                     ${r.campo}
                   </span>`
                 : `No disponible`
@@ -3291,7 +3303,7 @@ document.addEventListener("click", async function (e) {
               <div class="ta-left">
                 ${r.urlAcceso ? `
                   <a href="${r.urlAcceso}" target="_blank" class="btn-link-inegi">
-                    <i class="bi bi-link-45deg me-1"></i> Página Datos Abiertos INEGI
+                    <i class="bi bi-link-45deg me-1"></i> Ver en INEGI
                   </a>` : ""}
               </div>
 
