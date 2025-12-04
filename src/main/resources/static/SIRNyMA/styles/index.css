@@ -770,10 +770,14 @@ body, html {
   .overlay-brand-top { left: 2.5% !important; top: 3.5% !important; width: calc(clamp(90px, 14vw, 220px) - 2px) !important; }
 
   /* Controles (flechas) encima y tamaño mayor para visibilidad en proyector */
-  .carousel-control-prev, .carousel-control-next {
-    top: 14% !important;
-    width: 3.4rem; height: 3.4rem; right: 3.5%; left: 3.5%;
+  @media only screen and (max-width: 1366px) and (max-height: 768px) {
+    .carousel-control-prev, .carousel-control-next {
+      top: 14% !important;
+      width: 3.4rem;
+      height: 3.4rem;
+    }
   }
+
 
   /* Panel de filtros: altura máxima para mostrar scroll */
   #apartadofiltros .card { max-height: 78vh; overflow-y: auto; }
@@ -926,26 +930,7 @@ body, html {
 }
 
 /* Ajuste: bajar ligeramente las flechas del carousel en los diferentes breakpoints */
-.carousel-control-prev,
-.carousel-control-next {
-  top: 20% !important; /* valor por defecto (desktop) */
-}
 
-/* Laptop / Proyector (ancho hasta 1366, alto hasta 768) */
-@media only screen and (max-width: 1366px) and (max-height: 768px) {
-  .carousel-control-prev,
-  .carousel-control-next {
-    top: 20% !important;
-  }
-}
-
-/* Tablet / pantallas medianas (<=1024) */
-@media only screen and (max-width: 1024px) {
-  .carousel-control-prev,
-  .carousel-control-next {
-    top: 22% !important;
-  }
-}
 
 /* iPad (768 - 1024): mantener las flechas por debajo de la overlay-box, un poco más abajo */
 @media only screen and (min-width: 768px) and (max-width: 1024px) {
@@ -955,13 +940,7 @@ body, html {
   }
 }
 
-/* Móvil pequeño (<=480) */
-@media only screen and (max-width: 480px) {
-  .carousel-control-prev,
-  .carousel-control-next {
-    top: 14% !important;
-  }
-}
+
 
 /* Ajuste final para 1366x768: bajar más controles y adaptar la primera imagen para que encaje */
 @media only screen and (width: 1366px) and (height: 768px),
@@ -991,5 +970,34 @@ body, html {
     width: 100% !important;
     height: 100% !important;
     object-fit: cover !important;
+  }
+}
+
+/* --- FIX general para laptops/escritorio: flechas bien centradas --- */
+@media (min-width: 992px) {
+  #myCarousel .carousel-control-prev,
+  #myCarousel .carousel-control-next {
+    top: 50% !important;                 /* centradas verticalmente */
+    transform: translateY(-50%);
+    width: 3rem;
+    height: 3rem;
+  }
+
+  #myCarousel .carousel-control-prev {
+    left: 1.5rem !important;             /* solo a la izquierda */
+    right: auto !important;
+  }
+
+  #myCarousel .carousel-control-next {
+    right: 1.5rem !important;            /* solo a la derecha */
+    left: auto !important;
+  }
+}
+
+/* Laptops "bajitas" (1280–1366 ancho, 720–800 alto): un poco más abajo */
+@media (min-width: 992px) and (max-width: 1366px) and (max-height: 800px) {
+  #myCarousel .carousel-control-prev,
+  #myCarousel .carousel-control-next {
+    top: 55% !important;
   }
 }
