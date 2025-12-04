@@ -2097,7 +2097,7 @@ function renderPage(data, page) {
                           <a class="btn btn-sm btn-gen-indicator"
                             href="https://inegi-indicator-gen.lovable.app/?idVar=${encodeURIComponent(variable.idVar)}"
                             target="_blank" rel="noopener noreferrer"
-                            title="Abrir generador de indicadores (pasa idVar)">
+                            title="Abrir generador de indicadores">
                             <i class="bi bi-box-arrow-up-right me-1"></i> Generar idea de indicador
                           </a>
                 </div>
@@ -3266,27 +3266,30 @@ document.addEventListener("click", async function (e) {
         const ubicacion = (r.tabla || r.campo)
         ? `
           <div class="tabulado-info text-end">
-            <span><i class="bi bi-table"></i></span>
-            ${
-              r.tabla
-                ? `<span
-                    data-bs-toggle="tooltip"
+            <span data-bs-toggle="tooltip"
                     data-bs-placement="bottom"
                     data-bs-container="#infoModal"
                     title="Nombre de la tabla donde se encuentra la variable">
+                    <i class="bi bi-table"></i>
+                    </span>
+            ${
+              r.tabla
+                ? `<span
+                    >
                     ${r.tabla}
                   </span>`
                 : `No disponible`
             }
             /
-             <span> <i class="bi bi-hdd-network me-1"></i></span>
-            ${
-              r.campo
-                ? `<span
-                    data-bs-toggle="tooltip"
+             <span
+              data-bs-toggle="tooltip"
                     data-bs-placement="bottom"
                     data-bs-container="#infoModal"
-                    title="Clave de identificación de la variable en la tabla">
+                    title="Clave de identificación de la variable en la tabla"> 
+                    <i class="bi bi-hdd-network me-1"></i></span>
+            ${
+              r.campo
+                ? `<span>
                     ${r.campo}
                   </span>`
                 : `No disponible`
