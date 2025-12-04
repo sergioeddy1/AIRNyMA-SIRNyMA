@@ -2839,8 +2839,16 @@ document.addEventListener("click", async function (e) {
         const vistaWeb = isVistaWeb(tipo);
 
         const metaLinea =
-          (t.hoja ? `<span><i class="bi bi-file-spreadsheet"></i> ${t.hoja}</span>` : "") +
-          (!t.hoja && t.numTab ? `<span><i class="bi bi-file-spreadsheet"></i> ${t.numTab}</span>` : "");
+          (t.hoja ? `<span class="tabulado-info text-end"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="bottom"
+                    data-bs-container="#infoModal"
+                    title="Nombre de la hoja donde se encuentra el tabulado"><i class="bi bi-file-spreadsheet"></i> ${t.hoja}</span>` : "") +
+          (!t.hoja && t.numTab ? `<span class="tabulado-info text-end"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="bottom"
+                    data-bs-container="#infoModal"
+                    title="Nombre de la hoja donde se encuentra el tabulado"><i class="bi bi-file-spreadsheet"></i> ${t.numTab}</span>` : "");
 
         const botonDerecha = t.urlDescarga ? `
           <a href="${t.urlDescarga}" target="_blank"
@@ -2874,11 +2882,7 @@ document.addEventListener("click", async function (e) {
                 <div class="ta-right-buttons">
                   ${botonDerecha}
                 </div>
-                <div class="tabulado-info text-end"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="bottom"
-                    data-bs-container="#infoModal"
-                    title="Nombre de la hoja donde se encuentra el tabulado">
+                <div >
                   ${metaLinea}
                 </div>
               </div>
@@ -2916,8 +2920,16 @@ document.addEventListener("click", async function (e) {
 
       // Meta: si existe 'hoja' úsala; si no, usa número
       const metaLinea =
-        (tabulado.hoja ? `<span><i class="bi bi-file-spreadsheet"></i>  ${tabulado.hoja}</span>` : "") +
-        (!tabulado.hoja && tabulado.numTab ? `<span><i class="bi bi-file-spreadsheet"></i>  ${tabulado.numTab}</span>` : "");
+        (tabulado.hoja ? `<span class="tabulado-info text-end"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="bottom"
+                  data-bs-container="#infoModal"
+                  title="Nombre de la hoja donde se encuentra el tabulado"><i class="bi bi-file-spreadsheet"></i>  ${tabulado.hoja}</span>` : "") +
+        (!tabulado.hoja && tabulado.numTab ? `<span class="tabulado-info text-end"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="bottom"
+                  data-bs-container="#infoModal"
+                  title="Nombre de la hoja donde se encuentra el tabulado"><i class="bi bi-file-spreadsheet"></i>  ${tabulado.numTab}</span>` : "");
 
       const botonDerecha = tabulado.ligaDescTab ? `
         <a href="${tabulado.ligaDescTab}" target="_blank"
@@ -2950,11 +2962,7 @@ document.addEventListener("click", async function (e) {
               <div class="ta-right-buttons">
                 ${botonDerecha}
               </div>
-               <div class="tabulado-info text-end"
-                  data-bs-toggle="tooltip"
-                  data-bs-placement="bottom"
-                  data-bs-container="#infoModal"
-                  title="Nombre de la hoja donde se encuentra el tabulado">
+               <div >
                 ${metaLinea}
               </div>
             </div>
@@ -3056,27 +3064,31 @@ document.addEventListener("click", async function (e) {
 
         const metaLinea = (m.tabla || m.campo)
         ? `
-          <span><i class="bi bi-table"></i></span>
+          <span
+          data-bs-toggle="tooltip"
+                  data-bs-placement="bottom"
+                  data-bs-container="#infoModal"
+                  title="Nombre de la tabla donde se encuentra la variable"
+          ><i class="bi bi-table"></i></span>
           ${
             m.tabla
               ? `<span
-                  data-bs-toggle="tooltip"
-                  data-bs-placement="bottom"
-                  data-bs-container="#infoModal"
-                  title="Nombre de la tabla donde se encuentra la variable">
+                  >
                   ${m.tabla}
                 </span>`
               : `-`
           }
           /
-          <span><i class="bi bi-hdd-network me-1"></i></span>
+          <span
+          data-bs-toggle="tooltip"
+                  data-bs-placement="bottom"
+                  data-bs-container="#infoModal"
+                  title="Clave de identificación de la variable en la tabla"
+          ><i class="bi bi-hdd-network me-1"></i></span>
           ${
             m.campo
               ? `<span
-                  data-bs-toggle="tooltip"
-                  data-bs-placement="bottom"
-                  data-bs-container="#infoModal"
-                  title="Clave de identificación de la variable en la tabla">
+                  >
                   ${m.campo}
                 </span>`
               : `-`
@@ -3129,27 +3141,31 @@ document.addEventListener("click", async function (e) {
 
      const metaLinea = (info.nomTabla || info.nomCampo)
       ? `
-        <span><i class="bi bi-table"></i></span>
+        <span
+        data-bs-toggle="tooltip"
+                data-bs-placement="bottom"
+                data-bs-container="#infoModal"
+                title="Nombre de la tabla donde se encuentra la variable"
+        ><i class="bi bi-table"></i></span>
         ${
           info.nomTabla
             ? `<span
-                data-bs-toggle="tooltip"
-                data-bs-placement="bottom"
-                data-bs-container="#infoModal"
-                title="Nombre de la tabla donde se encuentra la variable">
+                >
                 ${info.nomTabla}
               </span>`
             : `No disponible`
         }
         / 
-        <span> <i class="bi bi-hdd-network me-1"></i></span>
+        <span
+         data-bs-toggle="tooltip"
+                data-bs-placement="bottom"
+                data-bs-container="#infoModal"
+                title="Clave de identificación de la variable en la tabla"
+        > <i class="bi bi-hdd-network me-1"></i></span>
         ${
           info.nomCampo
             ? `<span
-                data-bs-toggle="tooltip"
-                data-bs-placement="bottom"
-                data-bs-container="#infoModal"
-                title="Clave de identificación de la variable en la tabla">
+               >
                 ${info.nomCampo}
               </span>`
             : `No disponible`
