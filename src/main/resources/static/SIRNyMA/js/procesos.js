@@ -10,8 +10,8 @@ let unidadToken = 0;                  // versión de carga; invalida renders vie
 const GLOBAL_DEFAULTS = {
   unidades: 5,                 // siempre 5
   procesosTotales: 45 + 64,    // 109
-  procesosAmbientales: 31 + 16,// 47
-  variablesAmbientales: 1165 + 554 // 1719
+  procesosAmbientales: 31 + 15,// 46
+  variablesAmbientales: 1165 + 195 // 1360
 };
 
 // === Formatea números con espacio cada 3 dígitos ===

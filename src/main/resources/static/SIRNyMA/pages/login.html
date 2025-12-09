@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ingreso - AIRNyMA / SIRNyMA</title>
+  <link rel="stylesheet" href="../styles/login.css" />
+</head>
+<body>
+  <main class="login-page" role="main">
+    <section class="login-wrap" aria-labelledby="login-title">
+      <div class="login-brand">
+        <!-- Puedes reemplazar este SVG por tu logo -->
+        <svg width="56" height="56" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <rect width="24" height="24" rx="4" fill="#0b7a88"></rect>
+          <path d="M6 12h12M6 8h12M6 16h8" stroke="#fff" stroke-width="1.4" stroke-linecap="round"></path>
+        </svg>
+        <h1 id="login-title">SIRNyMA</h1>
+        <p class="login-subtitle">Espacio digital de indicadores y variables</p>
+      </div>
+
+      <form id="loginForm" class="login-card" action="/login" method="post" autocomplete="on" novalidate>
+        <div id="loginError" class="login-error" aria-live="polite" hidden></div>
+
+        <label for="userInput" class="sr-only">Usuario o correo</label>
+        <input id="userInput" name="username" type="text" inputmode="email" placeholder="Correo o usuario" required autocomplete="username" />
+
+        <label for="passwordInput" class="sr-only">Contraseña</label>
+        <input id="passwordInput" name="password" type="password" placeholder="Contraseña" required autocomplete="current-password" />
+
+        <div class="login-controls">
+          <label class="remember">
+            <input id="remember" name="remember" type="checkbox" />
+            <span>Recordarme</span>
+          </label>
+          <a class="forgot-link" href="/forgot-password">¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <button id="loginBtn" class="btn-primary" type="submit">Iniciar sesión</button>
+
+        <div class="login-divider"><span>o</span></div>
+
+        <div class="socials">
+          <button type="button" class="btn-social btn-google" aria-label="Ingresar con Google">Google</button>
+          <button type="button" class="btn-social btn-guest" aria-label="Ingresar como invitado">Invitado</button>
+        </div>
+
+        <footer class="login-footer">
+          <small>¿No tienes cuenta? <a href="/register">Regístrate</a></small>
+        </footer>
+      </form>
+    </section>
+  </main>
+
+  <script src="../js/login.js"></script>
+
+</body>
+</html>
