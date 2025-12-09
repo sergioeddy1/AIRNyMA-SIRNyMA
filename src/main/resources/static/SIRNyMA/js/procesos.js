@@ -8,10 +8,10 @@ let unidadToken = 0;                  // versión de carga; invalida renders vie
 
 // === Valores iniciales (roll-up global al entrar) ===
 const GLOBAL_DEFAULTS = {
-  unidades: 5,                 // siempre 5
+  unidades: 5,                 //  5
   procesosTotales: 45 + 64,    // 109
   procesosAmbientales: 31 + 15,// 46
-  variablesAmbientales: 1165 + 195 // 1360
+  variablesAmbientales: 1165 + 195 // 1360 
 };
 
 // === Formatea números con espacio cada 3 dígitos ===
