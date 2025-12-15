@@ -1,3 +1,15 @@
+(function () {
+  const sesionStr = localStorage.getItem('sirnmaUser') || sessionStorage.getItem('sirnmaUser');
+
+  if (!sesionStr) {
+    // No hay sesión → mandar a login
+    window.location.href = '../pages/login.html'; // ajusta la ruta
+    return;
+  }
+
+  const sesion = JSON.parse(sesionStr);
+  console.log('Usuario autenticado:', sesion.username);
+
 document.addEventListener("DOMContentLoaded", function () {
   // Elementos del DOM
   const searchForm = document.getElementById("searchForm");
@@ -3822,3 +3834,5 @@ function highlightTerm(text, term) {
 // AQUÍ TERMINA TODA LA LÓGICA DE VARIABLES
 // ……………………………
 });
+
+})();

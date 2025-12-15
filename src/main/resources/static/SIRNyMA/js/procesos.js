@@ -1,3 +1,14 @@
+(function () {
+  const sesionStr = localStorage.getItem('sirnmaUser') || sessionStorage.getItem('sirnmaUser');
+
+  if (!sesionStr) {
+    // No hay sesión → mandar a login
+    window.location.href = '../pages/login.html'; // ajusta la ruta
+    return;
+  }
+
+  const sesion = JSON.parse(sesionStr);
+  console.log('Usuario autenticado:', sesion.username);
 // procesos.js
 
 // ---- Estado global para sincronizar cargas y contador ----
@@ -889,3 +900,5 @@ document.addEventListener('click', (e) => {
     if (unflipBtn) flipCard.classList.remove('flipped');
   }
 });
+
+})();

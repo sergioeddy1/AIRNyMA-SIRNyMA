@@ -17,60 +17,52 @@
 </head>
 <body>
 
-          <!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #003057;">
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark shadow-sm" style="background-color: #003057;">
   <div class="container-fluid">
-    <a class="navbar-brand" href="index.html">
+
+    <!-- 🔹 LOGO -->
+    <a class="navbar-brand d-flex align-items-center" href="index.html">
       <img src="/assets/INEGI_g.png" alt="Logo INEGI"
            style="width: 9rem; filter: invert(1) brightness(2) contrast(1.5);">
     </a>
 
+    <!-- 🔹 Botón hamburguesa -->
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
 
+    <!-- 🔹 Contenido del menú -->
     <div class="collapse navbar-collapse" id="navbarNav">
 
-      <!-- 🔹 Menú de navegación -->
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0" style="gap: 0.5rem;"> <!-- espacio entre botones -->
+      <!-- 🔹 Menú principal -->
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0" style="gap: 0.4rem;">
+
         <li class="nav-item">
-          <a class="nav-link"
-             href="procesos.html"
-             style="font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 6px; transition: background-color 0.2s;">
-            Procesos de Producción
-          </a>
+          <a class="nav-link nav-btn" href="procesos.html">Procesos de Producción</a>
         </li>
+
         <li class="nav-item">
-          <a class="nav-link"
-             href="variables.html"
-             style="font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 6px; transition: background-color 0.2s;">
-            Inventario de variables ambientales
-          </a>
+          <a class="nav-link nav-btn" href="variables.html">Inventario de variables ambientales</a>
         </li>
+
         <li class="nav-item">
-          <a class="nav-link"
-             aria-current="page"
-             href="indicadores.html"
-             style="font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 6px; transition: background-color 0.2s;">
-            Indicadores existentes
-          </a>
+          <a class="nav-link nav-btn" href="indicadores.html">Indicadores existentes</a>
         </li>
-        
+
       </ul>
+
+      <!-- 🔹 Botón de cerrar sesión alineado a la derecha -->
+      <div class="d-flex align-items-center">
+        <button id="logoutBtn" class="btn btn-logout">
+          <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+        </button>
+      </div>
 
     </div>
   </div>
 </nav>
-          <!-- <form id="navbarSearchForm" class="d-flex" role="search">
-              <input id="searchInput" class="form-control me-2 rounded-pill" type="search" name="search" placeholder="Buscar..." aria-label="Buscar">
-              <button class="btn btn-outline-light rounded-pill" type="submit">Buscar</button>
-            </form>  -->
-          </div>
-        </div>
-      </nav>
-      
 
-    
     
 <!-- Carrusel con texto a la izquierda e imagen a la derecha -->
 <div id="myCarousel" class="carousel slide carousel-white mb-5" data-bs-ride="carousel">
@@ -99,7 +91,7 @@
         Procesos de Producción
       </h2>
       <p style="color: #ffffff; margin: 0;">
-        Descubre los procesos de producción del INEGI que integran información sobre el medio ambiente y los recursos naturales, organizados por Unidad Administrativa.
+        Conoce los procesos de producción del INEGI que integran información sobre el medio ambiente y recursos naturales, organizados por Unidad Administrativa.
       </p>
     </div>
   </div>
@@ -187,21 +179,19 @@
                     text-align: justify;
                     ">
                  <p>
-                  Este portal es una herramienta de consulta que permite explorar la información
-                  estadística y geográfica relacionada con el<strong style="color: #009edb;"> medio ambiente y los recursos
-                  naturales</strong>, a partir de los <strong style="color: #009edb;">Procesos de Producción del Instituto Nacional de Estadística y Geografía (INEGI) </strong> 
+                  El Espacio Digital es una plataforma de consulta que permite explorar la información estadística y geográfica relacionada con el
+                  <strong style="color: #009edb;"> medio ambiente y recursos
+                  naturales</strong>, a partir de los <strong style="color: #009edb;">Procesos de Producción</strong>  del <strong style="color: #009edb;"></strong>Instituto Nacional de Estadística y Geografía (INEGI) </strong>
                    y las <strong style="color: #009edb;">variables ambientales</strong> que estos captan.
                   </p> 
                   <p>
-                  Su contenido se alimenta del <strong style="color: #009edb;">inventario de variables ambientales del Sistema Integrado de Inventario y Encuestas sobre Recursos Naturales y Medio Ambiente (SIIERNMA)</strong>, lo que garantiza la coherencia conceptual y la trazabilidad de las fuentes de información ambiental.
-                  A través de esta plataforma es posible identificar aquellos procesos de producción que
-                  incorporan variables relacionadas con el medio ambiente y los recursos naturales, conocer sus principales características y 
-                  consultar de manera estructurada los elementos que contribuyen al desarrollo de
-                  indicadores ambientales.
+                  Se alimenta del inventario de variables ambientales del<strong style="color: #009edb;">Sistema Integrado de Inventario y Encuestas sobre Recursos Naturales y Medio Ambiente (SIIERNMA)</strong>,
+                   lo que garantiza la coherencia conceptual y la trazabilidad de las fuentes de información ambiental. A través de esta plataforma es posible identificar procesos de producción que incorporan variables
+                  relacionadas con el medio ambiente y recursos naturales, conocer sus principales características y consultar de manera estructurada los elementos que contribuyen al desarrollo de indicadores ambientales.
                   </p>
                   <p>
-                  Con ello, el portal busca fortalecer la <strong style="color: #009edb;">transparencia, accesibilidad y comprensión</strong> de la información ambiental generada por el INEGI, facilitando su
-                  aprovechamiento para el análisis, la investigación y la toma de decisiones.
+                  Con ello, el portal busca fortalecer la <strong style="color: #009edb;">transparencia, accesibilidad y comprensión</strong> de la información ambiental generada por el INEGI, 
+                  así como facilitar su aprovechamiento para análisis, investigación y toma de decisiones.
                 </p>
                 </div>
                 <hr>

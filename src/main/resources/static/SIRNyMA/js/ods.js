@@ -1,3 +1,14 @@
+(function () {
+  const sesionStr = localStorage.getItem('sirnmaUser') || sessionStorage.getItem('sirnmaUser');
+
+  if (!sesionStr) {
+    // No hay sesión → mandar a login
+    window.location.href = '../pages/login.html'; // ajusta la ruta
+    return;
+  }
+
+  const sesion = JSON.parse(sesionStr);
+  console.log('Usuario autenticado:', sesion.username);
 /* TItutlos para los contenedores dinamicos de los ODS */
 const odsTitles = {
   "1": "Objetivo 1: Poner fin a la pobreza en todas sus formas en todo el mundo",
@@ -658,5 +669,5 @@ function renderComentarios(comentario) {
 document.querySelectorAll('[id^="OdsContainer"]').forEach(div => div.classList.add('d-none'));
 document.querySelectorAll('[id^="pagination"]').forEach(div => div.classList.add('d-none'));
 
-
+})();
 

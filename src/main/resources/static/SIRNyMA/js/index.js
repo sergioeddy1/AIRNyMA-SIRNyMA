@@ -1,3 +1,15 @@
+(function () {
+  const sesionStr = localStorage.getItem('sirnmaUser') || sessionStorage.getItem('sirnmaUser');
+
+  if (!sesionStr) {
+    // No hay sesión → mandar a login
+    window.location.href = './login/login.html'; // ajusta la ruta
+    return;
+  }
+
+  const sesion = JSON.parse(sesionStr);
+  console.log('Usuario autenticado:', sesion.username);
+
 document.addEventListener('DOMContentLoaded', () => {
   const carousel = document.getElementById('myCarousel');
   if (!carousel) return;
@@ -35,3 +47,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // Bootstrap no pausa videos automáticamente; simplemente cambia clases.
   // Si tenías handlers de slide/slid que tocaban los videos, elimínalos.
 });
+
+const logoutBtn = document.getElementById('logoutBtn');
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem('sirnmaUser');
+    sessionStorage.removeItem('sirnmaUser');
+    window.location.href = '../pages/login.html'; // ajusta ruta
+  });
+}
+
+})();
