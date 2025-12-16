@@ -439,29 +439,16 @@ function filtrarProcessSelectPorTema(selectedTema) {
 }
 
 
-function hasMicrodatos(variable) {
-  if (!variable) return false;
-  if (variable.relMicro === 'Sí') return true;
-  // Económicas con lista embebida
-  if (variable._source === 'economicas-ultima' &&
-      Array.isArray(variable._microdatosList) &&
-      variable._microdatosList.length > 0) {
-    return true;
-  }
-  return false;
+function hasMicrodatos(v) {
+  // ajusta a tu estructura real
+  return v.relMicro === "Sí" || (Array.isArray(v._microdatosList) && v._microdatosList.length > 0);
 }
 
-function hasDatosAbiertos(variable) {
-  if (!variable) return false;
-  // Económicas: requiere bandera + lista embebida con elementos
-  if (variable._source === 'economicas-ultima') {
-    return variable.relAbiertos === 'Sí' &&
-           Array.isArray(variable._datosAbiertosList) &&
-           variable._datosAbiertosList.length > 0;
-  }
-  // Socio: usa bandera relAbiertos si existe
-  return variable.relAbiertos === 'Sí';
+function hasDatosAbiertos(v) {
+  // ajusta a tu estructura real
+  return v.relAbiertos === "Sí" || (Array.isArray(v._datosAbiertosList) && v._datosAbiertosList.length > 0);
 }
+
 
   // ==== FIN HELPERS /indicadores/ultima ====
 
@@ -826,15 +813,23 @@ function filterByRelation() {
     }
 
 
-    // Filtro de relación temática
-    if (relTabCheckbox?.checked || relMicroCheckbox?.checked || chkRelAbiertos?.checked) {
-      filtered = filtered.filter(variable => {
-        const matchRelTab    = relTabCheckbox?.checked   ? variable.relTab === "Sí" : true;
-        const matchRelMicro  = relMicroCheckbox?.checked ? hasMicrodatos(variable)  : true;
-        const matchAbiertos  = chkRelAbiertos?.checked   ? hasDatosAbiertos(variable) : true;
-        return matchRelTab && matchRelMicro && matchAbiertos;
-      });
-    }
+          // Filtro de relación (TABULADOS / MICRODATOS / DATOS ABIERTOS) con lógica OR (unión)
+      const wantsTab      = !!relTabCheckbox?.checked;
+      const wantsMicro    = !!relMicroCheckbox?.checked;
+      const wantsAbiertos = !!chkRelAbiertos?.checked;
+
+      if (wantsTab || wantsMicro || wantsAbiertos) {
+        filtered = filtered.filter(v => {
+          const okTab      = wantsTab      && (v.relTab === "Sí");
+          const okMicro    = wantsMicro    && hasMicrodatos(v);
+          const okAbiertos = wantsAbiertos && hasDatosAbiertos(v);
+
+          // ✅ unión: si cumple cualquiera de los seleccionados, pasa
+          return okTab || okMicro || okAbiertos;
+        });
+      }
+
+
 
     // Filtro de alineación con MDEA y ODS
     if (alinMdeaCheckbox?.checked || alinOdsCheckbox?.checked) {
@@ -1991,7 +1986,7 @@ function renderPage(data, page) {
 
                       <div class="col-md-6">
                         <div class="mb-2">
-                          <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Cnjunto de personas, elementos o unidades que se estudian y cuanrifican por la variable">
+                          <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Conjunto de personas, elemento o unidades que se estudian o cuantifican por la variable">
                             <i class="bi bi-diagram-3 me-1"></i>Categoría:</span>
                           <span class="text-dark ms-1 fw-normal">${hCategoria}</span> <!-- 👈 -->
                         </div>

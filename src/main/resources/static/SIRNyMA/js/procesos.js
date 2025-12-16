@@ -217,7 +217,7 @@ function mapEconomicasToLocal(item) {
     pi: item.proceso || "No disponible",
     pp: item.proceso || "No disponible",
     dgaRespPp: null,
-    perioProd: null,
+    perioProd: item.periodicidadpublicacion || null,
     vigInicial: item.inicio ? String(item.inicio).slice(0, 4) : null,
     vigFinal: item.fin 
       ? (/^\d{4}/.test(String(item.fin)) ? String(item.fin).slice(0, 4) : String(item.fin)) 
