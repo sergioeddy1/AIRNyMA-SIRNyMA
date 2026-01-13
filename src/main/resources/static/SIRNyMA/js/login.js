@@ -24,6 +24,11 @@
     return typeof valor === 'string' && valor.startsWith('$2');
   }
 
+  // Valida que el correo sea del dominio @inegi.org.mx
+  function esCorreoInegi(correo) {
+    return typeof correo === 'string' && /^[A-Za-z0-9._%+-]+@inegi\.org\.mx$/i.test(correo);
+  }
+
   async function autenticarUsuario(nombreIngresado, passwordPlano) {
     // Intentamos filtrar en backend primero (si tu controlador soporta ?username=)
     try {
@@ -90,6 +95,12 @@
 
     if (!user || !pass) {
       mostrarError('Por favor completa usuario y contraseña.');
+      return;
+    }
+
+    // Validar que el usuario sea un correo con dominio @inegi.org.mx
+    if (!esCorreoInegi(user)) {
+      mostrarError('Por favor ingresa un correo con dominio @inegi.org.mx.');
       return;
     }
 

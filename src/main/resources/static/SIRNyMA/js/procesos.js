@@ -71,8 +71,52 @@ function actualizarEtiquetaUnidades() {
 
 // --- Abre variables.html en otra pestaña ---
 function handleVariableClick(idPp) {
-  window.open(`variables.html?idPp=${encodeURIComponent(idPp)}`, '_blank');
+  const key = 'sirnmaUser';
+  const session = sessionStorage.getItem(key) || localStorage.getItem(key);
+
+  const url = `variables.html?idPp=${encodeURIComponent(idPp)}`;
+  const newWin = window.open(url, '_blank');
+
+  if (!session) return; // nada que pasar
+
+  // Intento directo de enviar la sesión por postMessage (misma origin)
+  const trySend = () => {
+    try {
+      if (!newWin || newWin.closed) return false;
+      newWin.postMessage({ type: 'setSession', session }, location.origin);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  if (!trySend()) {
+    const iv = setInterval(() => {
+      if (trySend() || !newWin || newWin.closed) {
+        clearInterval(iv);
+      }
+    }, 50);
+    // como fallback, limitar intentos
+    setTimeout(() => clearInterval(iv), 3000);
+  }
 }
+
+// Exponer la función para que onclick=... funcione desde HTML
+if (typeof window !== 'undefined') window.handleVariableClick = handleVariableClick;
+
+// Responder a peticiones de sesión desde la ventana hija (por si ella solicita)
+window.addEventListener('message', (ev) => {
+  if (ev.origin !== location.origin) return;
+  const data = ev.data || {};
+  if (data.type === 'requestSession') {
+    const s = sessionStorage.getItem('sirnmaUser') || localStorage.getItem('sirnmaUser');
+    if (s && ev.source) {
+      try {
+        ev.source.postMessage({ type: 'setSession', session: s }, ev.origin);
+      } catch (e) {}
+    }
+  }
+});
 
 // --- Helpers generales ---
 function mostrarVigencia(vigInicial, vigFinal) {

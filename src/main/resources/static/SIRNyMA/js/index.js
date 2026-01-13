@@ -3,7 +3,7 @@
 
   if (!sesionStr) {
     // No hay sesión → mandar a login
-    window.location.href = './login/login.html'; // ajusta la ruta
+    window.location.href = './login.html'; // ajusta la ruta
     return;
   }
 

@@ -5,28 +5,24 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Ingreso - SIRNMA</title>
   <link rel="stylesheet" href="../styles/login.css" />
+  <link rel="icon" type="image/png" href="/assets/favicon_espaciodigital.png">
 </head>
 <body>
   <main class="login-page" role="main">
     <section class="login-wrap" aria-labelledby="login-title">
       <div class="login-brand">
-        <!-- Puedes reemplazar este SVG por tu logo -->
-        <svg width="56" height="56" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <rect width="24" height="24" rx="4" fill="#0b7a88"></rect>
-          <path d="M6 12h12M6 8h12M6 16h8" stroke="#fff" stroke-width="1.4" stroke-linecap="round"></path>
-        </svg>
-        <h1 id="login-title">SIRNMA</h1>
-        <p class="login-subtitle">Espacio digital de indicadores y variables</p>
+        <img width="90" height="100" viewBox="0 0 24 24" style="border-radius: 6px; filter: brightness(0.9) contrast(1.1);" src="/assets/favicon_espaciodigital.png" alt="Logo SIRNMA">
+        <h4 class="login-subtitle">Espacio digital del inventario de variables del SIIERNMA e Indicadores Ambientales</h4>
       </div>
 
       <form id="loginForm" class="login-card" action="/login" method="post" autocomplete="on" novalidate>
         <div id="loginError" class="login-error" aria-live="polite" hidden></div>
 
-        <label for="userInput" class="sr-only">Usuario o correo</label>
-        <input id="userInput" name="username" type="text" inputmode="email" placeholder="Correo o usuario" required autocomplete="username" />
+        <label for="userInput" class="sr-only">Correo</label>
+        <input id="userInput" name="username" type="text" inputmode="email" placeholder="Correo Institucional" required autocomplete="username" />
 
         <label for="passwordInput" class="sr-only">Contraseña</label>
-        <input id="passwordInput" name="password" type="password" placeholder="Contraseña" required autocomplete="current-password" />
+        <input id="passwordInput" name="password" type="password" placeholder="*******" required autocomplete="current-password" />
 
         <!-- <div class="login-controls">
           <label class="remember">

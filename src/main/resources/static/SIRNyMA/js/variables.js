@@ -2,8 +2,29 @@
   const sesionStr = localStorage.getItem('sirnmaUser') || sessionStorage.getItem('sirnmaUser');
 
   if (!sesionStr) {
-    // No hay sesión → mandar a login
-    window.location.href = '../pages/login.html'; // ajusta la ruta
+    // No hay sesión inmediata: esperar brevemente a que la ventana que nos abrió envíe la sesión por postMessage
+    // Si en 800ms no llega, redirigimos al login como antes
+    let timer = null;
+    const onSession = () => {
+      clearTimeout(timer);
+      // Ya guardamos la sesión en sessionStorage desde el listener en variables.html; recargar para continuar con la lógica normal
+      location.reload();
+    };
+    window.addEventListener('sessionReceived', onSession, { once: true });
+
+    // Si en un tiempo no hay respuesta, redirigimos
+    timer = setTimeout(() => {
+      window.removeEventListener('sessionReceived', onSession);
+      window.location.href = '../pages/login.html';
+    }, 800);
+
+    // También pedimos al opener que envíe la sesión (en caso de que aún no lo haya hecho)
+    try {
+      if (window.opener && !window.opener.closed && window.opener.location && window.opener.location.origin === location.origin) {
+        window.opener.postMessage({ type: 'requestSession' }, location.origin);
+      }
+    } catch (e) {}
+
     return;
   }
 

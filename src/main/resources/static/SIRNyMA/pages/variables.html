@@ -276,6 +276,29 @@ body, html {
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>   
 
+<script>
+// Recibe sesión desde la ventana que abrió esta pestaña y la guarda en sessionStorage
+window.addEventListener('message', (ev) => {
+  if (ev.origin !== location.origin) return;
+  if (ev.data?.type === 'setSession' && ev.data.session) {
+    try {
+      sessionStorage.setItem('sirnmaUser', ev.data.session);
+      // Notificar a scripts ya cargados
+      window.dispatchEvent(new CustomEvent('sessionReceived', { detail: { session: ev.data.session } }));
+    } catch (e) { console.error('Error storing session', e); }
+  }
+}, false);
+
+// Si la ventana fue abierta por otra en el mismo origin, pedirle la sesión si no la tenemos
+(function askOpenerForSession() {
+  try {
+    if (!sessionStorage.getItem('sirnmaUser') && window.opener && !window.opener.closed && window.opener.location && window.opener.location.origin === location.origin) {
+      window.opener.postMessage({ type: 'requestSession' }, location.origin);
+    }
+  } catch (e) {}
+})();
+</script>
+
 <script src="../js/variables.js"></script>
 
  <!--! FOOTER -->
