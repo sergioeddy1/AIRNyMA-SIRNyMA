@@ -10,46 +10,49 @@
 <body>
   <main class="login-page" role="main">
     <section class="login-wrap" aria-labelledby="login-title">
-      <div class="login-brand">
-        <img width="90" height="100" viewBox="0 0 24 24" style="border-radius: 6px; filter: brightness(0.9) contrast(1.1);" src="/assets/favicon_espaciodigital.png" alt="Logo SIRNMA">
-        <h4 class="login-subtitle">Espacio digital del inventario de variables del SIIERNMA e Indicadores Ambientales</h4>
+      <div class="login-brand" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 2rem;">
+        <img width="90" height="100" src="/assets/favicon_espaciodigital.png" alt="Logo SIRNMA" style="margin-bottom: 1rem;">
+        <h1 id="login-title" style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 2.2rem; font-weight: 700; margin: 0 0 0.5rem 0; color: #fff; text-align: center; text-shadow: 0 1px 4px #222;">
+          Ingreso - SIRNMA
+        </h1>
+        <p class="login-subtitle" style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 1.1rem; color: #e0e0e0; text-align: center; max-width: 320px; text-shadow: 0 1px 3px #222;">
+          Espacio digital del inventario de variables del SIIERNMA e Indicadores Ambientales
+        </p>
       </div>
 
       <form id="loginForm" class="login-card" action="/login" method="post" autocomplete="on" novalidate>
         <div id="loginError" class="login-error" aria-live="polite" hidden></div>
 
-        <label for="userInput" class="sr-only">Correo</label>
-        <input id="userInput" name="username" type="text" inputmode="email" placeholder="Correo Institucional" required autocomplete="username" />
+        <div class="form-group">
+          <label for="userInput" class="form-label">Correo institucional</label>
+          <div class="input-wrap">
+            <input id="userInput" name="username" type="email" inputmode="email" placeholder="nombre.apellido@inegi.org.mx" required autocomplete="username" />
+          </div>
+        </div>
 
-        <label for="passwordInput" class="sr-only">Contraseña</label>
-        <input id="passwordInput" name="password" type="password" placeholder="*******" required autocomplete="current-password" />
+        <div class="form-group">
+          <label for="passwordInput" class="form-label">Contraseña</label>
+          <div class="input-wrap">
+            <input id="passwordInput" name="password" type="password" placeholder="Contraseña" required autocomplete="current-password" />
+            <button type="button" id="togglePassword" class="toggle-password" aria-label="Mostrar contraseña" title="Mostrar contraseña">👁️</button>
+          </div>
+        </div>
 
-        <!-- <div class="login-controls">
-          <label class="remember">
-            <input id="remember" name="remember" type="checkbox" />
-            <span>Recordarme</span>
-          </label>
-          <a class="forgot-link" href="/forgot-password">¿Olvidaste tu contraseña?</a>
-        </div> -->
+        <div class="form-actions">
+          <button id="loginBtn" class="btn-primary" type="submit">Iniciar sesión</button>
+        </div>
 
-        <button id="loginBtn" class="btn-primary" type="submit">Iniciar sesión</button>
-
-        <!-- <div class="login-divider"><span>o</span></div> -->
-
-        <!-- <div class="socials">
-          <button type="button" class="btn-social btn-google" aria-label="Ingresar con Google">Google</button>
-          <button type="button" class="btn-social btn-guest" aria-label="Ingresar como invitado">Invitado</button>
-        </div> -->
-
-        <!-- <footer class="login-footer">
-          <small>¿No tienes cuenta? <a href="/register">Regístrate</a></small>
-        </footer> -->
+        <footer class="login-footer">
+         
+        </footer>
       </form>
     </section>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
   <script src="../js/login.js"></script>
-
+  <div style="position:fixed;right:8px;bottom:6px;font-size:11px;line-height:1.05;color:rgba(255,255,255,0.18);text-align:right;pointer-events:none;font-family: 'Segoe UI', Arial, sans-serif;z-index:9999;">
+    <span style="display:block">Subdirección de Indicadores Sobre Recurso Naturales y Medio Ambiente</span>
+    <span style="display:block;font-weight:700;font-size:10px;margin-top:2px">DIRECCIÓN GENERAL DE GEOGRAFÍA Y MEDIO AMBIENTE</span>
+  </div>
 </body>
 </html>

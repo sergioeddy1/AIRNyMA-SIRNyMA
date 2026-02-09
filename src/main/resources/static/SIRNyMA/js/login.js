@@ -143,4 +143,43 @@
       btn.textContent = 'Iniciar sesión';
     }
   });
+
+  // Toggle mostrar/ocultar contraseña
+  const toggleBtn = document.getElementById('togglePassword');
+  const passwordInput = document.getElementById('passwordInput');
+
+  if (toggleBtn && passwordInput) {
+    let isVisible = false;
+
+    // Inicializar con ojo cerrado (password oculta)
+    toggleBtn.textContent = '👁️‍🗨️';
+
+    toggleBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      isVisible = !isVisible;
+      passwordInput.type = isVisible ? 'text' : 'password';
+      // Invertido: ojo abierto cuando visible, cerrado cuando oculto
+      toggleBtn.textContent = isVisible ? '👁️' : '👁️‍🗨️';
+      toggleBtn.setAttribute('aria-label', isVisible ? 'Ocultar contraseña' : 'Mostrar contraseña');
+      toggleBtn.setAttribute('title', isVisible ? 'Ocultar contraseña' : 'Mostrar contraseña');
+    });
+
+    toggleBtn.addEventListener('mousedown', function (e) {
+      e.preventDefault();
+    });
+
+    // Ocultar botón cuando hay contenido y no está enfocado
+    const updateButtonVisibility = function () {
+      const hasContent = passwordInput.value.length > 0;
+      const isFocused = document.activeElement === passwordInput;
+      toggleBtn.style.opacity = (hasContent && !isFocused) ? '0.3' : '1';
+      toggleBtn.style.pointerEvents = (hasContent && !isFocused) ? 'none' : 'auto';
+    };
+
+    passwordInput.addEventListener('input', updateButtonVisibility);
+    passwordInput.addEventListener('focus', updateButtonVisibility);
+    passwordInput.addEventListener('blur', updateButtonVisibility);
+    updateButtonVisibility();
+  }
 })();
