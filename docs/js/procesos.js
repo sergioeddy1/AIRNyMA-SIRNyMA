@@ -1,5 +1,17 @@
 // procesos.js
 
+(function () {
+  const sesionStr = localStorage.getItem('sirnmaUser') || sessionStorage.getItem('sirnmaUser');
+
+  if (!sesionStr) {
+    // No hay sesión → mandar a login
+    window.location.href = './login.html'; // ajusta la ruta
+    return;
+  }
+
+  const sesion = JSON.parse(sesionStr);
+  console.log('Usuario autenticado:', sesion.username);
+
 // ---- Estado global para sincronizar cargas y contador ----
 let isCargandoUnidad = false;         // evita cargas en paralelo
 let contadorAnimFrame = null;         // requestAnimationFrame activo
@@ -483,8 +495,8 @@ function filtrarEconomicasSinVariables(procesos, conteo) {
 async function cargarSociodemograficas({ container }) {
   renderLoader(container, "Cargando procesos (Sociodemográficas)...");
   try {
-    const procesos  = await fetch("https://cho-ata-basket-galleries.trycloudflare.com/api/proceso").then(res => res.json());
-    const variables = await fetch("https://cho-ata-basket-galleries.trycloudflare.com/api/variables").then(res => res.json());
+    const procesos  = await fetch("https://desire-toner-diagnosis-concentration.trycloudflare.com/api/proceso").then(res => res.json());
+    const variables = await fetch("https://desire-toner-diagnosis-concentration.trycloudflare.com/api/variables").then(res => res.json());
 
     const conteoGlobal = buildConteoPorIdPp(variables);
     procesos.forEach(p => { if (!(p.idPp in conteoGlobal)) conteoGlobal[p.idPp] = 0; });
@@ -568,9 +580,9 @@ function renderContadorVariablesUnidad(conteoGlobal, { animateMs = 350 } = {}) {
 // --- Carga ECONÓMICAS (Base de datos nueva) ---
 async function cargarEconomicas({ container }) {
   renderLoader(container, "Cargando procesos (Económicas)...");
-  const urlProcesos = "https://movement-comparable-demonstrated-qualification.trycloudflare.com/api/procesos/buscar?unidad=" +
+  const urlProcesos = "https://need-planets-authors-worm.trycloudflare.com/api/procesos/buscar?unidad=" +
                       encodeURIComponent("Unidad de Estadísticas Económicas");
-  const urlVariablesEco = "https://movement-comparable-demonstrated-qualification.trycloudflare.com/api/indicadores/ultima";
+  const urlVariablesEco = "https://need-planets-authors-worm.trycloudflare.com/api/indicadores/ultima";
 
   try {
     const economicasRaw = await fetch(urlProcesos).then(r => r.json());
@@ -582,7 +594,7 @@ async function cargarEconomicas({ container }) {
       conteoGlobal = buildConteoPorIdPpDesdeUltima(payloadUltima);
     } catch (e) {
       try {
-        const variablesLocal = await fetch("https://cho-ata-basket-galleries.trycloudflare.com/api/variables").then(r => r.json());
+        const variablesLocal = await fetch("https://desire-toner-diagnosis-concentration.trycloudflare.com/api/variables").then(r => r.json());
         conteoGlobal = buildConteoPorIdPp(variablesLocal);
       } catch (e2) {
         conteoGlobal = {};
@@ -786,3 +798,22 @@ function restoreUnidadCardSelection() {
     }
   } catch (e) {}
 }
+
+// Delegación: click en botones de flip/unflip dentro del contenedor de procesos
+document.addEventListener('click', (e) => {
+  const flipBtn = e.target.closest('[data-flip]');
+  const unflipBtn = e.target.closest('[data-unflip]');
+
+  if (flipBtn || unflipBtn) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const flipCard = e.target.closest('.flip-wrap')?.querySelector('.flip-card');
+    if (!flipCard) return;
+
+    if (flipBtn)   flipCard.classList.add('flipped');
+    if (unflipBtn) flipCard.classList.remove('flipped');
+  }
+});
+
+})();

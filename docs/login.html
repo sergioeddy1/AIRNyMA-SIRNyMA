@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ingreso - SIRNMA</title>
+  <link rel="stylesheet" href="css/login.css" />
+  <link rel="icon" type="image/png" href="img/favicon_espaciodigital.png">
+</head>
+
+<body>
+
+    <img 
+     src="img/INEGI_g.png" 
+      alt="Logo INEGI"
+      style="
+      position: absolute;
+        width: 9rem; 
+        margin-left: 1.5rem; 
+        margin-top: 1rem; 
+        filter: grayscale(.5) brightness(1.6) contrast(.5);
+      ">
+   
+  <main class="login-page" role="main">
+
+    <section class="login-wrap" aria-labelledby="login-title">
+     
+
+      <form id="loginForm" class="login-card" action="#" method="post" autocomplete="on" novalidate>
+
+
+        <div class="login-brand" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 2rem;">
+          <div style="position: relative; width: 100%; display: flex; justify-content: center;">
+            <img 
+              width="90" 
+              height="100" 
+              src="img/icononewmap.png" 
+              alt="Logo SIRNMA" 
+              style="
+                position: absolute;
+                top: -95px;
+                left: 50%;
+                transform: translateX(-50%);
+                margin-bottom: 0;
+                background: #fff;
+                border-radius: 55px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+                padding: 6px;
+                z-index: 2;
+              "
+            >
+          </div>
+          <h1 id="login-title" style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 2rem; font-weight: 700; margin: 1 0 0.5rem 0; color: #2d3961; text-align: center; text-shadow: 0 1px 4px #949494;">
+            Inicio de sesión
+          </h1>
+          <p class="login-subtitle" style="font-family: 'Segoe UI', Arial, sans-serif; font-size: 1.1rem; color: #2d3961; text-align: center; max-width: 320px; text-shadow: 0 1px 3px #949494;">
+            Espacio digital del inventario de variables del SIIERNMA e Indicadores Ambientales
+          </p>
+        </div>
+
+        <div id="loginError" class="login-error" aria-live="polite" hidden></div>
+
+        <div class="form-group">
+          <label for="userInput" class="form-label">Correo institucional</label>
+          <div class="input-wrap">
+            <input id="userInput" name="username" type="email" inputmode="email" placeholder="nombre.apellido@inegi.org.mx" required autocomplete="username" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="passwordInput" class="form-label">Contraseña</label>
+          <div class="input-wrap">
+            <input id="passwordInput" name="password" type="password" placeholder="Contraseña" required autocomplete="current-password" />
+            <button type="button" id="togglePassword" class="toggle-password" aria-label="Mostrar contraseña" title="Mostrar contraseña">👁️</button>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button id="loginBtn" class="btn-primary" type="submit">Iniciar sesión</button>
+        </div>
+
+        <footer class="login-footer">
+         
+        </footer>
+      </form>
+    </section>
+  </main>
+
+  <script src="js/login.js"></script>
+  <div style="position:fixed;right:8px;bottom:6px;font-size:11px;line-height:1.05;color:rgba(255,255,255,0.18);text-align:right;pointer-events:none;font-family: 'Segoe UI', Arial, sans-serif;z-index:9999;">
+    <span style="display:block">Subdirección de Indicadores Sobre Recurso Naturales y Medio Ambiente</span>
+    <span style="display:block;font-weight:700;font-size:10px;margin-top:2px">DIRECCIÓN GENERAL DE GEOGRAFÍA Y MEDIO AMBIENTE</span>
+  </div>
+</body>
+</html>
