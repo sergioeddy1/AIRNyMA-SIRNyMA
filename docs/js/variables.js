@@ -15,7 +15,7 @@
     // Si en un tiempo no hay respuesta, redirigimos
     timer = setTimeout(() => {
       window.removeEventListener('sessionReceived', onSession);
-      window.location.href = '../pages/login.html';
+      window.location.href = './login.html';
     }, 800);
 
     // También pedimos al opener que envíe la sesión (en caso de que aún no lo haya hecho)
@@ -150,7 +150,7 @@ function rebuildClasifIndex() {
   });
   // ==== PARCHE: helpers faltantes usados más abajo ====
 
-
+  
   function filterByUnidad(data) {
     if (!Array.isArray(data)) return [];
     if (unidadFiltro === 'todas') return data;
@@ -260,7 +260,7 @@ async function getOdsIndicadoresCatalog() {
   if (odsIndicadoresCatalog) return odsIndicadoresCatalog;
 
   try {
-    const res  = await fetch('https://desire-toner-diagnosis-concentration.trycloudflare.com/api/ods_indicadores');   // <- tu API
+    const res  = await fetch('https://desire-toner-diagnosis-concentration.trycloudflare.com/api/ods_indicadores');
     const data = await res.json();
     odsIndicadoresCatalog = Array.isArray(data) ? data : [];
   } catch (err) {
@@ -608,7 +608,7 @@ function formatOdsComposite(val) {
 // === util de asset (ODS0010_es.jpg, ..., ODS0170_es.jpg) ===
 function odsAssetPath(objNum) {
   const code = String(objNum * 10).padStart(4, "0");
-  return `img/ODS${code}_es.jpg`; // servido desde src/main/resources/static/assets
+  return `img/ODS${code}_es.jpg`;
 }
 
 // === genera las miniaturas con data-ods ===
@@ -2124,6 +2124,7 @@ function renderPage(data, page) {
                                       })()
                                 }
                               </div>
+
                     </div>
                 </div>
             </div>
@@ -2811,6 +2812,18 @@ function safeField(str) {
   return s;
 }
 
+// Helper para inicializar tooltips dentro del modal
+function initTooltipsInModal() {
+  const modal = document.getElementById('infoModal');
+  if (!modal || typeof bootstrap === 'undefined') return;
+
+  const tooltipTriggerList = [].slice.call(
+    modal.querySelectorAll('[data-bs-toggle="tooltip"]')
+  );
+
+  tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+}
+
 
 // Evento delegado para mostrar información de tabulados y microdatos en el modal
 document.addEventListener("click", async function (e) {
@@ -2824,7 +2837,7 @@ document.addEventListener("click", async function (e) {
   if (tabTrigger) {
     resetModalHeaderColor();   // <- siempre que NO sea ODS
 
-    document.getElementById("infoModalLabel").textContent = "Tabulado(s) asociado(s)";
+    document.getElementById("infoModalLabel").textContent = "Tabulado(s)";
     const idVar    = tabTrigger.getAttribute("data-idvar");
     const modalBody = document.getElementById("infoModalBody");
     modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
@@ -2845,33 +2858,36 @@ document.addEventListener("click", async function (e) {
     if (variable && variable._source === "economicas-ultima" &&
         Array.isArray(variable._tabuladosList) && variable._tabuladosList.length) {
 
-      const html = variable._tabuladosList.map(t => {
+        const html = variable._tabuladosList.map(t => {
         const tipo = t.tipo || "";
         const excel = isExcelLike(tipo);
         const inter = isInteractivo(tipo);
         const vistaWeb = isVistaWeb(tipo);
 
-        // Meta: prioriza HOJA para económicas si existe; si no, usa numTab
         const metaLinea =
-          (t.hoja ? `<span><i class="bi bi-file-earmark-text me-1"></i> ${t.hoja}</span>` : "") +
-          (!t.hoja && t.numTab ? `<span><i class="bi bi-file-earmark-text me-1"></i> ${t.numTab}</span>` : "");
+          (t.hoja ? `<span class="tabulado-info text-end"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="bottom"
+                    data-bs-container="#infoModal"
+                    title="Nombre de la hoja donde se encuentra el tabulado"><i class="bi bi-file-spreadsheet"></i> ${t.hoja}</span>` : "") +
+          (!t.hoja && t.numTab ? `<span class="tabulado-info text-end"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="bottom"
+                    data-bs-container="#infoModal"
+                    title="Nombre de la hoja donde se encuentra el tabulado"><i class="bi bi-file-spreadsheet"></i> ${t.numTab}</span>` : "");
 
-        // Botón principal de la derecha (descarga o interactivo o vista web si aplica)
-        // Nota: por requerimiento, los botones de urlDescarga se van a la DERECHA con el meta.
         const botonDerecha = t.urlDescarga ? `
           <a href="${t.urlDescarga}" target="_blank"
-             class="btn-download ${excel ? "btn-excel" : inter ? "btn-interactivo" : "btn-download-default"}">
+            class="btn-download ${excel ? "btn-excel" : inter ? "btn-interactivo" : "btn-download-default"}">
             ${excel ? `<i class="bi bi-filetype-xlsx me-1"></i> EXCEL`
                     : inter ? `<i class="bi bi-bar-chart-line me-1"></i> Interactivo`
                             : `<i class="bi bi-download me-1"></i> Descargar`}
           </a>` : "";
 
-        // Acciones de la IZQUIERDA: Ver en INEGI + Vista Web (si aplica con su propia URL)
-        // Si hay un link específico de vista web, úsalo; si no, lo omitimos.
         const botonVistaWebIzq = (vistaWeb && t.urlAcceso)
           ? `<a href="${t.urlAcceso}" target="_blank" class="btn-web">
-               <i class="bi bi-globe2 me-1"></i> Vista web
-             </a>`
+              <i class="bi bi-globe2 me-1"></i> Vista web
+            </a>`
           : "";
 
         const botonAccesoInegiIzq = t.urlAcceso ? `
@@ -2892,7 +2908,7 @@ document.addEventListener("click", async function (e) {
                 <div class="ta-right-buttons">
                   ${botonDerecha}
                 </div>
-                <div class="tabulado-info text-end">
+                <div >
                   ${metaLinea}
                 </div>
               </div>
@@ -2902,6 +2918,7 @@ document.addEventListener("click", async function (e) {
       }).join("");
 
       modalBody.innerHTML = html || "<div class='text-danger'>No hay tabulados disponibles.</div>";
+      initTooltipsInModal();
       return;
     }
 
@@ -2929,8 +2946,16 @@ document.addEventListener("click", async function (e) {
 
       // Meta: si existe 'hoja' úsala; si no, usa número
       const metaLinea =
-        (tabulado.hoja ? `<span><i class="bi bi-file-earmark-text me-1"></i> ${tabulado.hoja}</span>` : "") +
-        (!tabulado.hoja && tabulado.numTab ? `<span><i class="bi bi-file-earmark-text me-1"></i> ${tabulado.numTab}</span>` : "");
+        (tabulado.hoja ? `<span class="tabulado-info text-end"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="bottom"
+                  data-bs-container="#infoModal"
+                  title="Nombre de la hoja donde se encuentra el tabulado"><i class="bi bi-file-spreadsheet"></i>  ${tabulado.hoja}</span>` : "") +
+        (!tabulado.hoja && tabulado.numTab ? `<span class="tabulado-info text-end"
+                  data-bs-toggle="tooltip"
+                  data-bs-placement="bottom"
+                  data-bs-container="#infoModal"
+                  title="Nombre de la hoja donde se encuentra el tabulado"><i class="bi bi-file-spreadsheet"></i>  ${tabulado.numTab}</span>` : "");
 
       const botonDerecha = tabulado.ligaDescTab ? `
         <a href="${tabulado.ligaDescTab}" target="_blank"
@@ -2963,7 +2988,7 @@ document.addEventListener("click", async function (e) {
               <div class="ta-right-buttons">
                 ${botonDerecha}
               </div>
-              <div class="tabulado-info text-end">
+               <div >
                 ${metaLinea}
               </div>
             </div>
@@ -2972,7 +2997,9 @@ document.addEventListener("click", async function (e) {
       `;
     }).join("");
 
-    modalBody.innerHTML = contenido || "<div class='text-danger'>No hay ligas disponibles para los tabulados relacionados.</div>";
+    modalBody.innerHTML = contenido || 
+    "<div class='text-danger'>No hay ligas disponibles para los tabulados relacionados.</div>";
+    initTooltipsInModal();
   } catch (error) {
     console.error(error);
     modalBody.innerHTML = "<div class='text-danger'>Error al cargar la información.</div>";
@@ -2985,7 +3012,7 @@ document.addEventListener("click", async function (e) {
   if (microTrigger) {
     resetModalHeaderColor();   // <- aquí
 
-    document.getElementById("infoModalLabel").textContent = "Microdato(s) asociado(s)";
+    document.getElementById("infoModalLabel").textContent = "Microdatos";
     const idVar     = microTrigger.getAttribute("data-idvar");
     const modalBody = document.getElementById("infoModalBody");
     modalBody.innerHTML = "<div class='text-center'>Cargando...</div>";
@@ -3062,8 +3089,39 @@ document.addEventListener("click", async function (e) {
         const botonDerecha = buildDownloadButton(m.urlDescriptor || m.urlAcceso);
 
         const metaLinea = (m.tabla || m.campo)
-          ? `<span><i class="bi bi-hdd-network me-1"></i>${m.tabla || "-"} / ${m.campo || "-"}</span>`
-          : "";
+        ? `
+          <span
+          data-bs-toggle="tooltip"
+                  data-bs-placement="bottom"
+                  data-bs-container="#infoModal"
+                  title="Nombre de la tabla donde se encuentra la variable"
+          ><i class="bi bi-table"></i></span>
+          ${
+            m.tabla
+              ? `<span
+                  >
+                  ${m.tabla}
+                </span>`
+              : `-`
+          }
+          /
+          <span
+          data-bs-toggle="tooltip"
+                  data-bs-placement="bottom"
+                  data-bs-container="#infoModal"
+                  title="Clave de identificación de la variable en la tabla"
+          ><i class="bi bi-hdd-network me-1"></i></span>
+          ${
+            m.campo
+              ? `<span
+                  >
+                  ${m.campo}
+                </span>`
+              : `-`
+          }
+        `
+        : "";
+
 
         return `
           <div class="tabulado-card micro-card">
@@ -3073,7 +3131,7 @@ document.addEventListener("click", async function (e) {
               <div class="ta-left">
                 ${m.urlAcceso ? `
                   <a href="${m.urlAcceso}" target="_blank" class="btn-link-inegi">
-                    <i class="bi bi-link-45deg me-1"></i> Página Microdatos INEGI
+                    <i class="bi bi-link-45deg me-1"></i> Ver en INEGI
                   </a>` : ""}
               </div>
 
@@ -3092,7 +3150,8 @@ document.addEventListener("click", async function (e) {
       }).join("");
 
       modalBody.innerHTML = html || "<div class='text-danger'>No hay microdatos disponibles.</div>";
-      return;
+    initTooltipsInModal();
+    return;
     }
 
     // 2) Fallback a /api/microdatos (sociodemográficas, etc.)
@@ -3106,9 +3165,40 @@ document.addEventListener("click", async function (e) {
 
       const botonDerecha = buildDownloadButton(info.ligaDd);
 
-      const metaLinea = (info.nomTabla || info.nomCampo)
-        ? `<span><i class="bi bi-hdd-network me-1"></i>${info.nomTabla || "No disponible"} / ${info.nomCampo || "No disponible"}</span>`
-        : "";
+     const metaLinea = (info.nomTabla || info.nomCampo)
+      ? `
+        <span
+        data-bs-toggle="tooltip"
+                data-bs-placement="bottom"
+                data-bs-container="#infoModal"
+                title="Nombre de la tabla donde se encuentra la variable"
+        ><i class="bi bi-table"></i></span>
+        ${
+          info.nomTabla
+            ? `<span
+                >
+                ${info.nomTabla}
+              </span>`
+            : `No disponible`
+        }
+        / 
+        <span
+         data-bs-toggle="tooltip"
+                data-bs-placement="bottom"
+                data-bs-container="#infoModal"
+                title="Clave de identificación de la variable en la tabla"
+        > <i class="bi bi-hdd-network me-1"></i></span>
+        ${
+          info.nomCampo
+            ? `<span
+               >
+                ${info.nomCampo}
+              </span>`
+            : `No disponible`
+        }
+      `
+      : "";
+
 
       modalBody.innerHTML = `
         <div class="tabulado-card micro-card">
@@ -3118,7 +3208,7 @@ document.addEventListener("click", async function (e) {
             <div class="ta-left">
               ${info.ligaMicro ? `
                 <a href="${info.ligaMicro}" target="_blank" class="btn-link-inegi">
-                  <i class="bi bi-link-45deg me-1"></i> Página Microdatos INEGI
+                  <i class="bi bi-link-45deg me-1"></i> Ver en INEGI
                 </a>` : ""}
             </div>
 
@@ -3134,6 +3224,7 @@ document.addEventListener("click", async function (e) {
           </div>
         </div>
       `;
+      initTooltipsInModal();
     } else {
       modalBody.innerHTML = "<div class='text-danger'>No hay información de microdatos disponible.</div>";
     }
@@ -3153,7 +3244,7 @@ document.addEventListener("click", async function (e) {
     const labelEl = document.getElementById("infoModalLabel");
     const bodyEl  = document.getElementById("infoModalBody");
 
-    if (labelEl) labelEl.textContent = "Datos Abiertos asociados";
+    if (labelEl) labelEl.textContent = "Datos Abiertos";
     if (bodyEl)  bodyEl.innerHTML = "<div class='text-center'>Cargando...</div>";
 
     const idVar  = datosTrigger.getAttribute("data-idvar");
@@ -3215,12 +3306,39 @@ document.addEventListener("click", async function (e) {
           </a>` : "";
 
         const ubicacion = (r.tabla || r.campo)
-          ? `<div class="tabulado-info text-end">
-               <span><i class="bi bi-file-earmark-text me-1"></i>
-               ${(r.tabla || "No disponible")} / ${(r.campo || "No disponible")}
-               </span>
-             </div>`
-          : "";
+        ? `
+          <div class="tabulado-info text-end">
+            <span data-bs-toggle="tooltip"
+                    data-bs-placement="bottom"
+                    data-bs-container="#infoModal"
+                    title="Nombre de la tabla donde se encuentra la variable">
+                    <i class="bi bi-table"></i>
+                    </span>
+            ${
+              r.tabla
+                ? `<span
+                    >
+                    ${r.tabla}
+                  </span>`
+                : `No disponible`
+            }
+            /
+             <span
+              data-bs-toggle="tooltip"
+                    data-bs-placement="bottom"
+                    data-bs-container="#infoModal"
+                    title="Clave de identificación de la variable en la tabla"> 
+                    <i class="bi bi-hdd-network me-1"></i></span>
+            ${
+              r.campo
+                ? `<span>
+                    ${r.campo}
+                  </span>`
+                : `No disponible`
+            }
+          </div>
+        `
+        : "";
 
         return `
           <div class="tabulado-card">
@@ -3229,7 +3347,7 @@ document.addEventListener("click", async function (e) {
               <div class="ta-left">
                 ${r.urlAcceso ? `
                   <a href="${r.urlAcceso}" target="_blank" class="btn-link-inegi">
-                    <i class="bi bi-link-45deg me-1"></i> Página Datos Abiertos INEGI
+                    <i class="bi bi-link-45deg me-1"></i> Ver en INEGI
                   </a>` : ""}
               </div>
 
@@ -3245,6 +3363,7 @@ document.addEventListener("click", async function (e) {
       }).join("");
 
       bodyEl.innerHTML = contenido || "<div class='text-danger'>No hay información disponible.</div>";
+      initTooltipsInModal();
       return;
     }
 
@@ -3490,40 +3609,45 @@ if (e.target.closest(".badge-ods")) {
 
       const varTitle = fmt(variable.varAsig || idVar);
 
+       // 👉 Para evitar repetir la misma meta N veces en el modal
+      const metasVistas = new Set();
+
       modalBody.innerHTML = `
-        <div class="mb-2"><strong>${varTitle}</strong></div>
         <div class="list-group">
           ${lista.map(o => {
-            // META: código + nombre desde metaNombre (económicas ya lo trae)
+            // META: código + nombre
             const metaCode  = cleanUnderscores(formatOdsComposite(o.meta));
             const metaName  = cleanUnderscores(o.metaNombre || "");
             const showMeta  = metaCode && metaCode !== "-";
 
-            const metaBlock = showMeta ? `
-              <div class="small mb-1"><strong>Meta ODS detectada:</strong> ${metaCode}</div>
-              ${metaName ? `<div class="small mb-1">${metaName}</div>` : ""}`
-            : "";
+            // Si la meta ya se mostró antes, NO volvemos a mostrar el bloque de meta
+            let metaBlock = "";
+            if (showMeta && !metasVistas.has(metaCode)) {
+              metaBlock = `
+                <div class="small mb-1"><strong>Meta ${metaCode}: </strong></div>
+                ${metaName ? `<div class="small mb-1">${metaName}</div>` : ""}`;
+              metasVistas.add(metaCode);
+            }
 
-            // INDICADOR: solo si es válido, con indicadorNombre
+            // INDICADOR: solo si es válido
             let indicadorBlock = "";
             if (hasValidIndicador(o.indicador)) {
               const indCode = cleanUnderscores(formatOdsComposite(o.indicador));
               const indName = cleanUnderscores(o.indicadorNombre || "");
               indicadorBlock = `
-                <div class="small mb-1"><strong>Indicador ODS:</strong> ${indCode}</div>
+                <div class="small mb-1"><strong>Indicador ${indCode}:</strong></div>
                 ${indName ? `<div class="small mb-1">${indName}</div>` : ""}`;
             }
 
-            const coment =
-              o.comentarioS && o.comentarioS.trim() !== "-"
-                ? `<div class="small text-muted">${cleanUnderscores(o.comentarioS)}</div>`
-                : "";
+            // Si NO hay meta (porque es duplicada) y NO hay indicador, no pintamos nada
+            if (!metaBlock && !indicadorBlock) {
+              return "";
+            }
 
             return `
               <div class="list-group-item">
                 ${metaBlock}
                 ${indicadorBlock}
-                ${coment}
               </div>
             `;
           }).join("")}
@@ -3532,13 +3656,14 @@ if (e.target.closest(".badge-ods")) {
       return;
     }
 
+
     // ------------------------------------------------------------------
     // 2) SOCIODEMOGRÁFICAS (fallback /api/ods + /api/ods_indicadores + /api/meta_ods)
     // ------------------------------------------------------------------
     const [resOds, resIndic, resMeta] = await Promise.all([
-      fetch(`https://desire-toner-diagnosis-concentration.trycloudflare.com/api/ods`),
-      fetch(`https://desire-toner-diagnosis-concentration.trycloudflare.com/api/ods_indicadores`), // catálogo indicadores
-      fetch(`https://desire-toner-diagnosis-concentration.trycloudflare.com/api/meta_ods`)         // catálogo metas
+      fetch(`/api/ods`),
+      fetch(`/api/ods_indicadores`), // catálogo indicadores
+      fetch(`/api/meta_ods`)         // catálogo metas
     ]);
 
     const data = await resOds.json();
@@ -3575,21 +3700,20 @@ if (e.target.closest(".badge-ods")) {
     const first  = registros[0];
     const objNum = formatOdsObjetivo(first.ods ?? first.objetivo);
     let rawName = first.odsNombre || first.objetivoNombre || first.ods;
-
-    // aplicar limpieza SOLO a sociodemográficas
     const cleanName = cleanOdsTitleName(rawName);
 
     modalTitle.textContent = `ODS ${objNum}. ${cleanName}`;
 
     const varTitle = fmt((variable?.varAsig) || idVar);
 
+    // 👉 Set para saber qué metas ya se pintaron
+    const metasVistas = new Set();
+
     modalBody.innerHTML = `
-      <div class="mb-2"><strong>${varTitle}</strong></div>
       <div class="list-group">
         ${registros.map(info => {
           const odsNumber = getOdsObjectiveNumber(info.ods ?? info.objetivo);
 
-          // META: código + nombre desde catálogo meta_ods
           const metaCode = cleanUnderscores(formatOdsComposite(info.meta));
           const showMeta = metaCode && metaCode !== "-";
 
@@ -3599,12 +3723,14 @@ if (e.target.closest(".badge-ods")) {
             catalogMeta
           );
 
-          const metaBlock = showMeta ? `
-            <div class="small mb-1"><strong>Meta ODS detectada:</strong> ${metaCode}</div>
-            ${metaNameFromCat ? `<div class="small mb-1">${metaNameFromCat}</div>` : ""}`
-          : "";
+          let metaBlock = "";
+          if (showMeta && !metasVistas.has(metaCode)) {
+            metaBlock = `
+              <div class="small mb-1"><strong>${metaCode}</strong> </div>
+              ${metaNameFromCat ? `<div class="small mb-1">${metaNameFromCat}</div>` : ""}`;
+            metasVistas.add(metaCode);
+          }
 
-          // INDICADOR: solo si es válido, con nombre desde catálogo ods_indicadores
           let indicadorBlock = "";
           if (hasValidIndicador(info.indicador)) {
             const indCode   = cleanUnderscores(formatOdsComposite(info.indicador));
@@ -3616,25 +3742,25 @@ if (e.target.closest(".badge-ods")) {
             );
 
             indicadorBlock = `
-              <div class="small mb-1"><strong>Indicador ODS:</strong> ${indCode}</div>
+              <div class="small mb-1"><strong>${indCode}</strong></div>
               ${nameIndic ? `<div class="small mb-1">${nameIndic}</div>` : ""}`;
           }
 
-          const coment =
-            info.comentOds && info.comentOds.trim() !== "-"
-              ? `<div class="small text-muted">${cleanUnderscores(info.comentOds)}</div>`
-              : "";
+          // Si meta es duplicada y no hay indicador, no se pinta nada
+          if (!metaBlock && !indicadorBlock) {
+            return "";
+          }
 
           return `
             <div class="list-group-item">
               ${metaBlock}
               ${indicadorBlock}
-              ${coment}
             </div>
           `;
         }).join("")}
       </div>
     `;
+
   } catch (err) {
     console.error(err);
     if (modalBody) {
@@ -3668,11 +3794,11 @@ document.addEventListener("DOMContentLoaded", function () {
 // ---- Nota de fuente al final de la página (texto pequeño, no altera layout) ----
 
 // Si decides conservar ese bloque, ajústalo así:
-fetch('https://desire-toner-diagnosis-concentration.trycloudflare.com/api/clasificaciones')
+fetch('/api/clasificaciones')
   .then(res => res.json())
   .then(clasificaciones => {
     clasificacionesGlobal = clasificaciones;
-    return fetch('https://desire-toner-diagnosis-concentration.trycloudflare.com/api/eventos').then(res => res.json());
+    return fetch('/api/eventos').then(res => res.json());
   })
   .then(eventos => {
     eventosGlobal = eventos;

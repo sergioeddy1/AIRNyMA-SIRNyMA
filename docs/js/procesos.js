@@ -1,16 +1,15 @@
-// procesos.js
-
 (function () {
   const sesionStr = localStorage.getItem('sirnmaUser') || sessionStorage.getItem('sirnmaUser');
 
   if (!sesionStr) {
     // No hay sesión → mandar a login
-    window.location.href = './login.html'; // ajusta la ruta
+    window.location.href = './login.html';
     return;
   }
 
   const sesion = JSON.parse(sesionStr);
   console.log('Usuario autenticado:', sesion.username);
+// procesos.js
 
 // ---- Estado global para sincronizar cargas y contador ----
 let isCargandoUnidad = false;         // evita cargas en paralelo
@@ -20,10 +19,10 @@ let unidadToken = 0;                  // versión de carga; invalida renders vie
 
 // === Valores iniciales (roll-up global al entrar) ===
 const GLOBAL_DEFAULTS = {
-  unidades: 5,                 // siempre 5
+  unidades: 5,                 //  5
   procesosTotales: 45 + 64,    // 109
-  procesosAmbientales: 31 + 16,// 47
-  variablesAmbientales: 1165 + 554 // 1719
+  procesosAmbientales: 31 + 15,// 46
+  variablesAmbientales: 1165 + 195 // 1360 
 };
 
 // === Formatea números con espacio cada 3 dígitos ===
@@ -72,8 +71,52 @@ function actualizarEtiquetaUnidades() {
 
 // --- Abre variables.html en otra pestaña ---
 function handleVariableClick(idPp) {
-  window.open(`variables.html?idPp=${encodeURIComponent(idPp)}`, '_blank');
+  const key = 'sirnmaUser';
+  const session = sessionStorage.getItem(key) || localStorage.getItem(key);
+
+  const url = `variables.html?idPp=${encodeURIComponent(idPp)}`;
+  const newWin = window.open(url, '_blank');
+
+  if (!session) return; // nada que pasar
+
+  // Intento directo de enviar la sesión por postMessage (misma origin)
+  const trySend = () => {
+    try {
+      if (!newWin || newWin.closed) return false;
+      newWin.postMessage({ type: 'setSession', session }, location.origin);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  if (!trySend()) {
+    const iv = setInterval(() => {
+      if (trySend() || !newWin || newWin.closed) {
+        clearInterval(iv);
+      }
+    }, 50);
+    // como fallback, limitar intentos
+    setTimeout(() => clearInterval(iv), 3000);
+  }
 }
+
+// Exponer la función para que onclick=... funcione desde HTML
+if (typeof window !== 'undefined') window.handleVariableClick = handleVariableClick;
+
+// Responder a peticiones de sesión desde la ventana hija (por si ella solicita)
+window.addEventListener('message', (ev) => {
+  if (ev.origin !== location.origin) return;
+  const data = ev.data || {};
+  if (data.type === 'requestSession') {
+    const s = sessionStorage.getItem('sirnmaUser') || localStorage.getItem('sirnmaUser');
+    if (s && ev.source) {
+      try {
+        ev.source.postMessage({ type: 'setSession', session: s }, ev.origin);
+      } catch (e) {}
+    }
+  }
+});
 
 // --- Helpers generales ---
 function mostrarVigencia(vigInicial, vigFinal) {
@@ -197,6 +240,14 @@ function setProcesosTitle(unidad) {
   el.textContent = base + sufijo;
 }
 
+function hasValidDesc(desc) {
+  if (desc === undefined || desc === null) return false;
+  const s = String(desc).trim().toLowerCase();
+  if (!s) return false;
+  if (s === '-' || s === 'null' || s === 'na') return false;
+  return true;
+}
+
 // --- Normalizador: ECONÓMICAS → shape local (sociodemograficas) ---
 function mapEconomicasToLocal(item) {
   // Periodicidad de publicación preferente
@@ -209,8 +260,12 @@ function mapEconomicasToLocal(item) {
                   ? "Información de Interés Nacional"
                   : null;
 
-  // Descripción: objetivo (+ pobjeto si existe)
-  const desc = [item.objetivo, item.pobjeto].filter(Boolean).join(" ");
+  // Guardamos objetivo por separado
+  const objetivo = (item.objetivo || '').trim() || null;
+  const pobjeto  = (item.pobjeto  || '').trim() || null;
+
+  // Para descPp usamos primero objetivo, luego pobjeto como respaldo
+  const desc = objetivo || pobjeto || null;
 
   return {
     idPp: item.acronimo || "SD",
@@ -218,7 +273,7 @@ function mapEconomicasToLocal(item) {
     pp: item.proceso || "No disponible",
     dgaRespPp: null,
     perioProd: null,
-    vigInicial: item.inicio ? String(item.inicio).slice(0, 4) : null, // Solo los primeros 4 dígitos
+    vigInicial: item.inicio ? String(item.inicio).slice(0, 4) : null,
     vigFinal: item.fin 
       ? (/^\d{4}/.test(String(item.fin)) ? String(item.fin).slice(0, 4) : String(item.fin)) 
       : null, 
@@ -226,7 +281,12 @@ function mapEconomicasToLocal(item) {
     gradoMadur: grado,
     perPubResul: perPub || "No disponible",
     estatus: item.estatus || "Activo",
+
+    // 👇 aquí va lo que usará la cara trasera
     descPp: desc || "No disponible",
+    objetivo,          // <- campo extra por si lo quieres usar directo
+    pobjeto,           // opcional
+
     comentPp: item.comentarioS || item.comentarioA || "-",
     responCaptura: null,
     _source: 'economicas',
@@ -234,6 +294,7 @@ function mapEconomicasToLocal(item) {
   };
 }
 
+// --- Render de tarjetas  ---
 // --- Render de tarjetas  ---
 function renderProcesos(procesos, conteo, container) {
   const counter = document.getElementById("procesosCounter");
@@ -245,81 +306,147 @@ function renderProcesos(procesos, conteo, container) {
     return;
   }
 
+
   procesos.forEach(proceso => {
-    let iconoHTML = "";
-
-    // Comportamiento normal para las demás unidades
     let extension = "png";
-
     const baseName = `img/${proceso.idPp}`;
     const iconoFallback = `img/no_disponible.png`;
     const iconoRutaMin = `${baseName}.${extension}`;
     const iconoRutaMay = `${baseName}.${extension.toUpperCase()}`;
-
-    iconoHTML = `
-        <img src="${iconoRutaMin}" 
-            class="img-fluid proceso-icon rounded-start" 
-            alt="Icono ${proceso.idPp}" 
-            style="max-height: 80px; object-fit: contain; ${proceso.idPp === "CPV" ? "filter: invert(1);" : ""}"
-            onerror="
-              if (this.src.includes('.png') && !this.src.includes('.PNG')) {
-                this.onerror = null;
-                this.src = '${iconoRutaMay}';
-              } else {
-                this.onerror = null;
-                this.src = '${iconoFallback}';
-              }
-            ">
+    const iconoHTML = `
+      <img src="${iconoRutaMin}"
+           class="img-fluid proceso-icon rounded-start"
+           alt="Icono ${proceso.idPp}"
+           style="max-height: 80px; object-fit: contain; ${proceso.idPp === "CPV" ? "filter: invert(1);" : ""}"
+           onerror="
+             if (this.src.includes('.png') && !this.src.includes('.PNG')) {
+               this.onerror = null;
+               this.src = '${iconoRutaMay}';
+             } else {
+               this.onerror = null;
+               this.src = '${iconoFallback}';
+             }
+           ">
     `;
-    
-    const totalVars = conteo[proceso.idPp] || 0;
 
-    const card = `
-      <div class="col-md-4 mb-4">
-        <div class="card h-100 shadow-sm rounded-3 p-2 position-relative">
-          ${proceso.gradoMadur === "Información de Interés Nacional" ? `
-            <span class="badge bg-secondary position-absolute top-0 start-0 m-2"
-                  style="z-index:2; cursor: help;"
-                  data-bs-toggle="tooltip"
-                  data-bs-placement="right"
-                  title="Información de Interés Nacional">IIN</span>` : ""}
-          <div class="row g-0 d-flex align-items-center">
-            <div class="col-4 d-flex justify-content-center">${iconoHTML}</div>
-            <div class="col-8">
-              <div class="card-body p-2">
-                <h5 class="card-title fw-bold mb-1">${proceso.pp || "Desconocido"}</h5>
-                <p class="card-text text-muted mb-1">${proceso.idPp}</p>
-                <p class="card-text mb-1">
-                  <strong style="font-size: 0.85rem">Estatus:</strong>
-                  <span class="badge ${getStatusClass(proceso.estatus)}">${proceso.estatus}</span>
-                </p>
-                <p class="card-text mb-1" style="font-size: 0.85rem">
-                  <strong style="font-size: 0.85rem">Periodicidad:</strong>
-                  ${proceso.perioProd || "No disponible"}
-                </p>
-                <p class="card-text mb-1" style="font-size: 0.85rem">
-                  <strong style="font-size: 0.85rem">Vigencia:</strong>
-                  ${mostrarVigencia(proceso.vigInicial, proceso.vigFinal)}
-                </p>
-                <p class="card-text mb-0">
-                  <strong style="font-size: 0.85rem">Total de variables ambientales:</strong>
-                  <span style="color: #08739c; font-family: 'Monaco', monospace; font-weight: bold; font-size: 1.2rem; text-decoration: underline; cursor: pointer;"
-                        onclick="handleVariableClick('${proceso.idPp}')">
-                    ${formatNumberWithSpace(totalVars)}
-                  </span>
-                </p>
-              </div>
+   const totalVars = conteo[proceso.idPp] || 0;
+
+    const isEco   = (proceso._source === 'economicas');
+    const isSocio = !isEco;
+
+    const backText = isEco
+      ? (proceso.objetivo || proceso.descPp || '')
+      : (proceso.descPp || '');
+
+    const canFlip = hasValidDesc(backText);
+    const backLabel = isEco ? 'Objetivo:' : 'Descripción del proceso:';
+
+    // FRONT
+   const front = `
+  <div class="flip-side flip-front">
+    <div class="card h-100 shadow-sm rounded-3 position-relative proceso-card">
+
+      ${proceso.gradoMadur === "Información de Interés Nacional" ? `
+        <span class="badge bg-secondary position-absolute top-0 start-0 m-2"
+              style="z-index:2; cursor: help;"
+              data-bs-toggle="tooltip"
+              data-bs-placement="right"
+              title="Información de Interés Nacional">IIN</span>` : ""}
+
+      <div class="card-body proceso-body">
+        <!-- TÍTULO debajo del badge, ocupando todo el ancho -->
+        <h5 class="card-title proceso-title fw-bold mb-2">
+          ${proceso.pp || "Desconocido"}
+        </h5>
+
+        <!-- FILA: icono a la izquierda, info a la derecha -->
+        <div class="row g-0 align-items-center">
+          <div class="col-4 d-flex justify-content-center">
+            ${iconoHTML}
+          </div>
+          <div class="col-8 ps-2">
+            <div class="proceso-meta">
+              <p class="card-text text-muted mb-1 small">
+                ${proceso.idPp}
+              </p>
+              <p class="card-text mb-1 small">
+                <strong>Estatus:</strong>
+                <span class="badge ${getStatusClass(proceso.estatus)}">
+                  ${proceso.estatus}
+                </span>
+              </p>
+              <p class="card-text mb-1 small">
+                <strong>Periodicidad:</strong>
+                ${proceso.perioProd || "No disponible"}
+              </p>
+              <p class="card-text mb-1 small">
+                <strong>Vigencia:</strong>
+                ${mostrarVigencia(proceso.vigInicial, proceso.vigFinal)}
+              </p>
+              <p class="card-text mb-0 small">
+                <strong>Total de variables ambientales:</strong>
+                <span style="color: #08739c; font-family: 'Monaco', monospace; font-weight: bold; font-size: 1.1rem; text-decoration: underline; cursor: pointer;"
+                      onclick="handleVariableClick('${proceso.idPp}')">
+                  ${formatNumberWithSpace(totalVars)}
+                </span>
+              </p>
             </div>
           </div>
         </div>
-      </div>`;
-    container.innerHTML += card;
+      </div>
+
+      ${canFlip ? `
+      <button type="button"
+              class="btn btn-sm btn-outline-primary btn-flip"
+              data-flip="1"
+              title="Ver más información">
+        <i class="bi bi-arrow-repeat"></i>
+      </button>` : ``}
+    </div>
+  </div>
+`;
+
+    // BACK (solo si hay texto válido)
+    const back = canFlip ? `
+      <div class="flip-side flip-back">
+        <div class="card h-100 shadow-sm rounded-3 p-3 position-relative proceso-card">
+          <h6 class="fw-bold mb-2">
+            ${proceso.pp || proceso.pi || proceso.idPp || 'Proceso'}
+          </h6>
+          <div class="proceso-desc small text-secondary">
+            <strong>${backLabel}</strong><br>
+            ${backText}
+          </div>
+
+          <button type="button"
+                  class="btn btn-sm btn-outline-secondary btn-unflip"
+                  data-unflip="1"
+                  title="Volver">
+            <i class="bi bi-arrow-90deg-left"></i>
+          </button>
+        </div>
+      </div>
+    ` : '';
+
+    const card = `
+      <div class="col-md-4 mb-4">
+        <div class="flip-wrap">
+          <div class="flip-card">
+            ${front}
+            ${back}
+          </div>
+        </div>
+      </div>
+    `;
+
+    container.insertAdjacentHTML('beforeend', card);
   });
 
   // Tooltips Bootstrap
   const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
   tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
 }
+
 
 // --- Filtros y orden: reusables para cualquier lista de procesos ---
 function wireFiltrosYOrden({ procesosGlobal, conteoGlobal, container }) {
@@ -388,7 +515,8 @@ function wireFiltrosYOrden({ procesosGlobal, conteoGlobal, container }) {
   document.getElementById("iinCheck").addEventListener("change", aplicarFiltrosYOrden);
   document.getElementById("ordenarProcesos").addEventListener("change", aplicarFiltrosYOrden);
 
-   const resetBtn = document.getElementById("resetFiltrosBtn");
+  // Botón para restablecer filtros (si existe en el DOM)
+  const resetBtn = document.getElementById("resetFiltrosBtn");
   if (resetBtn) {
     resetBtn.addEventListener("click", (e) => {
       e.preventDefault();
@@ -417,6 +545,7 @@ function wireFiltrosYOrden({ procesosGlobal, conteoGlobal, container }) {
       if (selectPerio) selectPerio.focus();
     });
   }
+
   // Primera pintada
   aplicarFiltrosYOrden();
 }
@@ -495,7 +624,7 @@ function filtrarEconomicasSinVariables(procesos, conteo) {
 async function cargarSociodemograficas({ container }) {
   renderLoader(container, "Cargando procesos (Sociodemográficas)...");
   try {
-    const procesos  = await fetch("https://desire-toner-diagnosis-concentration.trycloudflare.com/api/proceso").then(res => res.json());
+    const procesos  = await fetch("https://desire-toner-diagnosis-concentration.trycloudflare.com/api/procesos").then(res => res.json());
     const variables = await fetch("https://desire-toner-diagnosis-concentration.trycloudflare.com/api/variables").then(res => res.json());
 
     const conteoGlobal = buildConteoPorIdPp(variables);
@@ -580,8 +709,8 @@ function renderContadorVariablesUnidad(conteoGlobal, { animateMs = 350 } = {}) {
 // --- Carga ECONÓMICAS (Base de datos nueva) ---
 async function cargarEconomicas({ container }) {
   renderLoader(container, "Cargando procesos (Económicas)...");
-  const urlProcesos = "https://need-planets-authors-worm.trycloudflare.com/api/procesos/buscar?unidad=" +
-                      encodeURIComponent("Unidad de Estadísticas Económicas");
+const urlProcesos = "https://need-planets-authors-worm.trycloudflare.com/api/procesos/buscar?unidad=" +
+                         encodeURIComponent("Unidad de Estadísticas Económicas");
   const urlVariablesEco = "https://need-planets-authors-worm.trycloudflare.com/api/indicadores/ultima";
 
   try {
