@@ -3661,9 +3661,9 @@ if (e.target.closest(".badge-ods")) {
     // 2) SOCIODEMOGRÁFICAS (fallback /api/ods + /api/ods_indicadores + /api/meta_ods)
     // ------------------------------------------------------------------
     const [resOds, resIndic, resMeta] = await Promise.all([
-      fetch(`/api/ods`),
-      fetch(`/api/ods_indicadores`), // catálogo indicadores
-      fetch(`/api/meta_ods`)         // catálogo metas
+      fetch(`https://desire-toner-diagnosis-concentration.trycloudflare.com/api/ods`),
+      fetch(`https://desire-toner-diagnosis-concentration.trycloudflare.com/api/ods_indicadores`), // catálogo indicadores
+      fetch(`https://desire-toner-diagnosis-concentration.trycloudflare.com/api/meta_ods`)         // catálogo metas
     ]);
 
     const data = await resOds.json();
@@ -3794,11 +3794,11 @@ document.addEventListener("DOMContentLoaded", function () {
 // ---- Nota de fuente al final de la página (texto pequeño, no altera layout) ----
 
 // Si decides conservar ese bloque, ajústalo así:
-fetch('/api/clasificaciones')
+fetch('https://desire-toner-diagnosis-concentration.trycloudflare.com/api/clasificaciones')
   .then(res => res.json())
   .then(clasificaciones => {
     clasificacionesGlobal = clasificaciones;
-    return fetch('/api/eventos').then(res => res.json());
+    return fetch('https://desire-toner-diagnosis-concentration.trycloudflare.com/api/eventos').then(res => res.json());
   })
   .then(eventos => {
     eventosGlobal = eventos;
