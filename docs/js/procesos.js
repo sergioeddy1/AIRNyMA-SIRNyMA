@@ -624,7 +624,7 @@ function filtrarEconomicasSinVariables(procesos, conteo) {
 async function cargarSociodemograficas({ container }) {
   renderLoader(container, "Cargando procesos (Sociodemográficas)...");
   try {
-    const procesos  = await fetch("https://desire-toner-diagnosis-concentration.trycloudflare.com/api/procesos").then(res => res.json());
+    const procesos  = await fetch("https://desire-toner-diagnosis-concentration.trycloudflare.com/api/proceso").then(res => res.json());
     const variables = await fetch("https://desire-toner-diagnosis-concentration.trycloudflare.com/api/variables").then(res => res.json());
 
     const conteoGlobal = buildConteoPorIdPp(variables);
