@@ -1,3 +1,36 @@
+(function () {
+  const sesionStr = localStorage.getItem('sirnmaUser') || sessionStorage.getItem('sirnmaUser');
+
+  if (!sesionStr) {
+    // No hay sesión inmediata: esperar brevemente a que la ventana que nos abrió envíe la sesión por postMessage
+    // Si en 800ms no llega, redirigimos al login como antes
+    let timer = null;
+    const onSession = () => {
+      clearTimeout(timer);
+      // Ya guardamos la sesión en sessionStorage desde el listener en variables.html; recargar para continuar con la lógica normal
+      location.reload();
+    };
+    window.addEventListener('sessionReceived', onSession, { once: true });
+
+    // Si en un tiempo no hay respuesta, redirigimos
+    timer = setTimeout(() => {
+      window.removeEventListener('sessionReceived', onSession);
+      window.location.href = '../pages/login.html';
+    }, 800);
+
+    // También pedimos al opener que envíe la sesión (en caso de que aún no lo haya hecho)
+    try {
+      if (window.opener && !window.opener.closed && window.opener.location && window.opener.location.origin === location.origin) {
+        window.opener.postMessage({ type: 'requestSession' }, location.origin);
+      }
+    } catch (e) {}
+
+    return;
+  }
+
+  const sesion = JSON.parse(sesionStr);
+  console.log('Usuario autenticado:', sesion.username);
+
 document.addEventListener("DOMContentLoaded", function () {
   // Elementos del DOM
   const searchForm = document.getElementById("searchForm");
@@ -227,7 +260,7 @@ async function getOdsIndicadoresCatalog() {
   if (odsIndicadoresCatalog) return odsIndicadoresCatalog;
 
   try {
-    const res  = await fetch('https://cho-ata-basket-galleries.trycloudflare.com/api/ods_indicadores');   // <- tu API
+    const res  = await fetch('https://desire-toner-diagnosis-concentration.trycloudflare.com/api/ods_indicadores');   // <- tu API
     const data = await res.json();
     odsIndicadoresCatalog = Array.isArray(data) ? data : [];
   } catch (err) {
@@ -240,7 +273,7 @@ async function getOdsIndicadoresCatalog() {
 
 
   async function fetchVariablesDesdeUltima() {
-    const urlUltima = "https://movement-comparable-demonstrated-qualification.trycloudflare.com/api/indicadores/ultima";
+    const urlUltima = "https://need-planets-authors-worm.trycloudflare.com/api/indicadores/ultima";
     const res = await fetch(urlUltima);
     if (!res.ok) throw new Error(`ultima respondió ${res.status}`);
     const payload = await res.json();
@@ -467,7 +500,7 @@ function hasDatosAbiertos(variable) {
 
   // trae y aplana /indicadores/ultima → array de variables en shape local
   async function fetchVariablesDesdeUltima() {
-    const urlUltima = "https://movement-comparable-demonstrated-qualification.trycloudflare.com/api/indicadores/ultima";
+    const urlUltima = "https://need-planets-authors-worm.trycloudflare.com/api/indicadores/ultima";
     const res = await fetch(urlUltima);
     if (!res.ok) throw new Error(`ultima respondió ${res.status}`);
     const payload = await res.json();
@@ -525,7 +558,7 @@ function hasDatosAbiertos(variable) {
   }
 
   async function fetchProcesosEconomicas() {
-    const urlProcesosEco = "https://movement-comparable-demonstrated-qualification.trycloudflare.com/api/procesos/buscar?unidad=" +
+    const urlProcesosEco = "https://need-planets-authors-worm.trycloudflare.com/api/procesos/buscar?unidad=" +
                            encodeURIComponent("Unidad de Estadísticas Económicas");
     const res = await fetch(urlProcesosEco);
     if (!res.ok) throw new Error("procesos Económicas respondió " + res.status);
@@ -605,7 +638,7 @@ function cleanUnderscores(str) {
 let __odsCache__ = null;
 async function fetchOdsOnce() {
   if (__odsCache__) return __odsCache__;
-  const res = await fetch('https://cho-ata-basket-galleries.trycloudflare.com/api/ods');
+  const res = await fetch('https://desire-toner-diagnosis-concentration.trycloudflare.com/api/ods');
   const data = await res.json();
   __odsCache__ = Array.isArray(data) ? data : (data ? [data] : []);
   return __odsCache__;
@@ -1347,12 +1380,12 @@ showCounterSpinner();
 showListSpinner();
 
 Promise.all([
-  fetch("https://cho-ata-basket-galleries.trycloudflare.com/api/proceso").then(r => r.json()),
+  fetch("https://desire-toner-diagnosis-concentration.trycloudflare.com/api/proceso").then(r => r.json()),
   fetchProcesosEconomicas(),                 // procesosEco
-  fetch("https://cho-ata-basket-galleries.trycloudflare.com/api/variables").then(r => r.json()),
+  fetch("https://desire-toner-diagnosis-concentration.trycloudflare.com/api/variables").then(r => r.json()),
   fetchVariablesDesdeUltima(),               // ← variablesUltima (económicas mapeadas)
-  fetch("https://cho-ata-basket-galleries.trycloudflare.com/api/eventos").then(r => r.json()),
-  fetch("https://cho-ata-basket-galleries.trycloudflare.com/api/clasificaciones").then(r => r.json())
+  fetch("https://desire-toner-diagnosis-concentration.trycloudflare.com/api/eventos").then(r => r.json()),
+  fetch("https://desire-toner-diagnosis-concentration.trycloudflare.com/api/clasificaciones").then(r => r.json())
 ])
 .then(([procesosLocal, procesosEco, variablesLocal, variablesUltima, eventos, clasificaciones]) => {
   // 1) Procesos (merge locales + eco)
@@ -2161,7 +2194,7 @@ if (tooltips.length) {
       let __mdeaCache__ = null;
       async function fetchMdeaOnce() {
         if (__mdeaCache__ != null) return __mdeaCache__;
-        const res = await fetch('https://cho-ata-basket-galleries.trycloudflare.com/api/mdea');
+        const res = await fetch('https://desire-toner-diagnosis-concentration.trycloudflare.com/api/mdea');
         const data = await res.json();
         // el endpoint a veces regresa 1 registro o arreglo
         __mdeaCache__ = Array.isArray(data) ? data : (data ? [data] : []);
@@ -2873,7 +2906,7 @@ document.addEventListener("click", async function (e) {
     }
 
     // Caso 2: Fallback a endpoints locales
-    const resVarTab = await fetch('https://cho-ata-basket-galleries.trycloudflare.com/api/var-tab');
+    const resVarTab = await fetch('https://desire-toner-diagnosis-concentration.trycloudflare.com/api/var-tab');
     const dataVarTab = await resVarTab.json();
     const relaciones = Array.isArray(dataVarTab) ? dataVarTab.filter(rel => rel.idVar === idVar) : [];
 
@@ -2882,7 +2915,7 @@ document.addEventListener("click", async function (e) {
       return;
     }
 
-    const resTabulados = await fetch('https://cho-ata-basket-galleries.trycloudflare.com/api/tabulado');
+    const resTabulados = await fetch('https://desire-toner-diagnosis-concentration.trycloudflare.com/api/tabulado');
     const tabulados = await resTabulados.json();
 
     const contenido = relaciones.map(rel => {
@@ -3063,7 +3096,7 @@ document.addEventListener("click", async function (e) {
     }
 
     // 2) Fallback a /api/microdatos (sociodemográficas, etc.)
-    const res = await fetch(`https://cho-ata-basket-galleries.trycloudflare.com/api/microdatos`);
+    const res = await fetch(`https://desire-toner-diagnosis-concentration.trycloudflare.com/api/microdatos`);
     const data = await res.json();
     const info = Array.isArray(data)
       ? data.find(micro => String(micro.idVar) === String(idVar))
@@ -3331,7 +3364,7 @@ if (e.target.closest(".mdea-chip")) {
       // ========================
       //    SOCIODEMOGRÁFICAS
       // ========================
-      const all = await fetch("https://cho-ata-basket-galleries.trycloudflare.com/api/mdea")
+      const all = await fetch("https://desire-toner-diagnosis-concentration.trycloudflare.com/api/mdea")
         .then((r) => r.json())
         .then((d) => (Array.isArray(d) ? d : d ? [d] : []));
 
@@ -3503,9 +3536,9 @@ if (e.target.closest(".badge-ods")) {
     // 2) SOCIODEMOGRÁFICAS (fallback /api/ods + /api/ods_indicadores + /api/meta_ods)
     // ------------------------------------------------------------------
     const [resOds, resIndic, resMeta] = await Promise.all([
-      fetch(`https://cho-ata-basket-galleries.trycloudflare.com/api/ods`),
-      fetch(`https://cho-ata-basket-galleries.trycloudflare.com/api/ods_indicadores`), // catálogo indicadores
-      fetch(`https://cho-ata-basket-galleries.trycloudflare.com/api/meta_ods`)         // catálogo metas
+      fetch(`https://desire-toner-diagnosis-concentration.trycloudflare.com/api/ods`),
+      fetch(`https://desire-toner-diagnosis-concentration.trycloudflare.com/api/ods_indicadores`), // catálogo indicadores
+      fetch(`https://desire-toner-diagnosis-concentration.trycloudflare.com/api/meta_ods`)         // catálogo metas
     ]);
 
     const data = await resOds.json();
@@ -3635,11 +3668,11 @@ document.addEventListener("DOMContentLoaded", function () {
 // ---- Nota de fuente al final de la página (texto pequeño, no altera layout) ----
 
 // Si decides conservar ese bloque, ajústalo así:
-fetch('https://cho-ata-basket-galleries.trycloudflare.com/api/clasificaciones')
+fetch('https://desire-toner-diagnosis-concentration.trycloudflare.com/api/clasificaciones')
   .then(res => res.json())
   .then(clasificaciones => {
     clasificacionesGlobal = clasificaciones;
-    return fetch('https://cho-ata-basket-galleries.trycloudflare.com/api/eventos').then(res => res.json());
+    return fetch('https://desire-toner-diagnosis-concentration.trycloudflare.com/api/eventos').then(res => res.json());
   })
   .then(eventos => {
     eventosGlobal = eventos;
@@ -3689,3 +3722,5 @@ function highlightTerm(text, term) {
 // AQUÍ TERMINA TODA LA LÓGICA DE VARIABLES
 // ……………………………
 });
+
+})();

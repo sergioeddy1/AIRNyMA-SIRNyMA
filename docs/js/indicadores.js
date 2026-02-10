@@ -1,4 +1,93 @@
+(function () {
+  const sesionStr = localStorage.getItem('sirnmaUser') || sessionStorage.getItem('sirnmaUser');
+
+  if (!sesionStr) {
+    // No hay sesión → mandar a login
+    window.location.href = '.login.html'; // ajusta la ruta
+    return;
+  }
+
+  const sesion = JSON.parse(sesionStr);
+  console.log('Usuario autenticado:', sesion.username);
+
 let indicadoresData = [];
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, c => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[c]));
+}
+
+// Construye el HTML de la fórmula (MathJax o texto plano)
+function buildFormulaHTML(indicador) {
+  if (!indicador || !indicador.formulaCalculo) return '';
+
+  const id = Number(indicador.id);
+
+  switch (id) {
+    // EJEMPLO: PAimp = (AI / AC) * 100  (id que tengas en tu tabla)
+    case 14: // <-- cámbialo al id real de este indicador
+      return `
+        <span class="formula-math">
+          \\(PA_{imp} = \\frac{AI}{AC} \\times 100\\)
+        </span>
+      `;
+
+    // δ = ((ε − λ)/λ) × 100 ; δ: ..., λ: ..., ε: ...
+    case 2: // si este es el de cambio de extensión superficial
+      return `
+        <span class="formula-math">
+          \\(\\delta = \\frac{\\varepsilon - \\lambda}{\\lambda} \\times 100\\)
+        </span>
+        <br>
+        <small>
+          \\(\\delta\\): variación porcentual de la extensión;&nbsp;
+          \\(\\lambda\\): extensión del año base \\([\\mathrm{km}^2]\\);&nbsp;
+          \\(\\varepsilon\\): extensión del año x \\([\\mathrm{km}^2]\\)
+        </small>
+      `;
+
+    // EPP = (plantas/operaciones que cumplen con parámetros... / universo evaluado) * 100
+    case 16: // <-- pon aquí el id correcto del indicador EPP
+      return `
+        <span class="formula-math">
+          \\(EPP =
+          \\frac{
+            \\text{plantas/operaciones que cumplen con parámetros establecidos}
+          }{
+            \\text{universo evaluado}
+          } \\times 100\\)
+        </span>
+      `;
+
+    // PCPDARMST = [(PDARMST(x) − PDARMST(AB))/PDARMST(AB)] × 100
+    case 21: // <-- id del indicador PCPDARMST
+      return `
+        <span class="formula-math">
+          \\(PCPDARMST =
+          \\frac{PDARMST(x) - PDARMST(AB)}{PDARMST(AB)} \\times 100\\)
+        </span>
+      `;
+
+    // PANF = ((AP − AF)/AP) × 100
+    case 24: // <-- id del indicador PANF
+      return `
+        <span class="formula-math">
+          \\(PANF = \\frac{AP - AF}{AP} \\times 100\\)
+        </span>
+      `;
+
+    // Por defecto: deja el texto tal cual, pero bonito
+    default:
+      return `<code class="formula-plain">${escapeHtml(indicador.formulaCalculo)}</code>`;
+  }
+}
+
+
 
 // --- Utils para tablaDatos -> tabla HTML ---
 function parseTablaDatos(raw) {
@@ -14,6 +103,34 @@ function parseTablaDatos(raw) {
     console.warn('No se pudo parsear tablaDatos:', e);
     return null;
   }
+}
+
+// Convierte texto sencillo de fórmula a TeX y lo envuelve para MathJax
+function toTeXFromPlain(str) {
+  if (!str) return '';
+  // Si ya viene en TeX (\frac, \(, $$), respétalo
+  if (/\\frac|\\\(|\\\[|\$\$/.test(str)) return str;
+
+  let s = String(str).trim();
+
+  // (AI / AC) -> \frac{AI}{AC}
+  s = s.replace(/\(\s*([A-Za-z0-9_]+)\s*\/\s*([A-Za-z0-9_]+)\s*\)/g, '\\frac{$1}{$2}');
+
+  // Reemplaza * por \times
+  s = s.replace(/\*/g, '\\times');
+
+  // Opcional: quita dobles espacios
+  s = s.replace(/\s{2,}/g, ' ');
+
+  // Envuelve en inline math
+  return `\\(${s}\\)`;
+}
+
+// Decide si mostrar como fórmula o texto plano
+function renderFormula(value) {
+  if (!value) return '';
+  const maybeFormula = /\/|\*|=|\\frac|\\\(|\$\$/.test(value);
+  return maybeFormula ? toTeXFromPlain(value) : value;
 }
 
 // Convierte claves a títulos más legibles
@@ -90,7 +207,7 @@ function buildTableHTML(rows) {
 // --- Fin Utils ---
 
 document.addEventListener("DOMContentLoaded", function () {
- fetch('https://cho-ata-basket-galleries.trycloudflare.com/api/indicadores_ambientales')
+ fetch('https://desire-toner-diagnosis-concentration.trycloudflare.com/api/indicadores_ambientales')
   .then(res => res.json())
   .then(data => {
     indicadoresData = data;
@@ -190,7 +307,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const graficoHTML = isGraficoImagen
         ? `
           <div class="ratio ratio-16x9 d-flex align-items-center justify-content-center">
-            <img src="/assets/graficoid_23.png"
+            <img src="img/graficoid_23.png"
                 alt="Gráfico indicador 23"
                 class="img-fluid rounded border">
           </div>`
@@ -233,8 +350,12 @@ document.addEventListener("DOMContentLoaded", function () {
       <div class="col-md-8 bg-light border rounded p-2">${indicador.definicionVariables || ''}</div>
     </div>
     <div class="row align-items-start mb-3">
-      <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Fórmula de cálculo</div></div>
-      <div class="col-md-8 bg-light border rounded p-2">${indicador.formulaCalculo || ''}</div>
+      <div class="col-md-4">
+        <div class="fw-semibold small text-muted bg-light border rounded p-2">Fórmula de cálculo</div>
+      </div>
+      <div class="col-md-8 bg-light border rounded p-2">
+        <span class="mathjax-formula">${renderFormula(indicador.formulaCalculo || '')}</span>
+      </div>
     </div>
     <div class="row align-items-start mb-3">
       <div class="col-md-4"><div class="fw-semibold small text-muted bg-light border rounded p-2">Alcance (qué mide)</div></div>
@@ -341,6 +462,9 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       document.getElementById('indicadorModalLabel').textContent = indicadorNombre;
       modalBody.innerHTML = `<p>No se encontró información adicional para este indicador.</p>`;
+    }
+    if (window.MathJax?.typesetPromise) {
+      MathJax.typesetPromise([document.getElementById('indicadorModalBody')]);
     }
 
     const modal = new bootstrap.Modal(modalEl);
@@ -495,3 +619,6 @@ function renderIndicadorChart(canvasId, tablaGraficos) {
     }
   });
 }
+
+
+})();
