@@ -17,11 +17,11 @@
             if (!sesionStr) {
                 // CASO A: No hay usuario -> Mandar directo al LOGIN
                 // Usamos .replace() para que el usuario no pueda dar click en "Atrás" y volver aquí
-                window.location.replace("/login.html");
+                window.location.replace("./login.html");
             } else {
                 // CASO B: Ya hay usuario logueado -> Mandar a tu página de INICIO (la que acabas de mover)
                 // Asegúrate de haber creado pages/inicio.html con el código del carrusel
-                window.location.replace("/inicio.html");
+                window.location.replace("./home.html");
             }
         })();
     </script>
