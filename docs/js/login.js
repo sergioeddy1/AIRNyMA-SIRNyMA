@@ -140,7 +140,7 @@
 
       // Redirigir a la página principal del sitio de docs
       // Ajusta si quieres redirigir a otra ruta (p. ej. ../SIRNyMA/pages/index.html)
-      window.location.href = './index.html';
+      window.location.href = './home.html';
 
     } catch (err) {
       console.error('[login] Error autenticando:', err);
