@@ -5,7 +5,7 @@
   const btn = document.getElementById('loginBtn');
 
   // Base del backend: ajustada a tu IP/puerto
-  const API_BASE = 'http://10.109.1.63:8080';
+  const API_BASE = 'http://10.109.1.13:8090';
   const USUARIOS_ENDPOINT = `${API_BASE.replace(/\/$/, '')}/api/usuarios`;
 
   function mostrarError(msg) {
