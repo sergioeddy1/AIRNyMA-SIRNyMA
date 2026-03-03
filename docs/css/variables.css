@@ -1456,3 +1456,23 @@ padding-bottom: 6px;
 }
 
 
+/* Botón para abrir generador externo dentro del detalle de variable */
+.accordion .accordion-body { position: relative; }
+
+.btn-gen-indicator {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 30;
+  background-color: #0d6efd;
+  color: #fff;
+  border: none;
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.25rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.btn-gen-indicator:hover {
+  background-color: #0b5ed7;
+  transform: translateY(-1px);
+}
+.btn-gen-indicator i { vertical-align: middle; }
