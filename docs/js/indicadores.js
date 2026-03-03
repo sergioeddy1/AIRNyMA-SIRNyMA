@@ -207,7 +207,7 @@ function buildTableHTML(rows) {
 // --- Fin Utils ---
 
 document.addEventListener("DOMContentLoaded", function () {
- fetch('https://desire-toner-diagnosis-concentration.trycloudflare.com/api/indicadores_ambientales')
+ fetch('https://meeting-bacterial-window-schema.trycloudflare.com/api/indicadores_ambientales')
   .then(res => res.json())
   .then(data => {
     indicadoresData = data;
