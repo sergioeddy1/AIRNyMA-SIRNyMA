@@ -2024,7 +2024,7 @@ function renderPage(data, page) {
 
                       <div class="col-md-6">
                         <div class="mb-2">
-                          <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Cnjunto de personas, elementos o unidades que se estudian y cuanrifican por la variable">
+                          <span class="fw-semibold text-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Conjunto de personas, elemento o unidades que se estudian o cuantifican por la variable">
                             <i class="bi bi-diagram-3 me-1"></i>Categoría:</span>
                           <span class="text-dark ms-1 fw-normal">${hCategoria}</span> <!-- 👈 -->
                         </div>
