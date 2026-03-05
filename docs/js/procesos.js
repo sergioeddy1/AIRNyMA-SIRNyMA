@@ -19,7 +19,7 @@ let unidadToken = 0;                  // versión de carga; invalida renders vie
 
 // === Valores iniciales (roll-up global al entrar) ===
 const GLOBAL_DEFAULTS = {
-  unidades: 2,                 //  5
+  unidades: 2,                 //  2
   procesosTotales: 45 + 64,    // 109
   procesosAmbientales: 31 + 15,// 46
   variablesAmbientales: 1165 + 195 // 1360 
@@ -162,12 +162,13 @@ function animateCountTo(elOrSelector, toValue, ms = 350) {
 
 // fija "Unidades Administrativas" una sola vez (o calcula del DOM si prefieres)
 function initSummaryStaticCounters() {
-  // Aplicar valores por defecto y no sobrescribir el contador de unidades
+   // Aplicar valores por defecto y no sobrescribir el contador de unidades
   // con el conteo de tarjetas del DOM (evita que muestre 5 en lugar de 2).
   setSummaryDefaults();
   const el = document.getElementById('scUnidades');
   if (el) el.textContent = formatNumberWithSpace(GLOBAL_DEFAULTS.unidades);
 }
+
 
 // Actualiza los 3 counters dinámicos de la unidad seleccionada
 // - procesosTotales: todos los procesos de la unidad (sin filtrar por variables)
