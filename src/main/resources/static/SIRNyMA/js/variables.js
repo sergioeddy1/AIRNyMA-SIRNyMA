@@ -2125,6 +2125,15 @@ function renderPage(data, page) {
                                 }
                               </div>
 
+                              <!-- Botón externo: pasa idVar por query a generador -->
+                                          <a class="btn btn-sm btn-gen-indicator"
+                                            href="https://inegi-indicator-gen.lovable.app/?idVar=${encodeURIComponent(variable.idVar)}"
+                                            target="_blank" rel="noopener noreferrer"
+                                            title="Abrir generador de indicadores (pasa idVar)">
+                                            <i class="bi bi-box-arrow-up-right me-1"></i> Generar idea de indicador
+                                            ${variable.idVar}
+                                          </a>
+
                     </div>
                 </div>
             </div>
