@@ -624,8 +624,8 @@ function filtrarEconomicasSinVariables(procesos, conteo) {
 async function cargarSociodemograficas({ container }) {
   renderLoader(container, "Cargando procesos (Sociodemográficas)...");
   try {
-    const procesos  = await fetch("https://kelly-next-emma-measurements.trycloudflare.com/api/proceso").then(res => res.json());
-    const variables = await fetch("https://kelly-next-emma-measurements.trycloudflare.com/api/variables").then(res => res.json());
+    const procesos  = await fetch("https://subtle-planner-building-vincent.trycloudflare.com/api/proceso").then(res => res.json());
+    const variables = await fetch("https://subtle-planner-building-vincent.trycloudflare.com/api/variables").then(res => res.json());
 
     const conteoGlobal = buildConteoPorIdPp(variables);
     procesos.forEach(p => { if (!(p.idPp in conteoGlobal)) conteoGlobal[p.idPp] = 0; });
@@ -709,9 +709,9 @@ function renderContadorVariablesUnidad(conteoGlobal, { animateMs = 350 } = {}) {
 // --- Carga ECONÓMICAS (Base de datos nueva) ---
 async function cargarEconomicas({ container }) {
   renderLoader(container, "Cargando procesos (Económicas)...");
-const urlProcesos = "https://diamonds-strain-men-instructor.trycloudflare.com/api/procesos/buscar?unidad=" +
+const urlProcesos = "https://readers-bodies-independent-lexmark.trycloudflare.com/api/procesos/buscar?unidad=" +
                          encodeURIComponent("Unidad de Estadísticas Económicas");
-  const urlVariablesEco = "https://diamonds-strain-men-instructor.trycloudflare.com/api/indicadores/ultima";
+  const urlVariablesEco = "https://readers-bodies-independent-lexmark.trycloudflare.com/api/indicadores/ultima";
 
   try {
     const economicasRaw = await fetch(urlProcesos).then(r => r.json());
@@ -723,7 +723,7 @@ const urlProcesos = "https://diamonds-strain-men-instructor.trycloudflare.com/ap
       conteoGlobal = buildConteoPorIdPpDesdeUltima(payloadUltima);
     } catch (e) {
       try {
-        const variablesLocal = await fetch("https://kelly-next-emma-measurements.trycloudflare.com/api/variables").then(r => r.json());
+        const variablesLocal = await fetch("https://subtle-planner-building-vincent.trycloudflare.com/api/variables").then(r => r.json());
         conteoGlobal = buildConteoPorIdPp(variablesLocal);
       } catch (e2) {
         conteoGlobal = {};

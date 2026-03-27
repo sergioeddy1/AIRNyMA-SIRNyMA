@@ -207,7 +207,7 @@ function buildTableHTML(rows) {
 // --- Fin Utils ---
 
 document.addEventListener("DOMContentLoaded", function () {
- fetch('https://kelly-next-emma-measurements.trycloudflare.com/api/indicadores_ambientales')
+ fetch('https://subtle-planner-building-vincent.trycloudflare.com/api/indicadores_ambientales')
   .then(res => res.json())
   .then(data => {
     indicadoresData = data;
