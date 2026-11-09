@@ -41,16 +41,25 @@ src/
    git clone <url-del-repositorio>
    ```
 
-2. **Coloca los archivos de datos y API**  
+2. **Configura la conexión a la base de datos**  
+   `src/main/resources/application.properties` es una configuración local ignorada por Git. Si no existe, copia la plantilla `src/main/resources/application.properties.example` a ese nombre y configura la URL, el usuario y la contraseña de tu base de datos. También puedes definir `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME` y `SPRING_DATASOURCE_PASSWORD` como variables de entorno.
+
+   Si el archivo ya estaba versionado antes de agregarlo a `.gitignore`, deja de versionarlo sin borrar tu copia local:
+   ```bash
+   git rm --cached -- src/main/resources/application.properties
+   ```
+   Después confirma ese cambio para que Git deje de incluir el archivo en futuras subidas.
+
+3. **Coloca los archivos de datos y API**  
    Asegúrate de que los endpoints `/api/proceso`, `/api/variables`, `/api/clasificaciones`, `/api/eventos`, etc. estén disponibles y devuelvan los datos requeridos en formato JSON.
 
-3. **Coloca el favicon**  
+4. **Coloca el favicon**  
    Pon tu archivo `favicon.ico` o `favicon.png` en la carpeta `/assets/` y agrega la referencia en el `<head>` de tus páginas HTML:
    ```html
    <link rel="icon" type="image/png" href="/assets/favicon.png">
    ```
 
-4. **Abre el archivo `index.html`**  
+5. **Abre el archivo `index.html`**  
    Puedes abrirlo directamente en tu navegador o servirlo desde un servidor web local.
 
 ## Dependencias

@@ -2,11 +2,10 @@ spring.application.name=demo
 server.port=8080
 server.address=0.0.0.0
 
-spring.datasource.url=jdbc:postgresql://10.109.1.13:5432/DataVariablesDGES_Backup
-spring.datasource.username=postgres
-spring.datasource.password=nuevo_pass
+spring.datasource.url=${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/your_database}
+spring.datasource.username=${SPRING_DATASOURCE_USERNAME:your_username}
+spring.datasource.password=${SPRING_DATASOURCE_PASSWORD:}
 spring.datasource.driver-class-name=org.postgresql.Driver
-
 
 # Configuración JPA/Hibernate
 spring.jpa.database=postgresql
