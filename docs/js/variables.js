@@ -273,7 +273,7 @@ async function getOdsIndicadoresCatalog() {
 
 
   async function fetchVariablesDesdeUltima() {
-    const urlUltima = "https://encouraging-struck-cartoons-fisheries.trycloudflare.com/api/indicadores/ultima";
+    const urlUltima = "https://arrested-architect-constraints-tommy.trycloudflare.com/api/indicadores/ultima";
     const res = await fetch(urlUltima);
     if (!res.ok) throw new Error(`ultima respondió ${res.status}`);
     const payload = await res.json();
@@ -500,7 +500,7 @@ function hasDatosAbiertos(variable) {
 
   // trae y aplana /indicadores/ultima → array de variables en shape local
   async function fetchVariablesDesdeUltima() {
-    const urlUltima = "https://encouraging-struck-cartoons-fisheries.trycloudflare.com/api/indicadores/ultima";
+    const urlUltima = "https://arrested-architect-constraints-tommy.trycloudflare.com/api/indicadores/ultima";
     const res = await fetch(urlUltima);
     if (!res.ok) throw new Error(`ultima respondió ${res.status}`);
     const payload = await res.json();
@@ -558,7 +558,7 @@ function hasDatosAbiertos(variable) {
   }
 
   async function fetchProcesosEconomicas() {
-    const urlProcesosEco = "https://encouraging-struck-cartoons-fisheries.trycloudflare.com/api/procesos/buscar?unidad=" +
+    const urlProcesosEco = "https://arrested-architect-constraints-tommy.trycloudflare.com/api/procesos/buscar?unidad=" +
                            encodeURIComponent("Unidad de Estadísticas Económicas");
     const res = await fetch(urlProcesosEco);
     if (!res.ok) throw new Error("procesos Económicas respondió " + res.status);
