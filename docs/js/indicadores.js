@@ -207,7 +207,7 @@ function buildTableHTML(rows) {
 // --- Fin Utils ---
 
 document.addEventListener("DOMContentLoaded", function () {
- fetch('https://half-vanilla-tip-poly.trycloudflare.com/api/indicadores_ambientales')
+ fetch('https://encouraging-struck-cartoons-fisheries.trycloudflare.com/api/indicadores_ambientales')
   .then(res => res.json())
   .then(data => {
     indicadoresData = data;
