@@ -709,9 +709,9 @@ function renderContadorVariablesUnidad(conteoGlobal, { animateMs = 350 } = {}) {
 // --- Carga ECONÓMICAS (Base de datos nueva) ---
 async function cargarEconomicas({ container }) {
   renderLoader(container, "Cargando procesos (Económicas)...");
-const urlProcesos = "https://readers-bodies-independent-lexmark.trycloudflare.com/api/procesos/buscar?unidad=" +
+const urlProcesos = "https://encouraging-struck-cartoons-fisheries.trycloudflare.com/api/procesos/buscar?unidad=" +
                          encodeURIComponent("Unidad de Estadísticas Económicas");
-  const urlVariablesEco = "https://readers-bodies-independent-lexmark.trycloudflare.com/api/indicadores/ultima";
+  const urlVariablesEco = "https://encouraging-struck-cartoons-fisheries.trycloudflare.com/api/indicadores/ultima";
 
   try {
     const economicasRaw = await fetch(urlProcesos).then(r => r.json());
